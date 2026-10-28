@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Sertifikatlar — Admin — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true">
+  {% from "_macros.html" import admin_pagination %}
+
+  <div class="app-shell">
+    {% include "_admin_sidebar.html" %}
+
+    <div class="app-content">
+
+      <div class="app-topbar">
+        <div>
+          <h1>Berilgan sertifikatlar</h1>
+          <p>Jami {{ total }} ta sertifikat</p>
+        </div>
+      </div>
+
+      <form method="get" action="{{ admin_prefix }}/certificates" class="admin-search-row">
+        <input type="text" name="q" value="{{ search }}" placeholder="Email, ism yoki tekshirish ID bo'yicha qidirish...">
+        <button type="submit" class="btn-secondary">Qidirish</button>
+      </form>
+
+      <div class="admin-users-table-wrap">
+        <table class="admin-users-table">
+          <thead>
+            <tr>
+              <th>Tekshirish ID</th>
+              <th>Foydalanuvchi</th>
+              <th>Fan</th>
+              <th>Rejim</th>
+              <th>Natija</th>
+              <th>Sana</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in certs %}
+            <tr>
+              <td>{{ row.cert.verification_id }}</td>
+              <td>{{ row.first_name or "—" }} <span style="color:var(--ink-soft); font-size:0.8rem;">({{ row.email }})</span></td>
+              <td>{{ subject_names.get(row.cert.subject, row.cert.subject) }}</td>
+              <td>{{ row.cert.mode }}</td>
+              <td>{{ row.cert.score_label }} ({{ row.cert.percent }}%)</td>
+              <td>{{ row.cert.issued_at.strftime("%d.%m.%Y") }}</td>
+              <td><a href="/certificate/{{ row.cert.verification_id }}" target="_blank" class="btn-secondary admin-btn-sm">Ko'rish</a></td>
+            </tr>
+            {% else %}
+            <tr><td colspan="7" style="text-align:center; color:var(--ink-soft); padding:24px;">Hali sertifikat berilmagan.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {{ admin_pagination(admin_prefix + '/certificates?page=', page, total_pages, ('&q=' + search) if search else '') }}
+
+    </div>
+  </div>
+
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

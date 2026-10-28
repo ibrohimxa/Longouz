@@ -1,0 +1,72 @@
+<!-- ============================================================================
+     PIN QILINGAN BOYQUSH — pastki o'ng burchakda, doim ko'rinadi.
+     Bu blok har bir sahifaning </body>'sidan oldin qo'yiladi.
+
+     AI repetitor endi FAQAT Pro/Ultra imtiyozi (main.py: /repetitor va
+     /api/ask shu tarzda himoyalangan). Bepul foydalanuvchiga to'liq chat
+     oynasini ko'rsatib, keyin har bir xabarda bloklashdan ko'ra — pin
+     tugmasi to'g'ridan-to'g'ri /upgrade'ga olib boradigan yopiq (qulf)
+     ko'rinishda ko'rsatiladi.
+     ============================================================================ -->
+{% if user and user.plan == 'free' %}
+<a id="owl-pin-button" href="/upgrade?locked=repetitor" aria-label="AI repetitor — Pro/Ultra imtiyozi" title="AI repetitor — Pro/Ultra'da ochiladi" class="owl-pin-locked">
+  {% with living_owl_id="owl-pin-living", living_owl_size=48 %}
+    {% include "_living_owl.html" %}
+  {% endwith %}
+  <svg class="owl-pin-lock-badge" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+</a>
+{% else %}
+<button id="owl-pin-button" aria-label="AI repetitor bilan gaplashish" title="Ask LongoAI">
+  {% with living_owl_id="owl-pin-living", living_owl_size=48 %}
+    {% include "_living_owl.html" %}
+  {% endwith %}
+</button>
+
+<div id="floating-chat-widget">
+  <div class="floating-chat-header">
+    <div id="owl-voice-orb" class="owl-voice-orb" aria-hidden="true"><span class="owl-voice-orb-core"></span></div>
+    <span>Ask LongoAI</span>
+    <button type="button" id="floating-chat-voice-toggle" class="chat-voice-toggle" title="Ovoz (gapirish/eshitish)ni yoqish/o'chirish" aria-pressed="false">
+      <svg class="icon-voice-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 010 7"/><path d="M19 5a9 9 0 010 14"/></svg>
+      <svg class="icon-voice-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+    </button>
+  </div>
+  <div class="floating-chat-messages" id="floating-chat-messages">
+    <p class="chat-msg-empty" id="floating-chat-empty">Savolingizni yozing yoki mikrofondan gapiring.</p>
+  </div>
+  <div class="owl-mode-picker" id="owl-effort-row">
+    <button type="button" class="owl-mode-btn" id="owl-mode-btn" aria-haspopup="true" aria-expanded="false">
+      <svg class="owl-mode-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 00-7 7c0 2.4 1.2 4.4 3 5.7V17a1 1 0 001 1h6a1 1 0 001-1v-2.3c1.8-1.3 3-3.3 3-5.7a7 7 0 00-7-7z"/><line x1="9" y1="21" x2="15" y2="21"/></svg>
+      <span id="owl-mode-btn-label">Oddiy</span>
+      <svg class="owl-mode-btn-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="owl-mode-popover" id="owl-mode-popover" hidden>
+      <button type="button" class="owl-effort-btn is-active" data-effort="normal" data-label="Oddiy">
+        <span class="owl-mode-opt-text"><span class="owl-mode-opt-title">Oddiy</span><span class="owl-mode-opt-sub">Tez va aniq javob — Gemini</span></span>
+        <svg class="owl-mode-opt-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </button>
+      <button type="button" class="owl-effort-btn" data-effort="high" data-label="Chuqur o'ylab">
+        <span class="owl-mode-opt-text"><span class="owl-mode-opt-title">Chuqur o'ylab</span><span class="owl-mode-opt-sub">Batafsil, misollar bilan</span></span>
+        <svg class="owl-mode-opt-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </button>
+      <button type="button" class="owl-effort-btn owl-effort-max" data-effort="max" data-label="Maksimal">
+        <span class="owl-mode-opt-text"><span class="owl-mode-opt-title">Maksimal <svg class="owl-effort-lock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span><span class="owl-mode-opt-sub">Eng chuqur tahlil — Pro/Ultra</span></span>
+        <svg class="owl-mode-opt-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="owl-usage-indicator" id="owl-usage-indicator" hidden>
+    <div class="owl-usage-bar"><div class="owl-usage-bar-fill" id="owl-usage-bar-fill"></div></div>
+    <span id="owl-usage-text"></span>
+  </div>
+  <form class="floating-chat-input-row" id="floating-chat-form">
+    <button type="button" id="floating-chat-mic" class="chat-mic-btn" aria-label="Ovozli savol" title="Mikrofondan gapiring">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+    </button>
+    <input type="text" id="floating-chat-input" placeholder="Savolingizni yozing..." autocomplete="off">
+    <button type="submit" class="chat-send-btn" id="floating-chat-send" aria-label="Yuborish" style="width:38px;height:38px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+    </button>
+  </form>
+</div>
+{% endif %}

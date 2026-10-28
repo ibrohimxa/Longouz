@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="LongoUZ — test yechish.">
+  <title>Test — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/figure.css">
+  <link rel="stylesheet" href="/static/exam.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true"
+      data-subject="{{ subject }}"
+      data-level="{{ level }}"
+      data-mode="{{ mode }}"
+      data-topic="{{ topic or '' }}"
+      data-topics="{{ topics_list | tojson if topics_list else '' }}"
+      data-missed-mode="{{ 'true' if missed_mode else 'false' }}"
+      data-variant="{{ variant }}"
+      data-checkpoint="{{ 'true' if checkpoint else 'false' }}"
+      data-drill="{{ drill }}"
+      data-question-count="{{ mode_info.question_count }}"
+      data-time-limit-minutes="{{ mode_info.time_limit_minutes }}"
+      data-attempt-token="{{ attempt_token }}">
+
+  <header class="site-header quiz-header">
+    <a href="/dashboard" class="brand">
+      {% include "_brandmark.html" %}
+    </a>
+    <div class="quiz-header-meta">
+      <span class="quiz-mode-badge quiz-mode-badge-{{ mode }}">{{ mode_info.name }}</span>
+      <span class="quiz-subject-label">{{ subject_name }}</span>
+      <span id="quiz-timer" class="quiz-timer">--:--</span>
+      <button type="button" id="qr-open" class="qr-open-btn" title="Shu savol bo'yicha shikoyat qilish" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+        <span>Shikoyat qilish</span>
+      </button>
+      <button class="theme-toggle" aria-label="Rejimni almashtirish" title="Kunduzgi/tungi rejim">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="quiz-main">
+
+    <div id="quiz-loading" class="quiz-status-card">
+      <p>Savollar tayyorlanmoqda...</p>
+    </div>
+
+    <div id="quiz-error" class="quiz-status-card" style="display:none;">
+      <p id="quiz-error-text"></p>
+      <a href="/quiz" class="btn-primary">Orqaga</a>
+    </div>
+
+    <div id="quiz-body" style="display:none;">
+      <div class="quiz-progress-track">
+        <div id="quiz-progress-fill" class="quiz-progress-fill"></div>
+      </div>
+      <p id="quiz-progress-label" class="quiz-progress-label"></p>
+
+      <div id="quiz-palette" class="quiz-palette"></div>
+      <div class="quiz-question-card">
+        <span id="quiz-section-label" class="quiz-section-label" hidden></span>
+        <h2 id="quiz-question-text"></h2>
+        <div id="quiz-qfig" class="quiz-qfig" hidden></div>
+        <div id="quiz-options" class="quiz-options"></div>
+      </div>
+
+      <div class="quiz-nav-row">
+        <button type="button" id="quiz-prev-btn" class="btn-secondary">Oldingi</button>
+        <button type="button" id="quiz-next-btn" class="btn-primary">Keyingi</button>
+        <button type="button" id="quiz-finish-btn" class="btn-primary" style="display:none;">Yakunlash</button>
+      </div>
+    </div>
+
+    <div id="quiz-result" class="quiz-status-card" style="display:none;">
+      <h2 id="quiz-result-title"></h2>
+      <p id="quiz-result-detail"></p>
+      <div id="quiz-result-breakdown" class="result-breakdown"></div>
+      <div id="quiz-result-cert" style="display:none;" class="quiz-cert-box">
+        <p>Tabriklaymiz — rasmiy sertifikat generatsiya qilindi!</p>
+        <div class="quiz-cert-actions">
+          <a id="quiz-cert-view" href="#" class="btn-secondary">Sertifikatni ko'rish</a>
+          <a id="quiz-cert-download" href="#" class="btn-primary">PDF yuklab olish</a>
+        </div>
+      </div>
+      <div class="quiz-result-actions">
+        <a href="/quiz" class="btn-secondary">Yana bir test</a>
+        <a id="quiz-review-link" href="#" class="btn-primary">Javoblarni ko'rish</a>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ==========================================================================
+       NATIJA TABRIKLASH OYNASI — test tugagach ekran o'rtasida ochiladi:
+       kubok (natijaga qarab harakati/rangi o'zgaradi) + ikki chetdan
+       otiladigan konfetti. "Natijalarim" bosilganda xato/to'g'ri javoblar
+       sahifasiga (avvalgidek) o'tadi.
+       ========================================================================== -->
+  <div id="quiz-celebrate-overlay" class="quiz-celebrate-overlay" hidden>
+    <div class="quiz-confetti-field" id="quiz-confetti-field" aria-hidden="true"></div>
+    <div class="quiz-celebrate-card">
+      <div class="quiz-trophy-stage" id="quiz-trophy-stage">
+        <svg class="quiz-trophy-svg" id="quiz-trophy-svg" viewBox="0 0 64 64" fill="none">
+          <path d="M20 10h24v10a12 12 0 01-24 0V10z" fill="currentColor"/>
+          <path d="M20 12h-8a6 6 0 006 6" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <path d="M44 12h8a6 6 0 01-6 6" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <rect x="28" y="32" width="8" height="10" fill="currentColor"/>
+          <path d="M18 50h28l-3-8H21l-3 8z" fill="currentColor"/>
+          <rect x="16" y="50" width="32" height="5" rx="2" fill="currentColor"/>
+        </svg>
+      </div>
+      <h2 id="quiz-celebrate-title" class="quiz-celebrate-title"></h2>
+      <p id="quiz-celebrate-detail" class="quiz-celebrate-detail"></p>
+      <div id="quiz-celebrate-breakdown" class="result-breakdown"></div>
+      <div id="quiz-celebrate-cert" style="display:none;" class="quiz-cert-box">
+        <p>Tabriklaymiz — rasmiy sertifikat generatsiya qilindi!</p>
+        <div class="quiz-cert-actions">
+          <a id="quiz-celebrate-cert-view" href="#" class="btn-secondary">Sertifikatni ko'rish</a>
+          <a id="quiz-celebrate-cert-download" href="#" class="btn-primary">PDF yuklab olish</a>
+        </div>
+      </div>
+      <div class="quiz-result-actions">
+        <a href="/quiz" class="btn-secondary">Yana bir test</a>
+        <a id="quiz-celebrate-results-btn" href="#" class="btn-primary">Natijalarim</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHIKOYAT OYNASI (o'ng tarafdan ochiladi) -->
+  <div id="qr-backdrop" class="qr-backdrop" hidden></div>
+  <aside id="qr-panel" class="qr-panel" role="dialog" aria-modal="true" aria-labelledby="qr-title" hidden>
+    <div class="qr-head">
+      <h3 id="qr-title">Savol bo'yicha shikoyat</h3>
+      <button type="button" id="qr-close" class="qr-x" aria-label="Yopish">&times;</button>
+    </div>
+    <div class="qr-body">
+      <p class="qr-qno" id="qr-qno"></p>
+      <blockquote class="qr-qtext" id="qr-qtext"></blockquote>
+      <fieldset class="qr-cats" id="qr-cats">
+        <legend>Muammo nimada?</legend>
+        <label><input type="radio" name="qr-cat" value="wrong_answer"> To'g'ri javob noto'g'ri belgilangan</label>
+        <label><input type="radio" name="qr-cat" value="typo"> Imlo / grammatik xato</label>
+        <label><input type="radio" name="qr-cat" value="unclear"> Savol tushunarsiz yoki noaniq</label>
+        <label><input type="radio" name="qr-cat" value="bad_options"> Variantlar xato (ikkita to'g'ri yoki hech biri)</label>
+        <label><input type="radio" name="qr-cat" value="figure"> Chizma / rasm xato yoki ko'rinmayapti</label>
+        <label><input type="radio" name="qr-cat" value="outdated"> Ma'lumot eskirgan</label>
+        <label><input type="radio" name="qr-cat" value="other" checked> Boshqa</label>
+      </fieldset>
+      <label class="qr-lbl" for="qr-details">Batafsil yozing: nima xato va qanday bo'lishi kerak?</label>
+      <textarea id="qr-details" maxlength="1000" rows="5" placeholder="Masalan: 3-variant to'g'ri, chunki ..."></textarea>
+      <p class="qr-count"><span id="qr-n">0</span>/1000</p>
+      <p id="qr-msg" class="qr-msg" role="status"></p>
+    </div>
+    <div class="qr-foot">
+      <button type="button" id="qr-cancel" class="btn-secondary">Bekor qilish</button>
+      <button type="button" id="qr-send" class="btn-primary">Yuborish</button>
+    </div>
+  </aside>
+
+  {% include "_owl_widget.html" %}
+
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/app.js"></script>
+  <script src="/static/owl-chat.js"></script>
+  <script src="/static/quiz-style.js"></script>
+  <script src="/static/figure.js"></script>
+  <script src="/static/quiz.js"></script>
+  <script src="/static/quiz-report.js"></script>
+  <script src="/static/calculator.js"></script>
+  <script src="/static/formula-sheet.js"></script>
+</body>
+</html>

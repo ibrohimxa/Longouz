@@ -1,0 +1,62 @@
+<div class="auth-owl-stage" id="auth-owl-stage">
+  <div class="auth-owl-lift" id="auth-owl-lift">
+    <svg id="auth-owl-svg" viewBox="0 0 240 220" xmlns="http://www.w3.org/2000/svg" style="width:120px; height:auto; display:block;">
+      <defs>
+        <linearGradient id="authOwlBody" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#4FA8FF"/>
+          <stop offset="100%" stop-color="#1A5FE0"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Bosh guruhi — email yozilganda pastga qaraydi (rotate) -->
+      <g id="auth-owl-head" style="transform-origin: 120px 90px; transition: transform 0.3s ease;">
+
+        <!-- Quloqchalar -->
+        <path d="M75 45 Q60 10 90 28 Q82 45 95 58 Z" fill="url(#authOwlBody)"/>
+        <path d="M165 45 Q180 10 150 28 Q158 45 145 58 Z" fill="url(#authOwlBody)"/>
+
+        <!-- Bosh -->
+        <ellipse cx="120" cy="100" rx="65" ry="60" fill="url(#authOwlBody)"/>
+
+        <!-- Ko'z halqalari -->
+        <circle cx="95" cy="95" r="30" fill="#FFFFFF"/>
+        <circle cx="145" cy="95" r="30" fill="#FFFFFF"/>
+        <circle cx="95" cy="95" r="23" fill="#D8ECFF"/>
+        <circle cx="145" cy="95" r="23" fill="#D8ECFF"/>
+
+        <!-- Qorachiqlar -->
+        <g id="auth-owl-pupils">
+          <circle cx="95" cy="95" r="15" fill="#0D1B3D"/>
+          <circle cx="100" cy="89" r="4.5" fill="#FFFFFF"/>
+          <circle cx="145" cy="95" r="15" fill="#0D1B3D"/>
+          <circle cx="150" cy="89" r="4.5" fill="#FFFFFF"/>
+        </g>
+
+        <!-- Ko'z qopqoqlari — HAR BIRI ko'zning o'zi bilan AYNAN bir xil
+             o'lchamdagi TO'LIQ doira (r=31, ko'z halqasi r=30 dan bir oz katta) —
+             shu sababli yopilganda ko'z chizig'i yoki qorachiq HECH QACHON
+             "chiziq" bo'lib ko'rinmaydi yoki qisman ko'rinib qolmaydi, doim
+             TO'LIQ yopiladi. Ochiq holatda scaleY(0) — butunlay tekis va
+             ko'rinmas, yopilganda scaleY(1) — to'liq doira. -->
+        <ellipse id="auth-eyelid-left" cx="95" cy="95" rx="31" ry="31" fill="url(#authOwlBody)"
+                 style="transform-origin: 95px 95px; transform: scaleY(0); transition: transform 0.22s cubic-bezier(.4,0,.2,1);"/>
+        <ellipse id="auth-eyelid-right" cx="145" cy="95" rx="31" ry="31" fill="url(#authOwlBody)"
+                 style="transform-origin: 145px 95px; transform: scaleY(0); transition: transform 0.22s cubic-bezier(.4,0,.2,1);"/>
+
+        <!-- Tumshuq -->
+        <path d="M112 118 L120 135 L128 118 Q120 126 112 118 Z" fill="#FFA726"/>
+
+        <!-- Qanotlar ("qo'llar") — parol yozilganda IKKALASI ham yuqoriga
+             ko'tarilib, ko'zlarni butunlay yopadi (real Telegram animatsiyasidagi
+             kabi). "Ko'rsatish" tugmasi bosilganda faqat bitta tomon pastga
+             tushib, bitta ko'z ochilib qoladi. -->
+        <path id="auth-owl-wing-left" d="M60 128 Q35 140 38 172 Q48 160 60 163 Q68 148 60 128 Z" fill="#3D9BFF" style="transform-origin: 55px 145px; transition: transform 0.35s cubic-bezier(.34,1.4,.64,1);"/>
+        <path id="auth-owl-wing-right" d="M180 128 Q205 140 202 172 Q192 160 180 163 Q172 148 180 128 Z" fill="#3D9BFF" style="transform-origin: 185px 145px; transition: transform 0.35s cubic-bezier(.34,1.4,.64,1);"/>
+      </g>
+    </svg>
+  </div>
+  <!-- "Devor" — yashil chiziq. Boyqush BOSHIDA shu chiziq ORTIDA (pastda)
+       butunlay yashiringan; Ism yoki Email maydoni fokus qilinganda
+       boyqush devordan "qarab chiqqandek" birdaniga yuqoriga sakraydi. -->
+  <div class="auth-owl-wall" id="auth-owl-wall"></div>
+</div>

@@ -1,0 +1,32 @@
+.pf-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 6px 0 22px; }
+.pf-card { background: var(--bg-elevated); border: 1px solid var(--line); border-radius: 16px; padding: 18px; min-width: 0; }
+.pf-card-wide { grid-column: 1 / -1; }
+.pf-card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.pf-card-head h3 { margin: 0; font-size: 1.02rem; }
+.pf-msg { font-size: .8rem; color: var(--accent-green); } .pf-msg.is-err { color: var(--error); }
+.pf-me { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+.pf-avatar { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; font: 700 1.6rem var(--font-display); color: #07130d; flex: 0 0 auto; }
+.pf-me-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.pf-me-info span, .pf-me-info small { color: var(--ink-soft); overflow-wrap: anywhere; }
+.pf-colors { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.pf-color { width: 28px; height: 28px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; }
+.pf-color.is-on { border-color: var(--ink); box-shadow: 0 0 0 2px var(--bg-elevated) inset; }
+.pf-color:focus-visible { outline: 2px solid var(--accent-green); outline-offset: 2px; }
+.pf-form { display: flex; flex-direction: column; gap: 12px; }
+.pf-field { display: flex; flex-direction: column; gap: 5px; font-size: .84rem; color: var(--ink-soft); }
+.pf-field input[type=text], .pf-field input[type=email], .pf-field input[type=password] {
+  font: 500 .95rem var(--font-body); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; width: 100%; box-sizing: border-box;
+}
+.pf-field input:disabled { opacity: .6; }
+.pf-field input:focus-visible { outline: 2px solid var(--accent-green); outline-offset: 1px; }
+.pf-field input[type=range] { width: 100%; accent-color: var(--accent-green); }
+.pf-field b { color: var(--ink); }
+.pf-note { font-size: .86rem; color: var(--ink-soft); margin: 0 0 12px; }
+.pf-theme { display: flex; gap: 10px; flex-wrap: wrap; }
+.pf-form .btn-primary { align-self: flex-start; }
+.pf-danger { margin-top: 14px; border-top: 1px dashed var(--line); padding-top: 12px; }
+.pf-danger summary { cursor: pointer; color: var(--error); font-weight: 600; }
+.btn-danger { background: var(--error); color: #fff; border: 0; border-radius: 10px; padding: 11px 18px; font-weight: 700; cursor: pointer; align-self: flex-start; }
+.btn-secondary { display: inline-block; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 10px 16px; font-weight: 600; cursor: pointer; text-decoration: none; }
+.btn-secondary:hover { border-color: var(--accent-green); }
+@media (max-width: 760px) { .pf-grid { grid-template-columns: 1fr; } }

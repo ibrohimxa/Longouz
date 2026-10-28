@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>AI holati — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true">
+
+  <div class="app-shell">
+    {% include "_admin_sidebar.html" %}
+
+    <div class="app-content">
+
+      <div class="app-topbar">
+        <div>
+          <h1>AI holati</h1>
+          <p>Kalitlar sozlanganmi va ishlayaptimi — "Tekshirish" bosilsa haqiqiy so'rov yuboriladi</p>
+        </div>
+      </div>
+
+      {% if recent_hint %}<div class="form-error" style="margin-bottom:16px;">So'nggi 15 daqiqadagi xatolar: {{ recent_hint }}</div>{% endif %}
+
+      <div class="admin-users-table-wrap">
+        <table class="admin-users-table">
+          <thead><tr><th>Provayder</th><th>Model</th><th>Kalit</th><th>Tekshiruv natijasi</th></tr></thead>
+          <tbody>
+            {% if results %}
+              {% for r in results %}
+              <tr>
+                <td>{{ r.label }}</td>
+                <td>{{ r.model }}</td>
+                <td>{{ "sozlangan" if r.configured else "YO'Q" }}</td>
+                <td>{% if r.ok %}<strong style="color:var(--accent-green);">ISHLAYAPTI</strong> ({{ r.ms }} ms) — {{ r.detail }}{% else %}<strong style="color:var(--error);">ISHLAMAYAPTI</strong> — {{ r.detail }}{% endif %}</td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              {% for p in providers %}
+              <tr>
+                <td>{{ p.label }}</td><td>{{ p.model }}</td>
+                <td>{{ "sozlangan" if p.configured else "YO'Q" }}</td>
+                <td style="color:var(--ink-soft);">Hali tekshirilmadi</td>
+              </tr>
+              {% endfor %}
+              <tr><td>Ovoz (edge-tts)</td><td>—</td><td>kalit shart emas</td><td style="color:var(--ink-soft);">Hali tekshirilmadi</td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+
+      <form method="post" action="{{ admin_prefix }}/ai/test" style="margin-top:18px;">
+        <button type="submit" class="btn-primary" onclick="this.disabled=true;this.textContent='Tekshirilmoqda... (20 soniyagacha)';this.form.submit();">Hozir tekshirish</button>
+      </form>
+      <section class="panel" style="margin-top:22px;max-width:640px;">
+        <h2 class="panel-title">Kalitlarni shu yerdan kiriting</h2>
+        <p class="panel-sub">Saqlansa <code>.env</code> ga yoziladi va darhol ishlaydi (qayta ishga tushirish shart emas). Bo'sh qoldirilgan maydon o'zgarmaydi.</p>
+        <form id="ai-keys-form" autocomplete="off">
+          <div class="field"><label>Gemini API kaliti <small style="color:var(--ink-soft)">(hozir: {{ key_masks.GEMINI_API_KEY }})</small></label>
+            <input type="password" name="GEMINI_API_KEY" placeholder="AIza..." autocomplete="new-password"></div>
+          <div class="field"><label>Gemini modeli <small style="color:var(--ink-soft)">(hozir: {{ key_masks.GEMINI_MODEL }})</small></label>
+            <input type="text" name="GEMINI_MODEL" placeholder="gemini-flash-latest"></div>
+          <div class="field"><label>Claude (Anthropic) kaliti <small style="color:var(--ink-soft)">(hozir: {{ key_masks.ANTHROPIC_API_KEY }})</small></label>
+            <input type="password" name="ANTHROPIC_API_KEY" placeholder="sk-ant-..." autocomplete="new-password"></div>
+          <button type="submit" class="btn-primary">Saqlash</button>
+          <span id="ai-keys-msg" style="margin-left:12px;"></span>
+        </form>
+      </section>
+      <script>
+      document.getElementById('ai-keys-form').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var msg = document.getElementById('ai-keys-msg'), data = {};
+        new FormData(this).forEach(function (v, k) { if (String(v).trim()) data[k] = String(v).trim(); });
+        if (!Object.keys(data).length) { msg.textContent = 'Hech narsa kiritilmadi.'; return; }
+        try {
+          var r = await fetch('{{ admin_prefix }}/api/ai/keys', {method: 'POST', headers: {'Content-Type': 'application/json', 'X-Requested-With': 'fetch'}, body: JSON.stringify(data)});
+          var j = await r.json();
+          msg.textContent = r.ok ? 'Saqlandi. "Hozir tekshirish" ni bosing.' : (j.detail || 'Xato');
+          if (r.ok) setTimeout(function () { location.reload(); }, 900);
+        } catch (err) { msg.textContent = 'Tarmoq xatosi.'; }
+      });
+      </script>
+
+    </div>
+  </div>
+
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

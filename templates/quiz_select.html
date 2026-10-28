@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="LongoUZ — test rejimini tanlang.">
+  <title>Test boshlash — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/exam.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true">
+
+  <div class="app-shell">
+
+    {% set nav_active = 'quiz' %}{% include "_app_sidebar.html" %}
+
+    <div class="app-content">
+
+      {% include "_announcement_banner.html" %}
+      <div class="app-topbar">
+        <div>
+          <h1 id="qs-title">Test boshlash</h1>
+          <p id="qs-subtitle">Qaysi rejimda tayyorlanasiz?</p>
+        </div>
+      </div>
+
+      <div class="subject-tabs" id="subject-tabs">
+        {% for s in subjects %}
+        <button type="button" class="subject-tab{{ ' is-active' if s.code == default_subject else '' }}" data-subject="{{ s.code }}">{{ s.name }}</button>
+        {% endfor %}
+      </div>
+
+      <div class="qs-steps">
+        <span class="qs-step qs-step-active" data-step="3">1. Rejim</span>
+        <span class="qs-step" data-step="4">2. Mavzu</span>
+      </div>
+
+      <section class="qs-panel" id="qs-panel-mode">
+        <p class="qs-hint">Test shu andozada tuziladi — savollar {{ default_level_name }} daraja bo'yicha tanlanadi.</p>
+        <div class="mode-select-grid" id="qs-mode-grid"></div>
+      </section>
+
+      <section class="qs-panel qs-hidden" id="qs-panel-topics">
+        <div class="ielts-tabs qs-hidden" id="qs-ielts-tabs">
+          <span class="ielts-tab is-active" data-tab="question">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+            Savollar
+          </span>
+          <a href="/ielts/speaking" class="ielts-tab" data-tab="speaking">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+            Speaking
+          </a>
+          <a href="/ielts/writing" class="ielts-tab" data-tab="writing">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4z"/></svg>
+            Writing
+          </a>
+          <a href="/ielts/history" class="ielts-tab" data-tab="history">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+            Tarix
+          </a>
+        </div>
+
+        <p class="qs-hint" id="qs-topics-hint">Mavzu bo'yicha tayyorlaning — DTM/sertifikatda ko'p uchraydigan mavzular ketma-ket tartibda.</p>
+
+        <div id="qs-plan-strip" class="plan-strip qs-hidden"></div>
+        <details class="exam-info qs-hidden" id="qs-exam-info"></details>
+        <div class="variant-switch qs-hidden" id="qs-variant" role="group" aria-label="DTM bahosi">
+          <button type="button" class="is-active" data-variant="main">1-mutaxassislik fani (3.1 ball)</button>
+          <button type="button" data-variant="second">2-mutaxassislik fani (2.1 ball)</button>
+        </div>
+
+        <div class="qs-mock-card" id="qs-mock-card">
+          <div>
+            <strong>To'liq mock test</strong>
+            <p>Barcha mavzulardan aralash — haqiqiy imtihon sharoitida sinab ko'ring.</p>
+          </div>
+          {% if full_mock_access %}
+          <a href="#" id="qs-mock-start" class="btn-primary admin-btn-sm">Boshlash</a>
+          {% else %}
+          <a href="/upgrade" class="qs-mock-locked">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            Pro/Ultra
+          </a>
+          {% endif %}
+        </div>
+
+        <div id="qs-mocks" class="qs-hidden" style="margin:12px 0"></div>
+
+        <div class="topic-missed-banner qs-hidden" id="qs-missed-banner">
+          <div>
+            <strong>Ilgari xato qilingan savollaringiz bor</strong>
+            <p><span id="qs-missed-count">0</span> ta savol kutmoqda — xohlasangiz avval o'shalarni qaytadan ko'rib chiqishingiz mumkin.</p>
+          </div>
+          <a href="#" id="qs-missed-start" class="qs-missed-btn">Xatolarni takrorlash</a>
+        </div>
+
+        <div id="qs-drills" class="qs-hidden"></div>
+        <div class="grade-tabs qs-hidden" id="qs-grade-tabs" role="tablist" aria-label="Sinflar"></div>
+        <div class="grade-head qs-hidden" id="qs-grade-head"></div>
+        <div class="topic-list" id="qs-topic-list"></div>
+        <button type="button" class="qs-back" data-back-to="3">&larr; Rejimni o'zgartirish</button>
+      </section>
+
+    </div>
+  </div>
+
+  {% include "_owl_widget.html" %}
+
+  <script>
+    const MODES_BY_SUBJECT = {{ modes_by_subject | tojson }};
+    const SUBJECT_NAMES = {
+      {% for s in subjects %}{{ s.code | tojson }}: {{ s.name | tojson }},{% endfor %}
+    };
+    const DEFAULT_SUBJECT = {{ default_subject | tojson }};
+    // MUHIM: DARAJA endi bu yerda SO'RALMAYDI — bu SIZNING (foydalanuvchining)
+    // darajangiz, ro'yxatdan o'tishda (yoki Profilda) bir marta tanlangan va
+    // shu yerdan avtomatik olinadi. Fan ham xuddi shunday — bu sahifa endi
+    // FAQAT "qaysi rejim" va "qaysi mavzu"ni so'raydi.
+    const DEFAULT_LEVEL = {{ default_level | tojson }};
+
+    const state = { subject: DEFAULT_SUBJECT, level: DEFAULT_LEVEL, mode: null };
+
+    function showStep(n) {
+      document.querySelectorAll(".qs-panel").forEach((p) => {
+        p.classList.add("qs-hidden");
+      });
+      const stepToPanel = { 3: "qs-panel-mode", 4: "qs-panel-topics" };
+      document.getElementById(stepToPanel[n]).classList.remove("qs-hidden");
+      document.querySelectorAll(".qs-step").forEach((s) => {
+        s.classList.toggle("qs-step-active", Number(s.dataset.step) === n);
+        s.classList.toggle("qs-step-done", Number(s.dataset.step) < n);
+      });
+    }
+
+    function updateHeader() {
+      const title = document.getElementById("qs-title");
+      const subtitle = document.getElementById("qs-subtitle");
+      const subjectLabel = SUBJECT_NAMES[state.subject] || state.subject;
+      if (!state.mode) {
+        title.textContent = subjectLabel;
+        subtitle.textContent = "Qaysi rejimda tayyorlanasiz?";
+      } else {
+        title.textContent = subjectLabel;
+        subtitle.textContent = "Mavzuni tanlang — ketma-ket ishlang";
+      }
+    }
+
+    function renderModes() {
+      const grid = document.getElementById("qs-mode-grid");
+      const modes = MODES_BY_SUBJECT[state.subject] || [];
+      grid.innerHTML = modes.map((m) => `
+        <button type="button" class="mode-card mode-card-${m.code}" data-mode="${m.code}">
+          <div class="mode-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+          </div>
+          <h3>${m.name}</h3>
+          <p>${m.description}</p>
+          <div class="mode-card-meta">
+            <span>${m.question_count} savol</span>
+            <span>${m.time_limit_minutes} daqiqa</span>
+          </div>
+          <span class="mode-card-cta">Tanlash
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </span>
+        </button>
+      `).join("");
+
+      grid.querySelectorAll(".mode-card").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          state.mode = btn.dataset.mode;
+          updateHeader();
+          await loadTopics();
+          showStep(4);
+        });
+      });
+    }
+
+    const LOCK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>';
+    const esc = (t) => { const d = document.createElement("div"); d.textContent = String(t == null ? "" : t); return d.innerHTML; };
+    let tieredData = null;
+    let activeGrade = null;
+    let activeVariant = "main";
+
+    function qBase() { return `/quiz/take?subject=${state.subject}&level=${state.level}&mode=${state.mode}`; }
+
+    function showLockModal(title, text) {
+      const old = document.getElementById("lock-modal");
+      if (old) old.remove();
+      const el = document.createElement("div");
+      el.id = "lock-modal";
+      el.className = "lock-modal-overlay";
+      el.innerHTML = `<div class="lock-modal-card" role="dialog" aria-modal="true">
+        <h3>${esc(title)}</h3><p>${esc(text)}</p>
+        <div class="lock-modal-actions"><a class="go" href="/upgrade">Tarifni yangilash</a><button type="button" class="cancel">Hozir emas</button></div></div>`;
+      document.body.appendChild(el);
+      const close = () => el.remove();
+      el.querySelector(".cancel").addEventListener("click", close);
+      el.addEventListener("click", (e) => { if (e.target === el) close(); });
+      document.addEventListener("keydown", function h(e) { if (e.key === "Escape") { close(); document.removeEventListener("keydown", h); } });
+    }
+
+    function renderPlanStrip(d) {
+      const el = document.getElementById("qs-plan-strip");
+      el.classList.remove("qs-hidden");
+      const pct = Math.round(d.open_topics / Math.max(d.total_topics, 1) * 100);
+      el.innerHTML = `<span><b>${esc(d.plan_name)}</b> tarifi: ${d.open_topics} / ${d.total_topics} mavzu ochiq</span>
+        <span class="plan-meter"><i style="width:${pct}%"></i></span>
+        ${d.plan === "ultra" ? "" : '<a href="/upgrade">Ko\'proq mavzu va qiyin savollar →</a>'}`;
+    }
+
+    const VARIANT_SUBJECTS = ["biology", "chemistry", "physics", "native", "math", "english", "russian"];
+    async function renderExamInfo() {
+      const el = document.getElementById("qs-exam-info");
+      try {
+        const res = await fetch(`/api/exam-info?subject=${encodeURIComponent(state.subject)}&mode=${encodeURIComponent(state.mode)}`);
+        const d = await res.json();
+        if (!d.tiered) { el.classList.add("qs-hidden"); return; }
+        let h = `<summary>Imtihon haqida: ${esc(d.name)} · ${d.total} savol · ${d.time} daqiqa</summary><div class="exam-info-body">`;
+        h += "<div><h4>Tuzilma</h4>";
+        if (d.blocks) {
+          h += "<table><tr><th>Blok</th><th>Savol</th><th>Ball</th><th>Izoh</th></tr>" +
+            d.blocks.map((b) => `<tr><td>${esc(b.name)}</td><td>${b.count}</td><td>${b.max}</td><td>${esc(b.note)}</td></tr>`).join("") + "</table>";
+        }
+        h += "</div>";
+        if (d.ball_by_difficulty) {
+          h += "<div><h4>Savol bali (qiyinlikka qarab)</h4><table>" +
+            d.ball_by_difficulty.map((r) => `<tr><td>${esc(r.name)}</td><td><b>${r.ball}</b></td></tr>`).join("") + "</table></div>";
+        }
+        if (d.difficulty) {
+          h += "<div><h4>Qiyinlik tarkibi</h4><table>" + d.difficulty.map((r) => `<tr><td>${esc(r.name)}</td><td><b>${r.count}</b></td></tr>`).join("") + "</table>" +
+            `<p class="note">${esc(d.typology)}</p></div>`;
+        }
+        if (d.levels) {
+          h += "<div><h4>Milliy sertifikat darajalari va imtiyozi</h4><table><tr><th>Daraja</th><th>Ball</th><th>OTMga kirishda</th></tr>" +
+            d.levels.map((r) => `<tr><td><span class="exam-pill">${esc(r.level)}</span></td><td>${esc(r.range)}</td><td>${esc(r.benefit)}</td></tr>`).join("") +
+            `</table><p class="note">${esc(d.mandatory_note)}</p></div>`;
+        }
+        h += "</div>";
+        el.innerHTML = h;
+        el.classList.remove("qs-hidden");
+      } catch (e) { el.classList.add("qs-hidden"); }
+    }
+
+    function renderDrills(d) {
+      const box = document.getElementById("qs-drills");
+      const pro = d.plan !== "free";
+      const ultra = d.plan === "ultra";
+      const base = qBase();
+      const mk = (label, desc, href, ok, tierLabel, tierCls, need) => ok
+        ? `<a class="drill-card" href="${href}"><b>${label}</b><span>${desc}</span><span class="tier-badge ${tierCls}">${tierLabel}</span></a>`
+        : `<button type="button" class="drill-card is-locked" data-lock="${esc(need)}"><b>${label}</b><span>${desc}</span><span class="tier-badge ${tierCls}">${tierLabel}</span></button>`;
+      const cards = [];
+      const mockHref = `${base}${(VARIANT_SUBJECTS.includes(state.subject) && state.mode === "dtm") ? "&variant=" + activeVariant : ""}`;
+      cards.push(mk("To'liq imtihon", `${d.mock.total} savol · ${d.mock.time} daqiqa · rasmiy tuzilma va ball`, mockHref, pro, "Pro", "tier-pro", "To'liq imtihon (rasmiy tuzilma, ball va daraja) Pro yoki Ultra tarifda ochiladi."));
+      if (state.subject === "history") {
+        cards.push(mk("Siyosiy tarix bloki", "29 ta savol shaklida blok mashqi", `${base}&drill=block:siyosiy`, pro, "Pro", "tier-pro", "Blok mashqlari Pro yoki Ultra tarifda ochiladi."));
+        cards.push(mk("Madaniyat va me'morchilik", "Obidalar, me'morlar, mamlakatlar madaniyati", `${base}&drill=block:madaniyat`, pro, "Pro", "tier-pro", "Blok mashqlari Pro yoki Ultra tarifda ochiladi."));
+      }
+      cards.push(mk("Ochiq (yozma) savollar", "Javobni o'zingiz yozasiz — haqiqiy imtihondagidek", `${base}&drill=open`, pro, "Pro", "tier-pro", "Ochiq savollar mashqi Pro yoki Ultra tarifda ochiladi."));
+      cards.push(mk("Qiyin savollar", "Faqat III daraja — eng murakkab savollar", `${base}&drill=hard`, ultra, "Ultra", "tier-ultra", "Qiyin savollar mashqi faqat Ultra tarifida ochiladi."));
+      box.innerHTML = '<div class="section-title">Imtihon va maxsus mashqlar</div><div class="drill-grid">' + cards.join("") + "</div>";
+      box.classList.remove("qs-hidden");
+      box.querySelectorAll("[data-lock]").forEach((b) => b.addEventListener("click", () => showLockModal("Bu imkoniyat qulflangan", b.dataset.lock)));
+    }
+
+    function renderGradeTabs(d) {
+      const tabs = document.getElementById("qs-grade-tabs");
+      tabs.classList.remove("qs-hidden");
+      if (activeGrade == null || !d.grades.some((g) => g.grade === activeGrade)) activeGrade = d.grades[0].grade;
+      tabs.innerHTML = d.grades.map((g) => `<button type="button" class="grade-tab ${g.grade === activeGrade ? "is-active" : ""}" data-grade="${g.grade}" role="tab">
+        <b>${g.grade}-sinf</b><small>${g.open}/${g.total} ochiq</small></button>`).join("");
+      tabs.querySelectorAll(".grade-tab").forEach((b) => b.addEventListener("click", () => {
+        activeGrade = Number(b.dataset.grade);
+        renderGradeTabs(d);
+        renderGradeTopics(d);
+      }));
+    }
+
+    function renderGradeTopics(d) {
+      const list = document.getElementById("qs-topic-list");
+      const head = document.getElementById("qs-grade-head");
+      const g = d.grades.find((x) => x.grade === activeGrade);
+      head.classList.remove("qs-hidden");
+      head.innerHTML = `<h2>${g.grade}-sinf mavzulari</h2><span>${g.open} ta ochiq · ${g.total - g.open} ta yuqori tarifda</span>`;
+      const RING_R = 16, C = 2 * Math.PI * RING_R;
+      list.innerHTML = g.topics.map((t, i) => {
+        const off = C * (1 - t.percent / 100);
+        const tierCls = "tier-" + t.tier;
+        const badge = `<span class="tier-badge ${tierCls}">${esc(t.tier_name)}</span>`;
+        const head = `<span class="topic-row-head"><span class="code-chip">${esc(t.code)}</span>${badge}</span>`;
+        let row;
+        if (t.locked) {
+          row = `<button type="button" class="topic-row topic-row-locked" data-lock-topic="${esc(t.tier_name)}" data-title="${esc(t.topic)}">
+            <span class="topic-row-order">${i + 1}</span>
+            <span class="topic-row-body">${head}<span class="topic-row-title">${esc(t.topic)}</span>
+            <span class="topic-row-meta-sub">${esc(t.tier_name)} tarifida ochiladi</span></span>
+            <span class="topic-row-lock-icon">${LOCK_SVG}</span></button>`;
+        } else {
+          row = `<a class="topic-row ${t.completed ? "topic-row-done" : ""}" href="${qBase()}&topic=${encodeURIComponent(t.topic)}">
+            <span class="topic-row-order">${i + 1}</span>
+            <span class="topic-row-body">${head}
+              <span class="topic-chip ${t.completed ? "topic-chip-done" : (t.solved ? "topic-chip-progress" : "")}">${t.completed ? "Tugallangan" : (t.solved ? "Davom etmoqda" : "Yangi mavzu")}</span>
+              <span class="topic-row-title">${esc(t.topic)}</span>
+              <span class="topic-row-meta-sub">${t.solved}/${t.total} savol yechilgan</span>
+              <span class="topic-row-cta">Boshlash <span aria-hidden="true">→</span></span></span>
+            <svg class="topic-ring" viewBox="0 0 40 40" aria-hidden="true"><circle class="topic-ring-bg" cx="20" cy="20" r="${RING_R}"></circle>
+              <circle class="topic-ring-fill" cx="20" cy="20" r="${RING_R}" stroke-dasharray="${C}" stroke-dashoffset="${off}"></circle>
+              <text x="20" y="24" text-anchor="middle" class="topic-ring-text">${t.percent}%</text></svg></a>`;
+        }
+        if (t.checkpoint) {
+          const cp = t.checkpoint;
+          row += `<a class="topic-row topic-row-practice" href="${qBase()}&checkpoint=1&topics=${encodeURIComponent(cp.topics.join("|"))}">
+            <span class="topic-row-order">★</span>
+            <span class="topic-row-body"><span class="topic-row-title">${esc(cp.label)} (${g.grade}-sinf, ${cp.from}–${cp.to}-mavzular)</span>
+            <span class="topic-row-meta-sub">Shu mavzulardan siz xato qilgan savollar + yangi savollar · hammaga ochiq</span></span>
+            <span class="topic-row-meta">Boshlash</span></a>`;
+        }
+        return row;
+      }).join("");
+      list.querySelectorAll("[data-lock-topic]").forEach((b) => b.addEventListener("click", () =>
+        showLockModal(`“${b.dataset.title}” mavzusi qulflangan`, `Bu mavzu ${b.dataset.lockTopic} tarifida ochiladi. Tarifni yangilab, barcha ${d.total_topics} mavzuga va qiyinroq savollarga ega bo'lasizmi?`)));
+    }
+
+    function setTieredUi(on) {
+      ["qs-plan-strip", "qs-exam-info", "qs-drills", "qs-grade-tabs", "qs-grade-head"].forEach((id) => {
+        if (!on) document.getElementById(id).classList.add("qs-hidden");
+      });
+      document.getElementById("qs-variant").classList.toggle("qs-hidden", !(on && state.mode === "dtm" && VARIANT_SUBJECTS.includes(state.subject)));
+      const mock = document.getElementById("qs-mock-card");
+      if (mock) mock.classList.toggle("qs-hidden", on);
+    }
+
+    async function loadTopics() {
+      const mockStart = document.getElementById("qs-mock-start");
+      if (mockStart) {
+        mockStart.href = `/quiz/take?subject=${state.subject}&level=${state.level}&mode=${state.mode}`;
+      }
+
+      (async () => {
+        const box = document.getElementById("qs-mocks");
+        try {
+          const r = await fetch(`/api/mocks?subject=${encodeURIComponent(state.subject)}&mode=${encodeURIComponent(state.mode)}`);
+          const j = r.ok ? await r.json() : { mocks: [] };
+          box.innerHTML = "";
+          box.classList.toggle("qs-hidden", !j.mocks.length);
+          if (j.mocks.length) {
+            const h = document.createElement("strong"); h.textContent = "Mock testlar"; box.appendChild(h);
+            j.mocks.forEach((m) => {
+              const a = document.createElement("a");
+              a.className = "qs-mock-card"; a.style.cssText = "display:flex;justify-content:space-between;margin-top:8px;text-decoration:none;color:inherit";
+              a.href = m.locked ? "/upgrade" : `/quiz/take?subject=${state.subject}&level=${state.level}&mode=${state.mode}&mock=${m.id}`;
+              a.textContent = `${m.name} — ${m.variant}-variant · ${m.total} savol` + (m.locked ? ` · 🔒 ${m.plan}` : "");
+              box.appendChild(a);
+            });
+          }
+        } catch (e) { box.classList.add("qs-hidden"); }
+      })();
+
+      const ieltsTabs = document.getElementById("qs-ielts-tabs");
+      const showIeltsTabs = state.subject === "english" && (state.mode === "ielts" || state.mode === "cefr");
+      ieltsTabs.classList.toggle("qs-hidden", !showIeltsTabs);
+
+      const list = document.getElementById("qs-topic-list");
+      list.innerHTML = "<p class='qs-hint'>Yuklanmoqda...</p>";
+      try {
+        const res = await fetch(`/api/topics?subject=${encodeURIComponent(state.subject)}&mode=${encodeURIComponent(state.mode)}`);
+        if (!res.ok) throw new Error("topics fetch failed");
+        const data = await res.json();
+
+        const missedBanner = document.getElementById("qs-missed-banner");
+        const missedCount = document.getElementById("qs-missed-count");
+        const missedStart = document.getElementById("qs-missed-start");
+        if (data.missed_count > 0) {
+          missedBanner.classList.remove("qs-hidden");
+          missedCount.textContent = data.missed_count;
+          missedStart.href = `/quiz/take?subject=${state.subject}&level=${state.level}&mode=${state.mode}&topic=__missed__`;
+        } else {
+          missedBanner.classList.add("qs-hidden");
+        }
+
+        if (data.tiered) {
+          tieredData = data;
+          setTieredUi(true);
+          renderPlanStrip(data);
+          renderExamInfo();
+          renderDrills(data);
+          if (!data.grades.length) { list.innerHTML = "<p class='qs-hint'>Mavzular tayyorlanmoqda.</p>"; return; }
+          renderGradeTabs(data);
+          renderGradeTopics(data);
+          return;
+        }
+        setTieredUi(false);
+
+        if (!data.topics.length) {
+          list.innerHTML = "<p class='qs-hint'>Bu fan uchun mavzular hali tayyorlanmoqda.</p>";
+          return;
+        }
+
+        const RING_R = 16;
+        const RING_CIRCUMFERENCE = 2 * Math.PI * RING_R;
+        list.innerHTML = data.topics.map((t, idx) => {
+          const offset = RING_CIRCUMFERENCE * (1 - t.percent / 100);
+          const lockIcon = LOCK_SVG;
+          const row = t.locked ? `
+          <a class="topic-row topic-row-locked" href="/upgrade" title="Bu mavzu yuqori tarifda ochiladi">
+            <span class="topic-row-order">${t.order}</span>
+            <span class="topic-row-body">
+              <span class="topic-row-title">${t.topic}</span>
+              <span class="topic-row-meta-sub">Pro/Ultra tarifda ochiladi</span>
+            </span>
+            <span class="topic-row-lock-icon">${lockIcon}</span>
+          </a>` : `
+          <a class="topic-row ${t.completed ? 'topic-row-done' : ''}"
+             href="/quiz/take?subject=${state.subject}&level=${state.level}&mode=${state.mode}&topic=${encodeURIComponent(t.topic)}">
+            <span class="topic-row-order">${t.order}</span>
+            <span class="topic-row-body">
+              <span class="topic-chip ${t.completed ? 'topic-chip-done' : (t.solved ? 'topic-chip-progress' : '')}">${t.completed ? "Tugallangan" : (t.solved ? "Davom etmoqda" : "Yangi mavzu")}</span>
+              <span class="topic-row-title">${t.topic}</span>
+              <span class="topic-row-meta-sub">${t.solved}/${t.total} savol yechilgan</span>
+              <span class="topic-row-cta">Boshlash <span aria-hidden="true">→</span></span>
+            </span>
+            <svg class="topic-ring" viewBox="0 0 40 40" aria-hidden="true">
+              <circle class="topic-ring-bg" cx="20" cy="20" r="${RING_R}"></circle>
+              <circle class="topic-ring-fill" cx="20" cy="20" r="${RING_R}"
+                      stroke-dasharray="${RING_CIRCUMFERENCE}" stroke-dashoffset="${offset}"></circle>
+              <text x="20" y="24" text-anchor="middle" class="topic-ring-text">${t.percent}%</text>
+            </svg>
+          </a>`;
+          // Har 5 mavzudan keyin — aralash "amaliy sinov" (practice quiz) kartasi
+          // (qulflangan mavzular uchun ko'rsatilmaydi)
+          if (!t.locked && (idx + 1) % 5 === 0) {
+            const groupNum = Math.floor((idx + 1) / 5);
+            const rangeStart = idx - 4;
+            const groupTopics = data.topics.slice(rangeStart, idx + 1).map((gt) => gt.topic);
+            const topicsParam = encodeURIComponent(groupTopics.join(","));
+            return row + `
+          <a class="topic-row topic-row-practice"
+             href="/quiz/take?subject=${state.subject}&level=${state.level}&mode=${state.mode}&topics=${topicsParam}">
+            <span class="topic-row-order">★</span>
+            <span class="topic-row-body">
+              <span class="topic-row-title">${groupNum}-amaliy sinov (${rangeStart + 1}—${idx + 1}-mavzular aralash)</span>
+              <span class="topic-row-meta-sub">O'tgan 5 ta mavzudan aralash — ${data.practice_question_count || 10} ta savol</span>
+            </span>
+            <span class="topic-row-meta">Boshlash</span>
+          </a>`;
+          }
+          return row;
+        }).join("");
+      } catch (e) {
+        list.innerHTML = "<p class='qs-hint'>Mavzularni yuklab bo'lmadi. Sahifani yangilang.</p>";
+      }
+    }
+
+    document.querySelectorAll(".qs-back").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const step = Number(btn.dataset.backTo);
+        state.mode = null;
+        updateHeader();
+        showStep(step);
+      });
+    });
+
+    // Fan tablari — tepada doim ko'rinadi, bosilganda o'sha fanning rejim/test
+    // ro'yxati darhol almashadi (butonga qarab testlar o'zgaradi).
+    document.querySelectorAll(".subject-tab").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        if (tab.dataset.subject === state.subject) return;
+        document.querySelectorAll(".subject-tab").forEach((t) => t.classList.remove("is-active"));
+        tab.classList.add("is-active");
+        state.subject = tab.dataset.subject;
+        state.mode = null;
+        updateHeader();
+        renderModes();
+        showStep(3);
+      });
+    });
+
+    document.querySelectorAll("#qs-variant button").forEach((b) => b.addEventListener("click", () => {
+      activeVariant = b.dataset.variant;
+      document.querySelectorAll("#qs-variant button").forEach((x) => x.classList.toggle("is-active", x === b));
+      if (tieredData) renderDrills(tieredData);
+    }));
+
+    updateHeader();
+    renderModes();
+    showStep(3);
+  </script>
+
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/app.js"></script>
+  <script src="/static/owl-chat.js"></script>
+</body>
+</html>

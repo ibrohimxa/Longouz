@@ -1,0 +1,136 @@
+/* Kirish va ro'yxatdan o'tish sahifalari (.au-*) — referens dizayn */
+body.auth-page{--a-bg:#04141a;--a-card:#08191e;--a-line:rgba(110,230,200,.16);--a-ink:#f1faf7;--a-mute:#8fb1ab;--a-in:#061317;--a-inbd:rgba(255,255,255,.13);--a-g:#22d3a0;--a-g2:#12b98a;--a-gtxt:#04261d;--lg-uz:#22d3a0;
+  background:radial-gradient(70% 50% at 50% 0%,rgba(20,150,120,.12),transparent 70%),linear-gradient(180deg,#051a20,#04131a 60%,#03101a);color:var(--a-ink);min-height:100vh;display:flex;flex-direction:column;font-family:Inter,system-ui,sans-serif}
+body.auth-login{--lg-uz:#1fa4f0}
+html[data-theme="light"] body.auth-page{--a-bg:#f1f8f6;--a-card:#fff;--a-line:rgba(10,120,95,.2);--a-ink:#0b2a26;--a-mute:#4b6c66;--a-in:#fff;--a-inbd:rgba(10,70,60,.22);--a-g:#12a67c;--a-g2:#0b8a66;--a-gtxt:#fff;--lg-uz:#0f9f77;
+  background:radial-gradient(70% 50% at 50% 0%,rgba(30,180,140,.14),transparent 70%),linear-gradient(180deg,#f3faf8,#e9f5f2)}
+html[data-theme="light"] body.auth-login{--lg-uz:#1778c9}
+.auth-page .site-header{background:transparent;border-bottom:1px solid rgba(255,255,255,.07);backdrop-filter:none}
+html[data-theme="light"] .auth-page .site-header{border-color:rgba(10,70,60,.12)}
+.auth-page .site-header .brand{font-size:1.45rem}
+.auth-page .site-nav{gap:20px}
+.auth-page .site-nav a{color:var(--a-ink);font-weight:500}
+.auth-page .site-nav .nav-cta{background:var(--a-g);color:var(--a-gtxt);border-radius:999px;padding:11px 24px;font-weight:600;box-shadow:0 6px 20px rgba(34,211,160,.25)}
+.auth-page .site-nav .nav-cta:hover{background:var(--a-g2)}
+.auth-page .site-footer{margin-top:0;background:transparent;border-top:1px solid rgba(255,255,255,.07);padding:36px 16px;text-align:center;color:var(--a-mute);font-size:.82rem}
+.auth-page .site-footer p{margin:0;color:inherit}
+html[data-theme="light"] .auth-page .site-footer{border-color:rgba(10,70,60,.12)}
+.au-main{position:relative;flex:1;display:flex;align-items:center;justify-content:center;padding:40px 24px;overflow:hidden}
+
+/* umumiy: karta, maydonlar, tugmalar */
+.au-field{margin:0 0 14px}
+.au-field label{display:block;margin:0 0 7px;font-size:.95rem;font-weight:500;color:var(--a-ink)}
+.au-input{position:relative}
+.au-input>svg{position:absolute;left:16px;top:50%;width:20px;height:20px;transform:translateY(-50%);color:var(--a-mute);pointer-events:none;transition:color .15s}
+.au-input input{width:100%;height:48px;box-sizing:border-box;padding:0 48px 0 50px;border-radius:12px;border:1px solid var(--a-inbd);background:var(--a-in);color:var(--a-ink);font:400 .95rem Inter,system-ui,sans-serif;outline:0;transition:border-color .15s,box-shadow .15s}
+.au-input input::placeholder{color:var(--a-mute);opacity:.85}
+.au-input input:focus,.au-input input:focus-visible{border-color:var(--a-g);box-shadow:0 0 0 3px rgba(34,211,160,.16)}
+.au-input:focus-within>svg:first-child{color:var(--a-g)}
+.au-eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:38px;height:38px;border:0;background:none;color:var(--a-mute);cursor:pointer;border-radius:10px;display:grid;place-items:center}
+.au-eye:hover{color:var(--a-ink)}.au-eye svg{width:20px;height:20px}
+.au-eye .au-slash{opacity:0}.au-eye.is-on .au-slash{opacity:1}
+.au-submit{width:100%;height:48px;margin-top:6px;border:0;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;background:var(--a-g);color:var(--a-gtxt);font:600 1rem Inter,system-ui,sans-serif;transition:filter .15s,transform .15s,box-shadow .15s}
+.au-submit svg{width:22px;height:22px;flex:none}
+.au-submit:hover{filter:brightness(1.07);transform:translateY(-1px)}.au-submit:active{transform:none}
+.au-submit:disabled{opacity:.7;cursor:progress}
+.au-google{display:flex;align-items:center;justify-content:center;gap:12px;height:48px;border-radius:12px;background:#fff;color:#15222a;font-weight:600;font-size:.95rem;text-decoration:none;border:1px solid rgba(0,0,0,.08);transition:filter .15s,transform .15s}
+.au-google:hover{filter:brightness(.96);transform:translateY(-1px)}
+.au-google-arrow{position:relative}.au-google-arrow .au-go{position:absolute;right:20px;width:20px;height:20px}
+html[data-theme="light"] .au-google{border-color:rgba(10,70,60,.25)}
+.au-or{display:flex;align-items:center;gap:14px;margin:16px 0;color:var(--a-mute);font-size:.82rem}
+.au-or::before,.au-or::after{content:"";flex:1;height:1px;background:var(--a-inbd)}
+.au-switch{text-align:center;margin:20px 0 0;color:var(--a-mute);font-size:.92rem}
+.au-switch a{color:var(--a-g);font-weight:600;text-decoration:none;margin-left:4px}.au-switch a:hover{text-decoration:underline}
+.au-error{margin:0 0 14px;padding:11px 14px;border-radius:10px;background:rgba(255,90,90,.12);border:1px solid rgba(255,90,90,.4);color:#ffb4b4;font-size:.9rem}
+html[data-theme="light"] .au-error{color:#a11;background:rgba(220,50,50,.08)}
+.au-plan{margin:0 0 14px;padding:8px 12px;border-radius:10px;text-align:center;background:rgba(34,211,160,.12);border:1px solid rgba(34,211,160,.35);color:var(--a-g);font-weight:700;font-size:.85rem}
+.au-bar{display:block;width:110px;height:3px;border-radius:3px;margin:12px auto 0;background:linear-gradient(90deg,transparent,var(--a-g),transparent)}
+.au-cf{margin:4px 0 8px;display:flex;flex-direction:column;align-items:center;min-height:0}
+.au-cf-status{margin:6px 0 0;color:#f59e0b;font-size:.82rem}.au-cf-status:empty{display:none}
+.au-cfnote{display:flex;align-items:center;justify-content:center;gap:7px;margin:4px 0 8px;color:var(--a-mute);font-size:.76rem}
+.au-cfnote svg{width:15px;height:15px;color:#f6821f}
+
+/* RO'YXATDAN O'TISH: 3 ustun */
+.au-reg{width:min(1260px,100%);display:grid;grid-template-columns:minmax(0,1fr) 511px minmax(0,1fr);align-items:center;gap:32px}
+.au-reg-left{position:relative;padding:12px 0 12px 56px;align-self:stretch;display:flex;flex-direction:column;justify-content:center}
+.au-badge{display:inline-flex;align-items:center;gap:9px;align-self:flex-start;padding:7px 16px;border-radius:999px;border:1px solid rgba(34,211,160,.55);color:var(--a-g);font-weight:600;font-size:.85rem;background:rgba(34,211,160,.06)}
+.au-badge svg{width:19px;height:19px}
+.au-reg-left h1{margin:20px 0 0;font:800 clamp(2.1rem,3.2vw,2.9rem)/1.15 Inter,system-ui,sans-serif;letter-spacing:-.02em;color:var(--a-ink)}
+.au-reg-left h1 span{display:block;color:var(--a-g)}
+.au-lead{margin:16px 0 0;color:var(--a-mute);font-size:1.12rem;line-height:1.55;max-width:22em}
+.au-feats{list-style:none;margin:30px 0 0;padding:0;display:flex;flex-direction:column;gap:20px;max-width:22em}
+.au-feats li{display:flex;align-items:center;gap:16px;color:var(--a-mute);font-size:.9rem;line-height:1.45}
+.au-feats li b{color:var(--a-ink);font-weight:600}
+.au-feats i{flex:none;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:var(--a-g);background:rgba(34,211,160,.1);border:1px solid rgba(34,211,160,.18)}
+.au-feats i svg{width:22px;height:22px}
+.au-leaf-l{position:absolute;left:-40px;bottom:-60px;width:160px;height:auto;opacity:.9;pointer-events:none}
+.au-card{position:relative;background:linear-gradient(180deg,rgba(12,32,38,.96),var(--a-card));border:1px solid var(--a-line);border-radius:18px;padding:32px 34px 28px;box-shadow:0 30px 80px rgba(0,0,0,.45),0 0 60px rgba(34,211,160,.06)}
+.au-card::before{content:"";position:absolute;top:-1px;left:22%;right:22%;height:2px;background:linear-gradient(90deg,transparent,var(--a-g),transparent);filter:blur(1px)}
+html[data-theme="light"] .au-card{background:#fff;box-shadow:0 24px 60px rgba(10,80,65,.16)}
+.au-card-brand{text-align:center;margin-bottom:22px}
+.au-card-owl{display:block;width:92px;height:auto;margin:0 auto 4px;filter:drop-shadow(0 4px 18px rgba(40,140,255,.4))}
+.au-card-word{font:800 2.05rem/1.1 Inter,system-ui,sans-serif;letter-spacing:-.02em;color:var(--a-ink)}
+.au-card-word b{color:var(--a-g);font-weight:800}
+.au-card-sub{margin:8px 0 0;color:var(--a-mute);font-size:1rem}
+.au-reg-right{position:relative;display:flex;align-items:center;justify-content:center}
+.au-reg-right img{display:block;width:min(100%,440px);height:auto;border-radius:24px;
+  -webkit-mask-image:radial-gradient(ellipse 72% 70% at 50% 50%,#000 55%,transparent 100%);mask-image:radial-gradient(ellipse 72% 70% at 50% 50%,#000 55%,transparent 100%)}
+html[data-theme="light"] .au-reg-right img{border-radius:28px;-webkit-mask-image:none;mask-image:none;box-shadow:0 20px 50px rgba(5,40,40,.3)}
+
+/* KIRISH: katta bo'lingan karta */
+.au-log{position:relative;z-index:1;width:min(1142px,100%);display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--a-line);border-radius:20px;overflow:hidden;
+  background:linear-gradient(180deg,rgba(10,28,34,.92),rgba(7,22,28,.95));box-shadow:0 30px 90px rgba(0,0,0,.5),0 0 70px rgba(34,211,160,.08)}
+html[data-theme="light"] .au-log{background:#fff;box-shadow:0 24px 70px rgba(10,80,65,.18)}
+.au-log-art{position:relative;border-right:1px solid var(--a-line);background:radial-gradient(80% 60% at 50% 30%,rgba(25,80,150,.22),transparent 70%),#06161c;display:flex;flex-direction:column}
+html[data-theme="light"] .au-log-art{background:#06161c}
+.au-log-img img{display:block;width:100%;height:auto}
+.au-log-img{-webkit-mask-image:linear-gradient(180deg,#000 80%,transparent);mask-image:linear-gradient(180deg,#000 80%,transparent)}
+.au-log-copy{padding:0 36px 40px 72px;margin-top:-10px;color:#f1faf7}
+.au-bar-l{margin:0 0 16px;width:58px;background:var(--a-g)}
+.au-log-copy h2{margin:0;font:700 clamp(1.7rem,2.6vw,2.35rem)/1.2 Inter,system-ui,sans-serif;letter-spacing:-.015em;max-width:11em}
+.au-log-copy h2 span{display:block;color:#22d3a0}
+.au-log-copy p{margin:18px 0 0;color:#97b4ae;font-size:1.02rem;line-height:1.55;max-width:21em}
+.au-log-form{padding:48px 56px 36px;display:flex;flex-direction:column;justify-content:center;min-width:0}
+.au-log-brand{display:flex;align-items:center;justify-content:center;gap:10px;margin:0 0 26px;font-size:1.7rem}
+.au-log-brand img{height:2.1rem;width:auto}
+.au-log-form h1{margin:0;font:800 1.9rem/1.2 Inter,system-ui,sans-serif;letter-spacing:-.015em}
+.au-log-sub{margin:10px 0 24px;color:var(--a-mute);font-size:1rem}
+.au-wave{position:absolute;left:0;bottom:0;width:100%;height:42%;pointer-events:none}
+.au-wave .w1{fill:rgba(20,150,120,.09)}.au-wave .w2{fill:rgba(20,130,140,.09)}
+html[data-theme="light"] .au-wave .w1{fill:rgba(20,160,130,.14)}html[data-theme="light"] .au-wave .w2{fill:rgba(20,140,160,.12)}
+
+/* planshet va telefon */
+@media (max-width:1180px){
+  .au-reg{grid-template-columns:minmax(0,1fr) 511px}
+  .au-reg-right{display:none}
+  .au-reg-left{padding-left:0}
+}
+@media (max-width:900px){
+  .au-main{padding:24px 16px}
+  .au-reg{grid-template-columns:minmax(0,520px);justify-content:center;gap:22px}
+  .au-reg-left{padding:0;align-items:center;text-align:center}
+  .au-badge{align-self:center}.au-reg-left h1{font-size:2rem}.au-lead{margin-inline:auto}
+  .au-feats,.au-leaf-l{display:none}
+  .au-log{grid-template-columns:1fr;width:min(560px,100%)}
+  .au-log-art{display:none}
+  .au-log-form{padding:34px 28px 28px}
+}
+@media (max-width:560px){
+  .auth-page .site-header .brand{font-size:1.15rem}
+  .auth-page .site-nav{gap:10px}
+  .auth-page .site-nav .nav-cta{padding:9px 14px;font-size:.82rem}
+  .auth-page .site-nav a:not(.nav-cta){font-size:.88rem}
+  .au-card{padding:24px 18px 22px;border-radius:16px}
+  .au-card-owl{width:76px}.au-card-word{font-size:1.7rem}
+  .au-reg-left h1{font-size:1.65rem}.au-lead{font-size:1rem}.au-reg-left{gap:0}
+  .au-log-form{padding:26px 18px 22px}.au-log-form h1{font-size:1.5rem}.au-log-brand{font-size:1.45rem;margin-bottom:18px}
+  .au-input input{height:46px;padding-left:46px}.au-submit,.au-google{height:46px}
+}
+@media (max-width:480px){.auth-page .site-nav a.nav-link{display:none}}
+@media (max-width:380px){
+  .auth-page .site-nav .theme-toggle{display:none}
+  .auth-page .site-header{padding-inline:10px}.auth-page .site-header .brand .lg-word{font-size:1rem}
+}
+
+.au-cf .turnstile-slot{width:100%;min-height:65px;display:flex;justify-content:center}
+.au-cf-retry{margin-top:6px;background:transparent;border:1px solid #f59e0b;color:#f59e0b;border-radius:8px;padding:4px 12px;font-size:.8rem;cursor:pointer}

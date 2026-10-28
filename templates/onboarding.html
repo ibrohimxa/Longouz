@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fan tanlash — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body>
+
+  <header class="site-header">
+    <a href="/" class="brand">
+      {% include "_brandmark.html" %}
+    </a>
+    <nav class="site-nav">
+      <a href="/logout">Chiqish</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="onboarding-wrap">
+      <div class="onboarding-intro">
+        <h1>Salom, {{ user.first_name or "do'stim" }}!</h1>
+        <p>Qaysi fandan boshlashni tanlang.</p>
+      </div>
+
+      {% if error %}<div class="form-error">{{ error }}</div>{% endif %}
+
+      <form method="post" action="/onboarding" id="onboarding-form">
+        <input type="hidden" name="subject" id="selected-subject" required>
+        <input type="hidden" name="certificate_type" value="dtm">
+
+        <!-- 1-QADAM: Fan tanlash -->
+        <div class="ob-step">
+          <div class="ob-step-label">
+            <span class="ob-step-num">1</span>
+            Qaysi fanni o'rganasiz?
+          </div>
+          <div class="subject-select-grid">
+
+            <div class="subject-select-card" data-subject="english">
+              <div class="subject-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20"/></svg>
+              </div>
+              <h3>Ingliz tili</h3>
+            </div>
+
+            <div class="subject-select-card" data-subject="russian">
+              <div class="subject-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+              </div>
+              <h3>Rus tili</h3>
+            </div>
+
+            <div class="subject-select-card" data-subject="math">
+              <div class="subject-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>
+              </div>
+              <h3>Matematika</h3>
+            </div>
+
+            <div class="subject-select-card" data-subject="history">
+              <div class="subject-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              </div>
+              <h3>Tarix</h3>
+            </div>
+
+            <div class="subject-select-card" data-subject="native">
+              <div class="subject-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              </div>
+              <h3>O'zbek tili va Adabiyot</h3>
+            </div>
+
+            <div class="subject-select-card" data-subject="chemistry">
+              <div class="subject-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H4v5M15 3h5v5M9 21H4v-5M15 21h5v-5M9 9h6v6H9z"/></svg>
+              </div>
+              <h3>Kimyo</h3>
+            </div>
+
+            <div class="subject-select-card" data-subject="biology">
+              <div class="subject-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 019.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 11 13.14 12 11"/></svg>
+              </div>
+              <h3>Biologiya</h3>
+            </div>
+
+            <div class="subject-select-card" data-subject="physics">
+              <div class="subject-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><ellipse cx="12" cy="12" rx="10" ry="4.5"/><ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(120 12 12)"/></svg>
+              </div>
+              <h3>Fizika</h3>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 2-QADAM: Daraja (accordion — fan tanlangandan keyin chiqadi) -->
+        <div id="level-section">
+          <div class="ob-step">
+            <div class="ob-step-label">
+              <span class="ob-step-num">2</span>
+              Darajangizni tanlang
+            </div>
+            <div class="ob-options ob-options-level">
+              {% for l in levels %}
+              <label class="ob-card">
+                <input type="radio" name="level" value="{{ l.code }}" required>
+                <span class="ob-card-title">{{ l.name }}</span>
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary btn-primary-block ob-submit">
+            Testni boshlash
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; LongoUZ — Barcha huquqlar himoyalangan.</p>
+  </footer>
+
+  <script>
+    // Fan kartalarini bosish — hidden input'ga yozadi, accordion ochadi
+    function selectSubjectCard(code) {
+      document.querySelectorAll(".subject-select-card").forEach(function(c) {
+        c.classList.toggle("selected", c.dataset.subject === code);
+      });
+      document.getElementById("selected-subject").value = code;
+      var levelSection = document.getElementById("level-section");
+      if (levelSection) {
+        levelSection.classList.add("level-open");
+        setTimeout(function() {
+          levelSection.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }, 100);
+      }
+    }
+    document.querySelectorAll(".subject-select-card").forEach(function(card) {
+      card.addEventListener("click", function() { selectSubjectCard(card.dataset.subject); });
+    });
+    // Home sahifasidan bosilgan fan oldindan tanlanadi
+    var presetSubject = "{{ preset_subject|default('') }}";
+    if (presetSubject) {
+      selectSubjectCard(presetSubject);
+    }
+  </script>
+  <script src="/static/devtools-guard.js"></script>
+</body>
+</html>

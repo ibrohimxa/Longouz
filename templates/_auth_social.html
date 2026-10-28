@@ -1,0 +1,3 @@
+{% if request.query_params.get('error') == 'google_not_configured' %}<div class="au-error">Google orqali kirish hozircha sozlanmagan.</div>{% endif %}
+{% if request.query_params.get('error') == 'google_failed' or request.query_params.get('error') == 'google_state_mismatch' %}<div class="au-error">Google orqali kirish amalga oshmadi. Qaytadan urinib ko'ring.</div>{% endif %}
+{% if request.query_params.get('error') == 'google_cancelled' %}<div class="au-error">Google orqali kirish bekor qilindi.</div>{% endif %}

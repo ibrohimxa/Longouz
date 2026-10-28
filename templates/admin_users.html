@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Foydalanuvchilar — Admin — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/admin-dash.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true">
+  {% from "_macros.html" import admin_pagination %}
+
+  <div class="app-shell">
+    {% include "_admin_sidebar.html" %}
+
+    <div class="app-content">
+
+      <div class="app-topbar">
+        <div>
+          <h1>Foydalanuvchilar</h1>
+          <p>Jami {{ total }} ta — tarifni o'zgartirish yoki hisobni o'chirish uchun quyidagi tugmalardan foydalaning</p>
+        </div>
+      </div>
+
+      <form method="get" action="{{ admin_prefix }}/users" class="admin-search-row">
+        <input type="text" name="q" value="{{ search }}" placeholder="Ism yoki email bo'yicha qidirish...">
+        <select name="plan" onchange="this.form.submit()">
+          <option value="">Barcha tariflar</option>
+          <option value="free" {{ "selected" if plan_filter == "free" }}>Bepul</option>
+          <option value="pro" {{ "selected" if plan_filter == "pro" }}>Pro</option>
+          <option value="ultra" {{ "selected" if plan_filter == "ultra" }}>Ultra</option>
+        </select>
+        <button type="submit" class="btn-secondary">Qidirish</button>
+        <a class="btn-secondary" href="{{ admin_prefix }}/users/export.csv?q={{ search|urlencode }}&plan={{ plan_filter }}">CSV yuklab olish</a>
+      </form>
+
+      {% if message %}<div class="form-success">{{ message }}</div>{% endif %}
+
+      <div class="admin-users-table-wrap">
+        <table class="admin-users-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Ism</th>
+              <th>Email</th>
+              <th>Fan</th>
+              <th>Tarif</th>
+              <th>Testlar</th>
+              <th>O'rtacha</th>
+              <th>Ro'yxatdan o'tgan</th>
+              <th>Amallar</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in users %}
+            <tr>
+              <td>{{ u.id }}</td>
+              <td><a href="{{ admin_prefix }}/users/{{ u.id }}">{{ u.first_name or "—" }}</a></td>
+              <td>{{ u.email }}</td>
+              <td>{{ subject_names.get(u.subject, u.subject or "—") }}</td>
+              <td><span class="admin-plan-badge admin-plan-{{ u.plan }}">{{ u.plan }}</span></td>
+              <td>{{ stats.get(u.id, {}).get("tests", 0) }}</td>
+              <td>{{ stats[u.id].percent ~ "%" if u.id in stats else "—" }}</td>
+              <td>{{ u.joined_at.strftime("%d.%m.%Y") if u.joined_at else "—" }}</td>
+              <td class="admin-users-actions">
+                <form method="post" action="{{ admin_prefix }}/users/{{ u.id }}/plan" class="admin-inline-form">
+                  <select name="plan">
+                    <option value="free" {{ "selected" if u.plan == "free" }}>Bepul</option>
+                    <option value="pro" {{ "selected" if u.plan == "pro" }}>Pro</option>
+                    <option value="ultra" {{ "selected" if u.plan == "ultra" }}>Ultra</option>
+                  </select>
+                  <button type="submit" class="btn-secondary admin-btn-sm">Saqlash</button>
+                </form>
+                <form method="post" action="{{ admin_prefix }}/users/{{ u.id }}/delete" class="admin-inline-form" onsubmit="return confirm('{{ u.email }} hisobini butunlay o\'chirishni tasdiqlaysizmi? Bu amalni qaytarib bo\'lmaydi.');">
+                  <button type="submit" class="admin-btn-sm admin-btn-danger">O'chirish</button>
+                </form>
+              </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="9" style="text-align:center; color:var(--ink-soft); padding:24px;">Hech kim topilmadi.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {{ admin_pagination(admin_prefix + '/users?page=', page, total_pages, (('&q=' + search|urlencode) if search else '') ~ (('&plan=' + plan_filter) if plan_filter else '')) }}
+
+    </div>
+  </div>
+
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

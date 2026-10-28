@@ -1,0 +1,4 @@
+# Lokal kompyuter uchun qo'shimchalar (Vercel'da kerak emas / sig'maydi).
+# setup_run.py bularni ham o'rnatadi. PDF dan chizma kesish va ovoz (TTS) shu yerda.
+aiosqlite
+pymupdf==1.24.14

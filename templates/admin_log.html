@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Admin jurnali — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true">
+
+  <div class="app-shell">
+    {% include "_admin_sidebar.html" %}
+
+    <div class="app-content">
+
+      <div class="app-topbar">
+        <div>
+          <h1>Admin jurnali</h1>
+          <p>So'nggi 150 ta admin amali — kim, qachon, nima qildi</p>
+        </div>
+      </div>
+
+      <div class="admin-users-table-wrap">
+        <table class="admin-users-table">
+          <thead>
+            <tr>
+              <th>Vaqt</th>
+              <th>Admin</th>
+              <th>Amal</th>
+              <th>Tafsilot</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for e in entries %}
+            <tr>
+              <td>{{ e.created_at.strftime("%d.%m.%Y %H:%M") }}</td>
+              <td>{{ e.admin_username }}</td>
+              <td>{{ e.action }}</td>
+              <td>{{ e.detail }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4" style="text-align:center; color:var(--ink-soft); padding:24px;">Hali hech qanday amal qayd etilmagan.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

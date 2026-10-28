@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="LongoUZ profili — statistika va natijalar.">
+  <title>Profil — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/profile.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true">
+
+  <div class="app-shell">
+
+    {% set nav_active = 'profile' %}{% include "_app_sidebar.html" %}
+
+    <div class="app-content">
+
+      {% include "_announcement_banner.html" %}
+      <div class="app-topbar">
+        <div>
+          <h1>{{ user.first_name or "Foydalanuvchi" }}
+            <span class="plan-badge plan-badge-{{ user.plan }}">{{ user.plan|upper }}</span>
+          </h1>
+          <p>{{ subject_name }} · {{ stats.level|capitalize if stats.level else "" }} daraja
+          {% if stats.certificate_type and stats.certificate_type != 'none' %}
+            · {{ stats.certificate_type|upper }} tayyorgarligi
+          {% endif %}
+          </p>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-value">{{ stats.total_quizzes or 0 }}</div>
+          <div class="stat-label">jami ishlangan testlar</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ stats.accuracy or 0 }}%</div>
+          <div class="stat-label">o'rtacha to'g'rilik</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ stats.total_correct or 0 }}/{{ stats.total_questions or 0 }}</div>
+          <div class="stat-label">to'g'ri javoblar</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ stats.streak_days or 0 }}</div>
+          <div class="stat-label">kunlik streak</div>
+        </div>
+      </div>
+
+
+      <!-- ============ PROFIL VA SOZLAMALAR ============ -->
+      <section class="pf-grid" id="pf-settings" aria-label="Profil va sozlamalar">
+
+        <article class="pf-card pf-card-wide">
+          <header class="pf-card-head"><h3>Profil ma'lumotlari</h3><span class="pf-msg" id="pf-msg-profile" role="status"></span></header>
+          <div class="pf-me">
+            <div class="pf-avatar" id="pf-avatar" style="background: {{ user.avatar_color or 'var(--accent-green)' }};">{{ ((user.first_name or "?")[0])|upper }}</div>
+            <div class="pf-me-info">
+              <strong>{{ user.first_name or "Foydalanuvchi" }}</strong>
+              <span>{{ user.email }}</span>
+              <small>A'zo bo'lgan sana: {{ user.joined_at.strftime("%d.%m.%Y") }} · <span class="plan-badge plan-badge-{{ user.plan }}">{{ user.plan|upper }}</span></small>
+            </div>
+          </div>
+          <div class="pf-colors" role="radiogroup" aria-label="Avatar rangi">
+            {% for c in avatar_colors %}
+            <button type="button" class="pf-color{% if user.avatar_color == c %} is-on{% endif %}" data-color="{{ c }}" style="background: {{ c }};" role="radio" aria-checked="{{ 'true' if user.avatar_color == c else 'false' }}" aria-label="Rang {{ loop.index }}"></button>
+            {% endfor %}
+          </div>
+          <form class="pf-form" id="pf-form-profile" autocomplete="off">
+            <label class="pf-field"><span>Ismingiz</span><input type="text" name="first_name" value="{{ user.first_name }}" maxlength="60" required></label>
+            <label class="pf-field"><span>Email (o'zgartirib bo'lmaydi)</span><input type="email" value="{{ user.email }}" disabled></label>
+            <button type="submit" class="btn-primary">Saqlash</button>
+          </form>
+        </article>
+
+        <article class="pf-card">
+          <header class="pf-card-head"><h3>O'quv maqsadlari</h3><span class="pf-msg" id="pf-msg-goals" role="status"></span></header>
+          <form class="pf-form" id="pf-form-goals">
+            <label class="pf-field"><span>Kunlik maqsad: <b id="pf-goal-val">{{ user.daily_goal or 10 }}</b> ta savol</span>
+              <input type="range" name="daily_goal" min="5" max="100" step="5" value="{{ user.daily_goal or 10 }}" aria-label="Kunlik maqsad"></label>
+            <label class="pf-field"><span>Maqsadli o'rtacha natija: <b id="pf-target-val">{{ user.target_percent or 90 }}</b>%</span>
+              <input type="range" name="target_percent" min="30" max="100" step="5" value="{{ user.target_percent or 90 }}" aria-label="Maqsadli natija"></label>
+            <button type="submit" class="btn-primary">Maqsadlarni saqlash</button>
+          </form>
+        </article>
+
+        <article class="pf-card">
+          <header class="pf-card-head"><h3>Xavfsizlik</h3><span class="pf-msg" id="pf-msg-pass" role="status"></span></header>
+          <form class="pf-form" id="pf-form-pass" autocomplete="off">
+            <label class="pf-field"><span>Joriy parol</span><input type="password" name="current_password" autocomplete="current-password" required></label>
+            <label class="pf-field"><span>Yangi parol (kamida 8 belgi)</span><input type="password" name="new_password" minlength="8" maxlength="72" autocomplete="new-password" required></label>
+            <label class="pf-field"><span>Yangi parolni takrorlang</span><input type="password" name="repeat" minlength="8" maxlength="72" autocomplete="new-password" required></label>
+            <button type="submit" class="btn-primary">Parolni almashtirish</button>
+          </form>
+        </article>
+
+        <article class="pf-card">
+          <header class="pf-card-head"><h3>Ko'rinish</h3></header>
+          <p class="pf-note">Tungi yoki kunduzgi rejimni tanlang. Tanlov shu brauzerda eslab qolinadi.</p>
+          <div class="pf-theme">
+            <button type="button" class="btn-secondary" data-set-theme="dark">Tungi</button>
+            <button type="button" class="btn-secondary" data-set-theme="light">Kunduzgi</button>
+          </div>
+        </article>
+
+        <article class="pf-card">
+          <header class="pf-card-head"><h3>Ma'lumotlarim</h3><span class="pf-msg" id="pf-msg-danger" role="status"></span></header>
+          <p class="pf-note">Barcha shaxsiy ma'lumotlaringizni (profil, testlar, suhbatlar) JSON fayl sifatida yuklab oling.</p>
+          <a class="btn-secondary" href="/api/profile/export" download>Ma'lumotlarimni yuklab olish</a>
+          <details class="pf-danger">
+            <summary>Akkauntni o'chirish</summary>
+            <p class="pf-note">Bu amalni qaytarib bo'lmaydi: barcha natijalar, sertifikatlar va suhbatlar o'chiriladi.</p>
+            <form class="pf-form" id="pf-form-delete" autocomplete="off">
+              <label class="pf-field"><span>Parolingiz</span><input type="password" name="password" autocomplete="current-password" required></label>
+              <label class="pf-field"><span>Tasdiqlash uchun <b>O'CHIRISH</b> deb yozing</span><input type="text" name="confirm" required></label>
+              <button type="submit" class="btn-danger">Akkauntni butunlay o'chirish</button>
+            </form>
+          </details>
+        </article>
+      </section>
+
+      <!-- ============ SOZLAMALAR — bosganda ochiladigan bo'limlar ============ -->
+
+      <details class="dash-panel dash-accordion" open>
+        <summary>
+          <span class="dash-accordion-summary-text">
+            <h3>Reja va AI limiti</h3>
+            <p class="panel-sub">Joriy tarifingiz va AI suhbat limitidan qancha foydalanganingiz</p>
+          </span>
+          <svg class="dash-accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </summary>
+        <div class="dash-accordion-body">
+          {% if usage.limit is not none %}
+            {% set percent = ((usage.used / usage.limit) * 100) | round if usage.limit else 100 %}
+            <div class="settings-usage-row">
+              <div class="settings-usage-bar-track">
+                <div class="settings-usage-bar-fill {% if percent >= 100 %}is-danger{% elif percent >= 70 %}is-warning{% endif %}" style="width: {{ percent }}%;"></div>
+              </div>
+              <span class="settings-usage-label">{{ usage.used }}/{{ usage.limit }} savol · so'nggi {{ usage.window_hours }} soatda</span>
+            </div>
+          {% else %}
+            <div class="settings-usage-row">
+              <span class="settings-usage-label settings-usage-unlimited">Cheksiz AI suhbat — {{ user.plan|upper }} tarifida limit yo'q</span>
+            </div>
+          {% endif %}
+          <div class="settings-limit-grid">
+            <div class="settings-limit-cell">
+              <div class="settings-limit-value">{{ plan_limits[user.plan].topic_question_count or "Cheksiz" }}</div>
+              <div class="settings-limit-key">savol / mavzu</div>
+            </div>
+            <div class="settings-limit-cell">
+              <div class="settings-limit-value">{{ plan_limits[user.plan].ai_window_hours }} soat</div>
+              <div class="settings-limit-key">AI oyna vaqti</div>
+            </div>
+            <div class="settings-limit-cell">
+              <div class="settings-limit-value">{{ "Ha" if plan_limits[user.plan].full_mock_access else "Yo'q" }}</div>
+              <div class="settings-limit-key">to'liq mock testlar</div>
+            </div>
+          </div>
+          {% if user.plan != "ultra" %}
+          <a href="/upgrade" class="btn-primary" style="margin-top:14px; display:inline-block;">Tarifni yangilash</a>
+          {% endif %}
+        </div>
+      </details>
+
+      {% if stats.by_subject %}
+      <details class="dash-panel dash-accordion" open>
+        <summary>
+          <span class="dash-accordion-summary-text">
+            <h3>Fanlar bo'yicha natijalar</h3>
+            <p class="panel-sub">Har bir fan bo'yicha to'g'rilik foizi</p>
+          </span>
+          <svg class="dash-accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </summary>
+        <div class="dash-accordion-body">
+          <div class="subject-chart">
+            <div class="subject-chart-yaxis">
+              <span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span>
+            </div>
+            <div class="subject-chart-plot">
+              {% for s in subjects %}
+                {% set data = stats.by_subject.get(s.code, {"correct": 0, "total": 0, "count": 0}) %}
+                {% set pct = ((data.correct / data.total) * 100) | round if data.total else 0 %}
+                <div class="subject-chart-col">
+                  <div class="subject-chart-bar-track">
+                    <div class="subject-chart-bar {% if pct >= 70 %}is-good{% elif pct >= 40 %}is-mid{% elif data.total %}is-low{% endif %}" style="height: {{ pct }}%;">
+                      <span class="subject-chart-bar-value">{{ pct }}%</span>
+                    </div>
+                  </div>
+                  <span class="subject-chart-label">{{ s.name }}</span>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </details>
+      {% endif %}
+
+      <details class="dash-panel dash-accordion" open>
+        <summary>
+          <span class="dash-accordion-summary-text">
+            <h3>Test tarixi</h3>
+            <p class="panel-sub">Barcha yechilgan testlaringiz</p>
+          </span>
+          <svg class="dash-accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </summary>
+        <div class="dash-accordion-body">
+          {% if history %}
+            {% for h in history %}
+            {% set score = ((h.correct_count / h.total_count) * 100) | round if h.total_count else 0 %}
+            <div class="quiz-history-item">
+              <div>
+                <div class="quiz-history-topic">{{ h.topic or "Umumiy mavzu" }}</div>
+                <div class="quiz-history-meta">{{ subject_names.get(h.subject, h.subject) }} · {{ h.created_at.strftime("%d.%m.%Y %H:%M") }}</div>
+              </div>
+              <div style="display:flex; align-items:center; gap:14px;">
+                <div class="quiz-history-score {% if score >= 70 %}quiz-score-good{% elif score >= 40 %}quiz-score-mid{% else %}quiz-score-low{% endif %}">
+                  {{ h.correct_count }}/{{ h.total_count }}
+                </div>
+                {% if h.questions_json %}
+                <a href="/quiz/{{ h.id }}/review" class="review-btn">Qayta ko'rish</a>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <p style="color: var(--ink-soft);">Hali test yechilmagan. <a href="/dashboard" style="color: var(--accent-green);">Kabinetga qaytib</a> birinchi testni boshlang.</p>
+          {% endif %}
+        </div>
+      </details>
+
+      {% if certificates %}
+      <details class="dash-panel dash-accordion" open>
+        <summary>
+          <span class="dash-accordion-summary-text">
+            <h3>Sertifikatlarim</h3>
+            <p class="panel-sub">Muvaffaqiyatli yakunlagan testlaringiz uchun berilgan rasmiy sertifikatlar</p>
+          </span>
+          <svg class="dash-accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </summary>
+        <div class="dash-accordion-body">
+          {% for cert in certificates %}
+          <div class="quiz-history-item">
+            <div>
+              <div class="quiz-history-topic">{{ subject_names.get(cert.subject, cert.subject) }} — {{ cert.score_label }}</div>
+              <div class="quiz-history-meta">{{ cert.issued_at.strftime("%d.%m.%Y") }} · ID: {{ cert.verification_id }}</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <a href="/certificate/{{ cert.verification_id }}" class="review-btn">Ko'rish</a>
+              <a href="/certificate/{{ cert.verification_id }}/pdf" class="review-btn">PDF</a>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </details>
+      {% endif %}
+
+      <details class="dash-panel dash-accordion" open>
+        <summary>
+          <span class="dash-accordion-summary-text">
+            <h3>Fan va darajani o'zgartirish</h3>
+            <p class="panel-sub">Istalgan vaqtda asosiy fan yoki qiyinlik darajangizni yangilashingiz mumkin</p>
+          </span>
+          <svg class="dash-accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </summary>
+        <div class="dash-accordion-body">
+          <form method="post" action="/profile/subject" style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
+            <div class="field" style="margin-bottom:0; min-width:200px;">
+              <label for="profile-subject">Fan</label>
+              <select id="profile-subject" name="subject" style="width:100%; padding:12px 14px; border-radius:10px; border:1px solid var(--line); background:var(--bg); color:var(--ink); font-size:0.92rem;">
+                {% for s in subjects %}
+                <option value="{{ s.code }}" {% if s.code == user.subject %}selected{% endif %}>{{ s.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="field" style="margin-bottom:0; min-width:160px;">
+              <label for="profile-level">Daraja</label>
+              <select id="profile-level" name="level" style="width:100%; padding:12px 14px; border-radius:10px; border:1px solid var(--line); background:var(--bg); color:var(--ink); font-size:0.92rem;">
+                {% for l in levels %}
+                <option value="{{ l.code }}" {% if l.code == user.level %}selected{% endif %}>{{ l.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <button type="submit" class="btn-primary" style="padding:12px 24px;">Saqlash</button>
+          </form>
+        </div>
+      </details>
+
+      <details class="dash-panel dash-accordion" open>
+        <summary>
+          <span class="dash-accordion-summary-text">
+            <h3>Rejalar va imtiyozlar</h3>
+            <p class="panel-sub">Har bir tarif nimalarni o'z ichiga oladi</p>
+          </span>
+          <svg class="dash-accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </summary>
+        <div class="dash-accordion-body">
+          <div class="plan-compare-grid">
+
+            <div class="plan-compare-card {% if user.plan == 'free' %}is-current{% endif %}">
+              <div class="plan-compare-head">
+                <span class="plan-badge plan-badge-free">FREE</span>
+                {% if user.plan == 'free' %}<span class="plan-current-tag">Joriy reja</span>{% endif %}
+              </div>
+              <ul>
+                <li>Dastlabki 65 mavzu / fan, mavzu boshiga {{ plan_limits.free.topic_question_count }} ta savol</li>
+                <li>So'nggi {{ plan_limits.free.ai_window_hours }} soatda {{ plan_limits.free.ai_daily }} ta AI savol</li>
+                <li>Fikrlash darajasi: Past / Odatiy / Yuqori</li>
+                <li>Matematika formulalar varag'i (test paytida)</li>
+                <li>Mavzu bo'yicha amaliyot va 5-mavzulik aralash testlar</li>
+              </ul>
+            </div>
+
+            <div class="plan-compare-card {% if user.plan == 'pro' %}is-current{% endif %}">
+              <div class="plan-compare-head">
+                <span class="plan-badge plan-badge-pro">PRO</span>
+                {% if user.plan == 'pro' %}<span class="plan-current-tag">Joriy reja</span>{% endif %}
+              </div>
+              <ul>
+                <li>Dastlabki 100 mavzu / fan, mavzu boshiga {{ plan_limits.pro.topic_question_count }} ta savol</li>
+                <li>So'nggi {{ plan_limits.pro.ai_window_hours }} soatda {{ plan_limits.pro.ai_daily }} ta AI savol</li>
+                <li>Fikrlash darajasi: shu jumladan <strong>Maksimal</strong></li>
+                <li>To'liq DTM/Sertifikat mock testlariga kirish</li>
+                <li>Barcha fanlarda bir xil, kengaytirilgan limitlar</li>
+                <li>Profilda va sertifikatlarda PRO belgisi</li>
+                <li>Ketma-ket 3 oy obuna uzaytirilsa — keyingi oyga chegirma</li>
+              </ul>
+              {% if user.plan == 'free' %}<a href="/upgrade" class="btn-primary plan-compare-cta">Pro'ga o'tish</a>{% endif %}
+            </div>
+
+            <div class="plan-compare-card {% if user.plan == 'ultra' %}is-current{% endif %}">
+              <div class="plan-compare-head">
+                <span class="plan-badge plan-badge-ultra">ULTRA</span>
+                {% if user.plan == 'ultra' %}<span class="plan-current-tag">Joriy reja</span>{% endif %}
+              </div>
+              <ul>
+                <li>Cheksiz mavzu va savollar — barcha fanlar bo'yicha to'liq bank</li>
+                <li>AI suhbatda kunlik/soatlik limit yo'q</li>
+                <li>Fikrlash darajasi: Maksimal + ustuvor javob sifati</li>
+                <li>To'liq DTM/Sertifikat/IELTS mock testlari, cheklovsiz</li>
+                <li>Shaxsiy o'quv rejasi va kengaytirilgan tahlil hisobotlari</li>
+                <li>Profilda va sertifikatlarda ULTRA (oltin) belgisi</li>
+                <li>Yangi funksiyalarga birinchilardan bo'lib kirish</li>
+              </ul>
+              {% if user.plan != 'ultra' %}<a href="/upgrade" class="btn-primary plan-compare-cta">Ultra'ga o'tish</a>{% endif %}
+            </div>
+
+          </div>
+        </div>
+      </details>
+
+    </div>
+  </div>
+
+  {% include "_owl_widget.html" %}
+
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/app.js"></script>
+  <script src="/static/owl-chat.js"></script>
+  <script src="/static/profile.js"></script>
+</body>
+</html>

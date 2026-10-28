@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="LongoUZ — yordam va aloqa.">
+  <title>Yordam — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true">
+
+  <div class="app-shell">
+
+    {% set nav_active = 'support' %}{% include "_app_sidebar.html" %}
+
+    <div class="app-content">
+
+      {% include "_announcement_banner.html" %}
+      <div class="app-topbar">
+        <div>
+          <h1>Yordam</h1>
+          <p>Savol yoki muammoingiz bo'lsa, shu yerdan yozing — admin ko'rib chiqib javob beradi.</p>
+        </div>
+      </div>
+
+      {% if sent %}<div class="form-success">Xabaringiz yuborildi. Admin tez orada javob beradi.</div>{% endif %}
+      {% if error %}<div class="form-error">{{ error }}</div>{% endif %}
+
+      <div class="dash-panel">
+        <h3>Yangi xabar yozish</h3>
+        <form method="post" action="/support" class="admin-question-form">
+          <div class="field">
+            <label for="support_subject">Mavzu (ixtiyoriy)</label>
+            <input type="text" name="subject" id="support_subject" maxlength="200" placeholder="masalan: To'lov bo'yicha savol">
+          </div>
+          <div class="field">
+            <label for="support_body">Xabar matni</label>
+            <textarea name="body" id="support_body" rows="4" maxlength="2000" required
+                      placeholder="Muammoingizni yoki savolingizni shu yerga yozing..."></textarea>
+          </div>
+          <button type="submit" class="btn-secondary">Yuborish</button>
+        </form>
+      </div>
+
+      <div class="dash-panel">
+        <h3>Oldingi xabarlaringiz</h3>
+        {% if messages %}
+        <div class="balance-history-list">
+          {% for m in messages %}
+          <div class="balance-history-row" style="flex-direction:column; align-items:stretch; gap:8px;">
+            <div>
+              <div class="balance-history-amount">{{ m.subject or "(mavzusiz)" }}</div>
+              <div class="balance-history-meta">{{ m.created_at.strftime("%Y-%m-%d %H:%M") }} · {{ "Javob berilgan" if m.replied_at else "Ko'rib chiqilmoqda" }}</div>
+            </div>
+            <p class="panel-sub" style="margin:0;">{{ m.body }}</p>
+            {% if m.admin_reply %}
+            <div style="background:var(--bg-hover); border-radius:10px; padding:10px 14px;">
+              <div class="balance-history-meta" style="margin-bottom:4px;">Admin javobi:</div>
+              <p style="margin:0;">{{ m.admin_reply }}</p>
+            </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="qs-hint" style="margin:0;">Hali xabar yubormagansiz.</p>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+
+  {% include "_owl_widget.html" %}
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

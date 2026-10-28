@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Savollar tekshiruvi — Admin — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/admin.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true">
+  <div class="app-shell">
+    {% include "_admin_sidebar.html" %}
+    <div class="app-content">
+      <div class="app-topbar">
+        <div>
+          <h1>Savollar tekshiruvi</h1>
+          <p>{{ report.checked }} ta savol tekshirildi — {{ report.total_issues }} ta muammo topildi</p>
+        </div>
+      </div>
+      {% include "_admin_qtabs.html" %}
+      <form method="get" class="admin-filter-row">
+        <select name="subject" onchange="this.form.submit()">
+          <option value="">Barcha fanlar</option>
+          {% for s in subjects %}<option value="{{ s.code }}" {{ "selected" if s.code == subject }}>{{ s.name }}</option>{% endfor %}
+        </select>
+        <select name="mode" onchange="this.form.submit()">
+          <option value="">Barcha rejimlar</option>
+          {% for m in modes %}<option value="{{ m.code }}" {{ "selected" if m.code == mode }}>{{ m.name }}</option>{% endfor %}
+        </select>
+        <noscript><button class="btn-secondary" type="submit">Tekshirish</button></noscript>
+      </form>
+      {% if report.kinds %}
+      <div class="admin-filter-row" style="flex-wrap:wrap">
+        {% for k, n in report.kinds.items() %}<span class="achip">{{ k }}: <b>{{ n }}</b></span>{% endfor %}
+      </div>
+      {% else %}
+      <div class="form-success">Muammo topilmadi — barcha savollarda kalit, variantlar va matn to'g'ri.</div>
+      {% endif %}
+      {% if report.issues %}
+      <div class="admin-users-table-wrap">
+        <table class="admin-users-table">
+          <thead><tr><th>ID</th><th>Fan / rejim</th><th>Mavzu</th><th>Savol</th><th>Muammo</th><th></th></tr></thead>
+          <tbody>
+          {% for i in report.issues %}
+            <tr>
+              <td>{{ i.id }}</td>
+              <td>{{ subject_names.get(i.subject, i.subject) }} · {{ i.mode }}</td>
+              <td>{{ i.topic }}</td>
+              <td style="max-width:360px">{{ i.question }}</td>
+              <td><b>{{ i.kind }}</b>{% if i.detail %}<br><small>{{ i.detail }}</small>{% endif %}</td>
+              <td><a href="{{ admin_prefix }}/questions/{{ i.id }}/edit" class="btn-secondary admin-btn-sm">Tuzatish</a></td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% if report.total_issues > report.issues|length %}<p style="color:var(--ink-soft)">Dastlabki {{ report.issues|length }} ta ko'rsatildi; filtr bilan toraytiring.</p>{% endif %}
+      {% endif %}
+    </div>
+  </div>
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Test qo'shish — Admin — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/admin.css">
+  <link rel="stylesheet" href="/static/figure.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true">
+  <div class="app-shell">
+    {% include "_admin_sidebar.html" %}
+    <div class="app-content">
+      <div class="adbar">
+        <a class="abtn" href="{{ admin_prefix }}/topics?subject={{ subject }}&mode={{ mode }}">← Mavzular</a>
+        <div class="grow"><h1>{{ topic }}</h1><small>{{ subject_name }} · {{ mode_name }}</small></div>
+        <a class="abtn" href="{{ admin_prefix }}/topics/questions?subject={{ subject }}&mode={{ mode }}&topic={{ topic|urlencode }}">Savollar ro'yxati <span class="ecount on" id="cnt">0</span></a>
+      </div>
+      {% if created %}<div class="ahello">✓ Mavzu yaratildi. Endi unga test qo'shing: bitta-bitta, chizmali, JSON yoki fayl orqali.</div>{% endif %}
+
+      <div class="mtabs" role="tablist" id="mtabs">
+        <button type="button" data-tab="manual" class="active">1. Bittalab qo'shish</button>
+        <button type="button" data-tab="figure">2. Variantli + chizma</button>
+        <button type="button" data-tab="json">3. JSON formatda</button>
+        <button type="button" data-tab="file">4. Fayl (PDF / ZIP / …)</button>
+      </div>
+
+      <section class="mpane" data-pane="manual figure" id="pane-form">
+        <form class="acard" id="qform" autocomplete="off">
+          <label class="afield">Savol matni
+            <textarea name="question" rows="3" maxlength="2000" placeholder="Savolni yozing…"></textarea>
+          </label>
+          <div class="figsec" hidden style="margin-top:12px">
+            <h3>Savol chizmasi</h3>
+            <div id="fb-q"></div>
+            <label class="afield" style="margin-top:8px;max-width:220px">Chizma kengligi (%)
+              <input type="number" id="fig-w" min="20" max="100" value="100">
+            </label>
+          </div>
+          <h3 style="margin-top:16px">Variantlar <span class="ahint">(to'g'risini belgilang)</span></h3>
+          <div id="opts"></div>
+          <label class="afield">Izoh (ixtiyoriy)
+            <textarea name="explanation" rows="2" maxlength="2000"></textarea>
+          </label>
+          <div class="arow">
+            <label class="fb-check"><input type="checkbox" id="publish" checked> Darhol nashr qilish (hamma ko'radi)</label>
+            <span style="flex:1"></span>
+            <button type="submit" class="abtn primary" id="save-q">Saqlash va yana qo'shish</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="mpane" data-pane="json" id="pane-json" hidden>
+        <div class="acard">
+          <h3>JSON ko'rinishida savollar</h3>
+          <p class="ahint">Massiv yoki <code>{"questions":[…]}</code>. To'g'ri javob: <code>correct_index</code> (0–3) yoki <code>answer</code> ("A"–"D"). Chizma ixtiyoriy: <code>figure</code>.</p>
+          <pre class="codeex" id="json-ex"></pre>
+          <textarea class="jsonbox" id="json-text" placeholder='[{"question": "…", "options": ["A","B","C","D"], "correct_index": 1}]'></textarea>
+          <div class="arow">
+            <input type="file" id="json-file" accept=".json,application/json,.txt">
+            <button type="button" class="abtn" id="json-fill">Namunani qo'yish</button>
+            <label class="fb-check"><input type="checkbox" id="json-pub" checked> Darhol nashr</label>
+            <span style="flex:1"></span>
+            <button type="button" class="abtn primary" id="json-save">Tekshirish va saqlash</button>
+          </div>
+          <p class="ahint" id="json-res"></p>
+        </div>
+      </section>
+
+      <section class="mpane" data-pane="file" id="pane-file" hidden>
+        <div class="acard">
+          <h3>Fayldan import (chizmalar bilan)</h3>
+          <p class="ahint">PDF, Word (.docx), Excel, CSV, TXT, JSON, rasm yoki ZIP. PDF/Word ichidagi chizmalar savol bilan birga olinadi. ZIP ichida <code>1.png</code>, <code>2.png</code> kabi rasmlar mos raqamli savolga biriktiriladi.</p>
+          <label class="dropz" id="dz"><b>Faylni shu yerga tashlang</b><span>yoki bosib tanlang</span>
+            <input type="file" id="imp-files" multiple hidden accept=".pdf,.docx,.xlsx,.csv,.tsv,.txt,.md,.json,.html,.htm,.zip,.png,.jpg,.jpeg,.webp,.gif">
+          </label>
+          <p class="ahint" id="imp-status"></p>
+          <div id="imp-wrap" hidden>
+            <div class="pvhead">
+              <label><input type="checkbox" id="imp-all" checked> Hammasini tanlash</label>
+              <label><input type="checkbox" id="imp-pub" checked> Darhol nashr</label>
+              <button type="button" class="abtn primary" id="imp-save">Mavzuga saqlash</button>
+            </div>
+            <div class="pvlist" id="imp-list"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script id="add-data" type="application/json">{{ {"subject": subject, "mode": mode, "topic": topic, "prefix": admin_prefix, "tab": tab}|tojson }}</script>
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/app.js"></script>
+  <script src="/static/figure.js"></script>
+  <script src="/static/figure-builder.js"></script>
+  <script src="/static/admin-toast.js"></script>
+  <script src="/static/admin-add.js"></script>
+</body>
+</html>

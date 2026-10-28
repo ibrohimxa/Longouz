@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>{{ page_title|default("Savollar banki") }} — Admin — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/admin.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true">
+  <div class="app-shell">
+    {% include "_admin_sidebar.html" %}
+    <div class="app-content">
+
+      <div class="app-topbar">
+        <div>
+          <h1>Mavzular</h1>
+          <p>Mavzuni oching — statistikasini ko'ring, tahrirlang yoki savol qo'shing. Saytdagi har qanday o'zgarish shu yerda ham darhol ko'rinadi.</p>
+        </div>
+        <button type="button" class="btn-primary" id="newtopic-toggle">+ Yangi mavzu</button>
+      </div>
+
+      <form method="post" action="{{ admin_prefix }}/topics/new" class="ntopic" id="newtopic-form" hidden>
+        <h3>Yangi mavzu kiritish</h3>
+        <div class="ntopic-row">
+          <label>Fan
+            <select name="subject" required>{% for s in subjects %}<option value="{{ s.code }}"{{ ' selected' if s.code == subject else '' }}>{{ s.name }}</option>{% endfor %}</select>
+          </label>
+          <label>Rejim
+            <select name="mode" required>{% for m in modes %}<option value="{{ m.code }}"{{ ' selected' if m.code == mode else '' }}>{{ m.name }}</option>{% endfor %}</select>
+          </label>
+          <label class="grow">Mavzu nomi
+            <input type="text" name="name" maxlength="150" required placeholder="Masalan: Koordinatalar tekisligi" autocomplete="off">
+          </label>
+          <button type="submit" class="abtn primary">Saqlash</button>
+        </div>
+        <p class="ehint">Mavzu saqlangach, darhol «Test qo'shish» sahifasi ochiladi.</p>
+      </form>
+
+      {% set qtab = 'topics' %}
+      {% include "_admin_qtabs.html" %}
+      {% if message %}<div class="form-success">{{ message }}</div>{% endif %}
+
+      <div class="astats">
+        <div class="astat"><b>{{ totals.topics }}</b><span>mavzu</span></div>
+        <div class="astat"><b>{{ totals.questions }}</b><span>savol</span></div>
+        <div class="astat ok"><b>{{ totals.active }}</b><span>faol</span></div>
+        <div class="astat warn"><b>{{ totals.hidden }}</b><span>yashirin</span></div>
+      </div>
+
+      <form method="get" action="{{ admin_prefix }}/topics" class="achips-form" id="topics-filter">
+        <div class="achips" role="group" aria-label="Fan">
+          <a href="?mode={{ mode }}&q={{ search|urlencode }}" class="achip{{ ' active' if not subject else '' }}">Barcha fanlar</a>
+          {% for s in subjects %}<a href="?subject={{ s.code }}&mode={{ mode }}&q={{ search|urlencode }}" class="achip{{ ' active' if s.code == subject else '' }}">{{ s.name }}</a>{% endfor %}
+        </div>
+        <div class="achips" role="group" aria-label="Rejim">
+          <a href="?subject={{ subject }}&q={{ search|urlencode }}" class="achip sm{{ ' active' if not mode else '' }}">Barcha rejimlar</a>
+          {% for m in modes %}<a href="?subject={{ subject }}&mode={{ m.code }}&q={{ search|urlencode }}" class="achip sm{{ ' active' if m.code == mode else '' }}">{{ m.name }}</a>{% endfor %}
+        </div>
+        <input type="hidden" name="subject" value="{{ subject }}"><input type="hidden" name="mode" value="{{ mode }}">
+        <input type="search" name="q" value="{{ search }}" placeholder="Mavzu nomidan qidirish…" class="asearch" id="topic-search" autocomplete="off">
+      </form>
+
+      <div class="atopics" id="atopics">
+        {% for t in topics %}
+        <details class="atopic" data-name="{{ t.topic|lower }}">
+          <summary>
+            <span class="atopic-chev" aria-hidden="true"></span>
+            <span class="atopic-name">{{ t.topic }}</span>
+            <span class="atopic-badges">
+              <span class="abadge subj">{{ subject_names.get(t.subject, t.subject) }}</span>
+              <span class="abadge">{{ mode_names.get(t.mode, t.mode) }}</span>
+              {% if t.final %}<span class="abadge fin">Yakuniy</span>{% endif %}
+            </span>
+            <span class="atopic-count">{{ t.total }} <small>savol</small></span>
+          </summary>
+          <div class="atopic-body">
+            <div class="atopic-stats">
+              <div><b>{{ t.total }}</b><span>jami savol</span></div>
+              <div><b class="ok">{{ t.active }}</b><span>faol</span></div>
+              <div><b class="{{ 'warn' if t.hidden else '' }}">{{ t.hidden }}</b><span>yashirin</span></div>
+              <div><b>{{ t.mocks }}</b><span>mock to'plami</span></div>
+              <div><b>{{ t.styled }}</b><span>ko'rinishi o'zgargan</span></div>
+            </div>
+            <div class="abar"><i style="width:{{ (t.active * 100 // t.total) if t.total else 0 }}%"></i></div>
+            <div class="atopic-actions">
+              <a class="abtn primary" href="{{ admin_prefix }}/topics/add?subject={{ t.subject }}&mode={{ t.mode }}&topic={{ t.topic|urlencode }}">+ Test qo'shish</a>
+              <a class="abtn" href="{{ admin_prefix }}/topics/questions?subject={{ t.subject }}&mode={{ t.mode }}&topic={{ t.topic|urlencode }}">Savollar ro'yxati ({{ t.total }})</a>
+              {% if t.total %}<a class="abtn" href="{{ admin_prefix }}/topics/edit?subject={{ t.subject }}&mode={{ t.mode }}&topic={{ t.topic|urlencode }}">Test ko'rinishida tahrirlash</a>{% endif %}
+              <form method="post" action="{{ admin_prefix }}/topics/rename" class="inl-form" data-prompt="Yangi nom:" data-name="{{ t.topic }}">
+                <input type="hidden" name="subject" value="{{ t.subject }}"><input type="hidden" name="mode" value="{{ t.mode }}"><input type="hidden" name="topic" value="{{ t.topic }}"><input type="hidden" name="new_name" value="">
+                <button type="submit" class="abtn ghost">Nomini o'zgartirish</button>
+              </form>
+              <form method="post" action="{{ admin_prefix }}/topics/delete" class="inl-form" data-confirm="«{{ t.topic }}» mavzusi va undagi {{ t.total }} ta savol butunlay o'chiriladi. Davom etasizmi?">
+                <input type="hidden" name="subject" value="{{ t.subject }}"><input type="hidden" name="mode" value="{{ t.mode }}"><input type="hidden" name="topic" value="{{ t.topic }}">
+                <button type="submit" class="abtn danger">O'chirish</button>
+              </form>
+            </div>
+          </div>
+        </details>
+        {% else %}
+        <p class="aempty">Hech narsa topilmadi.</p>
+        {% endfor %}
+      </div>
+
+      {% if total_pages > 1 %}
+      <nav class="apager" aria-label="Sahifalar">
+        {% set base = '?subject=' ~ subject ~ '&mode=' ~ mode ~ '&q=' ~ (search|urlencode) ~ '&page=' %}
+        <a class="abtn{{ ' disabled' if page <= 1 else '' }}" href="{{ base }}{{ page - 1 }}">‹</a>
+        {% for p in range(1, total_pages + 1) %}
+          {% if p == 1 or p == total_pages or (p - page)|abs <= 2 %}<a class="abtn{{ ' primary' if p == page else '' }}" href="{{ base }}{{ p }}">{{ p }}</a>
+          {% elif (p - page)|abs == 3 %}<span class="apager-gap">…</span>{% endif %}
+        {% endfor %}
+        <a class="abtn{{ ' disabled' if page >= total_pages else '' }}" href="{{ base }}{{ page + 1 }}">›</a>
+      </nav>
+      {% endif %}
+    </div>
+  </div>
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/app.js"></script>
+  <script>
+    (function () {
+      var tg = document.getElementById("newtopic-toggle"), nf = document.getElementById("newtopic-form");
+      tg.addEventListener("click", function () { nf.hidden = !nf.hidden; if (!nf.hidden) nf.querySelector("input[name=name]").focus(); });
+      if (location.search.indexOf("new=1") !== -1) tg.click();
+      document.querySelectorAll(".inl-form").forEach(function (f) {
+        f.addEventListener("submit", function (e) {
+          if (f.dataset.confirm && !confirm(f.dataset.confirm)) { e.preventDefault(); return; }
+          if (f.dataset.prompt) {
+            var v = prompt(f.dataset.prompt, f.dataset.name || "");
+            if (!v || !v.trim()) { e.preventDefault(); return; }
+            f.querySelector("input[name=new_name]").value = v.trim();
+          }
+        });
+      });
+    })();
+    (function () {
+      var inp = document.getElementById("topic-search"), rows = document.querySelectorAll(".atopic");
+      inp.addEventListener("input", function () {
+        var q = inp.value.trim().toLowerCase();
+        rows.forEach(function (r) { r.hidden = q && r.getAttribute("data-name").indexOf(q) === -1; });
+      });
+      inp.form.addEventListener("submit", function (e) { e.preventDefault(); });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+{# Tarif sotib olish oynasi — bosh sahifa (mehmon) va /upgrade (a'zo) uchun umumiy.
+   pm_member=True  -> faqat karta ma'lumotlari, POST /upgrade (hisob allaqachon bor)
+   pm_member=False -> mehmon: hisob ma'lumotlari + karta, POST /checkout/register #}
+<div id="pm-overlay" class="pm-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="pm-title">
+  <div class="pm-modal">
+    <button type="button" id="pm-close" class="pm-close" aria-label="Yopish">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+
+    <aside class="pm-left">
+      <div class="pm-brand">
+        <img class="pm-owl" src="/static/logo-owl3d.png" alt="LongoUZ" width="160" height="122">
+        <div class="pm-word" id="pm-title">Longo<b>UZ</b></div>
+      </div>
+      <div class="pm-pill">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5L3 8z"/></svg>
+        <span>Premium</span>
+      </div>
+      <h3 class="pm-lead">Bilim sari bir qadam oldinda!</h3>
+      <p class="pm-sub">LongoUZ <span id="pm-plan-name">Pro</span> – sizning til va fanlardan tayyorlanishingiz uchun eng yaxshi tanlov.</p>
+      <p class="pm-price" id="pm-plan-price">99 000 so'm/oy</p>
+
+      <ul class="pm-checks">
+        <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></i>To'liq mock testlar ochiladi!</li>
+        <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></i>Kengaytirilgan AI repetitor limiti</li>
+        <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></i>Istalgan vaqt bekor qilish mumkin</li>
+      </ul>
+
+      <div class="pm-script" aria-hidden="true">
+        <span>Orzularingizga<br>birga erishamiz!</span>
+        <svg viewBox="0 0 220 30" preserveAspectRatio="none"><path d="M2 26 C60 10 140 6 218 4" fill="none" stroke="#2d6bff" stroke-width="2.4" stroke-linecap="round"/></svg>
+      </div>
+      <svg class="pm-leaves" viewBox="0 0 150 190" aria-hidden="true">
+        <defs><linearGradient id="pmLf" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4aa3ff"/><stop offset="1" stop-color="#0f3fd0"/></linearGradient></defs>
+        <path d="M-6 150 C0 90 35 40 74 8 C80 60 56 120 -6 150Z" fill="url(#pmLf)" opacity=".95"/>
+        <path d="M-6 150 C20 110 44 74 74 8" fill="none" stroke="#0a1f6e" stroke-width="1.5" opacity=".6"/>
+        <path d="M40 196 C44 150 78 124 120 112 C124 150 96 188 40 196Z" fill="url(#pmLf)" opacity=".9"/>
+        <path d="M40 196 C64 160 90 134 120 112" fill="none" stroke="#0a1f6e" stroke-width="1.4" opacity=".6"/>
+      </svg>
+    </aside>
+
+    <section class="pm-right">
+      <div class="pm-tabs">
+        <div class="pm-tab">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.6"/><path d="M2.5 10h19" stroke-width="2.6"/><path d="M14.5 15.2h4" /></svg>
+          To'lov ma'lumotlari
+        </div>
+        <div class="pm-secure">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 10V8a5 5 0 0110 0v2h1a1.5 1.5 0 011.5 1.5v8A1.5 1.5 0 0118 21H6a1.5 1.5 0 01-1.5-1.5v-8A1.5 1.5 0 016 10h1zm2 0h6V8a3 3 0 00-6 0v2z"/></svg>
+          Xavfsiz va himoyalangan
+        </div>
+      </div>
+
+      <form id="pm-form" class="pm-form" method="post" action="{% if pm_member %}/upgrade{% else %}/checkout/register{% endif %}" autocomplete="off">
+        <input type="hidden" name="plan" id="pm-plan-input" value="pro">
+
+        {% if pm_member %}
+        <div class="pm-field">
+          <label for="pm-name"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="7.5" r="4"/><path d="M4 21a8 8 0 0116 0z"/></svg>Karta egasi</label>
+          <div class="pm-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="8" r="3.8"/><path d="M4.5 20.5a7.5 7.5 0 0115 0"/></svg><input type="text" id="pm-name" value="{{ (user.first_name or '') if user else '' }}" placeholder="Ism Familiya" autocomplete="cc-name"></div>
+        </div>
+        {% else %}
+        <div class="pm-field">
+          <label for="pm-name"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="7.5" r="4"/><path d="M4 21a8 8 0 0116 0z"/></svg>Ismingiz</label>
+          <div class="pm-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="8" r="3.8"/><path d="M4.5 20.5a7.5 7.5 0 0115 0"/></svg><input type="text" id="pm-name" name="first_name" placeholder="Ismingizni kiriting" autocomplete="name" required></div>
+        </div>
+        <div class="pm-field">
+          <label for="pm-email"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.5h18a1 1 0 011 1v.6l-10 6.2L2 7.1v-.6a1 1 0 011-1zM2 9.4l10 6.2 10-6.2V18a1 1 0 01-1 1H3a1 1 0 01-1-1V9.4z"/></svg>Email</label>
+          <div class="pm-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.4"/><path d="M3.5 7l8.5 6.2L20.5 7"/></svg><input type="email" id="pm-email" name="email" placeholder="Email manzilingiz" autocomplete="email" required></div>
+        </div>
+        <div class="pm-row">
+          <div class="pm-field">
+            <label for="pm-pass"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 10V8a5 5 0 0110 0v2h1a1.5 1.5 0 011.5 1.5v8A1.5 1.5 0 0118 21H6a1.5 1.5 0 01-1.5-1.5v-8A1.5 1.5 0 016 10h1zm2 0h6V8a3 3 0 00-6 0v2z"/></svg>Parol</label>
+            <div class="pm-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.2"/><path d="M8 10.5V8a4 4 0 018 0v2.5"/></svg><input type="password" id="pm-pass" name="password" placeholder="Parol" minlength="6" autocomplete="new-password" required></div>
+          </div>
+          <div class="pm-field">
+            <label for="pm-pass2"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 10V8a5 5 0 0110 0v2h1a1.5 1.5 0 011.5 1.5v8A1.5 1.5 0 0118 21H6a1.5 1.5 0 01-1.5-1.5v-8A1.5 1.5 0 016 10h1zm2 0h6V8a3 3 0 00-6 0v2z"/></svg>Takrorlang</label>
+            <div class="pm-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.2"/><path d="M8 10.5V8a4 4 0 018 0v2.5"/></svg><input type="password" id="pm-pass2" name="password_confirm" placeholder="Parolni takrorlang" minlength="6" autocomplete="new-password" required></div>
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="pm-card" id="pm-card-face" data-card-type="uzcard" aria-hidden="true">
+          <div class="pm-card-top"><span class="pm-chip"></span><span class="pm-card-brand" id="pm-card-brand">UzCard</span></div>
+          <div class="pm-card-num" id="pm-card-num"><i>••••</i><i>••••</i><i>••••</i><i>••••</i></div>
+          <div class="pm-card-bot">
+            <div><small>KARTA EGASI</small><b id="pm-card-name">TO'LIQ ISM</b></div>
+            <div class="pm-card-exp"><small>AMAL QILADI</small><b id="pm-card-exp">00/YY</b></div>
+          </div>
+        </div>
+
+        <div class="pm-field">
+          <label for="pm-cnum"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 5h16a2 2 0 012 2v1H2V7a2 2 0 012-2zm-2 5h20v7a2 2 0 01-2 2H4a2 2 0 01-2-2v-7zm13 3.5v2h4v-2h-4z"/></svg>Karta raqami</label>
+          <div class="pm-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.4"/><path d="M3 10h18M14.5 14.5H18"/></svg><input type="text" id="pm-cnum" inputmode="numeric" maxlength="19" placeholder="0000 0000 0000 0000" autocomplete="cc-number"></div>
+        </div>
+        <div class="pm-row">
+          <div class="pm-field">
+            <label for="pm-cexp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 2.5a1 1 0 011 1V5h8V3.5a1 1 0 112 0V5h1a2 2 0 012 2v2H3V7a2 2 0 012-2h1V3.5a1 1 0 011-1zM3 10.5h18V19a2 2 0 01-2 2H5a2 2 0 01-2-2v-8.5z"/></svg>Amal muddati</label>
+            <div class="pm-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2.4"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><input type="text" id="pm-cexp" maxlength="5" inputmode="numeric" placeholder="00/YY" autocomplete="cc-exp"></div>
+          </div>
+          <div class="pm-field">
+            <label for="pm-ccvv"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 10V8a5 5 0 0110 0v2h1a1.5 1.5 0 011.5 1.5v8A1.5 1.5 0 0118 21H6a1.5 1.5 0 01-1.5-1.5v-8A1.5 1.5 0 016 10h1zm2 0h6V8a3 3 0 00-6 0v2z"/></svg>CVV</label>
+            <div class="pm-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.2"/><path d="M8 10.5V8a4 4 0 018 0v2.5"/></svg><input type="password" id="pm-ccvv" inputmode="numeric" maxlength="3" placeholder="•••" autocomplete="cc-csc"></div>
+          </div>
+        </div>
+
+        {% if turnstile_active(request) %}
+        <div class="pm-cf">
+          <div class="turnstile-slot" data-sitekey="{{ turnstile_site_key() }}"></div>
+          <p data-turnstile-status class="pm-cf-status"></p>
+        </div>
+        {% endif %}
+
+        <button type="submit" class="pm-submit">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.6"/><path d="M2.5 10h19" stroke-width="2.8"/><path d="M14.5 15.2h4"/></svg>
+          <span>Tarifni tasdiqlash</span>
+          <svg class="pm-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+        <p class="pm-note">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l8 3v6c0 5-3.4 9.3-8 11-4.6-1.7-8-6-8-11V5l8-3zm-1.2 13.2l5.2-5.2-1.4-1.4-3.8 3.8-1.6-1.6-1.4 1.4 3 3z"/></svg>
+          <span>To'lov tizimi hali ulanmagan — hozircha tarif shu tugma bilan bepul va darhol faollashadi.{% if not pm_member %} Hisob tarif bilan birga yaratiladi.{% endif %}</span>
+        </p>
+      </form>
+    </section>
+  </div>
+</div>

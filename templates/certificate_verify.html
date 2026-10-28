@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="LongoUZ sertifikatini tekshirish.">
+  <title>Sertifikatni tekshirish — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="false">
+
+  <header class="site-header">
+    <a href="/" class="brand">
+      {% include "_brandmark.html" %}
+    </a>
+    <nav class="site-nav">
+      {% if is_owner and quiz_log_id %}
+      <a href="/quiz/{{ quiz_log_id }}/review" class="cert-back-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Test natijasiga qaytish
+      </a>
+      {% elif is_owner %}
+      <a href="/profile" class="cert-back-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Kabinetga qaytish
+      </a>
+      {% else %}
+      <a href="/">Bosh sahifa</a>
+      {% endif %}
+    </nav>
+  </header>
+
+  <main>
+    <div class="certificate-verify-wrap">
+      {% if found %}
+      <div class="certificate-verify-card is-valid">
+        <span class="certificate-badge">✓ Haqiqiy sertifikat</span>
+      </div>
+
+      <!-- HAQIQIY SERTIFIKAT KO'RINISHI — saytning o'zida, PDF'ga o'xshab -->
+      <div class="cert-sheet">
+        <div class="cert-sheet-inner">
+          <div class="cert-photo-frame" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+          </div>
+          <p class="cert-sheet-kicker">LONGOUZ TA'LIM PLATFORMASI</p>
+          <p class="cert-sheet-kicker-sub">(norasmiy, onlayn platforma sertifikati — davlat hujjati emas)</p>
+          <h1 class="cert-sheet-title">Umumta'lim fanini bilish darajasi</h1>
+          <p class="cert-sheet-subtitle">to'g'risida sertifikat</p>
+
+          <div class="cert-sheet-fields">
+            <div><span>Sertifikat raqami:</span><strong>LU{{ cert.verification_id }}</strong></div>
+            <div><span>Talabaning ID raqami:</span><strong>{{ student_id }}</strong></div>
+            <div><span>F.I.Sh.:</span><strong>{{ owner_name }}</strong></div>
+            <div><span>Test fani:</span><strong>{{ subject_name }}</strong></div>
+            <div><span>Test turi:</span><strong>{{ mode_name }}</strong></div>
+            <div><span>Umumiy to'plagan ball:</span><strong>{{ cert.score_label }}</strong></div>
+            <div><span>To'g'ri javoblar soni:</span><strong>{{ cert.correct_count }}/{{ cert.total_count }}</strong></div>
+            <div><span>Umumiy ball nisbiy foizi:</span><strong>{{ cert.percent }}%</strong></div>
+          </div>
+
+          {% if topic_breakdown %}
+          <div class="cert-sheet-topics">
+            <p class="cert-sheet-topics-title">Bo'limlar bo'yicha natijalari</p>
+            {% for item in topic_breakdown[:6] %}
+            <div class="cert-sheet-topics-row"><span>{{ item.topic }}</span><span>{{ item.correct }}/{{ item.total }}</span></div>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          {% if answer_grid %}
+          <div class="cert-sheet-answer-grid">
+            <p class="cert-sheet-answer-grid-title">Javoblar xulosasi</p>
+            <div class="cert-sheet-answer-grid-list">
+              {% for item in answer_grid %}
+              <span class="{{ 'is-correct' if item.is_correct else 'is-wrong' }}">{{ item.num }}. {{ item.letter }}</span>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+          <div class="cert-sheet-footer">
+            <div>
+              <p>Berilgan sana: {{ cert.issued_at.strftime("%d.%m.%Y") }}</p>
+              <p>Tekshirish ID: {{ cert.verification_id }}</p>
+            </div>
+            <div class="cert-sheet-signature">
+              <div class="cert-sheet-sign-line"></div>
+              <p>Direktor</p>
+            </div>
+          </div>
+
+          <p class="cert-sheet-disclaimer">Ushbu sertifikat LongoUZ ta'lim platformasida o'tkazilgan onlayn test natijasi asosida avtomatik berilgan — rasmiy davlat hujjati emas.</p>
+        </div>
+      </div>
+
+      {% if is_owner %}
+      <div class="quiz-result-actions" style="margin-top:24px; justify-content:center;">
+        <a href="/certificate/{{ cert.verification_id }}/pdf" class="btn-primary">PDF yuklab olish</a>
+      </div>
+      {% endif %}
+
+      {% else %}
+      <div class="certificate-verify-card">
+        <span class="certificate-badge" style="color: var(--error); background: transparent; border: 1px solid var(--error);">✕ Topilmadi</span>
+        <h1>Sertifikat topilmadi</h1>
+        <p>"{{ verification_id }}" ID'li sertifikat tizimda mavjud emas. ID'ni tekshirib qayta urinib ko'ring.</p>
+      </div>
+      {% endif %}
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; LongoUZ — Barcha huquqlar himoyalangan.</p>
+  </footer>
+  <script src="/static/devtools-guard.js"></script>
+</body>
+</html>

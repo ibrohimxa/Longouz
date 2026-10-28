@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Foydalanuvchi — Admin — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/admin-dash.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true">
+  {% from "_macros.html" import admin_pagination %}
+
+  <div class="app-shell">
+    {% include "_admin_sidebar.html" %}
+
+    <div class="app-content">
+
+      <div class="app-topbar">
+        <div>
+          <h1>{{ user.first_name or user.email }}</h1>
+          <p>{{ user.email }} · ID {{ user.id }} · <a href="{{ admin_prefix }}/users">← Ro'yxatga qaytish</a></p>
+        </div>
+      </div>
+
+      <div class="admin-stat-grid">
+        <div class="admin-stat-card"><span class="admin-stat-value">{{ user.plan|upper }}</span><span class="admin-stat-label">Tarif</span></div>
+        <div class="admin-stat-card"><span class="admin-stat-value">{{ stats.tests }}</span><span class="admin-stat-label">Yechilgan testlar</span></div>
+        <div class="admin-stat-card"><span class="admin-stat-value">{{ stats.percent }}%</span><span class="admin-stat-label">O'rtacha natija</span></div>
+        <div class="admin-stat-card"><span class="admin-stat-value">{{ user.streak_days }}</span><span class="admin-stat-label">Ketma-ket kun</span></div>
+        <div class="admin-stat-card"><span class="admin-stat-value">{{ subject_names.get(user.subject, user.subject or "—") }}</span><span class="admin-stat-label">Tanlangan fan</span></div>
+        <div class="admin-stat-card"><span class="admin-stat-value">{{ user.joined_at.strftime("%d.%m.%Y") if user.joined_at else "—" }}</span><span class="admin-stat-label">Ro'yxatdan o'tgan</span></div>
+      </div>
+
+      <form method="post" action="{{ admin_prefix }}/users/{{ user.id }}/plan" class="admin-search-row" style="margin-top:18px">
+        <select name="plan">
+          <option value="free" {{ "selected" if user.plan == "free" }}>Bepul</option>
+          <option value="pro" {{ "selected" if user.plan == "pro" }}>Pro</option>
+          <option value="ultra" {{ "selected" if user.plan == "ultra" }}>Ultra</option>
+        </select>
+        <button type="submit" class="btn-secondary">Tarifni saqlash</button>
+      </form>
+
+      <h2 style="margin:22px 0 10px">Oxirgi testlar</h2>
+      <div class="admin-users-table-wrap">
+        <table class="admin-users-table">
+          <thead><tr><th>Sana</th><th>Fan</th><th>Mavzu</th><th>Rejim</th><th>Natija</th><th>Vaqt</th></tr></thead>
+          <tbody>
+            {% for l in logs %}
+            <tr>
+              <td>{{ l.created_at.strftime("%d.%m.%Y %H:%M") }}</td>
+              <td>{{ subject_names.get(l.subject, l.subject) }}</td>
+              <td>{{ l.topic or "—" }}</td>
+              <td>{{ l.mode }}</td>
+              <td>{{ l.correct_count }}/{{ l.total_count }} {{ l.score_label }}</td>
+              <td>{{ (l.time_spent_seconds // 60) }} daq</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6" style="text-align:center;color:var(--ink-soft);padding:24px">Hali test yechilmagan.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="LongoUZ — IELTS Speaking mashqi.">
+  <title>{{ topic.title_uz }} — Speaking — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true">
+
+  <div class="app-shell">
+    {% set nav_active = 'quiz' %}{% include "_app_sidebar.html" %}
+
+    <div class="app-content">
+      {% include "_announcement_banner.html" %}
+      <div class="app-topbar">
+        <div>
+          <h1>{{ topic.title_uz }}</h1>
+          <p>IELTS Speaking Part {{ topic.part }} — savolni tinglang va ovozli yoki yozma javob bering</p>
+        </div>
+        <a href="/ielts/speaking" class="btn-secondary">&larr; Mavzular</a>
+      </div>
+
+      <div class="dash-panel" id="speaking-practice-panel">
+        <p class="qs-hint"><span id="q-progress"></span></p>
+        <p id="question-text" style="font-size:1.15rem; font-weight:600; line-height:1.5; margin:10px 0 18px;"></p>
+
+        <div class="admin-form-actions" style="margin-bottom:16px;">
+          <button type="button" class="btn-secondary" id="play-question-btn">🔊 Savolni tinglash</button>
+          <button type="button" class="btn-secondary" id="record-btn">🎤 Gapirish (ovoz orqali)</button>
+        </div>
+
+        <textarea id="answer-input" rows="6" style="width:100%; font-family:inherit; font-size:0.95rem; padding:12px; border-radius:10px; border:1px solid var(--border-color, rgba(120,120,120,0.25)); background:var(--bg-panel, transparent); color:inherit;" placeholder="Javobingizni shu yerga yozing (yoki yuqoridagi mikrofon tugmasi bilan gapiring)..."></textarea>
+        <p class="qs-hint" id="record-status" style="margin-top:6px;"></p>
+
+        <div class="admin-form-actions" style="margin-top:14px;">
+          <button type="button" class="btn-primary" id="next-btn">Keyingisi</button>
+        </div>
+        <div id="speaking-error" class="form-error" style="display:none; margin-top:12px;"></div>
+      </div>
+
+      <div class="dash-panel qs-hidden" style="margin-top:20px;" id="speaking-result-panel">
+        <h3>Natija</h3>
+        <p style="font-size:1.4rem; font-weight:700;">Band: <span id="result-band"></span></p>
+        <p id="result-feedback" style="margin-top:8px;"></p>
+        <div id="result-strengths" style="margin-top:14px;"></div>
+        <div id="result-improvements" style="margin-top:14px;"></div>
+        <div class="admin-form-actions" style="margin-top:18px;">
+          <a href="/ielts/speaking" class="btn-secondary">Boshqa mavzu</a>
+          <a href="/ielts/history" class="btn-primary">Tarixni ko'rish</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/limit-modal.js"></script>
+  <script>
+    const TOPIC_ID = {{ topic.id | tojson }};
+    const QUESTIONS = {{ topic.questions | tojson }};
+    let qIndex = 0;
+    const collected = [];
+    let currentAudio = null;
+    let recognition = null;
+    let isRecording = false;
+
+    const questionText = document.getElementById("question-text");
+    const qProgress = document.getElementById("q-progress");
+    const answerInput = document.getElementById("answer-input");
+    const nextBtn = document.getElementById("next-btn");
+    const playBtn = document.getElementById("play-question-btn");
+    const recordBtn = document.getElementById("record-btn");
+    const recordStatus = document.getElementById("record-status");
+    const errorBox = document.getElementById("speaking-error");
+
+    function renderQuestion() {
+      questionText.textContent = QUESTIONS[qIndex];
+      qProgress.textContent = `Savol ${qIndex + 1} / ${QUESTIONS.length}`;
+      answerInput.value = "";
+      nextBtn.textContent = qIndex === QUESTIONS.length - 1 ? "Yakunlash" : "Keyingisi";
+      errorBox.style.display = "none";
+    }
+    renderQuestion();
+
+    // --- Savolni ovozli o'qish (server TTS, ingliz ovozi; ishlamasa brauzer ovoziga o'tadi) ---
+    playBtn.addEventListener("click", async () => {
+      const text = QUESTIONS[qIndex];
+      playBtn.disabled = true;
+      playBtn.textContent = "Yuklanmoqda...";
+      try {
+        const res = await fetch("/api/tts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: text, lang: "en" }),
+        });
+        if (!res.ok) throw new Error("tts failed");
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        if (currentAudio) currentAudio.pause();
+        currentAudio = new Audio(url);
+        await currentAudio.play();
+      } catch (e) {
+        // Zaxira: brauzerning o'z ovozi (ingliz tilida)
+        try {
+          const utter = new SpeechSynthesisUtterance(text);
+          utter.lang = "en-US";
+          speechSynthesis.speak(utter);
+        } catch (e2) { /* ovoz umuman mavjud emas — jim o'tkaziladi */ }
+      } finally {
+        playBtn.disabled = false;
+        playBtn.textContent = "🔊 Savolni tinglash";
+      }
+    });
+
+    // --- Ovoz orqali javob berish (Web Speech API mavjud bo'lsa) ---
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      recordBtn.style.display = "none";
+      recordStatus.textContent = "Bu brauzerda ovozli kiritish mavjud emas — javobingizni yozib kiriting.";
+    } else {
+      recognition = new SpeechRecognition();
+      recognition.lang = "en-US";
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        answerInput.value = (answerInput.value + " " + transcript).trim();
+      };
+      recognition.onerror = () => {
+        recordStatus.textContent = "Ovozni tanib bo'lmadi — qayta urinib ko'ring yoki yozib kiriting.";
+        isRecording = false;
+        recordBtn.textContent = "🎤 Gapirish (ovoz orqali)";
+      };
+      recognition.onend = () => {
+        isRecording = false;
+        recordBtn.textContent = "🎤 Gapirish (ovoz orqali)";
+        recordStatus.textContent = "";
+      };
+
+      recordBtn.addEventListener("click", () => {
+        if (isRecording) {
+          recognition.stop();
+          return;
+        }
+        isRecording = true;
+        recordBtn.textContent = "⏹ To'xtatish";
+        recordStatus.textContent = "Tinglanmoqda... gapiring.";
+        try {
+          recognition.start();
+        } catch (e) {
+          isRecording = false;
+          recordBtn.textContent = "🎤 Gapirish (ovoz orqali)";
+          recordStatus.textContent = "Mikrofonga ruxsat berilmadi.";
+        }
+      });
+    }
+
+    nextBtn.addEventListener("click", async () => {
+      const answer = answerInput.value.trim();
+      if (!answer) {
+        errorBox.textContent = "Javob bo'sh bo'lishi mumkin emas.";
+        errorBox.style.display = "block";
+        return;
+      }
+      collected.push({ question: QUESTIONS[qIndex], answer: answer });
+
+      if (qIndex < QUESTIONS.length - 1) {
+        qIndex += 1;
+        renderQuestion();
+        return;
+      }
+
+      // --- Yakunlash: barcha javoblarni yuborish ---
+      nextBtn.disabled = true;
+      nextBtn.textContent = "Baholanmoqda...";
+      try {
+        const res = await fetch("/api/ielts/speaking/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ topic_id: TOPIC_ID, answers: collected }),
+        });
+        const data = await res.json();
+        if (res.status === 402) {
+          showLimitModal(data);
+          nextBtn.disabled = false;
+          nextBtn.textContent = "Yakunlash";
+          return;
+        }
+        if (!res.ok) {
+          errorBox.textContent = data.detail || "Xatolik yuz berdi. Qayta urinib ko'ring.";
+          errorBox.style.display = "block";
+          nextBtn.disabled = false;
+          nextBtn.textContent = "Yakunlash";
+          return;
+        }
+        showResult(data);
+      } catch (e) {
+        errorBox.textContent = "Internetga ulanishda muammo. Qayta urinib ko'ring.";
+        errorBox.style.display = "block";
+        nextBtn.disabled = false;
+        nextBtn.textContent = "Yakunlash";
+      }
+    });
+
+    function showResult(data) {
+      document.getElementById("speaking-practice-panel").classList.add("qs-hidden");
+      const panel = document.getElementById("speaking-result-panel");
+      panel.classList.remove("qs-hidden");
+      document.getElementById("result-band").textContent = data.band || "-";
+      document.getElementById("result-feedback").textContent = data.feedback || "";
+      const strengthsEl = document.getElementById("result-strengths");
+      if (data.strengths && data.strengths.length) {
+        strengthsEl.innerHTML = "<strong>Kuchli tomonlar:</strong><ul>" +
+          data.strengths.map((s) => `<li>${s}</li>`).join("") + "</ul>";
+      }
+      const improvementsEl = document.getElementById("result-improvements");
+      if (data.improvements && data.improvements.length) {
+        improvementsEl.innerHTML = "<strong>Yaxshilash kerak:</strong><ul>" +
+          data.improvements.map((s) => `<li>${s}</li>`).join("") + "</ul>";
+      }
+    }
+  </script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

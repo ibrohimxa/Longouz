@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Savollar ro'yxati — Admin — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/admin.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true">
+  <div class="app-shell">
+    {% include "_admin_sidebar.html" %}
+    <div class="app-content">
+      <div class="adbar">
+        <a class="abtn" href="{{ admin_prefix }}/topics?subject={{ subject }}&mode={{ mode }}">← Mavzular</a>
+        <div class="grow"><h1>{{ topic }}</h1><small>{{ subject_name }} · {{ mode_name }} · <span id="stat"></span></small></div>
+        <a class="abtn primary" href="{{ admin_prefix }}/topics/add?subject={{ subject }}&mode={{ mode }}&topic={{ topic|urlencode }}">+ Test qo'shish</a>
+      </div>
+      <div class="arow" style="margin:0 0 12px">
+        <input type="search" id="qsearch" class="asearch" placeholder="Savol ichidan qidirish…" autocomplete="off">
+        <div class="achips" id="qfilter">
+          <button type="button" class="achip active" data-f="all">Hammasi</button>
+          <button type="button" class="achip" data-f="on">Nashrda</button>
+          <button type="button" class="achip" data-f="off">Yopiq</button>
+        </div>
+      </div>
+      <div class="qlist" id="qlist"></div>
+      <nav class="apager" id="pager"></nav>
+    </div>
+  </div>
+  <script id="list-data" type="application/json">{{ payload|tojson }}</script>
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/app.js"></script>
+  <script src="/static/admin-toast.js"></script>
+  <script src="/static/admin-qlist.js"></script>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="LongoUZ — IELTS Writing mashqi.">
+  <title>{{ topic.title_uz }} — Writing — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true">
+
+  <div class="app-shell">
+    {% set nav_active = 'quiz' %}{% include "_app_sidebar.html" %}
+
+    <div class="app-content">
+      {% include "_announcement_banner.html" %}
+      <div class="app-topbar">
+        <div>
+          <h1>{{ topic.title_uz }}</h1>
+          <p>IELTS Writing Task 2</p>
+        </div>
+        <a href="/ielts/writing" class="btn-secondary">&larr; Mavzular</a>
+      </div>
+
+      <div class="dash-panel">
+        <h3>Topshiriq</h3>
+        <p style="font-size:1rem; line-height:1.6;">{{ topic.prompt_en }}</p>
+      </div>
+
+      <div class="dash-panel" style="margin-top:20px;" id="writing-form-panel">
+        <h3>Inshoyingiz</h3>
+        <p class="panel-sub">Kamida 20 so'z, ingliz tilida yozing. Tayyor bo'lgach "Baholashga yuborish" tugmasini bosing.</p>
+        <textarea id="essay-input" rows="14" style="width:100%; font-family:inherit; font-size:0.95rem; padding:12px; border-radius:10px; border:1px solid var(--border-color, rgba(120,120,120,0.25)); background:var(--bg-panel, transparent); color:inherit;" placeholder="Start writing your essay here..."></textarea>
+        <p class="qs-hint" style="margin-top:6px;"><span id="word-count">0</span> so'z</p>
+        <div class="admin-form-actions">
+          <button type="button" class="btn-primary" id="submit-essay-btn">Baholashga yuborish</button>
+        </div>
+        <div id="writing-error" class="form-error" style="display:none; margin-top:12px;"></div>
+      </div>
+
+      <div class="dash-panel qs-hidden" style="margin-top:20px;" id="writing-result-panel">
+        <h3>Natija</h3>
+        <p style="font-size:1.4rem; font-weight:700;">Band: <span id="result-band"></span></p>
+        <p id="result-feedback" style="margin-top:8px;"></p>
+        <div id="result-strengths" style="margin-top:14px;"></div>
+        <div id="result-improvements" style="margin-top:14px;"></div>
+        <div class="admin-form-actions" style="margin-top:18px;">
+          <a href="/ielts/writing" class="btn-secondary">Boshqa mavzu</a>
+          <a href="/ielts/history" class="btn-primary">Tarixni ko'rish</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/limit-modal.js"></script>
+  <script>
+    const TOPIC_ID = {{ topic.id | tojson }};
+    const essayInput = document.getElementById("essay-input");
+    const wordCount = document.getElementById("word-count");
+    const submitBtn = document.getElementById("submit-essay-btn");
+    const errorBox = document.getElementById("writing-error");
+
+    essayInput.addEventListener("input", () => {
+      const words = essayInput.value.trim().split(/\s+/).filter(Boolean);
+      wordCount.textContent = words.length;
+    });
+
+    submitBtn.addEventListener("click", async () => {
+      const essay = essayInput.value.trim();
+      errorBox.style.display = "none";
+      if (essay.split(/\s+/).filter(Boolean).length < 20) {
+        errorBox.textContent = "Insho juda qisqa — kamida 20 so'z yozing.";
+        errorBox.style.display = "block";
+        return;
+      }
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Baholanmoqda...";
+      try {
+        const res = await fetch("/api/ielts/writing/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ topic_id: TOPIC_ID, essay: essay }),
+        });
+        const data = await res.json();
+        if (res.status === 402) {
+          showLimitModal(data);
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Baholashga yuborish";
+          return;
+        }
+        if (!res.ok) {
+          errorBox.textContent = data.detail || "Xatolik yuz berdi. Qayta urinib ko'ring.";
+          errorBox.style.display = "block";
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Baholashga yuborish";
+          return;
+        }
+        showResult(data);
+      } catch (e) {
+        errorBox.textContent = "Internetga ulanishda muammo. Qayta urinib ko'ring.";
+        errorBox.style.display = "block";
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Baholashga yuborish";
+      }
+    });
+
+    function showResult(data) {
+      document.getElementById("writing-form-panel").classList.add("qs-hidden");
+      const panel = document.getElementById("writing-result-panel");
+      panel.classList.remove("qs-hidden");
+      document.getElementById("result-band").textContent = data.band || "-";
+      document.getElementById("result-feedback").textContent = data.feedback || "";
+      const strengthsEl = document.getElementById("result-strengths");
+      if (data.strengths && data.strengths.length) {
+        strengthsEl.innerHTML = "<strong>Kuchli tomonlar:</strong><ul>" +
+          data.strengths.map((s) => `<li>${s}</li>`).join("") + "</ul>";
+      }
+      const improvementsEl = document.getElementById("result-improvements");
+      if (data.improvements && data.improvements.length) {
+        improvementsEl.innerHTML = "<strong>Yaxshilash kerak:</strong><ul>" +
+          data.improvements.map((s) => `<li>${s}</li>`).join("") + "</ul>";
+      }
+    }
+  </script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

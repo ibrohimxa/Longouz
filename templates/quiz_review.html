@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test natijasi — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/figure.css">
+  <link rel="stylesheet" href="/static/exam.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true">
+
+  <div class="app-shell">
+
+    {% set nav_active = 'quiz' %}{% include "_app_sidebar.html" %}
+
+    <div class="app-content">
+      {% include "_announcement_banner.html" %}
+      <div class="app-topbar">
+        <div>
+          <h1>{{ quiz.topic or "Test natijasi" }}</h1>
+          <p>{{ subject_name }} · {{ quiz.correct_count }}/{{ quiz.total_count }} to'g'ri · {{ quiz.created_at.strftime("%d.%m.%Y %H:%M") }}</p>
+        </div>
+        <a href="/profile" class="plan-badge" style="color: var(--accent-green);">Profilga qaytish</a>
+      </div>
+
+      {% if certificate %}
+      <div class="quiz-cert-box" style="margin-bottom:20px; text-align:left; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+        <div>
+          <strong>Bu test uchun rasmiy sertifikat bor</strong>
+          <p style="margin:4px 0 0; color:var(--ink-soft); font-size:0.88rem;">{{ certificate.score_label }} · Tekshirish ID: {{ certificate.verification_id }}</p>
+        </div>
+        <div class="quiz-cert-actions" style="margin:0;">
+          <a href="/certificate/{{ certificate.verification_id }}" class="btn-secondary">Sertifikatni ko'rish</a>
+          <a href="/certificate/{{ certificate.verification_id }}/pdf" class="btn-primary">PDF yuklab olish</a>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if questions %}
+        <button type="button" id="ai-discuss-all-btn" class="btn-primary" style="margin-bottom:20px;">
+          Xatolarni AI bilan muhokama qilish
+        </button>
+
+        {% for q in questions %}
+        {% set user_idx = q.user_index if q.user_index is defined else None %}
+        {% set is_open = q.qtype == 'open' %}
+        {% set is_wrong = (is_open and not q.is_correct) or (not is_open and user_idx is not none and user_idx != q.correct_index) %}
+        <div class="dash-panel">
+          {% if q.difficulty or q.section or is_open %}
+          <div class="review-meta">
+            {% if q.section %}<span>{{ q.section }}</span>{% endif %}
+            {% if q.difficulty %}<span>{{ {1:"Oson",2:"O'rta",3:"Qiyin"}.get(q.difficulty, "") }}</span>{% endif %}
+            {% if is_open %}<span>Ochiq savol</span>{% endif %}
+          </div>
+          {% endif %}
+          <h3>{{ loop.index }}. {{ q.question }}</h3>
+          {% if q.figure and q.figure.q %}<div class="quiz-qfig" data-fig='{{ q.figure.q|tojson|forceescape }}'></div>{% endif %}
+          {% if is_open %}
+          <div style="margin-top:14px;">
+            <div class="review-open-answer {{ 'ok' if q.is_correct else 'bad' }}">
+              Sizning javobingiz: <strong>{{ q.user_text if q.user_text else "— yozilmagan —" }}</strong>
+            </div>
+            {% if not q.is_correct %}
+            <div class="review-open-answer ok">To'g'ri javob: <strong>{{ (q.accept or [])[0] if q.accept else "" }}</strong>
+              {% if q.accept and q.accept|length > 1 %}<span style="color:var(--ink-soft);"> (qabul qilinadi: {{ q.accept|join(", ") }})</span>{% endif %}
+            </div>
+            {% endif %}
+          </div>
+          {% endif %}
+          <div style="display:flex; flex-direction:column; gap:8px; margin-top:14px;">
+            {% for opt in (q.options if not is_open else []) %}
+            <div style="padding:12px 16px; border-radius:8px; border:1px solid var(--line); color: var(--ink);
+                        {% if loop.index0 == q.correct_index %}background:rgba(47,191,131,0.1); border-color:var(--accent-green);
+                        {% elif user_idx is not none and loop.index0 == user_idx %}background:rgba(248,81,73,0.1); border-color:var(--error);{% endif %}">
+              {{ opt }}
+              {% if q.figure and q.figure.o and q.figure.o[loop.index0] %}<div class="quiz-optfig" data-fig='{{ q.figure.o[loop.index0]|tojson|forceescape }}'></div>{% endif %}
+              {% if loop.index0 == q.correct_index %}<strong style="color: var(--accent-green);"> — to'g'ri javob</strong>{% endif %}
+              {% if user_idx is not none and loop.index0 == user_idx and loop.index0 != q.correct_index %}<strong style="color: var(--error);"> — sizning javobingiz</strong>{% endif %}
+            </div>
+            {% endfor %}
+          </div>
+          {% if q.explanation %}
+          <p style="margin-top:14px; color: var(--ink-soft); font-size:0.9rem;">{{ q.explanation }}</p>
+          {% endif %}
+          <button type="button" class="btn-secondary ai-ask-question-btn" style="margin-top:14px;"
+                  data-question="{{ q.question }}"
+                  data-correct="{{ (q.accept[0] if q.accept else '') if is_open else q.options[q.correct_index] }}"
+                  {% if is_wrong and is_open %}data-user-answer="{{ q.user_text or 'javob yozmadim' }}"{% elif is_wrong %}data-user-answer="{{ q.options[user_idx] }}"{% endif %}>
+            {% if is_wrong %}Nega xato qildim — AI'dan so'rash{% else %}Bu savol haqida AI'dan so'rash{% endif %}
+          </button>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p style="color: var(--ink-soft);">Bu test uchun batafsil ma'lumot saqlanmagan.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  {% include "_owl_widget.html" %}
+
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/app.js"></script>
+  <script src="/static/owl-chat.js"></script>
+  <script src="/static/figure.js"></script>
+  <script>
+    // ---------- Test yaxshi natija bilan tugaganda kichik bayram animatsiyasi ----------
+    (function () {
+      var correct = {{ quiz.correct_count or 0 }};
+      var total = {{ quiz.total_count or 0 }};
+      var percent = total ? Math.round((correct / total) * 100) : 0;
+      if (percent < 60) return; // past natijada bayram qilib "masxara" qilib qo'ymaslik uchun
+
+      var overlay = document.createElement("div");
+      overlay.className = "review-party-overlay";
+
+      var trophy = document.createElement("div");
+      trophy.className = "review-party-trophy";
+      trophy.textContent = percent === 100 ? "🏆" : "🎉"; // 🏆 yoki 🎉
+      overlay.appendChild(trophy);
+
+      var colors = ["#2fbf83", "#ffb347", "#4dabf7", "#f85149", "#a78bfa"];
+      for (var i = 0; i < 28; i++) {
+        var piece = document.createElement("span");
+        piece.className = "review-party-piece";
+        piece.style.left = (Math.random() * 100) + "vw";
+        piece.style.background = colors[i % colors.length];
+        piece.style.animationDelay = (Math.random() * 0.4) + "s";
+        piece.style.animationDuration = (1.8 + Math.random() * 1.2) + "s";
+        overlay.appendChild(piece);
+      }
+
+      document.body.appendChild(overlay);
+      setTimeout(function () { overlay.remove(); }, 3200);
+    })();
+
+    (function () {
+      if (!window.LZFigure) return;
+      document.querySelectorAll("[data-fig]").forEach(function (h) {
+        try { h.appendChild(window.LZFigure.render(JSON.parse(h.getAttribute("data-fig")))); } catch (e) {}
+      });
+    })();
+
+    (function () {
+      var subjectName = {{ subject_name|tojson }};
+
+      document.querySelectorAll(".ai-ask-question-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var q = btn.dataset.question;
+          var correct = btn.dataset.correct;
+          var userAnswer = btn.dataset.userAnswer;
+          var prompt;
+          if (userAnswer) {
+            prompt = subjectName + " fanidan bu savolda men xato qildim: \"" + q + "\". " +
+              "Men \"" + userAnswer + "\" deb javob berdim, lekin to'g'ri javob \"" + correct + "\" ekan. " +
+              "Nega mening javobim xato ekanini va to'g'ri javobga qanday kelish kerakligini tushuntirib bering.";
+          } else {
+            prompt = subjectName + " fanidan bu savolni chuqurroq tushuntirib bering: \"" + q + "\" " +
+              "(to'g'ri javob: \"" + correct + "\").";
+          }
+          if (window.LongoUZChat) window.LongoUZChat.ask(prompt);
+        });
+      });
+
+      var discussAllBtn = document.getElementById("ai-discuss-all-btn");
+      if (discussAllBtn) {
+        discussAllBtn.addEventListener("click", function () {
+          var wrongTexts = [];
+          document.querySelectorAll(".ai-ask-question-btn[data-user-answer]").forEach(function (btn) {
+            wrongTexts.push("\"" + btn.dataset.question + "\" (men \"" + btn.dataset.userAnswer + "\" dedim, to'g'risi \"" + btn.dataset.correct + "\")");
+          });
+          var prompt;
+          if (wrongTexts.length) {
+            prompt = subjectName + " fanidan yechgan testimda quyidagi savollarda xato qildim: " +
+              wrongTexts.join("; ") + ". Har birini qisqacha tushuntirib, xatolarim naqadar tipik ekanini ayting.";
+          } else {
+            prompt = subjectName + " fanidan yechgan testimda barcha savollarga to'g'ri javob berdim — " +
+              "keyingi bosqichda nimalarga e'tibor qaratsam, bilimimni yanada mustahkamlay olaman?";
+          }
+          if (window.LongoUZChat) window.LongoUZChat.ask(prompt);
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

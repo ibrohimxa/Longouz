@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Sozlamalar — Admin — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true">
+
+  <div class="app-shell">
+    {% include "_admin_sidebar.html" %}
+
+    <div class="app-content">
+
+      <div class="app-topbar">
+        <div>
+          <h1>Sozlamalar</h1>
+          <p>Sayt xatti-harakatini shu yerdan boshqarasiz — o'zgarishlar server qayta ishga tushmasdan darhol amal qiladi.</p>
+        </div>
+      </div>
+
+      {% if message %}<div class="form-success">{{ message }}</div>{% endif %}
+
+      <div class="dash-panel">
+        <h3>Tarif limitlari (Free / Pro / Ultra)</h3>
+        <p class="panel-sub">Har bir tarifning kunlik AI suhbat limiti va to'liq mock testga kirish huquqi. Kunlik limit maydonini bo'sh qoldiring — cheksiz bo'ladi.</p>
+
+        <form method="post" action="{{ admin_prefix }}/settings/plans" class="admin-question-form">
+          <div class="admin-form-row" style="align-items:flex-end;">
+            <div class="field">
+              <label for="free_ai_daily">Free — kunlik AI limiti</label>
+              <input type="number" min="0" name="free_ai_daily" id="free_ai_daily"
+                     value="{{ plan_limits.free.ai_daily if plan_limits.free.ai_daily is not none else '' }}"
+                     placeholder="cheksiz">
+            </div>
+            <div class="field">
+              <label for="free_topic_question_count">Free — mavzu mashqida savol soni</label>
+              <input type="number" min="1" name="free_topic_question_count" id="free_topic_question_count"
+                     value="{{ plan_limits.free.topic_question_count if plan_limits.free.topic_question_count is not none else '' }}"
+                     placeholder="cheksiz">
+            </div>
+            <div class="field">
+              <label for="free_ai_window_hours">Free — AI limit oynasi (soat)</label>
+              <input type="number" min="1" name="free_ai_window_hours" id="free_ai_window_hours"
+                     value="{{ plan_limits.free.ai_window_hours or 3 }}">
+            </div>
+            <div class="field-checkbox" style="padding-bottom:10px;">
+              <label><input type="checkbox" name="free_full_mock" {{ "checked" if plan_limits.free.full_mock_access }}> To'liq mock testga kirish</label>
+            </div>
+          </div>
+
+          <div class="admin-form-row" style="align-items:flex-end;">
+            <div class="field">
+              <label for="pro_ai_daily">Pro — kunlik AI limiti</label>
+              <input type="number" min="0" name="pro_ai_daily" id="pro_ai_daily"
+                     value="{{ plan_limits.pro.ai_daily if plan_limits.pro.ai_daily is not none else '' }}"
+                     placeholder="cheksiz">
+            </div>
+            <div class="field">
+              <label for="pro_topic_question_count">Pro — mavzu mashqida savol soni</label>
+              <input type="number" min="1" name="pro_topic_question_count" id="pro_topic_question_count"
+                     value="{{ plan_limits.pro.topic_question_count if plan_limits.pro.topic_question_count is not none else '' }}"
+                     placeholder="cheksiz">
+            </div>
+            <div class="field">
+              <label for="pro_ai_window_hours">Pro — AI limit oynasi (soat)</label>
+              <input type="number" min="1" name="pro_ai_window_hours" id="pro_ai_window_hours"
+                     value="{{ plan_limits.pro.ai_window_hours or 5 }}">
+            </div>
+            <div class="field-checkbox" style="padding-bottom:10px;">
+              <label><input type="checkbox" name="pro_full_mock" {{ "checked" if plan_limits.pro.full_mock_access }}> To'liq mock testga kirish</label>
+            </div>
+          </div>
+
+          <div class="admin-form-row" style="align-items:flex-end;">
+            <div class="field">
+              <label for="ultra_ai_daily">Ultra — kunlik AI limiti</label>
+              <input type="number" min="0" name="ultra_ai_daily" id="ultra_ai_daily"
+                     value="{{ plan_limits.ultra.ai_daily if plan_limits.ultra.ai_daily is not none else '' }}"
+                     placeholder="cheksiz">
+            </div>
+            <div class="field">
+              <label for="ultra_topic_question_count">Ultra — mavzu mashqida savol soni</label>
+              <input type="number" min="1" name="ultra_topic_question_count" id="ultra_topic_question_count"
+                     value="{{ plan_limits.ultra.topic_question_count if plan_limits.ultra.topic_question_count is not none else '' }}"
+                     placeholder="cheksiz">
+            </div>
+            <div class="field">
+              <label for="ultra_ai_window_hours">Ultra — AI limit oynasi (soat)</label>
+              <input type="number" min="1" name="ultra_ai_window_hours" id="ultra_ai_window_hours"
+                     value="{{ plan_limits.ultra.ai_window_hours or 5 }}">
+            </div>
+            <div class="field-checkbox" style="padding-bottom:10px;">
+              <label><input type="checkbox" name="ultra_full_mock" {{ "checked" if plan_limits.ultra.full_mock_access }}> To'liq mock testga kirish</label>
+            </div>
+          </div>
+
+          <div class="admin-form-actions">
+            <button type="submit" class="btn-primary">Limitlarni saqlash</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="dash-panel" style="margin-top:24px;">
+        <h3>Admin xavfsizligi</h3>
+        <p class="panel-sub">
+          Admin login: <strong>{{ admin_username }}</strong> ·
+          Parol yagona manbadan — server muhitidagi <code>.env</code> faylining <code>ADMIN_PASSWORD</code> qatoridan o'qiladi.
+          Parolni o'zgartirish uchun <code>.env</code> faylidagi shu qatorni tahrirlab, serverni qayta ishga tushiring —
+          bu qasddan shunday: xavfsizlik uchun parol kodning boshqa hech qanday joyida saqlanmaydi va admin paneldan
+          ham o'zgartirib bo'lmaydi (aks holda admin panelning o'ziga kirib olgan kishi o'z parolini qo'yib, chiqib ketmasligi mumkin edi).
+        </p>
+      </div>
+
+      <div class="dash-panel" style="margin-top:24px;">
+        <h3>Savollar banki — fan bo'yicha holat</h3>
+        <div class="admin-bank-summary">
+          {% for row in subject_breakdown %}
+          <a href="{{ admin_prefix }}/questions?subject={{ row.subject }}" class="admin-bank-chip {{ 'is-low' if row.question_count < 100 }}">
+            <span>{{ subject_names.get(row.subject, row.subject) }} · {{ row.topic_count }} mavzu</span>
+            <strong>{{ row.question_count }}</strong>
+          </a>
+          {% else %}
+          <p class="panel-sub">Hali savol yo'q.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

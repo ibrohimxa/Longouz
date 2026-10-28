@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Xabarlar — Admin — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true">
+  {% from "_macros.html" import admin_pagination %}
+
+  <div class="app-shell">
+    {% include "_admin_sidebar.html" %}
+
+    <div class="app-content">
+
+      <div class="app-topbar">
+        <div>
+          <h1>Xabarlar</h1>
+          <p>Jami {{ total }} ta — foydalanuvchilar "Yordam" bo'limidan yozgan xabarlar, o'qilmaganlar yuqorida.</p>
+        </div>
+      </div>
+
+      <div class="admin-users-table-wrap">
+        <table class="admin-users-table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Sana</th>
+              <th>Kimdan</th>
+              <th>Mavzu</th>
+              <th>Holat</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in items %}
+            <tr style="{{ 'font-weight:700;' if not row.msg.is_read }}">
+              <td>{% if not row.msg.is_read %}<span class="admin-plan-badge admin-plan-pro">yangi</span>{% endif %}</td>
+              <td style="white-space:nowrap;">{{ row.msg.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+              <td>{{ row.first_name or row.email }}</td>
+              <td>{{ row.msg.subject or "(mavzusiz)" }}</td>
+              <td>
+                {% if row.msg.replied_at %}<span class="admin-plan-badge admin-plan-ultra">javob berilgan</span>
+                {% elif row.msg.is_read %}<span class="admin-plan-badge admin-plan-free">o'qilgan</span>
+                {% else %}<span class="admin-plan-badge admin-plan-pro">o'qilmagan</span>{% endif %}
+              </td>
+              <td><a href="{{ admin_prefix }}/messages/{{ row.msg.id }}" class="admin-btn-sm">Ko'rish</a></td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6" style="text-align:center; color:var(--ink-soft); padding:24px;">Hali xabar yo'q.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {{ admin_pagination(admin_prefix + '/messages?page=', page, total_pages) }}
+
+    </div>
+  </div>
+
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

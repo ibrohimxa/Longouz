@@ -1,0 +1,21 @@
+<!-- ============================================================================
+     JONLI BOYQUSH — ASL logo-owl.png rasmi + ustiga qo'yilgan, sichqonchani
+     kuzatuvchi ikkita kichik "qorachiq" (pupil) elementi.
+     Nega SVG chizib emas, rasm ustiga overlay qilib qilingan: qo'lda
+     chizilgan SVG qanotlar "ko'rshapalak" (bat)ga o'xshab qolgan edi — bu
+     usul esa har doim ASL logotipni ishlatadi, xato bo'lish ehtimoli yo'q.
+
+     Ishlatish: shu faylni include qiling, oldindan quyidagi
+     Jinja o'zgaruvchilarini belgilang: living_owl_id, living_owl_size (px).
+     ============================================================================ -->
+<span class="living-owl" id="{{ living_owl_id }}" style="--lo-size: {{ living_owl_size }}px;">
+  <img src="/static/logo-owl.png" alt="LongoUZ" class="living-owl-img">
+  <span class="living-owl-mask living-owl-mask-left"></span>
+  <span class="living-owl-mask living-owl-mask-right"></span>
+  <span class="living-owl-pupil living-owl-pupil-left" data-lo-pupil-left>
+    <span class="living-owl-glint"></span>
+  </span>
+  <span class="living-owl-pupil living-owl-pupil-right" data-lo-pupil-right>
+    <span class="living-owl-glint"></span>
+  </span>
+</span>

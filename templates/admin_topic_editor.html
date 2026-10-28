@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Mavzu tahrirlagichi — Admin — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/admin.css">
+  <link rel="stylesheet" href="/static/figure.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true">
+  <div class="app-shell">
+    {% include "_admin_sidebar.html" %}
+    <div class="app-content editor-content">
+
+      <div class="ebar" id="ebar">
+        <a class="ebar-back" href="{{ admin_prefix }}/topics" id="ebar-back" title="Mavzularga qaytish">←<span> Mavzular</span></a>
+        <div class="ebar-title"><strong>{{ topic }}</strong><small id="ebar-sub"></small></div>
+        <div class="ebar-seg" role="group" aria-label="Rejim">
+          <button type="button" id="mode-view" class="active">Ko'rish</button>
+          <button type="button" id="mode-edit">Tahrirlash</button>
+        </div>
+        <button type="button" class="abtn ghost" id="btn-revert" title="Barcha o'zgarishlarni bekor qilish" hidden>Bekor qilish</button>
+        <button type="button" class="abtn primary save" id="btn-save" disabled>Saqlash <span class="ecount" id="ecount">0</span></button>
+      </div>
+      <div class="etoast" id="etoast" role="status" hidden></div>
+      <div class="echanged" id="echanged" hidden></div>
+
+      <div class="enav">
+        <button type="button" class="abtn" id="nav-prev" aria-label="Oldingi savol">‹</button>
+        <div class="enav-pos"><b id="nav-cur">1</b> / <span id="nav-total">0</span></div>
+        <button type="button" class="abtn" id="nav-next" aria-label="Keyingi savol">›</button>
+        <input type="number" min="1" id="nav-jump" class="enav-jump" placeholder="№" aria-label="Savol raqamiga o'tish">
+        <div class="enav-chips" id="nav-chips"></div>
+      </div>
+
+      <div class="egrid">
+        <section class="epreview-wrap">
+          <div class="epreview" id="epreview">
+            <header class="site-header quiz-header">
+              <span class="brand">{% include "_brandmark.html" %}</span>
+              <div class="quiz-header-meta">
+                <span class="quiz-mode-badge quiz-mode-badge-{{ mode }}" id="pv-mode"></span>
+                <span class="quiz-subject-label" id="pv-subject"></span>
+                <span class="quiz-timer" id="pv-timer">--:--</span>
+              </div>
+            </header>
+            <main class="quiz-main">
+              <div class="quiz-progress-track"><div class="quiz-progress-fill" id="pv-fill"></div></div>
+              <p class="quiz-progress-label" id="pv-label"></p>
+              <div class="quiz-question-card">
+                <h2 id="pv-question"></h2>
+                <div class="quiz-qfig" id="pv-qfig" hidden></div>
+                <div class="quiz-options" id="pv-options"></div>
+              </div>
+              <div class="quiz-nav-row">
+                <button type="button" class="btn-secondary" tabindex="-1">Oldingi</button>
+                <button type="button" class="btn-primary" tabindex="-1">Keyingi</button>
+              </div>
+            </main>
+          </div>
+          <p class="ehint" id="pv-hint">Ko'rish rejimi: savol o'quvchiga qanday ko'rinishini tekshiring. O'zgartirish uchun yuqoridagi "Tahrirlash"ni bosing.</p>
+        </section>
+
+        <aside class="epanel" id="epanel" hidden>
+          <div class="etabs" role="tablist">
+            <button type="button" class="active" data-tab="text">Matn</button>
+            <button type="button" data-tab="fig">Chizma</button>
+            <button type="button" data-tab="look">Ko'rinish</button>
+            <button type="button" data-tab="win">Test oynasi</button>
+          </div>
+
+          <div class="epane" data-pane="text">
+            <label class="elabel" for="f-question">Savol matni</label>
+            <textarea id="f-question" rows="4"></textarea>
+            <div class="elabel">Variantlar (to'g'risini belgilang)</div>
+            <div id="f-options"></div>
+            <label class="elabel" for="f-expl">Izoh</label>
+            <textarea id="f-expl" rows="2"></textarea>
+            <label class="echeck"><input type="checkbox" id="f-active"> Nashrda (hamma ko'radi)</label>
+            <div class="erow">
+              <button type="button" class="abtn" id="btn-add">+ Yangi savol qo'shish</button>
+              <button type="button" class="abtn danger" id="btn-del">O'chirish</button>
+            </div>
+          </div>
+
+          <div class="epane" data-pane="fig" hidden>
+            <p class="ehint">Savol chizmasi — Dekart koordinatalari, geometrik shakl, rasm yoki SVG. Namunada darhol ko'rinadi.</p>
+            <div class="elabel">Savol chizmasi</div>
+            <div id="fe-q"></div>
+            <label class="elabel" for="fe-w">Chizma kengligi: <output id="fe-wv">100</output>%</label>
+            <input type="range" id="fe-w" min="20" max="100" step="5" value="100">
+            <div class="elabel">Variant chizmalari (ixtiyoriy)</div>
+            <div id="fe-o"></div>
+          </div>
+
+          <div class="epane" data-pane="look" hidden>
+            <p class="ehint">Faqat shu savolning ko'rinishi. Natija chapdagi namunada darhol ko'rinadi.</p>
+            <div id="look-controls"></div>
+            <div class="erow">
+              <button type="button" class="abtn" id="look-reset">Tiklash</button>
+              <button type="button" class="abtn" id="look-all">Mavzudagi hamma savolga qo'llash</button>
+            </div>
+          </div>
+
+          <div class="epane" data-pane="win" hidden>
+            <p class="ehint">Butun mavzu uchun: o'quvchi test yechayotganda ko'radigan oyna tuzilmasi (soat, sarlavha, progress, kenglik).</p>
+            <div id="win-controls"></div>
+            <div class="erow"><button type="button" class="abtn" id="win-reset">Tiklash</button></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <script id="editor-data" type="application/json">{{ payload|tojson }}</script>
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/app.js"></script>
+  <script src="/static/quiz-style.js"></script>
+  <script src="/static/figure.js"></script>
+  <script src="/static/figure-builder.js"></script>
+  <script src="/static/admin-toast.js"></script>
+  <script src="/static/admin-editor.js"></script>
+</body>
+</html>

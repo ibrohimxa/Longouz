@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Shikoyatlar — Admin — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/admin-reports.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true" data-admin="{{ admin_prefix }}">
+  {% from "_macros.html" import admin_pagination %}
+  <div class="app-shell">
+    {% include "_admin_sidebar.html" %}
+    <div class="app-content">
+      <div class="app-topbar">
+        <div>
+          <h1>Savol shikoyatlari</h1>
+          <p>O'quvchilar test paytida yuborgan shikoyatlar. Claude tahlil qiladi, siz tasdiqlaysiz (yoki avto-rejim o'zi tuzatadi).</p>
+        </div>
+      </div>
+
+      <section class="rp-auto">
+        <div class="rp-auto-head">
+          <h3>Avtomatlashtirish</h3>
+          {% if not ai_ready %}<span class="rp-warn">AI kaliti sozlanmagan (Sozlamalar → ANTHROPIC_API_KEY / GEMINI_API_KEY)</span>{% endif %}
+        </div>
+        <div class="rp-auto-grid">
+          <label>Rejim
+            <select id="rp-mode">
+              <option value="off" {{ 'selected' if cfg.mode == 'off' }}>O'chirilgan</option>
+              <option value="suggest" {{ 'selected' if cfg.mode == 'suggest' }}>Tavsiya (admin tasdiqlaydi)</option>
+              <option value="auto" {{ 'selected' if cfg.mode == 'auto' }}>Avtomatik (ishonch yetarli bo'lsa o'zi tuzatadi)</option>
+            </select>
+          </label>
+          <label>Avto-tuzatish chegarasi (ishonch %)
+            <input type="number" id="rp-threshold" min="60" max="100" value="{{ cfg.threshold }}">
+          </label>
+          <label>Yashirish: nechta o'quvchi shikoyat qilsa (0 = o'chiq)
+            <input type="number" id="rp-hide" min="0" max="50" value="{{ cfg.hide_after }}">
+          </label>
+          <div class="rp-auto-actions">
+            <button class="admin-btn-sm" id="rp-save">Saqlash</button>
+            <button class="admin-btn-sm rp-primary" id="rp-batch">Yangilarini tahlil qil</button>
+          </div>
+        </div>
+        <p class="rp-hint">Vercel'da fon ishlari yo'q: avto-tahlil kuniga bir marta (cron, <code>CRON_SECRET</code> kerak) yoki yuqoridagi tugma bilan ishlaydi. Har bir avto-tuzatishni shikoyat kartasidagi «Qaytarish» bilan bekor qilish mumkin.</p>
+      </section>
+
+      <nav class="rp-tabs">
+        {% for key, label in (('open','Ochiq'),('fixed','Tuzatilgan'),('hidden','Yashirilgan'),('dismissed','Rad etilgan'),('all','Hammasi')) %}
+        <a href="{{ admin_prefix }}/reports?status={{ key }}" class="{{ 'active' if status == key }}">{{ label }}{% if counts.get(key) is not none %} <b>{{ counts[key] }}</b>{% endif %}</a>
+        {% endfor %}
+      </nav>
+
+      {% for it in items %}
+      {% set r = it.r %}
+      <article class="rp-card" data-id="{{ r.id }}">
+        <header>
+          <span class="rp-st rp-st-{{ r.status }}">{{ {'new':'Yangi','analyzed':'Tahlil qilindi','fixed':'Tuzatildi','hidden':'Yashirildi','dismissed':'Rad etildi'}[r.status] }}</span>
+          <span class="rp-cat">{{ categories.get(r.category, r.category) }}</span>
+          <span class="rp-meta">#{{ r.id }} · {{ subject_names.get(r.subject, r.subject) }} · {{ r.mode }} · {{ r.topic }} · {{ it.name or it.email or 'foydalanuvchi' }} · {{ r.created_at.strftime('%d.%m.%Y %H:%M') }}</span>
+        </header>
+        <div class="rp-q">{{ r.question_text }}</div>
+        <ol class="rp-opts" type="A">
+          {% for o in it.options %}<li class="{{ 'ok' if loop.index0 == r.correct_index }}">{{ o }}</li>{% endfor %}
+        </ol>
+        {% if r.details %}<blockquote class="rp-user">{{ r.details }}</blockquote>{% endif %}
+
+        {% if it.ai %}
+        <div class="rp-ai rp-ai-{{ it.ai.verdict }}">
+          <div class="rp-ai-top">
+            <b>{{ {'valid_error':'Xato tasdiqlandi','question_ok':'Savol to\'g\'ri','unclear':'Aniq emas'}[it.ai.verdict] }}</b>
+            <span>ishonch {{ it.ai.confidence }}%{% if it.ai.reporters and it.ai.reporters > 1 %} · {{ it.ai.reporters }} ta o'quvchi shikoyat qilgan{% endif %} · {{ it.ai.provider }}</span>
+          </div>
+          <p>{{ it.ai.explanation }}</p>
+          {% if it.ai.fix %}
+          <details class="rp-fix" open>
+            <summary>Taklif qilingan tuzatish (tahrirlash mumkin)</summary>
+            <textarea class="rp-fix-q" rows="2">{{ it.ai.fix.question }}</textarea>
+            {% for o in it.ai.fix.options %}
+            <div class="rp-fix-opt"><input type="radio" name="ci{{ r.id }}" value="{{ loop.index0 }}" {{ 'checked' if loop.index0 == it.ai.fix.correct_index }}><input type="text" class="rp-fix-o" value="{{ o }}"></div>
+            {% endfor %}
+            <textarea class="rp-fix-e" rows="2" placeholder="Izoh">{{ it.ai.fix.explanation }}</textarea>
+          </details>
+          {% elif it.ai.fix_error %}<p class="rp-warn">Avto-tuzatib bo'lmaydi: {{ it.ai.fix_error }}</p>{% endif %}
+        </div>
+        {% endif %}
+        {% if r.resolution %}<p class="rp-res">{{ r.resolution }}</p>{% endif %}
+
+        <footer>
+          {% if r.status in ('new','analyzed') %}
+          <button class="admin-btn-sm rp-primary" data-act="analyze">{{ 'Qayta tahlil' if it.ai else 'Claude bilan tahlil' }}</button>
+          {% if it.ai and it.ai.fix %}<button class="admin-btn-sm rp-ok" data-act="apply">Tuzatishni qo'llash</button>{% endif %}
+          {% if r.question_id %}<button class="admin-btn-sm" data-act="hide">Savolni yashirish</button>{% endif %}
+          <button class="admin-btn-sm" data-act="dismiss">Rad etish</button>
+          {% elif r.status == 'fixed' and r.original_json %}
+          <button class="admin-btn-sm" data-act="revert">Qaytarish</button>
+          {% else %}
+          <button class="admin-btn-sm" data-act="reopen">Qayta ochish</button>
+          {% endif %}
+          {% if r.question_id %}<a class="admin-btn-sm" href="{{ admin_prefix }}/questions/{{ r.question_id }}/edit" target="_blank">Savolni tahrirlash</a>{% endif %}
+        </footer>
+      </article>
+      {% else %}
+      <p class="rp-empty">Bu bo'limda shikoyat yo'q.</p>
+      {% endfor %}
+
+      {{ admin_pagination(admin_prefix + '/reports?status=' + status + '&page=', page, total_pages) }}
+    </div>
+  </div>
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/app.js"></script>
+  <script src="/static/admin-toast.js"></script>
+  <script src="/static/admin-reports.js"></script>
+</body>
+</html>

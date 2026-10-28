@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>{{ "Savolni tahrirlash" if question else "Yangi savol" }} — Admin — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/admin.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true">
+
+  <div class="app-shell">
+    {% include "_admin_sidebar.html" %}
+
+    <div class="app-content">
+
+      <div class="app-topbar">
+        <div>
+          <h1>{{ "Savolni tahrirlash" if question else "Yangi savol qo'shish" }}</h1>
+          <p>Savol + 4 ta variant + qaysi biri to'g'ri ekanini belgilang</p>
+        </div>
+      </div>
+
+      {% set qtab = 'new' %}{% include "_admin_qtabs.html" %}
+      {% if error %}<div class="form-error">{{ error }}</div>{% endif %}
+
+      <form method="post" action="{{ (admin_prefix + '/questions/' + question.id|string + '/edit') if question else (admin_prefix + '/questions/new') }}" class="admin-question-form">
+        <div class="admin-form-row">
+          <div class="field">
+            <label for="subject">Fan</label>
+            <select name="subject" id="subject" required>
+              {% for s in subjects %}
+              <option value="{{ s.code }}" {{ "selected" if (question and question.subject == s.code) or (not question and pf and pf.subject == s.code) }}>{{ s.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="field">
+            <label for="mode">Rejim</label>
+            <select name="mode" id="mode" required>
+              {% for m in modes %}
+              <option value="{{ m.code }}" {{ "selected" if (question and question.mode == m.code) or (not question and pf and pf.mode == m.code) }}>{{ m.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="admin-form-row">
+          <div class="field">
+            <label for="topic">Mavzu</label>
+            <input type="text" name="topic" id="topic" value="{{ question.topic if question else (pf.topic if pf else '') }}" placeholder="masalan: Algebra" required>
+          </div>
+          <div class="field">
+            <label for="mock_test">Hafta/guruh nomi (ixtiyoriy)</label>
+            <input type="text" name="mock_test" id="mock_test" value="{{ question.mock_test if question else '' }}" placeholder="masalan: 1-hafta">
+          </div>
+        </div>
+
+        <div class="field-checkbox">
+          <label><input type="checkbox" name="is_final_test" {{ "checked" if question and question.is_final_test }}> Yakuniy test savoli (haftalik/oylik umumlashtiruvchi — tarifdan qat'iy nazar to'liq beriladi)</label>
+        </div>
+
+        <div class="field">
+          <label for="question_text">Savol matni</label>
+          <textarea name="question_text" id="question_text" rows="3" required>{{ question.question if question else '' }}</textarea>
+        </div>
+
+        {% set opts = question_options if question else ["", "", "", ""] %}
+        {% for i in range(4) %}
+        <div class="admin-option-row">
+          <input type="radio" name="correct_index" value="{{ i }}" {{ "checked" if question and question.correct_index == i }} {{ "checked" if not question and i == 0 }} required>
+          <input type="text" name="option_{{ i }}" value="{{ opts[i] if i < opts|length else '' }}" placeholder="{{ ['A', 'B', 'C', 'D'][i] }} variant" required>
+        </div>
+        {% endfor %}
+        <p class="admin-form-hint">Chap tarafdagi doirani TO'G'RI javob variantining oldiga belgilang.</p>
+
+        <div class="field">
+          <label for="explanation">Izoh (nima uchun to'g'ri — ixtiyoriy, lekin tavsiya etiladi)</label>
+          <textarea name="explanation" id="explanation" rows="2">{{ question.explanation if question else '' }}</textarea>
+        </div>
+
+        {% if question %}
+        <div class="field-checkbox">
+          <label><input type="checkbox" name="is_active" {{ "checked" if question.is_active }}> Faol (testlarda ishlatilsin)</label>
+        </div>
+        {% endif %}
+
+        {% if not question %}
+        <div class="field-checkbox">
+          <label><input type="checkbox" name="notify" checked> Yangi savol/mavzu haqida o'quvchilarga bildirishnoma yuborilsin</label>
+        </div>
+        {% else %}
+        <p class="admin-form-hint">Tahrirlash o'quvchilarga bildirishnoma yubormaydi.</p>
+        {% endif %}
+
+        <div class="admin-form-actions">
+          <button type="submit" class="btn-primary">{{ "Saqlash" if question else "Qo'shish" }}</button>
+          <a href="{{ admin_prefix }}/questions" class="btn-secondary">Bekor qilish</a>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

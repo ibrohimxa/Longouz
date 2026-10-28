@@ -1,0 +1,15 @@
+.env
+.env.*
+*.db
+__pycache__
+*.pyc
+.venv
+certs
+*.bat
+*.sh
+setup_run.py
+https_cert.py
+migrate_sqlite_to_postgres.py
+README_*.md
+public
+node_modules

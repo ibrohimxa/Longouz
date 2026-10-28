@@ -1,0 +1,111 @@
+    <aside class="app-sidebar">
+      <div class="sidebar-brand">
+        {% include "_brandmark.html" %}
+        <em class="lg-admin-tag">Admin</em>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="{{ admin_prefix }}" class="sidebar-link{{ ' active' if active_tab == 'dashboard' else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Umumiy holat
+        </a>
+        <a href="{{ admin_prefix }}/users" class="sidebar-link{{ ' active' if active_tab == 'users' else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          Foydalanuvchilar
+        </a>
+        <a href="{{ admin_prefix }}/topics" class="sidebar-link{{ ' active' if active_tab == 'questions' else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+          Savollar banki
+        </a>
+        <a href="{{ admin_prefix }}/studio" class="sidebar-link{{ ' active' if active_tab == 'studio' else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 5.6L20 10l-5.6 2.4L12 18l-2.4-5.6L4 10l5.6-2.4z"/></svg>
+          Studio (AI)
+        </a>
+        <a href="{{ admin_prefix }}/import" class="sidebar-link{{ ' active' if active_tab == 'import' else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Import (PDF / fayl)
+        </a>
+        <a href="{{ admin_prefix }}/certificates" class="sidebar-link{{ ' active' if active_tab == 'certificates' else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.5 13.5L17 22l-5-3-5 3 1.5-8.5"/></svg>
+          Sertifikatlar
+        </a>
+        <a href="{{ admin_prefix }}/announcements" class="sidebar-link{{ ' active' if active_tab == 'announcements' else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          Bildirishnomalar
+        </a>
+        <a href="{{ admin_prefix }}/messages" class="sidebar-link{{ ' active' if active_tab == 'messages' else '' }}" style="position:relative;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          Xabarlar
+          <span id="admin-unread-badge" hidden style="margin-left:auto; background:var(--error); color:#fff; font-size:0.72rem; font-weight:700; line-height:1; border-radius:999px; padding:3px 7px;">0</span>
+        </a>
+        <a href="{{ admin_prefix }}/reports" class="sidebar-link{{ ' active' if active_tab == 'reports' else '' }}" style="position:relative;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+          Shikoyatlar
+          <span id="admin-reports-badge" hidden style="margin-left:auto; background:var(--error); color:#fff; font-size:0.72rem; font-weight:700; line-height:1; border-radius:999px; padding:3px 7px;">0</span>
+        </a>
+        <a href="{{ admin_prefix }}/log" class="sidebar-link{{ ' active' if active_tab == 'log' else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          Admin jurnali
+        </a>
+        <a href="{{ admin_prefix }}/ai" class="sidebar-link{{ ' active' if active_tab == 'ai' else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 9h.01M15 9h.01M9 15c1 1 5 1 6 0"/></svg>
+          AI holati
+        </a>
+        <a href="{{ admin_prefix }}/settings" class="sidebar-link{{ ' active' if active_tab == 'settings' else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          Sozlamalar
+        </a>
+        <a href="/" class="sidebar-link" target="_blank">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>
+          Saytni ko'rish
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="theme-toggle" aria-label="Rejimni almashtirish">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+          <span>Rejim</span>
+        </button>
+        <a href="{{ admin_prefix }}/logout" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Admin sessiyasidan chiqish
+        </a>
+      </div>
+    </aside>
+    <script>
+      (function () {
+        // Yangi (o'qilmagan) foydalanuvchi xabarlari soni — har bir admin
+        // sahifasida darhol ko'rinishi va vaqti-vaqti bilan yangilanib turishi
+        // uchun (admin sahifani ochiq qoldirsa ham yangi xabarni sezadi).
+        const badge = document.getElementById("admin-unread-badge");
+        if (!badge) return;
+        async function refreshUnreadCount() {
+          try {
+            const res = await fetch("{{ admin_prefix }}/api/messages/unread-count");
+            if (!res.ok) return;
+            const data = await res.json();
+            if (data.count > 0) {
+              badge.textContent = data.count > 99 ? "99+" : String(data.count);
+              badge.hidden = false;
+            } else {
+              badge.hidden = true;
+            }
+          } catch (e) { /* jimgina o'tkazib yuboramiz — tarmoq muammosi bo'lishi mumkin */ }
+        }
+        refreshUnreadCount();
+        setInterval(refreshUnreadCount, 30000);
+      })();
+      (function () {
+        const b = document.getElementById("admin-reports-badge");
+        if (!b) return;
+        async function r() {
+          try {
+            const res = await fetch("{{ admin_prefix }}/api/reports/count");
+            if (!res.ok) return;
+            const d = await res.json();
+            b.textContent = d.count > 99 ? "99+" : String(d.count);
+            b.hidden = !(d.count > 0);
+          } catch (e) {}
+        }
+        r(); setInterval(r, 45000);
+      })();
+    </script>

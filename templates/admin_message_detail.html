@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Xabar — Admin — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true">
+
+  <div class="app-shell">
+    {% include "_admin_sidebar.html" %}
+
+    <div class="app-content">
+
+      <div class="app-topbar">
+        <div>
+          <h1>{{ item.msg.subject or "(mavzusiz)" }}</h1>
+          <p>{{ item.first_name or item.email }} ({{ item.email }}) · {{ item.msg.created_at.strftime("%Y-%m-%d %H:%M") }}</p>
+        </div>
+        <a href="{{ admin_prefix }}/messages" class="btn-secondary">&larr; Ro'yxatga qaytish</a>
+      </div>
+
+      <div class="dash-panel">
+        <h3>Xabar matni</h3>
+        <p style="white-space:pre-wrap;">{{ item.msg.body }}</p>
+      </div>
+
+      {% if item.msg.admin_reply %}
+      <div class="dash-panel">
+        <h3>Yuborilgan javob</h3>
+        <p style="white-space:pre-wrap;">{{ item.msg.admin_reply }}</p>
+        <p class="panel-sub">{{ item.msg.replied_at.strftime("%Y-%m-%d %H:%M") }}</p>
+      </div>
+      {% endif %}
+
+      <div class="dash-panel">
+        <h3>{{ "Javobni yangilash" if item.msg.admin_reply else "Javob yozish" }}</h3>
+        <form method="post" action="{{ admin_prefix }}/messages/{{ item.msg.id }}/reply" class="admin-question-form">
+          <div class="field">
+            <textarea name="reply" rows="4" maxlength="2000" required placeholder="Foydalanuvchiga javobingizni yozing...">{{ item.msg.admin_reply }}</textarea>
+          </div>
+          <button type="submit" class="btn-secondary">Javobni yuborish</button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

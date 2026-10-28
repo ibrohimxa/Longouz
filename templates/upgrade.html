@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="LongoUZ — tarifni o'zgartirish.">
+  <title>Tarifni o'zgartirish — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=Caveat:wght@600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/purchase.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true">
+
+  <div class="app-shell">
+
+    {% set nav_active = 'balance' %}{% include "_app_sidebar.html" %}
+
+    <div class="app-content">
+      {% include "_announcement_banner.html" %}
+      <div class="app-topbar">
+        <div>
+          <h1>Tarifni tanlang</h1>
+          <p>Joriy tarifingiz: <strong>{{ user.plan|upper }}</strong>. Hozircha to'lov talab qilinmaydi — tarifni bir tugma bilan darhol almashtirishingiz mumkin.</p>
+        </div>
+      </div>
+
+      {% if locked_message %}
+      <div class="upgrade-locked-banner" style="margin-top:18px; padding:14px 18px; border-radius:12px; background:rgba(230,160,40,0.12); border:1px solid rgba(230,160,40,0.35); color:var(--ink); display:flex; align-items:center; gap:10px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;flex-shrink:0;color:#e6a028;"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+        <span>{{ locked_message }}</span>
+      </div>
+      {% endif %}
+
+      <div class="billing-toggle" role="group" aria-label="To'lov davri">
+        <button type="button" class="billing-toggle-btn active" data-cycle="monthly">Oylik</button>
+        <button type="button" class="billing-toggle-btn" data-cycle="yearly">Yillik <span class="billing-toggle-save">2 oy tejang</span></button>
+      </div>
+
+      <div class="plans-grid" style="margin-top:16px;" id="plans-grid">
+
+        <div class="plan-card {{ 'plan-card-current' if user.plan == 'free' else '' }}">
+          <div class="plan-name">Free</div>
+          <div class="plan-price">0 <span>so'm</span></div>
+          <ul class="plan-features">
+            <li>Tarix va biologiya: <b>45 ta mavzu</b> (har sinfdan boshlang'ich mavzular)</li>
+            <li>Oson va o'rta darajali savollar, mavzuda {{ plan_limits.free.topic_question_count }} tagacha</li>
+            <li>Har 10 mavzudan keyin nazorat testi (xatolar ustida ishlash) — ochiq</li>
+            <li>So'nggi {{ plan_limits.free.ai_window_hours }} soatda {{ plan_limits.free.ai_daily }} ta AI savol</li>
+            <li>To'liq imtihon (45 savol) — yo'q</li>
+          </ul>
+          {% if user.plan == 'free' %}
+          <span class="plan-btn plan-btn-outline plan-btn-current">Joriy tarifingiz</span>
+          {% else %}
+          <form method="post" action="/upgrade"><input type="hidden" name="plan" value="free">
+            <button type="submit" class="plan-btn plan-btn-outline" style="width:100%;">Free'ga qaytish</button>
+          </form>
+          {% endif %}
+        </div>
+
+        <div class="plan-card plan-card-popular {{ 'plan-card-current' if user.plan == 'pro' else '' }}">
+          <div class="plan-badge-popular">Mashhur</div>
+          <div class="plan-name">Pro</div>
+          <div class="plan-price" data-monthly-label="99 000 so'm/oy (hozircha bepul)" data-yearly-label="990 000 so'm/yil (hozircha bepul)">99 000 <span>so'm/oy (hozircha bepul)</span></div>
+          <ul class="plan-features">
+            <li>Tarix va biologiya: <b>85 ta mavzu</b>, qiyin savollar ochiladi</li>
+            <li>Mavzuda {{ plan_limits.pro.topic_question_count }} tagacha savol, ochiq (yozma javobli) savollar</li>
+            <li>To'liq imtihon: Milliy sertifikat (45 savol, 90 daq) va DTM</li>
+            <li>Blok bo'yicha mashqlar va natija tahlili (blok / qiyinlik)</li>
+            <li>So'nggi {{ plan_limits.pro.ai_window_hours }} soatda {{ plan_limits.pro.ai_daily }} ta AI savol</li>
+          </ul>
+          {% if user.plan == 'pro' %}
+          <span class="plan-btn plan-btn-primary plan-btn-current">Joriy tarifingiz</span>
+          {% else %}
+          <button type="button" class="plan-btn plan-btn-primary checkout-open-btn" style="width:100%;"
+                  data-plan="pro" data-plan-name="Pro"
+                  data-monthly-price="99 000 so'm/oy" data-yearly-price="990 000 so'm/yil">Pro'ga o'tish</button>
+          {% endif %}
+        </div>
+
+        <div class="plan-card {{ 'plan-card-current' if user.plan == 'ultra' else '' }}">
+          <div class="plan-name">Ultra</div>
+          <div class="plan-price" data-monthly-label="199 000 so'm/oy (hozircha bepul)" data-yearly-label="1 990 000 so'm/yil (hozircha bepul)">199 000 <span>so'm/oy (hozircha bepul)</span></div>
+          <ul class="plan-features">
+            <li>Tarix va biologiya: <b>150 ta mavzu</b> — barcha sinflar to'liq</li>
+            <li>Mavzuda {{ plan_limits.ultra.topic_question_count }} tagacha savol: eng qiyin va qo'shimcha savollar</li>
+            <li>«Qiyin savollar» mashqi (faqat Ultra)</li>
+            <li>Pro'dagi barcha imkoniyatlar + {{ plan_limits.ultra.ai_daily }} ta AI savol</li>
+          </ul>
+          {% if user.plan == 'ultra' %}
+          <span class="plan-btn plan-btn-outline plan-btn-current">Joriy tarifingiz</span>
+          {% else %}
+          <button type="button" class="plan-btn plan-btn-outline checkout-open-btn" style="width:100%;"
+                  data-plan="ultra" data-plan-name="Ultra"
+                  data-monthly-price="199 000 so'm/oy" data-yearly-price="1 990 000 so'm/yil">Ultra'ga o'tish</button>
+          {% endif %}
+        </div>
+
+      </div>
+
+      <p class="qs-hint" style="margin-top:16px;">Eslatma: to'lov tizimi hali ulanmagan, shuning uchun "Tasdiqlash" bosilganda tarif hozircha bepul va darhol almashadi — haqiqiy to'lov tez orada ulanadi.</p>
+    </div>
+  </div>
+
+  {% with pm_member=True %}{% include "_purchase_modal.html" %}{% endwith %}
+
+  {% include "_owl_widget.html" %}
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/app.js"></script>
+  <script src="/static/purchase.js"></script>
+  {% if turnstile_active(request) %}
+  <script src="/static/turnstile-helper.js"></script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=lgTurnstileReady" async defer></script>
+  {% endif %}
+  <script>
+    (function () {
+      // --- Oylik / Yillik narx almashtirgich — hozircha faqat KO'RSATISH
+      // uchun (haqiqiy to'lov davri hali serverga yozilmaydi, chunki to'lov
+      // tizimi umuman ulanmagan) — real to'lov ulanganda shu tanlov
+      // /upgrade so'roviga ham qo'shiladi. ---
+      let billingCycle = "monthly";
+      const toggleBtns = document.querySelectorAll(".billing-toggle-btn");
+      const priceEls = document.querySelectorAll("#plans-grid .plan-price[data-monthly-label]");
+      const checkoutBtns = document.querySelectorAll(".checkout-open-btn");
+
+      function applyBillingCycle(cycle) {
+        billingCycle = cycle;
+        toggleBtns.forEach((b) => b.classList.toggle("active", b.dataset.cycle === cycle));
+        priceEls.forEach((el) => {
+          const label = cycle === "yearly" ? el.dataset.yearlyLabel : el.dataset.monthlyLabel;
+          const amount = label.split(" so'm")[0];
+          const rest = "so'm" + label.split(" so'm")[1];
+          el.innerHTML = amount + " <span>" + rest + "</span>";
+        });
+        checkoutBtns.forEach((btn) => {
+          btn.dataset.activePrice = cycle === "yearly" ? btn.dataset.yearlyPrice : btn.dataset.monthlyPrice;
+        });
+      }
+
+      toggleBtns.forEach((btn) => {
+        btn.addEventListener("click", () => applyBillingCycle(btn.dataset.cycle));
+      });
+      applyBillingCycle("monthly");
+
+      {% if auto_open_plan %}
+      const autoBtn = document.querySelector('.checkout-open-btn[data-plan="{{ auto_open_plan }}"]');
+      if (autoBtn && window.pmOpen) window.pmOpen(autoBtn);
+      {% endif %}
+    })();
+  </script>
+</body>
+</html>

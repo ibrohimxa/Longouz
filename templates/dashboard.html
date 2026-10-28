@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="LongoUZ shaxsiy kabineti — natijalar, reja, reyting va yutuqlar.">
+  <title>Bosh sahifa — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/dashboard.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true">
+  <div class="app-shell">
+    {% set nav_active = 'home' %}{% include "_app_sidebar.html" %}
+    <div class="app-content dash">
+
+      <!-- Test davom ettirish banneri — localStorage da active attempt bo'lsa ko'rinadi -->
+      <div id="lz-resume-banner" style="display:none; background:var(--accent-green); color:#0a1f14;
+           padding:12px 20px; border-radius:10px; margin-bottom:14px; display:none;
+           align-items:center; gap:12px; font-weight:600; font-size:0.93rem;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+             style="width:18px;height:18px;flex-shrink:0"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <span id="lz-resume-text">Tugallanmagan testingiz bor — davom ettirasizmi?</span>
+        <a id="lz-resume-btn" href="#"
+           style="margin-left:auto;background:#0a1f14;color:var(--accent-green);
+                  padding:6px 16px;border-radius:6px;text-decoration:none;font-size:0.85rem;">
+          Davom ettirish
+        </a>
+        <button onclick="document.getElementById('lz-resume-banner').style.display='none';
+                         try{localStorage.removeItem('lz_active_attempt')}catch(e){}"
+                style="background:none;border:none;cursor:pointer;color:#0a1f14;opacity:0.7;
+                       font-size:1.3rem;line-height:1;padding:0 4px;" title="Yopish">×</button>
+      </div>
+      <script>
+      (function(){
+        try {
+          var raw = localStorage.getItem('lz_active_attempt');
+          if (!raw) return;
+          var d = JSON.parse(raw);
+          // 2 soatdan eski attempt ni e'tiborsiz qoldiramiz
+          if (!d || !d.url || !d.ts || (Date.now() - d.ts) > 7200000) {
+            localStorage.removeItem('lz_active_attempt');
+            return;
+          }
+          var banner = document.getElementById('lz-resume-banner');
+          var btn    = document.getElementById('lz-resume-btn');
+          if (banner && btn) {
+            btn.href = d.url;
+            banner.style.display = 'flex';
+          }
+        } catch(e) {}
+      })();
+      </script>
+
+      <div class="dash-top">
+        <button type="button" class="dash-search" id="dash-search-btn" aria-label="Qidiruv">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <span>Qidirish…</span><kbd>Ctrl K</kbd>
+        </button>
+        <span class="dash-streak" title="Ketma-ket faol kunlar">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2s5 4.5 5 10a5 5 0 01-10 0c0-2 1-3 1-3s1 2 2.5 2C11 8 12 2 12 2z"/></svg>
+          {{ d.streak if d else (stats.streak_days or 0) }} kun
+        </span>
+        {% include "_announcement_banner.html" %}
+      </div>
+
+{% if d %}
+      <!-- HERO -->
+      <section class="dash-hero lz-rise">
+        <div class="dash-hero-text">
+          <span class="dash-hero-chip">LONGOUZ · {{ subject_name|upper }} · {{ (user.certificate_type or 'dtm')|upper }}</span>
+          <h1>Xush kelibsiz, <em>{{ user.first_name or "do'stim" }}</em>!</h1>
+          <p class="dash-quote">“{{ quote }}”</p>
+          <p class="dash-sub">Bugun ham o'zingizning eng yaxshi versiyangiz sari bir qadam tashlang.</p>
+          <div class="dash-hero-cta">
+            <a href="/quiz" class="dash-btn dash-btn-primary"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Testni boshlash →</a>
+            <a href="#today-plan" class="dash-btn dash-btn-ghost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> Bugungi rejani ochish</a>
+          </div>
+        </div>
+        <svg class="dash-hero-art" viewBox="0 0 560 300" preserveAspectRatio="xMaxYMax meet" aria-hidden="true">
+          <defs>
+            <linearGradient id="hs-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#070d24"/><stop offset=".5" stop-color="#1b1b4d"/><stop offset=".82" stop-color="#6b3a74"/><stop offset="1" stop-color="#f4a24a"/></linearGradient>
+            <linearGradient id="hs-far" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3f86"/><stop offset="1" stop-color="#1b1f52"/></linearGradient>
+            <linearGradient id="hs-mid" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b3175"/><stop offset="1" stop-color="#12163f"/></linearGradient>
+            <linearGradient id="hs-main" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#49529f"/><stop offset=".55" stop-color="#262c6b"/><stop offset="1" stop-color="#0f1238"/></linearGradient>
+            <linearGradient id="hs-snow" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#c9d4ff"/></linearGradient>
+            <linearGradient id="hs-path" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ffe9b0"/><stop offset=".5" stop-color="#ffc258"/><stop offset="1" stop-color="#2fbf83"/></linearGradient>
+            <radialGradient id="hs-glow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ffd9a0" stop-opacity=".85"/><stop offset="1" stop-color="#ffd9a0" stop-opacity="0"/></radialGradient>
+            <radialGradient id="hs-sunglow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff2a8" stop-opacity=".95"/><stop offset=".45" stop-color="#ffd24a" stop-opacity=".35"/><stop offset="1" stop-color="#ffd24a" stop-opacity="0"/></radialGradient>
+            <radialGradient id="hs-sunface" cx=".4" cy=".4" r=".7"><stop offset="0" stop-color="#fffbe0"/><stop offset="1" stop-color="#ffc83a"/></radialGradient>
+            <radialGradient id="hs-hglow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ffe9a8" stop-opacity=".95"/><stop offset=".35" stop-color="#ffa24a" stop-opacity=".55"/><stop offset=".7" stop-color="#ff6a3d" stop-opacity=".18"/><stop offset="1" stop-color="#ff6a3d" stop-opacity="0"/></radialGradient>
+            <linearGradient id="hs-rim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd08a" stop-opacity=".9"/><stop offset="1" stop-color="#ffd08a" stop-opacity="0"/></linearGradient>
+            <filter id="hs-blur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3"/></filter>
+          </defs>
+          <rect x="-900" y="-200" width="1700" height="640" fill="url(#hs-sky)"/>
+          <g class="hs-stars" id="hs-stars" fill="#fff"><circle cx="339" cy="25" r="1.5" opacity="0.9"/><circle cx="57" cy="15" r="0.8" opacity="0.7"/><circle cx="67" cy="70" r="1" opacity="0.5"/><circle cx="96" cy="61" r="1.5" opacity="0.5"/><circle cx="254" cy="17" r="1.5" opacity="0.5"/><circle cx="134" cy="34" r="0.8" opacity="0.9"/><circle cx="414" cy="12" r="1" opacity="0.5"/><circle cx="144" cy="43" r="1.5" opacity="0.5"/><circle cx="128" cy="79" r="1.2" opacity="0.9"/><circle cx="193" cy="19" r="1" opacity="0.7"/><circle cx="107" cy="76" r="0.8" opacity="0.9"/><circle cx="69" cy="85" r="1" opacity="0.7"/><circle cx="552" cy="60" r="1.2" opacity="0.7"/><circle cx="472" cy="52" r="1.2" opacity="0.5"/><circle cx="192" cy="95" r="1" opacity="0.5"/><circle cx="315" cy="73" r="1.5" opacity="0.7"/><circle cx="467" cy="42" r="0.8" opacity="0.5"/><circle cx="532" cy="59" r="1" opacity="0.7"/><circle cx="163" cy="68" r="1.5" opacity="0.5"/><circle cx="87" cy="103" r="1.2" opacity="0.7"/><circle cx="366" cy="82" r="1.5" opacity="0.9"/><circle cx="475" cy="14" r="0.8" opacity="0.7"/><circle cx="493" cy="95" r="0.8" opacity="0.5"/><circle cx="325" cy="88" r="1.5" opacity="0.7"/><circle cx="403" cy="119" r="1.2" opacity="0.5"/><circle cx="480" cy="51" r="1" opacity="0.9"/><circle cx="127" cy="69" r="0.8" opacity="0.5"/><circle cx="302" cy="22" r="1" opacity="0.7"/><circle cx="408" cy="117" r="1.5" opacity="0.5"/><circle cx="178" cy="63" r="1.5" opacity="0.9"/><circle cx="292" cy="119" r="1" opacity="0.7"/><circle cx="293" cy="96" r="1.5" opacity="0.7"/><circle cx="397" cy="35" r="1" opacity="0.5"/><circle cx="188" cy="25" r="1" opacity="0.9"/><circle cx="246" cy="7" r="1.5" opacity="0.9"/><circle cx="194" cy="39" r="1.2" opacity="0.5"/><circle cx="157" cy="59" r="1.2" opacity="0.9"/><circle cx="334" cy="22" r="0.8" opacity="0.7"/><circle cx="409" cy="56" r="1.5" opacity="0.7"/><circle cx="114" cy="67" r="1.5" opacity="0.5"/><circle cx="203" cy="14" r="1" opacity="0.7"/><circle cx="174" cy="20" r="1.2" opacity="0.9"/><circle cx="61" cy="19" r="0.8" opacity="0.9"/><circle cx="162" cy="74" r="0.8" opacity="0.7"/><circle cx="34" cy="15" r="1" opacity="0.9"/><circle cx="393" cy="25" r="1.2" opacity="0.7"/></g>
+          <g transform="translate(-90 0)">
+          <g id="hs-moon" transform="translate(118 74)"><circle r="46" fill="#cfe9ff" opacity=".16"/><circle r="17" fill="#eaf4ff"/><circle cx="-5" cy="4" r="3.2" fill="#c5d6ea"/><circle cx="5" cy="-6" r="2.4" fill="#c5d6ea"/><circle cx="6" cy="7" r="2" fill="#c5d6ea"/></g>
+          <circle cx="360" cy="170" r="120" fill="url(#hs-glow)" id="hs-glowc"/>
+          <g id="hs-sun" style="display:none"><circle r="70" fill="url(#hs-sunglow)"/><circle r="24" fill="#fff4b8"/><circle r="24" fill="url(#hs-sunface)"/></g>
+          <path d="M-400 300 L-400 190 L-300 140 L-200 200 L-100 150 L-10 190 L-10 190 L60 130 L110 175 L170 105 L235 180 L290 140 L350 200 L420 150 L480 195 L570 120 L570 300Z" fill="url(#hs-far)" opacity=".85"/>
+          <path d="M90 300 L200 175 L245 205 L300 120 L345 165 L430 190 L520 150 L580 205 L580 300Z" fill="url(#hs-mid)"/>
+          <path d="M215 300 L318 150 L345 168 L388 58 L462 188 L486 176 L560 300Z" fill="url(#hs-main)"/>
+          <path d="M388 58 L352 124 L371 113 L384 134 L398 112 L412 130 L425 108 L444 140 L462 188 L430 150 L408 160 L388 58Z" fill="url(#hs-snow)" opacity=".95"/>
+          <path d="M388 58 L462 188 L486 176 L440 100Z" fill="#000" opacity=".16"/>
+          <g id="hs-horizon" style="opacity:0;mix-blend-mode:screen;pointer-events:none"><ellipse class="hs-hglow" cx="0" cy="0" rx="210" ry="95" fill="url(#hs-hglow)"/><g class="hs-rays" stroke="#ffd9a0" stroke-linecap="round" opacity=".55"><line x1="0" y1="0" x2="-170" y2="-70" stroke-width="3"/><line x1="0" y1="0" x2="-120" y2="-120" stroke-width="2.4"/><line x1="0" y1="0" x2="0" y2="-150" stroke-width="3"/><line x1="0" y1="0" x2="120" y2="-120" stroke-width="2.4"/><line x1="0" y1="0" x2="170" y2="-70" stroke-width="3"/></g></g>
+          <line x1="388" y1="58" x2="388" y2="26" stroke="#fff" stroke-width="2.2"/><path class="hs-flag" d="M388 26 L414 34 L388 44Z" fill="#2fbf83"/>
+          <text x="388" y="96" text-anchor="middle" font-family="Fraunces,serif" font-weight="700" font-size="21" fill="#0f1238" opacity=".85">LONGO</text>
+          <path class="hs-path hs-path-glow" d="M330 300 C380 282 262 262 322 238 C382 214 282 196 346 176 C396 160 352 138 388 112" fill="none" stroke="#ffc258" stroke-width="12" stroke-linecap="round" opacity=".35" filter="url(#hs-blur)"/>
+          <path class="hs-path" d="M330 300 C380 282 262 262 322 238 C382 214 282 196 346 176 C396 160 352 138 388 112" fill="none" stroke="url(#hs-path)" stroke-width="5.5" stroke-linecap="round"/>
+          <g fill="#fff3c9"><circle class="hs-spark" cx="346" cy="176" r="2.4"/><circle class="hs-spark s2" cx="322" cy="238" r="2.4"/><circle class="hs-spark s3" cx="388" cy="112" r="2.8"/></g>
+          <path d="M0 300 L0 262 L12 262 L12 250 L30 250 L30 266 L48 266 L48 256 L70 256 L70 270 L96 270 L96 258 L118 258 L118 272 L140 272 L140 300Z" fill="#0b0e2b"/>
+          <path d="M440 300 L440 270 L462 270 L462 258 L482 258 L482 266 L502 266 L502 252 L526 252 L526 268 L548 268 L548 260 L560 260 L560 300Z" fill="#0b0e2b"/>
+          <g><rect x="14" y="262" width="2.4" height="3" fill="#ffd27a" opacity="1"/><rect x="22" y="268" width="2.4" height="3" fill="#ffd27a" opacity="0.8"/><rect x="34" y="258" width="2.4" height="3" fill="#ffd27a" opacity="0.8"/><rect x="44" y="266" width="2.4" height="3" fill="#ffd27a" opacity="0.5"/><rect x="58" y="262" width="2.4" height="3" fill="#ffd27a" opacity="0.5"/><rect x="66" y="270" width="2.4" height="3" fill="#ffd27a" opacity="0.8"/><rect x="80" y="264" width="2.4" height="3" fill="#ffd27a" opacity="0.8"/><rect x="92" y="268" width="2.4" height="3" fill="#ffd27a" opacity="0.8"/><rect x="112" y="266" width="2.4" height="3" fill="#ffd27a" opacity="0.8"/><rect x="124" y="262" width="2.4" height="3" fill="#ffd27a" opacity="0.8"/><rect x="470" y="264" width="2.4" height="3" fill="#ffd27a" opacity="0.5"/><rect x="482" y="270" width="2.4" height="3" fill="#ffd27a" opacity="0.5"/><rect x="496" y="262" width="2.4" height="3" fill="#ffd27a" opacity="0.5"/><rect x="508" y="268" width="2.4" height="3" fill="#ffd27a" opacity="1"/><rect x="522" y="264" width="2.4" height="3" fill="#ffd27a" opacity="0.8"/><rect x="534" y="270" width="2.4" height="3" fill="#ffd27a" opacity="1"/><rect x="546" y="262" width="2.4" height="3" fill="#ffd27a" opacity="0.8"/><rect x="40" y="276" width="2.4" height="3" fill="#ffd27a" opacity="0.8"/><rect x="100" y="274" width="2.4" height="3" fill="#ffd27a" opacity="1"/><rect x="500" y="276" width="2.4" height="3" fill="#ffd27a" opacity="0.5"/></g>
+          <g fill="#0a1a1c"><path d="M150 300 L165 262 L180 300Z"/><path d="M170 300 L182 270 L194 300Z"/><path d="M262 300 L274 276 L286 300Z"/><path d="M420 300 L433 266 L446 300Z"/></g>
+          </g>
+          <path d="M400 300 L470 200 L520 230 L575 170 L700 300Z" fill="url(#hs-far)" opacity=".7"/>
+        </svg>
+        <div class="dash-hero-script" aria-hidden="true">Yuksak ball,<br>yorqin kelajak</div>
+      </section>
+
+      <!-- KPI -->
+      <section class="dash-kpis">
+        <article class="dash-kpi k-orange lz-rise">
+          <span class="dash-kpi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 01-10 0V4z"/><path d="M17 5h3v2a3 3 0 01-3 3M7 5H4v2a3 3 0 003 3"/></svg></span>
+          <div><span class="dash-kpi-label">Oxirgi natija</span><strong><span data-count="{{ d.last_percent }}" data-suffix="%">{{ d.last_percent }}%</span></strong>
+          <small class="{{ 'up' if d.delta_last and d.delta_last > 0 else 'down' if d.delta_last and d.delta_last < 0 else '' }}">{% if d.delta_last is not none %}{{ '▲' if d.delta_last > 0 else '▼' if d.delta_last < 0 else '•' }} {{ d.delta_last|abs }}% oldingi natijaga nisbatan{% else %}{{ 'Birinchi natija' if d.total_quizzes else 'Hali test yechilmagan' }}{% endif %}</small></div>
+        </article>
+        <article class="dash-kpi k-blue lz-rise">
+          <span class="dash-kpi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h0M8 14h2M12 14h2M8 18h2M12 18h4"/></svg></span>
+          <div><span class="dash-kpi-label">{{ subject_name }} o'rtacha</span><strong>{{ d.subject_avg }}%</strong><div class="dash-mini-bar"><i style="--w:{{ d.subject_avg }}%"></i></div></div>
+        </article>
+        <article class="dash-kpi k-purple lz-rise">
+          <span class="dash-kpi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span>
+          <div><span class="dash-kpi-label">To'g'ri javoblar</span><strong>{{ d.total_correct }}</strong><div class="dash-mini-bar"><i style="--w:{{ d.accuracy }}%"></i></div></div>
+        </article>
+        <article class="dash-kpi k-green lz-rise">
+          <span class="dash-kpi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></span>
+          <div><span class="dash-kpi-label">Yechilgan testlar</span><strong data-count="{{ d.total_quizzes }}">{{ d.total_quizzes }}</strong><small>Jami testlar soni</small></div>
+        </article>
+        <article class="dash-kpi k-fire lz-rise">
+          <span class="dash-kpi-ico"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2s5 4.5 5 10a5 5 0 01-10 0c0-2 1-3 1-3s1 2 2.5 2C11 8 12 2 12 2z"/></svg></span>
+          <div><span class="dash-kpi-label">Streak</span><strong>{{ d.streak }} kun</strong><small>{{ "Ajoyib davom eting!" if d.streak else "Bugun boshlang!" }}</small></div>
+        </article>
+      </section>
+
+      <div class="dash-grid">
+        <!-- Maqsad -->
+        <section class="dash-card dash-goal lz-rise" id="goal-card" data-avg="{{ d.avg_score }}" data-target="{{ user.target_percent or 90 }}">
+          <header><h2><span class="dash-h-ico">◎</span> Maqsadli natijangiz</h2></header>
+          <div class="dash-goal-top">
+            <strong class="dash-goal-num"><span id="goal-target">{{ user.target_percent or 90 }}</span>%</strong>
+            <button type="button" class="dash-chip-btn" id="goal-edit">Maqsadni o'zgartirish</button>
+            <span class="dash-goal-chip" id="goal-left"></span>
+          </div>
+          <div class="dash-goal-bar"><i id="goal-fill" style="--w:{{ d.avg_score }}%"></i></div>
+          <div class="dash-goal-foot"><div><small>Joriy o'rtacha</small><b>{{ d.avg_score }}%</b></div><div><small>Maqsad</small><b><span id="goal-target2">{{ user.target_percent or 90 }}</span>%</b></div></div>
+        </section>
+
+        <!-- Bugungi reja -->
+        <section class="dash-card lz-rise" id="today-plan">
+          <header><h2><span class="dash-h-ico">▣</span> Bugungi reja</h2><span class="dash-pill"><b>{{ d.plan_done }}</b>/{{ d.plan|length }} bajarildi</span></header>
+          <ul class="dash-plan">
+            {% for it in d.plan %}
+            <li class="{{ 'is-done' if it.done else '' }}"><a href="{{ it.href }}"><span class="dash-check">{% if it.done %}✓{% endif %}</span><span>{{ it.text }}</span>{% if it.meta %}<small>{{ it.meta }}</small>{% endif %}</a></li>
+            {% endfor %}
+          </ul>
+          <a href="/quiz" class="dash-btn dash-btn-outline small">Rejani davom ettirish →</a>
+        </section>
+
+        <!-- Promo -->
+        <section class="dash-card dash-promo lz-rise">
+          <div class="dash-promo-text">
+            <h2><span class="dash-h-ico">▤</span> Mock testlar</h2>
+            <p>Real imtihon sharoitida o'zingizni sinab ko'ring: vaqt chegarasi, savollar tartibi va natija tahlili bilan.</p>
+            <a href="/quiz" class="dash-btn dash-btn-hot">Testni boshlash →</a>
+          </div>
+          <svg class="dash-promo-art" viewBox="0 0 120 120" aria-hidden="true"><rect x="28" y="14" width="64" height="86" rx="8" fill="#1d2b66" stroke="#4a6bff" stroke-width="2" transform="rotate(8 60 57)"/><g transform="rotate(8 60 57)"><rect x="40" y="30" width="40" height="5" rx="2" fill="#7e95ff"/><rect x="40" y="43" width="32" height="4" rx="2" fill="#4a5aa8"/><rect x="40" y="53" width="36" height="4" rx="2" fill="#4a5aa8"/><rect x="40" y="63" width="28" height="4" rx="2" fill="#4a5aa8"/></g><path d="M86 70 L104 52 L110 58 L92 76 L84 78Z" fill="#ffb347"/></svg>
+        </section>
+
+        <!-- Tarix -->
+        <section class="dash-card dash-wide lz-rise">
+          <header><h2><span class="dash-h-ico">▥</span> Natijalar tarixi</h2>
+            <select id="dash-period" class="dash-select" aria-label="Davr">
+              <option value="7">Oxirgi 7 kun</option><option value="30">Oxirgi 30 kun</option><option value="180" selected>Oxirgi 6 oy</option><option value="0">Hammasi</option>
+            </select></header>
+          <div id="dash-history" class="dash-history"></div>
+          {% if not d.history %}<p class="dash-empty">Hali test yechilmagan — birinchi testdan keyin grafik shu yerda paydo bo'ladi.</p>{% endif %}
+        </section>
+
+        <!-- Mavzu o'zlashtirish -->
+        <section class="dash-card lz-rise">
+          <header><h2><span class="dash-h-ico">◉</span> Mavzular bo'yicha o'zlashtirish</h2><a href="/quiz" class="dash-link">Barchasini ko'rish →</a></header>
+          <div class="dash-rings">
+            {% for m in d.mastery %}
+            <a class="dash-ring-item" href="/quiz" title="{{ m.attempts }} ta urinish, {{ m.questions }} ta savol">
+              <div class="dash-ring" data-ring="{{ m.percent }}"><b>{{ m.percent }}%</b></div>
+              <span>{{ m.topic }}</span><small>{{ m.questions }} savol</small>
+            </a>
+            {% else %}<p class="dash-empty">Mavzular yuklanmoqda…</p>{% endfor %}
+          </div>
+        </section>
+
+        <!-- Zaif mavzular -->
+        <section class="dash-card lz-rise">
+          <header><h2><span class="dash-h-ico">▂▅▇</span> Zaif sohalar</h2><a href="/quiz" class="dash-link warn">Takomillashtirish kerak</a></header>
+          {% if d.weak %}
+          <ul class="dash-weak">
+            {% for w in d.weak %}<li><div><span>{{ w.topic }}</span><b>{{ w.percent }}%</b></div><div class="dash-goal-bar thin"><i style="--w:{{ w.percent }}%"></i></div></li>{% endfor %}
+          </ul>
+          {% else %}<p class="dash-empty">{% if d.total_quizzes %}Zaif mavzu yo'q — hammasi 80% dan yuqori!{% else %}Testlarni yeching — zaif mavzularni aniqlab beramiz.{% endif %}</p>{% endif %}
+        </section>
+
+        <!-- Yutuqlar -->
+        <section class="dash-card dash-full dash-achbar lz-rise" id="achievements">
+          <h2><span class="dash-h-ico">🏆︎</span> Yutuqlarim</h2>
+          <div class="dash-ach">
+            {% for a in d.achievements %}
+            <div class="dash-ach-item {{ 'is-done' if a.done else '' }}" title="{{ a.desc }}"><span class="dash-ach-ico">{% if a.done %}★{% else %}○{% endif %}</span><span><b>{{ a.title }}</b><small>{{ a.desc }}</small></span></div>
+            {% endfor %}
+          </div>
+          <a href="#achievements" class="dash-link" id="ach-all">{{ d.achievements_done }}/{{ d.achievements|length }} · Barcha yutuqlar →</a>
+        </section>
+
+        <!-- Reyting -->
+        <section class="dash-card dash-full dash-board lz-rise" id="leaderboard">
+          <header><h2><span class="dash-h-ico">♛</span> Reyting</h2>
+            <div class="dash-tabs" role="tablist"><button type="button" class="active" data-board="week">Hafta</button><button type="button" data-board="all">Hammasi</button></div>
+          </header>
+          {% for key, board in [('week', d.board_week), ('all', d.board_all)] %}
+          <ol class="dash-rank" data-board-list="{{ key }}" {% if key != 'week' %}hidden{% endif %}>
+            {% for e in board.entries %}
+            <li class="{{ 'is-me' if e.is_me else '' }}"><span class="dash-rank-pos">{% if e.rank <= 3 %}<i class="medal m{{ e.rank }}">{{ e.rank }}</i>{% else %}{{ e.rank }}{% endif %}</span>
+              <span class="dash-rank-name">{{ e.name }}{% if e.is_me %} <em>(siz)</em>{% endif %}{% if e.plan != 'free' %}<b class="dash-tag">{{ e.plan|upper }}</b>{% endif %}</span>
+              <span class="dash-rank-acc">{{ e.accuracy }}%</span>
+              <span class="dash-rank-pts">{{ e.points }} <small>ball</small></span></li>
+            {% else %}
+            <li class="dash-empty">Bu davrda hali natija yo'q — birinchi bo'ling!</li>
+            {% endfor %}
+          </ol>
+          {% endfor %}
+          <p class="dash-muted">Ball = to'g'ri javoblar soni. Sizning o'rningiz: {% if d.my_rank %}#{{ d.my_rank }} ({{ d.board_all.total }} ishtirokchidan){% else %}hali yo'q — test yeching{% endif %}.</p>
+        </section>
+      </div>
+{% else %}
+      <section class="dash-card"><p>Ma'lumotlarni yuklab bo'lmadi. Sahifani yangilang.</p><a href="/quiz" class="dash-btn dash-btn-primary">Test boshlash</a></section>
+{% endif %}
+    </div>
+  </div>
+
+  <!-- ⌘K qidiruv -->
+  <div id="dash-palette" class="dash-palette" hidden>
+    <div class="dash-palette-box" role="dialog" aria-label="Qidiruv">
+      <input id="dash-palette-input" type="search" placeholder="Sahifa yoki bo'lim nomi…" autocomplete="off">
+      <ul id="dash-palette-list"></ul>
+    </div>
+  </div>
+
+  {% include "_owl_widget.html" %}
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/app.js"></script>
+  <script src="/static/owl-chat.js"></script>
+  <script id="dash-data" type="application/json">{{ (d.history if d else [])|tojson }}</script>
+  <script src="/static/dashboard.js"></script>
+  <script src="/static/dashboard-sky.js"></script>
+</body>
+</html>

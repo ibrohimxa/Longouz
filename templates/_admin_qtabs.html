@@ -1,0 +1,7 @@
+<nav class="atabs" aria-label="Savollar banki bo'limlari">
+  <a href="{{ admin_prefix }}/topics" class="atab{{ ' active' if qtab == 'topics' else '' }}">Mavzular</a>
+  <a href="{{ admin_prefix }}/questions" class="atab{{ ' active' if qtab == 'list' else '' }}">Barcha savollar</a>
+  <a href="{{ admin_prefix }}/questions/audit" class="atab{{ ' active' if qtab == 'audit' else '' }}">Tekshiruv</a>
+  <a href="{{ admin_prefix }}/questions/new" class="atab{{ ' active' if qtab == 'new' else '' }}">+ Yangi savol</a>
+  <a href="{{ admin_prefix }}/import" class="atab{{ ' active' if qtab == 'import' else '' }}">Import (PDF / fayl)</a>
+</nav>

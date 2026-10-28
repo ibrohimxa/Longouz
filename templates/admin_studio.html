@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Studio — Admin — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/admin-dash.css">
+  <link rel="stylesheet" href="/static/admin.css">
+  <link rel="stylesheet" href="/static/admin-studio.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true">
+  <div class="app-shell">
+    {% include "_admin_sidebar.html" %}
+    <div class="app-content">
+      <div class="app-topbar"><div>
+        <h1>Studio</h1>
+        <p>Hujjatdan savol olish, mock yaratish, baza holati va Claude yordamchi</p>
+      </div></div>
+
+      <div class="st-tabs" id="st-tabs">
+        <button data-t="doc" class="on">📄 Hujjat → savollar</button>
+        <button data-t="mock">🧪 Mock yaratish</button>
+        <button data-t="bank">📊 Baza holati</button>
+        <button data-t="ai">🤖 Claude yordamchi</button>
+        <button data-t="log">🕘 O'zgarishlar</button>
+      </div>
+      {% if not ai_ready %}<div class="form-error">AI kaliti sozlanmagan — hujjatni AI bilan tahlil qilish va yordamchi ishlamaydi (qoida bo'yicha o'qish ishlaydi). <a href="{{ admin_prefix }}/ai">AI sozlamalari</a></div>{% endif %}
+
+      <!-- HUJJAT -->
+      <section class="st-pane" id="p-doc">
+        <div class="st-card">
+          <div class="st-row">
+            <label>Rejim <select id="d-mode">{% for m in modes %}<option value="{{ m.code }}">{{ m.name }}</option>{% endfor %}</select></label>
+            <label>Fan <select id="d-subject"><option value="auto">Avtomatik</option>{% for s in subjects %}<option value="{{ s.code }}">{{ s.name }}</option>{% endfor %}</select></label>
+            <label>Tarif <select id="d-tier"><option value="free">Free</option><option value="pro">Pro</option><option value="ultra">Ultra</option></select></label>
+            <label class="st-grow">Ko'rsatma (ixtiyoriy) <input id="d-hint" placeholder="masalan: faqat 2-bo'lim, javoblar oxirida"></label>
+          </div>
+          <div class="drop-zone" id="d-drop"><input type="file" id="d-file" multiple accept=".pdf,.docx,.xlsx,.json,.csv,.tsv,.txt,.md,.html,.htm,.zip,.png,.jpg,.jpeg,.webp">
+            <b>Fayl(lar)ni tashlang yoki bosing</b><small>PDF · Word · Excel · JSON · CSV · TXT · rasm · ZIP</small></div>
+          <div class="st-row"><button class="btn-primary" id="d-go">1. O'qish</button>
+            <button class="btn-secondary" id="d-ai" disabled>2. AI bilan aniqlashtirish</button>
+            <button class="btn-secondary" id="d-vis" disabled>Skaner / rasm uchun (AI ko'rish)</button>
+            <span id="d-status" class="st-note"></span></div>
+        </div>
+        <div id="d-docs"></div>
+        <div class="st-card" id="d-res" hidden>
+          <div class="st-row"><b id="d-count"></b>
+            <label><input type="checkbox" id="d-hide-dup" checked> Takrorlarni yashirish</label>
+            <label>Mock nomi <input id="d-mock" value="AI import"></label>
+            <label><input type="checkbox" id="d-pub" checked> Darhol e'lon qilish</label>
+            <button class="btn-primary" id="d-commit">Tanlanganlarni bazaga qo'shish</button></div>
+          <div id="d-list"></div>
+        </div>
+      </section>
+
+      <!-- MOCK -->
+      <section class="st-pane" id="p-mock" hidden>
+        <div class="st-card">
+          <div class="st-row">
+            <label>Rejim <select id="m-mode">{% for m in modes %}<option value="{{ m.code }}">{{ m.name }}</option>{% endfor %}</select></label>
+            <label>Fan <select id="m-subject">{% for s in subjects %}<option value="{{ s.code }}">{{ s.name }}</option>{% endfor %}</select></label>
+            <label>Variantlar <select id="m-var"><option>1</option><option selected>2</option><option>3</option></select></label>
+            <label>Kirish <select id="m-plan"><option value="0">Hamma (Free)</option><option value="1" selected>Pro+</option><option value="2">Ultra</option></select></label>
+            <label>Vaqt (daq, 0=standart) <input id="m-time" type="number" value="0" min="0" max="300" style="width:80px"></label>
+          </div>
+          <div class="st-row"><label class="st-grow">Mock nomi <input id="m-name" placeholder="masalan: DTM Mock — Oktyabr"></label>
+            <button class="btn-primary" id="m-go">Mock yaratish</button><span id="m-status" class="st-note"></span></div>
+          <p class="st-note">Variantlar bir-biridan farq qiladi (savollar takrorlanmaydi). Foydalanuvchilar test tanlash sahifasida "Mock" bo'limida ko'radi.</p>
+        </div>
+        <div class="st-card"><table class="st-table" id="m-table"></table></div>
+      </section>
+
+      <!-- BAZA -->
+      <section class="st-pane" id="p-bank" hidden>
+        <div class="st-card"><div class="st-row"><button class="btn-secondary" id="b-refresh">Yangilash</button>
+          <button class="btn-primary" id="b-seed">Tayyor bazani yangilash (seed)</button><span id="b-status" class="st-note"></span></div>
+          <div style="overflow:auto"><table class="st-table" id="b-table"></table></div></div>
+        <div class="st-card"><div id="b-topics-h" class="st-note">Qatorni bosing — mavzular ko'rinadi</div><div style="overflow:auto"><table class="st-table" id="b-topics"></table></div></div>
+      </section>
+
+      <!-- CLAUDE -->
+      <section class="st-pane" id="p-ai" hidden>
+        <div class="st-card">
+          {% if not claude_ready %}<div class="form-error">Claude kaliti (ANTHROPIC_API_KEY) kerak.</div>{% endif %}
+          <div id="a-chat" class="st-chat"></div>
+          <div id="a-actions"></div>
+          <div class="st-row"><input id="a-input" class="st-grow" placeholder="Masalan: Fizika DTM da kam savolli mavzularni ayt va 'Tarix' dagi noto'g'ri mavzuli savollarni top">
+            <button class="btn-primary" id="a-send">Yuborish</button></div>
+          <div class="st-row st-chips">
+            <button class="chip">Bazani tekshir: qaysi fan va mavzularda savol yetishmaydi?</button>
+            <button class="chip">Tarix DTM savollarini mavzuga mosligi bo'yicha tekshir</button>
+            <button class="chip">Matematika DTM da 10 ta savolning javobini qayta hisobla</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- LOG -->
+      <section class="st-pane" id="p-log" hidden>
+        <div class="st-card"><pre class="st-log">{{ changelog }}</pre></div>
+      </section>
+    </div>
+  </div>
+  <script>window.STUDIO = {prefix: "{{ admin_prefix }}"};</script>
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/app.js"></script>
+  <script src="/static/admin-studio.js"></script>
+</body>
+</html>

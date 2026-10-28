@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="LongoUZ balansi — hisobingizni to'ldiring.">
+  <title>Balans — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true">
+
+  <div class="app-shell">
+
+    {% set nav_active = 'balance' %}{% include "_app_sidebar.html" %}
+
+    <div class="app-content">
+
+      {% include "_announcement_banner.html" %}
+      <div class="app-topbar">
+        <div>
+          <h1>Balansim</h1>
+          <p>Balansni to'ldiring va kelajakda testlar/sertifikatlarni bir zumda sotib oling</p>
+        </div>
+      </div>
+
+      <div class="balance-hero">
+        <div class="balance-hero-label">Joriy balans</div>
+        <div class="balance-hero-amount"><span id="balance-amount">{{ "{:,}".format(user.balance_som or 0).replace(",", " ") }}</span> so'm</div>
+      </div>
+
+      <div class="balance-notice">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0;"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+        <span>Hozircha to'lov tizimlari (Click, Paynet, SQB) sinov rejimida — kartangizdan haqiqiy pul yechilmaydi va hech qanday karta ma'lumoti serverga yuborilmaydi. Ular to'liq ulangach, bu yerda real to'lov va balansni yechib olish imkoniyati ham qo'shiladi.</span>
+      </div>
+
+      <div class="balance-topup-card">
+        <div class="balance-topup-title">Summani tanlang</div>
+        <div class="balance-amount-grid" id="balance-amount-grid">
+          <button type="button" class="balance-amount-btn" data-amount="50000">50 000</button>
+          <button type="button" class="balance-amount-btn active" data-amount="100000">100 000</button>
+          <button type="button" class="balance-amount-btn" data-amount="200000">200 000</button>
+        </div>
+        <div class="field" style="margin-top:14px;">
+          <label for="balance-custom-amount">Yoki boshqa summa (so'm)</label>
+          <input type="text" inputmode="numeric" id="balance-custom-amount" placeholder="masalan: 150000">
+        </div>
+
+        <button type="button" class="balance-pay-btn balance-pay-btn-primary" data-method="click" id="balance-pay-click">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          Click orqali to'ldirish
+        </button>
+
+        <div class="balance-divider"><span>yoki hamkorlarimiz orqali</span></div>
+
+        <div class="balance-partner-row">
+          <button type="button" class="balance-pay-btn balance-pay-btn-outline" data-method="paynet" id="balance-pay-paynet">Paynet</button>
+          <button type="button" class="balance-pay-btn balance-pay-btn-outline" data-method="sqb" id="balance-pay-sqb">SQB (Sanoat-qurilish bank)</button>
+        </div>
+        <p class="qs-hint" style="margin-top:10px; margin-bottom:0;">Paynet va SQB hamkorligi orqali ulanish — kam komissiya bilan qulay to'lov, tez orada faollashadi.</p>
+      </div>
+
+      <div class="balance-history-card">
+        <div class="balance-topup-title">To'ldirish tarixi</div>
+        {% if history %}
+        <div class="balance-history-list">
+          {% for item in history %}
+          <div class="balance-history-row">
+            <div>
+              <div class="balance-history-amount">+{{ "{:,}".format(item.amount_som).replace(",", " ") }} so'm</div>
+              <div class="balance-history-meta">{{ item.method|upper }} · {{ item.created_at }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="qs-hint" style="margin:0;">Hali to'ldirish tarixi yo'q.</p>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+
+  {% include "_owl_widget.html" %}
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/app.js"></script>
+  <script>
+    (function () {
+      const amountBtns = document.querySelectorAll(".balance-amount-btn");
+      const customInput = document.getElementById("balance-custom-amount");
+      let selectedAmount = 100000;
+
+      amountBtns.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          amountBtns.forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          selectedAmount = parseInt(btn.dataset.amount, 10);
+          customInput.value = "";
+        });
+      });
+      customInput.addEventListener("input", () => {
+        const digits = customInput.value.replace(/\D/g, "");
+        customInput.value = digits;
+        if (digits) {
+          amountBtns.forEach((b) => b.classList.remove("active"));
+          selectedAmount = parseInt(digits, 10);
+        }
+      });
+
+      async function payWith(method) {
+        if (!selectedAmount || selectedAmount < 1000) {
+          alert("Iltimos, kamida 1 000 so'mlik summa kiriting.");
+          return;
+        }
+        const body = new URLSearchParams({ amount: selectedAmount, method });
+        const res = await fetch("/api/balance/topup", { method: "POST", body });
+        if (!res.ok) {
+          alert("Xatolik yuz berdi, birozdan so'ng qayta urinib ko'ring.");
+          return;
+        }
+        const data = await res.json();
+        document.getElementById("balance-amount").textContent = data.balance.toLocaleString("ru-RU").replace(/,/g, " ");
+        window.location.reload();
+      }
+
+      document.getElementById("balance-pay-click").addEventListener("click", () => payWith("click"));
+      document.getElementById("balance-pay-paynet").addEventListener("click", () => payWith("paynet"));
+      document.getElementById("balance-pay-sqb").addEventListener("click", () => payWith("sqb"));
+    })();
+  </script>
+</body>
+</html>

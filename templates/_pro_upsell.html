@@ -1,0 +1,19 @@
+<!-- ============================================================================
+     PRO TAKLIF KARTASI — sidebar pastida, kabinetning BARCHA sahifalarida
+     (dashboard, test, kurslar, profil, natija) ko'rinadi — LEKIN FAQAT
+     hali Pro/Ultra'ga O'TMAGAN (FREE) foydalanuvchilarga. Pro yoki Ultra
+     foydalanuvchi buni ko'rmaydi (allaqachon yuqori tarifda bo'lgani uchun
+     reklama ko'rsatish mantiqsiz va bezovta qiluvchi bo'lar edi — bu ilgari
+     TO'G'IRLANMAGAN edi: hamma tarifdagi foydalanuvchiga bir xil "Pro'ga
+     o'ting" kartasi ko'rsatilar edi).
+     ============================================================================ -->
+{% if user and user.plan == 'free' %}
+<a href="/upgrade" class="sidebar-pro-card">
+  <span class="sidebar-pro-badge">PRO</span>
+  <span class="sidebar-pro-text">
+    <strong>Pro'ga o'ting</strong>
+    Barcha fanlar, cheksiz AI va batafsil statistika
+  </span>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sidebar-pro-arrow"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+</a>
+{% endif %}

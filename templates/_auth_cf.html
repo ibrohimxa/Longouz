@@ -1,0 +1,6 @@
+{% if turnstile_site_key() %}
+{% if turnstile_active(request) %}
+<div class="au-cf"><div class="turnstile-slot" data-sitekey="{{ turnstile_site_key() }}"></div><p class="au-cf-status" data-turnstile-status></p></div>
+{% endif %}
+<p class="au-cfnote"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l8 3v6c0 5-3.4 9.3-8 11-4.6-1.7-8-6-8-11V5l8-3zm-1.2 13.2l5.2-5.2-1.4-1.4-3.8 3.8-1.6-1.6-1.4 1.4 3 3z"/></svg>Cloudflare Turnstile bilan himoyalangan</p>
+{% endif %}

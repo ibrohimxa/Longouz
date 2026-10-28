@@ -1,0 +1,129 @@
+{# ==========================================================================
+   ULASHILGAN "APP HEADER" — akkaunt ma'lumoti + qo'ng'iroq (bell) BITTA
+   panelda, sahifaning tepasida. Fayl nomi tarixiy sabablarga ko'ra
+   "_announcement_banner.html" (barcha shablonlarda shu {% include %} nomi
+   ishlatilgan) — lekin endi yuqori banner OLIB TASHLANGAN, faqat qo'ng'iroq
+   qoldi, chunki barcha bildirishnomalar ENDI FAQAT shu menyu orqali
+   ko'rsatiladi (aniq so'ralganidek).
+   ========================================================================== #}
+<div class="app-header">
+  <div class="app-header-account">
+    <div class="app-header-avatar"{% if user and user.avatar_color %} style="background: {{ user.avatar_color }}; color: #07130d;"{% endif %}>{{ ((user.first_name or "?")[0] if user else "?")|upper }}</div>
+    <div class="app-header-user-info">
+      <span class="app-header-name">{{ user.first_name or "Foydalanuvchi" if user else "" }}</span>
+      {% if user %}<span class="app-header-plan plan-badge-{{ user.plan }}">{{ user.plan|upper }}</span>{% endif %}
+    </div>
+  </div>
+
+  <div class="app-header-actions">
+    <button type="button" class="theme-toggle" aria-label="Kunduzgi / tungi rejim" title="Kunduzgi / tungi rejim">
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2 12h2.5M19.5 12H22M4.2 19.8L6 18M18 6l1.8-1.8"/></svg>
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg>
+    </button>
+    <div id="notif-bell" class="notif-bell">
+    <button type="button" id="notif-bell-btn" class="notif-bell-btn" aria-label="Bildirishnomalar" aria-haspopup="true" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      <span id="notif-bell-badge" class="notif-bell-badge" hidden>0</span>
+    </button>
+    <div id="notif-bell-panel" class="notif-bell-panel" hidden>
+      <div class="notif-bell-panel-head">Bildirishnomalar</div>
+      <div id="notif-bell-list" class="notif-bell-list"></div>
+    </div>
+  </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var SEEN_KEY = "longouz_last_seen_notification_ts";
+  var wrap = document.getElementById("notif-bell");
+  var btn = document.getElementById("notif-bell-btn");
+  var badge = document.getElementById("notif-bell-badge");
+  var panel = document.getElementById("notif-bell-panel");
+  var list = document.getElementById("notif-bell-list");
+  if (!wrap || !btn || !panel || !list) return;
+
+  var NOTIF_ICONS = {
+    announcement: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>',
+    support_reply: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>',
+    new_topic: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>',
+    welcome: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>',
+    welcome_back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>',
+  };
+
+  function getSeenTs() {
+    try { return parseFloat(localStorage.getItem(SEEN_KEY) || "0") || 0; } catch (e) { return 0; }
+  }
+  function setSeenTs(ts) {
+    try { localStorage.setItem(SEEN_KEY, String(ts)); } catch (e) {}
+  }
+
+  function wireOpenClose(maxTs) {
+    function closePanel() {
+      panel.hidden = true;
+      btn.setAttribute("aria-expanded", "false");
+    }
+    function openPanel() {
+      panel.hidden = false;
+      btn.setAttribute("aria-expanded", "true");
+      badge.hidden = true;
+      setSeenTs(maxTs);
+    }
+    btn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      if (panel.hidden) { openPanel(); } else { closePanel(); }
+    });
+    document.addEventListener("click", function (e) {
+      if (!panel.hidden && !wrap.contains(e.target)) closePanel();
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") closePanel();
+    });
+  }
+
+  fetch("/api/notifications").then(function (r) { return r.ok ? r.json() : null; }).then(function (data) {
+    var items = (data && data.items) || [];
+    if (!items.length) {
+      list.innerHTML = '<div class="notif-empty">Hozircha bildirishnoma yo\'q.</div>';
+      wireOpenClose(0);
+      return;
+    }
+
+    list.innerHTML = "";
+    items.forEach(function (item) {
+      var row = document.createElement("div");
+      row.className = "notif-item";
+      var icon = document.createElement("div");
+      icon.className = "notif-item-icon notif-item-icon-" + (item.type || "announcement");
+      icon.innerHTML = NOTIF_ICONS[item.type] || NOTIF_ICONS.announcement;
+      var body = document.createElement("div");
+      body.className = "notif-item-body-wrap";
+      var title = document.createElement("div");
+      title.className = "notif-item-title";
+      title.textContent = item.title || "Bildirishnoma";
+      var text = document.createElement("div");
+      text.className = "notif-item-body";
+      text.textContent = item.body || "";
+      var time = document.createElement("div");
+      time.className = "notif-item-time";
+      time.textContent = item.created_at || "";
+      body.appendChild(title);
+      body.appendChild(text);
+      body.appendChild(time);
+      row.appendChild(icon);
+      row.appendChild(body);
+      list.appendChild(row);
+    });
+
+    var maxTs = Math.max.apply(null, items.map(function (i) { return i.ts || 0; }));
+    var seenTs = getSeenTs();
+    var unread = items.filter(function (i) { return (i.ts || 0) > seenTs; }).length;
+    if (unread > 0) {
+      badge.textContent = unread > 9 ? "9+" : String(unread);
+      badge.hidden = false;
+    }
+
+    wireOpenClose(maxTs);
+  }).catch(function () {});
+})();
+</script>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Bildirishnomalar — Admin — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true">
+
+  <div class="app-shell">
+    {% include "_admin_sidebar.html" %}
+
+    <div class="app-content">
+
+      <div class="app-topbar">
+        <div>
+          <h1>Bildirishnomalar</h1>
+          <p>Bu yerdan yuborgan har bir xabar barcha foydalanuvchilarga sayt tepasidagi qo'ng'iroq (🔔) menyusida ko'rinadi — darhol, server qayta ishga tushmasdan.</p>
+        </div>
+      </div>
+
+      {% if message %}<div class="form-success">{{ message }}</div>{% endif %}
+
+      <div class="dash-panel">
+        <h3>Yangi bildirishnoma yuborish</h3>
+        <form method="post" action="{{ admin_prefix }}/announcements" class="admin-question-form">
+          <div class="field">
+            <label for="ann_title">Sarlavha (ixtiyoriy)</label>
+            <input type="text" name="title" id="ann_title" maxlength="200" placeholder="masalan: Yangi savollar qo'shildi">
+          </div>
+          <div class="field">
+            <label for="ann_body">Matn</label>
+            <textarea name="body" id="ann_body" rows="3" maxlength="1000" required
+                      placeholder="masalan: Fizika va kimyo fanlariga 100+ yangi mashq savoli qo'shildi — hoziroq sinab ko'ring!"></textarea>
+          </div>
+          <button type="submit" class="btn-secondary">Yuborish</button>
+        </form>
+      </div>
+
+      <div class="dash-panel">
+        <h3>Yuborilgan bildirishnomalar</h3>
+        {% if items %}
+        <div class="admin-users-table-wrap">
+        <table class="admin-users-table">
+          <thead>
+            <tr><th>Sana</th><th>Sarlavha</th><th>Matn</th><th>Holat</th><th></th></tr>
+          </thead>
+          <tbody>
+            {% for item in items %}
+            <tr>
+              <td style="white-space:nowrap;">{{ item.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+              <td>{{ item.title or "—" }}</td>
+              <td>{{ item.body }}</td>
+              <td>
+                {% if item.is_active %}<span class="admin-plan-badge admin-plan-pro">faol</span>
+                {% else %}<span class="admin-plan-badge admin-plan-free">o'chirilgan</span>{% endif %}
+              </td>
+              <td>
+                {% if item.is_active %}
+                <form method="post" action="{{ admin_prefix }}/announcements/{{ item.id }}/deactivate" onsubmit="return confirm('Bu bildirishnomani o\'chirasizmi? Foydalanuvchilar endi ko\'rmaydi.');">
+                  <button type="submit" class="admin-btn-sm admin-btn-danger">O'chirish</button>
+                </form>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        </div>
+        {% else %}
+        <p class="panel-sub">Hali bildirishnoma yuborilmagan.</p>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

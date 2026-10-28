@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Savollar banki — Admin — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/admin.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true">
+  {% from "_macros.html" import admin_pagination %}
+
+  <div class="app-shell">
+    {% include "_admin_sidebar.html" %}
+
+    <div class="app-content">
+
+      <div class="app-topbar">
+        <div>
+          <h1>Savollar banki</h1>
+          <p>Jami {{ total }} ta savol — fan/rejim bo'yicha filtrlang, tahrirlang yoki yangi qo'shing</p>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <a href="{{ admin_prefix }}/import" class="btn-secondary">PDF / fayl import</a>
+          <a href="{{ admin_prefix }}/questions/new" class="btn-primary">+ Yangi savol</a>
+        </div>
+      </div>
+
+      {% set qtab = 'list' %}{% include "_admin_qtabs.html" %}
+      <form method="get" action="{{ admin_prefix }}/questions" class="admin-filter-row">
+        {% if topic %}<input type="hidden" name="topic" value="{{ topic }}"><span class="achip active">Mavzu: {{ topic }} <a href="{{ admin_prefix }}/questions?subject={{ subject }}&mode={{ mode }}" style="margin-left:6px;">✕</a></span>{% endif %}
+        <select name="subject" onchange="this.form.submit()">
+          <option value="">Barcha fanlar</option>
+          {% for s in subjects %}
+          <option value="{{ s.code }}" {{ "selected" if s.code == subject }}>{{ s.name }}</option>
+          {% endfor %}
+        </select>
+        <select name="mode" onchange="this.form.submit()">
+          <option value="">Barcha rejimlar</option>
+          {% for m in modes %}
+          <option value="{{ m.code }}" {{ "selected" if m.code == mode }}>{{ m.name }}</option>
+          {% endfor %}
+        </select>
+        <select name="status" onchange="this.form.submit()">
+          <option value="">Holat: hammasi</option>
+          <option value="published" {{ "selected" if status == "published" }}>Nashr qilingan</option>
+          <option value="private" {{ "selected" if status == "private" }}>Private (qoralama)</option>
+        </select>
+        <select name="source" onchange="this.form.submit()">
+          <option value="">Manba: hammasi</option>
+          <option value="__manual__" {{ "selected" if source == "__manual__" }}>Qo'lda qo'shilgan</option>
+          {% for sr in sources %}<option value="{{ sr.name }}" {{ "selected" if source == sr.name }}>{{ sr.name[:50] }} ({{ sr.count }})</option>{% endfor %}
+        </select>
+        <input type="text" name="q" value="{{ search }}" placeholder="Savol matnidan qidirish...">
+        <button type="submit" class="btn-secondary">Filtrlash</button>
+      </form>
+
+      {% if message %}<div class="form-success">{{ message }}</div>{% endif %}
+
+      <form method="post" action="{{ admin_prefix }}/questions/bulk" id="bulk-form">
+      <input type="hidden" name="next" value="{{ request.url.path }}{{ ('?' ~ request.url.query) if request.url.query else '' }}">
+      <div class="q-bulk">
+        <button type="submit" name="action" value="publish" class="btn-secondary admin-btn-sm">Tanlanganlarni nashr qilish</button>
+        <button type="submit" name="action" value="private" class="btn-secondary admin-btn-sm">Private qilish</button>
+        <button type="submit" name="action" value="delete" class="admin-btn-sm admin-btn-danger" onclick="return confirm('Tanlangan savollar DOIMIY o\'chiriladi. Davom etasizmi?');">O'chirish</button>
+        <select name="subject_to" class="admin-btn-sm"><option value="">Fan (o'zgarmasin)</option>{% for sj in subjects %}<option value="{{ sj.code }}">{{ sj.name }}</option>{% endfor %}</select>
+        <select name="mode_to" class="admin-btn-sm"><option value="">Rejim (o'zgarmasin)</option>{% for m in modes %}<option value="{{ m.code }}">{{ m.name }}</option>{% endfor %}</select>
+        <input type="text" name="topic_to" class="admin-btn-sm" placeholder="Yangi mavzu nomi" style="min-width:150px">
+        <button type="submit" name="action" value="move" class="btn-secondary admin-btn-sm">Ko'chirish</button>
+        <span style="color:var(--ink-soft);font-size:.82rem">Tanlandi: <b id="bulk-count">0</b></span>
+      </div>
+      <div class="admin-users-table-wrap">
+        <table class="admin-users-table">
+          <thead>
+            <tr>
+              <th><input type="checkbox" id="bulk-all" aria-label="Hammasini tanlash"></th>
+              <th>ID</th>
+              <th>Fan</th>
+              <th>Rejim</th>
+              <th>Mavzu</th>
+              <th>Savol</th>
+              <th>Manba</th>
+              <th>Holat</th>
+              <th>Amallar</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for q in questions %}
+            <tr>
+              <td><input type="checkbox" name="ids" value="{{ q.id }}" class="bulk-box"></td>
+              <td>{{ q.id }}</td>
+              <td>{{ subject_names.get(q.subject, q.subject) }}</td>
+              <td>{{ q.mode }}</td>
+              <td>{{ q.topic }}</td>
+              <td style="max-width:320px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ q.question }}</td>
+              <td style="font-size:.76rem;color:var(--ink-soft);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ q.source_file }}">{{ (q.source_file ~ ' №' ~ q.source_no) if q.source_file else 'qo\'lda' }}</td>
+              <td>{% if q.is_active %}<span class="admin-plan-badge admin-plan-pro">nashr</span>{% else %}<span class="admin-plan-badge admin-plan-free">private</span>{% endif %}</td>
+              <td class="admin-users-actions">
+                <a href="{{ admin_prefix }}/questions/{{ q.id }}/edit" class="btn-secondary admin-btn-sm">Tahrirlash</a>
+                <button type="submit" formaction="{{ admin_prefix }}/questions/{{ q.id }}/delete" formmethod="post" class="admin-btn-sm admin-btn-danger" onclick="return confirm('Bu savol bazadan DOIMIY o\'chiriladi. Davom etasizmi?');">O'chirish</button>
+              </td>
+            </tr>
+            <tr class="q-opts-row"><td></td><td colspan="8">
+              <div class="q-opts" data-qid="{{ q.id }}">
+                {% for o in opts_map.get(q.id, []) %}<button type="button" class="q-opt{{ ' is-key' if loop.index0 == q.correct_index else '' }}" data-i="{{ loop.index0 }}" title="Shuni to'g'ri javob qilish"><b>{{ 'ABCDEF'[loop.index0] }}</b> {{ o }}</button>{% endfor %}
+                <span class="q-opt-msg"></span>
+              </div>
+            </td></tr>
+            {% else %}
+            <tr><td colspan="9" style="text-align:center; color:var(--ink-soft); padding:24px;">Hech narsa topilmadi.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      </form>
+      <style>
+        .q-opts{display:flex;flex-wrap:wrap;gap:6px;font-size:.82rem}
+        .q-opt{border:1px solid var(--line,#d8dcec);background:transparent;color:inherit;border-radius:8px;padding:3px 9px;cursor:pointer;text-align:left}
+        .q-opt:hover{border-color:#2fbf83}
+        .q-opt.is-key{background:rgba(47,191,131,.18);border-color:#2fbf83;font-weight:600}
+        .q-opts-row td{padding-top:0;border-top:0}
+        .q-opt-msg{color:var(--ink-soft);align-self:center}
+      </style>
+      <script>
+        document.addEventListener("click", async function (e) {
+          var b = e.target.closest(".q-opt"); if (!b) return;
+          var box = b.closest(".q-opts"), msg = box.querySelector(".q-opt-msg");
+          try {
+            var r = await fetch("{{ admin_prefix }}/api/questions/" + box.dataset.qid + "/correct", {method: "POST", credentials: "same-origin", headers: {"Content-Type": "application/json"}, body: JSON.stringify({index: parseInt(b.dataset.i, 10)})});
+            if (!r.ok) throw new Error(r.status);
+            box.querySelectorAll(".q-opt").forEach(function (x) { x.classList.toggle("is-key", x === b); });
+            msg.textContent = "✓ saqlandi";
+          } catch (err) { msg.textContent = "Xato: saqlanmadi"; }
+        });
+      </script>
+      <script>
+        (function () {
+          var all = document.getElementById("bulk-all"), boxes = Array.prototype.slice.call(document.querySelectorAll(".bulk-box")), c = document.getElementById("bulk-count");
+          function upd() { c.textContent = boxes.filter(function (b) { return b.checked; }).length; }
+          if (all) all.addEventListener("change", function () { boxes.forEach(function (b) { b.checked = all.checked; }); upd(); });
+          boxes.forEach(function (b) { b.addEventListener("change", upd); });
+        })();
+      </script>
+
+      {% set qs = (('&topic=' + topic|urlencode) if topic else '') + (('&subject=' + subject) if subject else '') + (('&mode=' + mode) if mode else '') + (('&q=' + search|urlencode) if search else '') + (('&status=' + status) if status else '') + (('&source=' + source|urlencode) if source else '') %}
+      {{ admin_pagination(admin_prefix + '/questions?page=', page, total_pages, qs) }}
+
+    </div>
+  </div>
+
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

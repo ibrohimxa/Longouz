@@ -1,0 +1,27 @@
+{# ==========================================================================
+   ADMIN PANEL — "OYNALANGAN" (windowed) SAHIFALASH.
+   Avvalgi holat: {% for p in range(1, total_pages + 1) %} — HAR BIR sahifa
+   raqamini birma-bir chiqarardi, savollar banki kabi katta jadvallarda
+   (70+ sahifa) ekran chetidan chiqib, konteynerga sig'may qolardi.
+   Endi faqat: 1, oxirgi, joriy sahifa atrofi (±2) va orasidagi "…" bo'shliq
+   ko'rsatiladi — istalgancha sahifa bo'lsa ham har doim ekranga sig'adi.
+   ========================================================================== #}
+{% macro admin_pagination(base_url, page, total_pages, extra_qs='') %}
+{% if total_pages > 1 %}
+<div class="admin-pagination">
+  {% if page > 1 %}
+  <a href="{{ base_url }}{{ page - 1 }}{{ extra_qs }}" class="admin-pagination-nav" aria-label="Oldingi">&laquo;</a>
+  {% endif %}
+  {% for p in range(1, total_pages + 1) %}
+    {% if p == 1 or p == total_pages or (p >= page - 2 and p <= page + 2) %}
+      <a href="{{ base_url }}{{ p }}{{ extra_qs }}" class="{{ 'active' if p == page }}">{{ p }}</a>
+    {% elif p == 2 or p == total_pages - 1 %}
+      <span class="admin-pagination-ellipsis">&hellip;</span>
+    {% endif %}
+  {% endfor %}
+  {% if page < total_pages %}
+  <a href="{{ base_url }}{{ page + 1 }}{{ extra_qs }}" class="admin-pagination-nav" aria-label="Keyingi">&raquo;</a>
+  {% endif %}
+</div>
+{% endif %}
+{% endmacro %}

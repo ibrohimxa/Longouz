@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Admin panel — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/admin-dash.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true">
+
+  <div class="app-shell">
+    {% include "_admin_sidebar.html" %}
+
+    <div class="app-content">
+
+      <div class="app-topbar">
+        <div>
+          <h1>Umumiy holat</h1>
+          <p>LongoUZ platformasining joriy ko'rsatkichlari</p>
+        </div>
+      </div>
+
+      <div class="admin-stat-grid">
+        <div class="admin-stat-card"><span class="admin-stat-value">{{ stats.total_users }}</span><span class="admin-stat-label">Jami foydalanuvchilar</span><small class="ad-delta">+{{ stats.signups_today }} bugun</small></div>
+        <div class="admin-stat-card"><span class="admin-stat-value">{{ stats.pro_users + stats.ultra_users }}</span><span class="admin-stat-label">Pullik tarif (Pro + Ultra)</span><small class="ad-delta">Pro {{ stats.pro_users }} · Ultra {{ stats.ultra_users }}</small></div>
+        <div class="admin-stat-card"><span class="admin-stat-value">{{ stats.total_quizzes }}</span><span class="admin-stat-label">Yechilgan testlar</span><small class="ad-delta">+{{ stats.quizzes_today }} bugun</small></div>
+        <div class="admin-stat-card"><span class="admin-stat-value">{{ stats.ai_messages_today }}</span><span class="admin-stat-label">Bugungi AI so'rovlari</span></div>
+        <div class="admin-stat-card"><span class="admin-stat-value">{{ stats.total_certs }}</span><span class="admin-stat-label">Berilgan sertifikatlar</span></div>
+        <div class="admin-stat-card"><span class="admin-stat-value">{{ stats.active_questions }}</span><span class="admin-stat-label">Faol savollar ({{ stats.total_questions }} jami)</span></div>
+        <a class="admin-stat-card" href="{{ admin_prefix }}/messages" style="text-decoration:none;color:inherit;"><span class="admin-stat-value" {% if ov.unread_messages %}style="color:var(--accent-gold)"{% endif %}>{{ ov.unread_messages }}</span><span class="admin-stat-label">O'qilmagan xabarlar</span></a>
+      </div>
+
+      <div class="ad-grid">
+        <section class="dash-panel ad-wide">
+          <h3>Oxirgi 14 kun faolligi</h3>
+          <p class="panel-sub"><i class="ad-dot a"></i> Yechilgan testlar &nbsp; <i class="ad-dot b"></i> Yangi ro'yxatdan o'tganlar</p>
+          <div id="ad-chart" class="ad-chart" role="img" aria-label="14 kunlik faollik grafigi"></div>
+        </section>
+
+        <section class="dash-panel">
+          <h3>Tariflar ulushi</h3>
+          {% set tot = (ov.plans.free + ov.plans.pro + ov.plans.ultra) or 1 %}
+          <div class="ad-donut-wrap">
+            <div class="ad-donut" style="--f: {{ (ov.plans.free * 100 / tot)|round(1) }}; --p: {{ (ov.plans.pro * 100 / tot)|round(1) }};"><b>{{ tot if (ov.plans.free + ov.plans.pro + ov.plans.ultra) else 0 }}</b><small>jami</small></div>
+            <ul class="ad-legend">
+              <li><i style="background:#8b949e"></i> Bepul <b>{{ ov.plans.free }}</b></li>
+              <li><i style="background:var(--accent-green)"></i> Pro <b>{{ ov.plans.pro }}</b></li>
+              <li><i style="background:var(--accent-gold)"></i> Ultra <b>{{ ov.plans.ultra }}</b></li>
+            </ul>
+          <button type="button" class="btn-secondary admin-btn-sm" id="diag-auth" style="margin-top:.6rem">Google va Cloudflare'ni haqiqiy tekshirish</button>
+          <div id="diag-out" style="margin-top:.5rem;font-size:.85rem;line-height:1.5"></div>
+          <script>
+          document.getElementById("diag-auth").addEventListener("click", async function () {
+            var out = document.getElementById("diag-out"); out.textContent = "Tekshirilmoqda…";
+            try {
+              var r = await fetch("{{ admin_prefix|default('/neo') }}/api/diagnose-auth", {method: "POST", credentials: "same-origin"});
+              var j = await r.json();
+              out.innerHTML = ["turnstile", "google"].map(function (k) { var x = j[k] || {}; return (x.ok ? "✅ " : "❌ ") + "<b>" + (k === "google" ? "Google" : "Turnstile") + ":</b> " + (x.msg || ""); }).join("<br>");
+            } catch (e) { out.textContent = "Xato: " + e; }
+          });
+          </script>
+          </div>
+        </section>
+
+        <section class="dash-panel">
+          <h3>Tizim holati</h3>
+          <ul class="ad-status">
+            {% for s in status %}<li><i class="ad-led {{ 'ok' if s.ok else 'off' }}"></i><span>{{ s.name }}</span><small>{{ s.hint }}</small></li>{% endfor %}
+          </ul>
+          <a href="{{ admin_prefix }}/ai" class="ad-link">AI kalitlarini sozlash →</a>
+        </section>
+
+        <section class="dash-panel">
+          <h3>Oxirgi foydalanuvchilar</h3>
+          <ul class="ad-list">
+            {% for u in ov.recent_users %}<li><span class="ad-av">{{ u.name[:1]|upper }}</span><span class="ad-main"><b>{{ u.name }}</b><small>{{ u.email }}</small></span><span class="plan-badge plan-badge-{{ u.plan }}">{{ u.plan|upper }}</span></li>
+            {% else %}<li class="ad-empty">Hali foydalanuvchi yo'q.</li>{% endfor %}
+          </ul>
+          <a href="{{ admin_prefix }}/users" class="ad-link">Barchasi →</a>
+        </section>
+
+        <section class="dash-panel">
+          <h3>Oxirgi testlar</h3>
+          <ul class="ad-list">
+            {% for q in ov.recent_quizzes %}<li><span class="ad-main"><b>{{ q.name }} · {{ q.topic }}</b><small>{{ q.subject }} · {{ q.when }}</small></span><span class="ad-score {{ 'good' if q.percent >= 70 else 'mid' if q.percent >= 40 else 'low' }}">{{ q.percent }}%</span></li>
+            {% else %}<li class="ad-empty">Hali test yechilmagan.</li>{% endfor %}
+          </ul>
+        </section>
+
+        <section class="dash-panel">
+          <h3>Eng qiyin mavzular</h3>
+          <p class="panel-sub">Barcha o'quvchilar bo'yicha o'rtacha natija eng past mavzular — savollarni shu yerdan yaxshilang.</p>
+          <ul class="ad-list">
+            {% for w in ov.weak %}<li><span class="ad-main"><b>{{ w.topic }}</b><small>{{ w.subject }} · {{ w.attempts }} urinish</small></span><span class="ad-score {{ 'low' if w.percent < 60 else ('mid' if w.percent < 80 else 'good') }}">{{ w.percent }}%</span></li>
+            {% else %}<li class="ad-empty">Ma'lumot yetarli emas (kamida 2 urinish kerak).</li>{% endfor %}
+          </ul>
+        </section>
+      </div>
+
+      <div class="dash-panel" style="margin-top:24px;">
+        <h3>Savollar banki — fan bo'yicha (umumiy)</h3>
+        <p class="panel-sub">Har bir fanda nechta faol savol va mavzu bor. Maqsad: har fan uchun ~{{ ov.bank_target }} savol.</p>
+        <div class="ad-bars">
+          {% for row in subject_breakdown %}
+          <a href="{{ admin_prefix }}/questions?subject={{ row.subject }}" class="ad-bar">
+            <span class="ad-bar-name">{{ row.name }} <small>{{ row.topic_count }} mavzu</small></span>
+            <span class="ad-bar-track"><i style="--w: {{ row.percent }}%"></i></span>
+            <strong>{{ row.question_count }}</strong>
+          </a>
+          {% else %}<p class="panel-sub">Hali savol yo'q.</p>{% endfor %}
+        </div>
+      </div>
+
+      <div class="dash-panel" style="margin-top:24px;">
+        <h3>Savollar banki — fan/rejim bo'yicha (batafsil)</h3>
+        <p class="panel-sub">Qaysi fan/rejimda savol kamligini shu yerdan ko'rasiz — <a href="{{ admin_prefix }}/questions">to'liq boshqarish uchun shu yerga o'ting</a>.</p>
+        <div class="admin-bank-summary">
+          {% for row in bank_summary %}
+          <a href="{{ admin_prefix }}/questions?subject={{ row.subject }}&mode={{ row.mode }}" class="admin-bank-chip {{ 'is-low' if row.count < 10 }}">
+            <span>{{ subject_names.get(row.subject, row.subject) }} · {{ mode_names.get(row.mode, row.mode) }}</span>
+            <strong>{{ row.count }}</strong>
+          </a>
+          {% else %}
+          <p class="panel-sub">Hali savol yo'q.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="dash-panel" style="margin-top:24px;">
+        <h3>Tezkor boshqaruv</h3>
+        <p class="panel-sub">Tarif limitlari va sayt e'loni — server qayta ishga tushmasdan darhol amal qiladi.</p>
+        <a href="{{ admin_prefix }}/settings" class="btn-primary">Sozlamalarni ochish →</a>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/app.js"></script>
+  <script id="ad-data" type="application/json">{{ {"days": ov.days, "quizzes": ov.quizzes, "signups": ov.signups}|tojson }}</script>
+  <script src="/static/admin-dash.js"></script>
+</body>
+</html>

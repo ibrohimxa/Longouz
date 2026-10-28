@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Import — Admin — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/admin-dash.css">
+  <link rel="stylesheet" href="/static/admin.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true">
+  <div class="app-shell">
+    {% include "_admin_sidebar.html" %}
+    <div class="app-content">
+
+      <div class="app-topbar">
+        <div>
+          <h1>Savollarni import qilish</h1>
+          <p>PDF, JSON, CSV yoki matn yuklang — tizim fan va mavzuni o'zi aniqlaydi, savoli kam mavzularga ustuvorlik beradi</p>
+        </div>
+      </div>
+
+      {% if message %}<div class="form-success">{{ message }}</div>{% endif %}
+      {% set qtab = 'import' %}{% include "_admin_qtabs.html" %}
+      {% for w in (warns or []) %}<div class="form-error">{{ w }}</div>{% endfor %}
+
+      {% if not preview %}
+      <form method="post" action="{{ admin_prefix }}/import/preview" enctype="multipart/form-data" class="admin-question-form import-form" id="imp-form">
+        <div class="admin-form-row">
+          <div class="field">
+            <label for="imp-mode">Rejim</label>
+            <select name="mode" id="imp-mode" onchange="location.href='{{ admin_prefix }}/import?mode='+this.value">
+              {% for m in modes %}<option value="{{ m.code }}" {{ "selected" if m.code == mode }}>{{ m.name }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="field">
+            <label for="imp-subject">Fan</label>
+            <select name="subject" id="imp-subject">
+              <option value="auto" selected>Avtomatik (savol matniga qarab)</option>
+              {% for s in subjects %}<option value="{{ s.code }}">{{ s.name }}</option>{% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="imp-topic">Mavzu (ixtiyoriy — bo'sh qoldirsangiz avtomatik aniqlanadi, fan tanlangan bo'lsa)</label>
+          <input type="text" name="topic" id="imp-topic" placeholder="masalan: Algebra">
+        </div>
+
+        <div class="drop-zone" id="drop-zone">
+          <input type="file" name="file" id="imp-file" multiple accept=".pdf,.docx,.xlsx,.json,.csv,.tsv,.txt,.md,.html,.htm,.zip">
+          <div class="drop-ic">⬆</div>
+          <b>Fayllarni shu yerga tashlang yoki tanlash uchun bosing</b>
+          <small>PDF · Word (.docx) · Excel (.xlsx) · JSON · CSV · TXT · HTML · <b>ZIP</b> (ichidagi hamma fayl ochiladi) — bir nechtasini birdan yuklash mumkin</small>
+          <ul class="drop-list" id="drop-list"></ul>
+        </div>
+
+        <div class="field">
+          <label for="imp-pasted">...yoki matn / JSON ni shu yerga joylashtiring</label>
+          <textarea name="pasted" id="imp-pasted" rows="5" placeholder="1. Savol matni? A) ... B) ... C) ... D) ...&#10;&#10;Javoblar: 1-B 2-A"></textarea>
+        </div>
+        <div class="admin-form-actions">
+          <button type="submit" class="btn-primary" id="imp-submit">Ko'rib chiqish va takrorlarni tekshirish</button>
+        </div>
+        <details class="admin-form-hint" style="margin-top:14px;">
+          <summary>Qo'llab-quvvatlanadigan formatlar</summary>
+          <p><b>PDF / Word / matn:</b> "1. Savol? A) ... B) ... C) ... D) ..." ko'rinishida; to'g'ri javob oxiridagi "Javoblar: 1-B 2-A ..." bo'limida yoki savol ostida "Javob: B" deb yozilgan bo'lishi kerak. Izoh: "Izoh: ...".</p>
+          <p><b>JSON:</b> <code>[{"question":"...","options":["a","b","c","d"],"correct_index":1,"explanation":"...","topic":"ixtiyoriy"}]</code></p>
+          <p><b>CSV / Excel:</b> ustunlar: question, A, B, C, D, correct (A-D), explanation, topic.</p>
+          <p><b>ZIP:</b> ichida istalgan qo'llab-quvvatlanadigan fayllar (papkalar bilan ham). Skaner qilingan (rasm) PDF'dan matn o'qib bo'lmaydi.</p>
+          <p><b>Takrorlar:</b> bazadagi (har qanday fan/rejimdagi) va yuklangan fayllar orasidagi bir xil savollar aniqlanadi: bittasi olinadi, qolganlari o'tkazib yuboriladi va hisobotda fayl nomi, sana va savol raqami ko'rsatiladi.</p>
+        </details>
+      </form>
+
+      {% if sources %}
+      <h2 style="margin-top:28px;">Import qilingan fayllar</h2>
+      <p class="admin-form-hint">Har bir fayldan kelgan savollarni alohida ko'rish, nashr qilish, private qilish yoki butunlay o'chirish mumkin.</p>
+      <div class="admin-users-table-wrap">
+        <table class="admin-users-table">
+          <thead><tr><th>Fayl</th><th>Savollar</th><th>Private</th><th>Sana</th><th>Amallar</th></tr></thead>
+          <tbody>
+            {% for s in sources %}
+            <tr>
+              <td style="max-width:320px;overflow-wrap:anywhere">{{ s.name }}</td><td>{{ s.count }}</td><td>{{ s.private }}</td>
+              <td>{{ s.date.strftime("%d.%m.%Y %H:%M") if s.date else "—" }}</td>
+              <td class="admin-users-actions">
+                <a class="btn-secondary admin-btn-sm" href="{{ admin_prefix }}/questions?source={{ s.name|urlencode }}">Ko'rish</a>
+                <form method="post" action="{{ admin_prefix }}/questions/source-action" class="admin-inline-form"><input type="hidden" name="source" value="{{ s.name }}"><input type="hidden" name="action" value="publish"><button class="btn-secondary admin-btn-sm" type="submit">Nashr</button></form>
+                <form method="post" action="{{ admin_prefix }}/questions/source-action" class="admin-inline-form"><input type="hidden" name="source" value="{{ s.name }}"><input type="hidden" name="action" value="private"><button class="btn-secondary admin-btn-sm" type="submit">Private</button></form>
+                <form method="post" action="{{ admin_prefix }}/questions/source-action" class="admin-inline-form" onsubmit="return confirm('Bu fayldan kelgan barcha savollar DOIMIY o\'chiriladi. Davom etasizmi?');"><input type="hidden" name="source" value="{{ s.name }}"><input type="hidden" name="action" value="delete"><button class="admin-btn-sm admin-btn-danger" type="submit">O'chirish</button></form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+
+      <h2 style="margin-top:28px;">Savoli kam mavzular ({{ thin_total }} ta, 15 dan kam)</h2>
+      <div class="admin-users-table-wrap">
+        <table class="admin-users-table">
+          <thead><tr><th>Fan</th><th>Mavzu</th><th>Savol soni</th></tr></thead>
+          <tbody>
+            {% for t in thin %}<tr><td>{{ t.subject_name }}</td><td>{{ t.topic }}</td><td>{{ t.count }}</td></tr>
+            {% else %}<tr><td colspan="3" style="text-align:center; color:var(--ink-soft); padding:18px;">Hamma mavzuda kamida 15 ta savol bor.</td></tr>{% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% else %}
+      <div class="imp-stats">
+        <div class="imp-stat"><b>{{ stats.total }}</b><span>jami topildi ({{ stats.files }} ta fayl)</span></div>
+        <div class="imp-stat ok"><b>{{ stats.new }}</b><span>yangi savol</span></div>
+        <div class="imp-stat warn"><b>{{ stats.dup_db }}</b><span>bazada allaqachon bor</span></div>
+        <div class="imp-stat warn"><b>{{ stats.dup_file }}</b><span>fayllar ichida takror</span></div>
+        <div class="imp-stat bad"><b>{{ stats.no_answer }}</b><span>javobi aniqlanmagan</span></div>
+      </div>
+
+      <div class="imp-filter" id="imp-filter">
+        <button type="button" class="achip active" data-f="all">Hammasi ({{ stats.total }})</button>
+        <button type="button" class="achip" data-f="new">Yangi ({{ stats.new }})</button>
+        <button type="button" class="achip" data-f="dupdb">Bazada bor ({{ stats.dup_db }})</button>
+        <button type="button" class="achip" data-f="dupfile">Fayl ichida takror ({{ stats.dup_file }})</button>
+        <button type="button" class="achip" data-f="noans">Javobsiz ({{ stats.no_answer }})</button>
+        <input type="search" id="imp-search" placeholder="Savol yoki fayl nomi bo'yicha qidirish...">
+      </div>
+
+      {% if stats.dup_db or stats.dup_file %}
+      <details class="imp-report" open>
+        <summary>Takrorlar hisoboti — {{ stats.dup_db + stats.dup_file }} ta savol qo'shilmaydi</summary>
+        <div class="admin-users-table-wrap">
+          <table class="admin-users-table" id="dup-table">
+            <thead><tr><th>Yuklangan fayl</th><th>№</th><th>Savol</th><th>Takror turi</th><th>Qayerdagi bilan bir xil</th><th>Sana</th></tr></thead>
+            <tbody>
+              {% for it in preview if it.dup %}
+              <tr>
+                <td style="overflow-wrap:anywhere">{{ it.src }}</td><td>{{ it.no }}</td>
+                <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ it.question }}">{{ it.question }}</td>
+                {% if it.dup.type == "db" %}
+                <td><span class="admin-plan-badge admin-plan-pro">bazada</span></td>
+                <td>#{{ it.dup.id }} · {{ it.dup.subject }} / {{ it.dup.mode }} / {{ it.dup.topic }}{% if it.dup.src %} · fayl: {{ it.dup.src }} №{{ it.dup.no }}{% endif %}</td>
+                <td>{{ it.dup.date }}</td>
+                {% else %}
+                <td><span class="admin-plan-badge admin-plan-free">fayl ichida</span></td>
+                <td>{{ it.dup.src }} · №{{ it.dup.no }} (birinchisi olinadi)</td><td>shu yuklash</td>
+                {% endif %}
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <button type="button" class="btn-secondary admin-btn-sm" id="dup-csv">Hisobotni CSV qilib yuklab olish</button>
+      </details>
+      {% endif %}
+
+      <form method="post" action="{{ admin_prefix }}/import/commit" class="import-preview">
+        <input type="hidden" name="mode" value="{{ mode }}">
+        <input type="hidden" name="count" value="{{ preview|length }}">
+        <p class="admin-form-hint">Takroriy savollar avtomatik <b>belgilanmagan</b> — qo'shilmaydi. Yangi savollarda fan, mavzu va to'g'ri javobni o'zgartirishingiz mumkin. To'g'ri javobi aniqlanmaganlar belgilanmagan holda turadi.</p>
+        <div class="imp-opts">
+          <label class="field-checkbox"><span>Holat:</span>
+            <select name="status"><option value="published">Nashr qilish (o'quvchilarga ko'rinadi)</option><option value="private">Private / qoralama (faqat admin ko'radi)</option></select>
+          </label>
+          <label class="field-checkbox"><input type="checkbox" name="notify" checked> Nashr qilinsa, foydalanuvchilarga bildirishnoma yuborilsin</label>
+          <label class="field-checkbox"><input type="checkbox" id="chk-all-new" checked> Barcha yangilarini belgilash</label>
+        </div>
+        {% for it in preview %}
+        {% set i = loop.index0 %}
+        {% set kind = ('dupdb' if it.dup.type == 'db' else 'dupfile') if it.dup else ('noans' if it.correct_index is none else 'new') %}
+        <div class="import-card {{ 'import-card-warn' if (it.correct_index is none and not it.dup) }} {{ 'import-card-dup' if it.dup }}" data-kind="{{ kind }}" data-text="{{ (it.question ~ ' ' ~ (it.src or ''))|lower }}">
+          <div class="import-card-head">
+            <label><input type="checkbox" name="inc_{{ i }}" class="inc-box" data-kind="{{ kind }}" {{ "checked" if (it.correct_index is not none and not it.dup) }}> <b>#{{ loop.index }}</b></label>
+            <span class="imp-src" title="Fayl va savol raqami">{{ it.src }} · №{{ it.no }}</span>
+            <select name="subject_{{ i }}">
+              {% for s in subjects %}<option value="{{ s.code }}" {{ "selected" if it.subject == s.code }}>{{ s.name }}</option>{% endfor %}
+            </select>
+            <input type="text" name="topic_{{ i }}" value="{{ it.topic }}" list="topics-{{ it.subject }}" placeholder="Mavzu">
+            {% if it.auto and not it.dup %}<span class="admin-plan-badge admin-plan-pro">avto</span>{% endif %}
+            {% if it.dup %}
+              <span class="admin-plan-badge admin-plan-free">TAKROR</span>
+              <label class="imp-force"><input type="checkbox" name="force_{{ i }}"> baribir qo'shish</label>
+            {% endif %}
+          </div>
+          {% if it.dup %}
+          <div class="imp-dupnote">
+            {% if it.dup.type == "db" %}Bazada bor: <b>#{{ it.dup.id }}</b> · {{ it.dup.subject }} / {{ it.dup.mode }} / {{ it.dup.topic }} · {{ it.dup.date }}{% if it.dup.src %} · fayl: {{ it.dup.src }} №{{ it.dup.no }}{% endif %}
+            {% else %}Shu yuklashda takror: <b>{{ it.dup.src }}</b> faylidagi <b>№{{ it.dup.no }}</b> bilan bir xil (birinchisi saqlanadi).{% endif %}
+          </div>
+          {% endif %}
+          <input type="hidden" name="src_{{ i }}" value="{{ it.src }}"><input type="hidden" name="no_{{ i }}" value="{{ it.no }}">
+          <textarea name="q_{{ i }}" rows="2">{{ it.question }}</textarea>
+          {% for k in range(4) %}
+          <div class="admin-option-row">
+            <input type="radio" name="correct_{{ i }}" value="{{ k }}" {{ "checked" if it.correct_index == k }}>
+            <input type="text" name="opt_{{ i }}_{{ k }}" value="{{ it.options[k] }}">
+          </div>
+          {% endfor %}
+          <input type="text" name="exp_{{ i }}" value="{{ it.explanation }}" placeholder="Izoh (ixtiyoriy)">
+        </div>
+        {% endfor %}
+        {% for sc, tlist in topics_by_subject.items() %}
+        <datalist id="topics-{{ sc }}">{% for t in tlist %}<option value="{{ t }}">{% endfor %}</datalist>
+        {% endfor %}
+        <div class="admin-form-actions imp-sticky">
+          <button type="submit" class="btn-primary">Tanlanganlarni bazaga qo'shish (<span id="sel-count">{{ stats.new - stats.no_answer }}</span>)</button>
+          <a href="{{ admin_prefix }}/import?mode={{ mode }}" class="btn-secondary">Bekor qilish</a>
+        </div>
+      </form>
+      {% endif %}
+
+    </div>
+  </div>
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/app.js"></script>
+  <script src="/static/admin-import.js"></script>
+</body>
+</html>
