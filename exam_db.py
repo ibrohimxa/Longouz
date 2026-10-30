@@ -327,7 +327,7 @@ async def seed_step(budget: float = 40.0) -> dict:
         import content
     except ImportError:
         return {"done": True, "left": 0, "added": 0}
-    if not await db.claim_lock("seed_lock", ttl=100):
+    if not await db.claim_lock("seed_lock", ttl=70):
         return {"done": False, "left": -1, "added": 0, "busy": True}
     started = time.monotonic()
     packs = content.load_packs()

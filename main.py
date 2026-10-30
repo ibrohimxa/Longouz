@@ -259,6 +259,9 @@ def _kick_seed(request: Request):
     """Vercel: tayyor savollar bazasi hali to'liq yuklanmagan bo'lsa, fon vazifasi sifatida davom ettiradi.
     (Fon vazifa instans muzlatilsa to'xtashi mumkin — shuning uchun sahifalar /api/seed-step ni ham chaqiradi.)"""
     global _SEED_TASK
+    # v224: Vercel javob qaytgach fon vazifasini muzlatadi va u qulfni 100 s band qilib qo'yardi.
+    # Endi yuklash faqat /api/seed-step so'rovlari ichida bajariladi (sahifalar uni o'zi chaqiradi).
+    return
     if _SEED_DONE or request.url.path.startswith(("/static", "/api/seed-step")):
         return
     if _SEED_TASK is not None and not _SEED_TASK.done():
