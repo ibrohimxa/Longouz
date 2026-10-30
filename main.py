@@ -122,6 +122,27 @@ _CSP_POLICY = (
 from starlette.middleware.gzip import GZipMiddleware as _GZip
 app.add_middleware(_GZip, minimum_size=1200, compresslevel=5)
 
+# v223: yagona manzil — eski *.vercel.app manzillari (longouz-v1xf..., longo-uz) asosiy manzilga yo'naltiriladi.
+# Asosiy manzil SITE_BASE_URL dan olinadi (masalan https://longouz-uz.vercel.app). Faqat production'da ishlaydi.
+def _canonical_host() -> str:
+    from urllib.parse import urlsplit
+    u = (os.getenv("SITE_BASE_URL") or "").strip()
+    return (urlsplit(u).hostname or "").lower() if u.startswith("http") else ""
+
+
+@app.middleware("http")
+async def canonical_host_middleware(request: Request, call_next):
+    if runtime.IS_VERCEL and os.getenv("VERCEL_ENV", "production") == "production":
+        canon = _canonical_host()
+        host = (request.headers.get("host") or "").split(":")[0].lower()
+        if canon and canon.endswith(".vercel.app") and host and host != canon and host.endswith(".vercel.app"):
+            target = f"https://{canon}{request.url.path}"
+            if request.url.query:
+                target += "?" + request.url.query
+            return RedirectResponse(target, status_code=308)
+    return await call_next(request)
+
+
 @app.middleware("http")
 async def security_headers_middleware(request: Request, call_next):
     if runtime.IS_VERCEL:
