@@ -14,14 +14,14 @@
    orqali tugaguncha davom ettiradi. Tugagach bir marta eslab qoladi va boshqa so'ramaydi. */
 (function () {
   try {
-    if (localStorage.getItem("lz_seed_v215") === "1") return;
+    if (localStorage.getItem("lz_seed_v224") === "1") return;
   } catch (e) {}
   if (!window.fetch || /^\/(neo|static)/.test(location.pathname)) return;
   var tries = 0;
   function step() {
     tries++;
     fetch("/api/seed-step", { credentials: "same-origin" }).then(function (r) { return r.json(); }).then(function (j) {
-      if (j && j.done) { try { localStorage.setItem("lz_seed_v215", "1"); } catch (e) {} return; }
+      if (j && j.done) { try { localStorage.setItem("lz_seed_v224", "1"); } catch (e) {} return; }
       if (tries < 40) setTimeout(step, (j && j.busy) ? 4000 : 800);
     }).catch(function () { if (tries < 40) setTimeout(step, 5000); });
   }
