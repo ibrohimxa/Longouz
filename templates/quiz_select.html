@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css">
   <link rel="stylesheet" href="/static/exam.css">
+  <link rel="stylesheet" href="/static/features215.css">
   <script src="/static/theme-init.js"></script>
 </head>
 <body data-logged-in="true">
@@ -42,9 +43,17 @@
       <section class="qs-panel" id="qs-panel-mode">
         <p class="qs-hint">Test shu andozada tuziladi — savollar {{ default_level_name }} daraja bo'yicha tanlanadi.</p>
         <div class="mode-select-grid" id="qs-mode-grid"></div>
+        <a class="f215-banner" href="/dtm-blok">
+          <span class="f215-banner-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4"/></svg></span>
+          <span><b>DTM haqiqiy format — 90 savollik blok mock</b><small>3 majburiy fan + 2 ixtisoslik fani, 180 daqiqa, maksimal 189 ball</small></span>
+        </a>
       </section>
 
       <section class="qs-panel qs-hidden" id="qs-panel-topics">
+        <a class="f215-banner" id="qs-adaptive" href="#">
+          <span class="f215-banner-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0112 4.5v15a2.5 2.5 0 01-4.96.44 2.5 2.5 0 01-2.96-3.08 3 3 0 01-.34-5.58 2.5 2.5 0 011.32-4.24 2.5 2.5 0 011.98-3A2.5 2.5 0 019.5 2z"/><path d="M14.5 2A2.5 2.5 0 0012 4.5v15a2.5 2.5 0 004.96.44 2.5 2.5 0 002.96-3.08 3 3 0 00.34-5.58 2.5 2.5 0 00-1.32-4.24 2.5 2.5 0 00-1.98-3A2.5 2.5 0 0014.5 2z"/></svg></span>
+          <span><b>AI adaptiv test</b><small>To'g'ri javobda qiyinroq, xatoda osonroq savol beradi — bilim darajangiz aniq o'lchanadi</small></span>
+        </a>
         <div class="ielts-tabs qs-hidden" id="qs-ielts-tabs">
           <span class="ielts-tab is-active" data-tab="question">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
@@ -124,6 +133,17 @@
 
     const state = { subject: DEFAULT_SUBJECT, level: DEFAULT_LEVEL, mode: null };
 
+    // Bazada savollar hali yo'q bo'lsa (yangi joylash) — serverda bo'laklab yuklaymiz va mavzularni qayta o'qiymiz.
+    let seedTries = 0;
+    function seedThenReload(list) {
+      list.innerHTML = "<p class='qs-hint'>Savollar bazasi tayyorlanmoqda… bir necha soniya kuting.</p>";
+      if (seedTries >= 25) { list.innerHTML = "<p class='qs-hint'>Bu fan uchun mavzular topilmadi. Sahifani yangilab ko'ring yoki admin bilan bog'laning.</p>"; return; }
+      seedTries++;
+      fetch("/api/seed-step", { credentials: "same-origin" }).then(r => r.json()).then(j => {
+        setTimeout(() => loadTopics(), (j && j.done) ? 300 : 1500);
+      }).catch(() => setTimeout(() => loadTopics(), 3000));
+    }
+
     function showStep(n) {
       document.querySelectorAll(".qs-panel").forEach((p) => {
         p.classList.add("qs-hidden");
@@ -146,6 +166,8 @@
       } else {
         title.textContent = subjectLabel;
         subtitle.textContent = "Mavzuni tanlang — ketma-ket ishlang";
+        const ad = document.getElementById("qs-adaptive");
+        if (ad) ad.href = `/quiz/take?subject=${state.subject}&level=${state.level}&mode=${state.mode}&adaptive=1&n=20`;
       }
     }
 
@@ -388,7 +410,7 @@
           renderPlanStrip(data);
           renderExamInfo();
           renderDrills(data);
-          if (!data.grades.length) { list.innerHTML = "<p class='qs-hint'>Mavzular tayyorlanmoqda.</p>"; return; }
+          if (!data.grades.length) { seedThenReload(list); return; }
           renderGradeTabs(data);
           renderGradeTopics(data);
           return;
@@ -396,7 +418,7 @@
         setTieredUi(false);
 
         if (!data.topics.length) {
-          list.innerHTML = "<p class='qs-hint'>Bu fan uchun mavzular hali tayyorlanmoqda.</p>";
+          seedThenReload(list);
           return;
         }
 

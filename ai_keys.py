@@ -18,7 +18,11 @@ _loaded_mtime: float | None = None
 
 
 def _clean(value: str | None) -> str:
-    return (value or "").strip().strip('"').strip("'").strip()
+    """Tirnoq (oddiy, qo'sh, "aqlli"), bo'sh joy, yangi qator va 'KEY=' prefiksini olib tashlaydi."""
+    v = (value or "").replace("\ufeff", "").strip()
+    if "=" in v[:40] and v.split("=", 1)[0].strip().isupper() and v.split("=", 1)[0].strip().replace("_", "").isalnum():
+        v = v.split("=", 1)[1].strip()          # "GEMINI_API_KEY=AIza..." ko'rinishida yopishtirilgan bo'lsa
+    return v.strip().strip("\"'`\u201c\u201d\u2018\u2019").strip()
 
 
 def reload_env(force: bool = False) -> None:
@@ -42,9 +46,18 @@ def reload_env(force: bool = False) -> None:
     _loaded_mtime = mtime
 
 
+def _config_default(name: str) -> str:
+    """ai_key_defaults.py dagi zaxira qiymat (env / .env / admin panelda kalit bo'lmasa)."""
+    try:
+        import ai_key_defaults
+        return _clean(ai_key_defaults.DEFAULT_KEYS.get(name, ""))
+    except Exception:  # noqa: BLE001
+        return ""
+
+
 def get(name: str, default: str = "") -> str:
     reload_env()
-    return _clean(os.environ.get(name)) or default
+    return _clean(os.environ.get(name)) or _config_default(name) or default
 
 
 def save(name: str, value: str) -> None:

@@ -46,11 +46,13 @@
         </div>
 
         {% if plan and plan != 'free' %}<div class="au-plan">{{ plan|upper }} rejasi tanlandi</div>{% endif %}
+        {% if subject_name %}<div class="au-plan">Tanlangan fan: {{ subject_name }}</div>{% endif %}
         {% if error %}<div class="au-error" role="alert">{{ error }}</div>{% endif %}
         {% include "_auth_social.html" %}
 
         <form method="post" action="/register" id="auth-form">
           <input type="hidden" name="plan" value="{{ plan or 'free' }}">
+          <input type="hidden" name="subject" value="{{ subject or '' }}">
           <div class="au-field">
             <label for="first_name">Ismingiz</label>
             <div class="au-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="3.8"/><path d="M4.5 20.5a7.5 7.5 0 0115 0"/></svg><input type="text" id="first_name" name="first_name" placeholder="Ismingizni kiriting" autocomplete="name" required></div>
@@ -71,7 +73,7 @@
           </div>
 
           {% if google_enabled() %}
-          <a href="/auth/google/login?intent=register" class="au-google">{% include "_auth_google_icon.html" %}Google bilan ro'yxatdan o'tish</a>
+          <a href="/auth/google/login{% if subject %}?subject={{ subject }}{% endif %}" class="au-google">{% include "_auth_google_icon.html" %}Google bilan davom etish</a>
           <div class="au-or"><span>yoki</span></div>
           {% endif %}
 

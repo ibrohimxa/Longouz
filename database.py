@@ -40,7 +40,7 @@ WEB_DB_PATH = "longouz_web.db"
 # mo'ljallangan) manzillar ham avtomatik "postgresql+asyncpg://" ga
 # almashtiriladi — .env'ga ularni O'ZGARTIRMASDAN nusxalab qo'yish kifoya.
 # ---------------------------------------------------------------------------
-_raw_database_url = os.getenv("DATABASE_URL", "").strip()
+_raw_database_url = (os.getenv("DATABASE_URL") or os.getenv("POSTGRES_URL") or os.getenv("NEON_DATABASE_URL") or "").strip()
 
 if _raw_database_url:
     if _raw_database_url.startswith("postgres://"):
@@ -78,7 +78,10 @@ else:
 # 20 soniya davomida bir xil foydalanuvchi ma'lumoti keshdan qaytariladi,
 # bu bazaga bosimni kamaytiradi va sayt tezroq ishlaydi.
 # ---------------------------------------------------------------------------
-CACHE_TTL_SECONDS = 20
+# Serverless (Vercel)da har instansning o'z xotirasi bor — keshlangan foydalanuvchi boshqa instansda eskirgan bo'lib qoladi
+# (onboarding/tarif o'zgargani ko'rinmay, qayta 'kiring/tanlang' deb so'rashiga sabab bo'lardi). Shu sababli u yerda kesh o'chiq.
+import runtime as _rt_cache
+CACHE_TTL_SECONDS = 0 if _rt_cache.IS_VERCEL else 5
 _user_cache: dict[int, tuple[float, "WebUser"]] = {}
 
 
@@ -106,7 +109,7 @@ def _cache_invalidate(user_id: int):
 # ---------------------------------------------------------------------------
 
 SUBJECTS = [
-    {"code": "native",    "name": "O'zbek tili va Adabiyot", "icon": "pen"},
+    {"code": "native",    "name": "Ona tili va adabiyot", "icon": "pen"},
     {"code": "math",      "name": "Matematika",               "icon": "ruler"},
     {"code": "english",   "name": "Ingliz tili",               "icon": "globe"},
     {"code": "russian",   "name": "Rus tili",                  "icon": "book"},
@@ -161,9 +164,9 @@ PLAN_LIMITS = {
     # 3x bo'lsin") — ilgari "cheksiz" edi, endi aniq raqam: 35*3=105 savol/
     # mavzu, 30*3=90 kunlik AI savol. Mavzular soni ham xuddi shunday (pastga,
     # get_topic_unlock_count'ga qarang: 100*3=300).
-    "free":  {"ai_daily": 15, "full_mock_access": False, "topic_question_count": 10, "ai_window_hours": 3},
-    "pro":   {"ai_daily": 30, "full_mock_access": True, "topic_question_count": 16, "ai_window_hours": 5},
-    "ultra": {"ai_daily": 90, "full_mock_access": True, "topic_question_count": 40, "ai_window_hours": 5},
+    "free":  {"ai_daily": 15, "full_mock_access": False, "topic_question_count": 25, "ai_window_hours": 3},
+    "pro":   {"ai_daily": 30, "full_mock_access": True, "topic_question_count": 60, "ai_window_hours": 5},
+    "ultra": {"ai_daily": 90, "full_mock_access": True, "topic_question_count": 125, "ai_window_hours": 5},
 }
 
 
@@ -512,30 +515,6 @@ class SupportMessage(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 
-class QuestionReport(Base):
-    """Foydalanuvchi test paytida savol haqida yuborgan SHIKOYAT (xato javob, imlo, noaniq savol va h.k.).
-    Admin panelda ko'rinadi; Claude tahlil qiladi va tuzatish taklif qiladi (yoki avto-rejimda o'zi tuzatadi)."""
-    __tablename__ = "question_reports"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(Integer, index=True)
-    question_id: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)
-    subject: Mapped[str] = mapped_column(String(30), default="")
-    mode: Mapped[str] = mapped_column(String(20), default="")
-    topic: Mapped[str] = mapped_column(String(150), default="")
-    question_text: Mapped[str] = mapped_column(Text, default="")
-    options_json: Mapped[str] = mapped_column(Text, default="[]")
-    correct_index: Mapped[int] = mapped_column(Integer, default=-1)
-    category: Mapped[str] = mapped_column(String(30), default="other")
-    details: Mapped[str] = mapped_column(String(1500), default="")
-    status: Mapped[str] = mapped_column(String(20), default="new", index=True)  # new | analyzed | fixed | hidden | dismissed
-    ai_json: Mapped[str] = mapped_column(Text, default="")       # Claude tahlili (JSON)
-    original_json: Mapped[str] = mapped_column(Text, default="")  # tuzatishdan oldingi savol (qaytarish uchun)
-    resolution: Mapped[str] = mapped_column(String(300), default="")
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    resolved_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-
-
 class BalanceTransaction(Base):
     """
     Balans (hamyon) to'ldirish tarixi — hozircha faqat demo/vizual: haqiqiy
@@ -702,6 +681,37 @@ class AdminLog(Base):
     action: Mapped[str] = mapped_column(String(60))
     detail: Mapped[str] = mapped_column(String(500), default="")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class QuestionReport(Base):
+    """Foydalanuvchi test paytida yuborgan SHIKOYAT (savol bo'yicha kamchilik / xato). Admin panelda ko'rib chiqiladi,
+    Claude tahlil qiladi va (admin tasdiqlasa yoki avto-rejimda) savol tuzatiladi."""
+    __tablename__ = "question_reports"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(Integer, index=True)
+    user_name: Mapped[str] = mapped_column(String(120), default="")
+    question_id: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)
+    subject: Mapped[str] = mapped_column(String(30), default="", index=True)
+    mode: Mapped[str] = mapped_column(String(20), default="")
+    topic: Mapped[str] = mapped_column(String(150), default="")
+    question_text: Mapped[str] = mapped_column(Text, default="")
+    options_json: Mapped[str] = mapped_column(Text, default="")
+    correct_index: Mapped[int] = mapped_column(Integer, default=-1)
+    explanation: Mapped[str] = mapped_column(Text, default="")
+    selected_answer: Mapped[str] = mapped_column(String(300), default="")
+    category: Mapped[str] = mapped_column(String(40), default="boshqa")
+    message: Mapped[str] = mapped_column(Text, default="")
+    # new | analyzed | fixed | dismissed
+    status: Mapped[str] = mapped_column(String(20), default="new", index=True)
+    ai_verdict: Mapped[str] = mapped_column(String(20), default="")      # error | ok | unclear
+    ai_confidence: Mapped[int] = mapped_column(Integer, default=0)
+    ai_note: Mapped[str] = mapped_column(Text, default="")
+    ai_fix_json: Mapped[str] = mapped_column(Text, default="")
+    admin_note: Mapped[str] = mapped_column(String(500), default="")
+    attempt_token: Mapped[str] = mapped_column(String(64), default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+    resolved_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
 
 class SiteSetting(Base):
@@ -916,8 +926,8 @@ async def init_web_db():
         import runtime
         import exam_db
         if runtime.IS_VERCEL and os.getenv("SEED_ON_START", "") != "1":
-            # Serverless: katta seeding so'rov vaqtidan oshib ketadi — admin paneldagi "Bazani yangilash"
-            # tugmasi yoki cloud_setup.py orqali bir marta bajariladi.
+            # Serverless: katta seeding bitta so'rovga sig'maydi — u BO'LAKLAB, avtomatik bajariladi
+            # (main.py: /api/seed-step va birinchi so'rovlardagi fon vazifasi). Bu yerda bloklamaymiz.
             pass
         else:
             await exam_db.seed_exam_content()
@@ -946,19 +956,106 @@ async def set_setting(key: str, value: str) -> None:
         await session.commit()
 
 
+async def claim_lock(name: str, ttl: int = 90) -> bool:
+    """Oddiy taqsimlangan qulf (SiteSetting orqali): bir vaqtda bitta instans ishlasin. ttl — soniya (qulf eskirishi)."""
+    key = "lock:" + name
+    now = int(time.time())
+    async with async_session() as session:
+        row = await session.get(SiteSetting, key)
+        if row is None:
+            try:
+                session.add(SiteSetting(key=key, value=str(now), updated_at=datetime.utcnow()))
+                await session.commit()
+                return True
+            except Exception:  # noqa: BLE001 — boshqa instans birinchi bo'lib yozdi
+                await session.rollback()
+                return False
+        try:
+            last = int(row.value or "0")
+        except ValueError:
+            last = 0
+        if now - last < ttl:
+            return False
+        res = await session.execute(
+            SiteSetting.__table__.update().where(SiteSetting.key == key, SiteSetting.value == row.value)
+            .values(value=str(now), updated_at=datetime.utcnow())
+        )
+        await session.commit()
+        return (res.rowcount or 0) > 0
+
+
+async def release_lock(name: str) -> None:
+    await set_setting("lock:" + name, "0")
+
+
 # --- Kalit/sozlamalar (AI kalitlari, Google, Turnstile) — admin panel orqali bazada saqlanadi.
 #     Vercel'da .env yozib bo'lmaydi, shuning uchun qiymatlar SiteSetting'da ("env:NAME") turadi
 #     va ishga tushganda os.environ'ga yuklanadi (bazadagi qiymat muhit o'zgaruvchisidan ustun).
 ENV_OVERRIDE_NAMES = (
     "ANTHROPIC_API_KEY", "GEMINI_API_KEY", "GEMINI_MODEL", "CLAUDE_MODEL",
     "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "TURNSTILE_SITE_KEY", "TURNSTILE_SECRET_KEY",
+    "TURNSTILE_MODE", "TURNSTILE_FALLBACK",
 )
+# Maxfiy kalitlar bazada SHIFRLANGAN saqlanadi (Fernet, kalit — WEB_SECRET_KEY dan olinadi). Ochiq sozlamalar (rejim, model) oddiy.
+_SECRET_OVERRIDES = {"ANTHROPIC_API_KEY", "GEMINI_API_KEY", "GOOGLE_CLIENT_SECRET", "TURNSTILE_SECRET_KEY"}
 _env_override_loaded_at = 0.0
+# Ishga tushgandagi (muhit/.env dagi) asl qiymatlar — admin panelda "tozalash" bosilganda shunga qaytariladi
+_ENV_BASELINE = {n: os.environ.get(n) for n in ENV_OVERRIDE_NAMES}
+
+
+def _fernet():
+    import base64
+    import hashlib
+    from cryptography.fernet import Fernet
+    import auth as _auth
+    key = base64.urlsafe_b64encode(hashlib.sha256(b"longouz-keys-v1:" + str(_auth.SECRET_KEY).encode()).digest())
+    return Fernet(key)
+
+
+def _enc(name: str, value: str) -> str:
+    if name not in _SECRET_OVERRIDES:
+        return value
+    try:
+        return "enc1:" + _fernet().encrypt(value.encode()).decode()
+    except Exception:  # noqa: BLE001
+        logger.warning("Kalitni shifrlab bo'lmadi — saqlanmadi.", exc_info=True)
+        raise
+
+
+def _dec(value: str) -> str:
+    if not value.startswith("enc1:"):
+        return value
+    try:
+        return _fernet().decrypt(value[5:].encode()).decode()
+    except Exception:  # noqa: BLE001
+        logger.warning("Bazadagi kalitni ochib bo'lmadi (WEB_SECRET_KEY o'zgargan bo'lishi mumkin) — o'tkazib yuborildi.")
+        return ""
 
 
 async def save_env_override(name: str, value: str) -> None:
     if name in ENV_OVERRIDE_NAMES:
-        await set_setting("env:" + name, value)
+        await set_setting("env:" + name, _enc(name, value))
+
+
+async def clear_env_override(name: str) -> None:
+    if name not in ENV_OVERRIDE_NAMES:
+        return
+    await set_setting("env:" + name, "")
+    base = _ENV_BASELINE.get(name)
+    if base:
+        os.environ[name] = base
+    else:
+        os.environ.pop(name, None)
+
+
+async def env_override_names() -> set[str]:
+    """Qaysi kalitlar admin panel orqali (bazada) saqlangan."""
+    try:
+        async with async_session() as session:
+            rows = (await session.execute(select(SiteSetting).where(SiteSetting.key.like("env:%")))).scalars().all()
+        return {r.key[4:] for r in rows if (r.value or "").strip()}
+    except Exception:  # noqa: BLE001
+        return set()
 
 
 async def load_env_overrides(force: bool = False) -> None:
@@ -972,7 +1069,15 @@ async def load_env_overrides(force: bool = False) -> None:
         for row in rows:
             name = row.key[4:]
             if name in ENV_OVERRIDE_NAMES and (row.value or "").strip():
-                os.environ[name] = row.value.strip()
+                val = _dec(row.value.strip())
+                if val:
+                    os.environ[name] = val
+            elif name in ENV_OVERRIDE_NAMES:      # admin "tozalash" bosgan — asl (muhit) qiymatga qaytamiz
+                base = _ENV_BASELINE.get(name)
+                if base:
+                    os.environ[name] = base
+                else:
+                    os.environ.pop(name, None)
     except Exception:  # noqa: BLE001
         logger.debug("env override yuklanmadi", exc_info=True)
 
@@ -3439,215 +3544,3 @@ async def admin_overview() -> dict:
         "subject_breakdown": subject_breakdown, "unread_messages": unread, "bank_target": BANK_TARGET_PER_SUBJECT,
         "db_engine": "PostgreSQL" if "postgres" in DATABASE_URL else "SQLite",
     }
-
-
-# =============================================================================
-# SAVOL SHIKOYATLARI (test paytida "Shikoyat qilish" tugmasi)
-# =============================================================================
-
-REPORT_CATEGORIES = {
-    "wrong_answer": "To'g'ri javob noto'g'ri belgilangan",
-    "typo": "Imlo / grammatik xato",
-    "unclear": "Savol tushunarsiz yoki noaniq",
-    "bad_options": "Variantlar xato (ikkita to'g'ri yoki hech biri)",
-    "figure": "Chizma / rasm xato yoki ko'rinmayapti",
-    "outdated": "Ma'lumot eskirgan",
-    "other": "Boshqa",
-}
-REPORT_STATUSES = {"new": "Yangi", "analyzed": "Tahlil qilindi", "fixed": "Tuzatildi", "hidden": "Yashirildi", "dismissed": "Rad etildi"}
-
-
-async def create_question_report(user_id: int, question_id: int | None, subject: str, mode: str, topic: str,
-                                 question_text: str, options: list, correct_index: int,
-                                 category: str, details: str) -> tuple["QuestionReport | None", bool]:
-    """(report, yangi_mi). Shu foydalanuvchi shu savolga ochiq shikoyat yuborgan bo'lsa — yangisi yaratilmaydi."""
-    import json as _j
-    if category not in REPORT_CATEGORIES:
-        category = "other"
-    async with async_session() as session:
-        if question_id:
-            dup = await session.execute(
-                select(QuestionReport).where(QuestionReport.user_id == user_id)
-                .where(QuestionReport.question_id == question_id)
-                .where(QuestionReport.status.in_(("new", "analyzed"))).limit(1)
-            )
-            old = dup.scalar_one_or_none()
-            if old is not None:
-                return old, False
-        rep = QuestionReport(
-            user_id=user_id, question_id=question_id, subject=subject, mode=mode, topic=(topic or "")[:150],
-            question_text=(question_text or "")[:4000], options_json=_j.dumps(options or [], ensure_ascii=False),
-            correct_index=int(correct_index if correct_index is not None else -1),
-            category=category, details=(details or "").strip()[:1500],
-        )
-        session.add(rep)
-        await session.commit()
-        await session.refresh(rep)
-        return rep, True
-
-
-async def list_question_reports(status: str = "", limit: int = 30, offset: int = 0) -> list[dict]:
-    async with async_session() as session:
-        q = (select(QuestionReport, WebUser.first_name, WebUser.email)
-             .join(WebUser, WebUser.id == QuestionReport.user_id, isouter=True)
-             .order_by(desc(QuestionReport.id)).limit(limit).offset(offset))
-        if status == "open":
-            q = q.where(QuestionReport.status.in_(("new", "analyzed")))
-        elif status:
-            q = q.where(QuestionReport.status == status)
-        rows = (await session.execute(q)).all()
-        return [{"r": r, "name": n or "", "email": e or ""} for r, n, e in rows]
-
-
-async def count_question_reports(status: str = "") -> int:
-    from sqlalchemy import func as _f
-    async with async_session() as session:
-        q = select(_f.count(QuestionReport.id))
-        if status == "open":
-            q = q.where(QuestionReport.status.in_(("new", "analyzed")))
-        elif status:
-            q = q.where(QuestionReport.status == status)
-        return int((await session.execute(q)).scalar() or 0)
-
-
-async def get_question_report(report_id: int) -> "QuestionReport | None":
-    async with async_session() as session:
-        return await session.get(QuestionReport, report_id)
-
-
-async def count_reports_for_question(question_id: int) -> int:
-    from sqlalchemy import func as _f
-    async with async_session() as session:
-        return int((await session.execute(
-            select(_f.count(_f.distinct(QuestionReport.user_id))).where(QuestionReport.question_id == question_id)
-        )).scalar() or 0)
-
-
-async def get_question_row(question_id: int) -> "Question | None":
-    async with async_session() as session:
-        return await session.get(Question, question_id)
-
-
-async def save_report_analysis(report_id: int, analysis: dict) -> None:
-    import json as _j
-    async with async_session() as session:
-        rep = await session.get(QuestionReport, report_id)
-        if rep is None:
-            return
-        rep.ai_json = _j.dumps(analysis, ensure_ascii=False)
-        if rep.status == "new":
-            rep.status = "analyzed"
-        await session.commit()
-
-
-async def set_report_status(report_id: int, status: str, resolution: str = "") -> bool:
-    async with async_session() as session:
-        rep = await session.get(QuestionReport, report_id)
-        if rep is None:
-            return False
-        rep.status = status
-        rep.resolution = (resolution or "")[:300]
-        rep.resolved_at = datetime.utcnow() if status in ("fixed", "hidden", "dismissed") else None
-        await session.commit()
-        return True
-
-
-def validate_fix(q: "Question", fix: dict) -> tuple[bool, str, dict]:
-    """AI taklif qilgan tuzatishni tekshiradi. (ok, sabab, tozalangan_fix)"""
-    import json as _j
-    if not isinstance(fix, dict):
-        return False, "Tuzatish formati noto'g'ri.", {}
-    qtype = q.qtype or "closed"
-    text = str(fix.get("question") or q.question).strip()
-    expl = str(fix.get("explanation") if fix.get("explanation") is not None else q.explanation).strip()
-    opts = fix.get("options")
-    if opts is None:
-        opts = _j.loads(q.options_json or "[]")
-    if not isinstance(opts, list):
-        return False, "Variantlar ro'yxat emas.", {}
-    opts = [str(o).strip() for o in opts]
-    if len(text) < 5 or len(text) > 1990:
-        return False, "Savol matni juda qisqa yoki uzun.", {}
-    if qtype == "open":
-        if not opts or any(not o for o in opts):
-            return False, "Qabul qilinadigan javoblar bo'sh.", {}
-        return True, "", {"question": text, "options": opts, "correct_index": q.correct_index, "explanation": expl[:1990]}
-    if len(opts) < 2 or len(opts) > 6 or any(not o for o in opts) or len({o.lower() for o in opts}) != len(opts):
-        return False, "Variantlar soni yoki mazmuni yaroqsiz (bo'sh/takror).", {}
-    ci = fix.get("correct_index", q.correct_index)
-    if not isinstance(ci, int) or not 0 <= ci < len(opts):
-        return False, "To'g'ri javob indeksi diapazondan tashqarida.", {}
-    return True, "", {"question": text, "options": opts, "correct_index": ci, "explanation": expl[:1990]}
-
-
-async def apply_report_fix(report_id: int, fix: dict, resolution: str = "Tuzatildi") -> tuple[bool, str]:
-    """Shikoyat bo'yicha savolni tuzatadi; eski holatni qaytarish uchun saqlaydi."""
-    import json as _j
-    rep = await get_question_report(report_id)
-    if rep is None or not rep.question_id:
-        return False, "Shikoyat yoki savol topilmadi (savol bazada yo'q)."
-    q = await get_question_row(rep.question_id)
-    if q is None:
-        return False, "Savol bazadan o'chirilgan."
-    ok, why, clean = validate_fix(q, fix)
-    if not ok:
-        return False, why
-    original = {"question": q.question, "options": _j.loads(q.options_json or "[]"),
-                "correct_index": q.correct_index, "explanation": q.explanation}
-    try:
-        done = await admin_update_question(
-            q.id, subject=q.subject, mode=q.mode, topic=q.topic, question=clean["question"],
-            options=clean["options"], correct_index=clean["correct_index"], explanation=clean["explanation"],
-            mock_test=q.mock_test, is_active=q.is_active, is_final_test=q.is_final_test,
-        )
-    except DuplicateQuestionError:
-        return False, "Bunday savol matni shu fan/rejimda allaqachon bor."
-    if not done:
-        return False, "Savolni yangilab bo'lmadi."
-    async with async_session() as session:
-        rep = await session.get(QuestionReport, report_id)
-        rep.original_json = _j.dumps(original, ensure_ascii=False)
-        rep.status, rep.resolution, rep.resolved_at = "fixed", resolution[:300], datetime.utcnow()
-        # shu savolning boshqa ochiq shikoyatlari ham yopiladi
-        others = await session.execute(select(QuestionReport).where(QuestionReport.question_id == q.id)
-                                       .where(QuestionReport.id != report_id).where(QuestionReport.status.in_(("new", "analyzed"))))
-        for o in others.scalars().all():
-            o.status, o.resolution, o.resolved_at = "fixed", f"Shikoyat #{report_id} bilan birga tuzatildi", datetime.utcnow()
-        await session.commit()
-    return True, "OK"
-
-
-async def revert_report_fix(report_id: int) -> tuple[bool, str]:
-    import json as _j
-    rep = await get_question_report(report_id)
-    if rep is None or not rep.original_json or not rep.question_id:
-        return False, "Qaytarish uchun eski holat saqlanmagan."
-    q = await get_question_row(rep.question_id)
-    if q is None:
-        return False, "Savol topilmadi."
-    orig = _j.loads(rep.original_json)
-    try:
-        await admin_update_question(q.id, subject=q.subject, mode=q.mode, topic=q.topic, question=orig["question"],
-                                   options=orig["options"], correct_index=orig["correct_index"],
-                                   explanation=orig.get("explanation", ""), mock_test=q.mock_test,
-                                   is_active=q.is_active, is_final_test=q.is_final_test)
-    except DuplicateQuestionError:
-        return False, "Eski matn bilan takror savol bor."
-    await set_report_status(report_id, "analyzed", "Tuzatish qaytarildi")
-    return True, "OK"
-
-
-async def hide_question_for_report(report_id: int, resolution: str = "Savol yashirildi") -> bool:
-    rep = await get_question_report(report_id)
-    if rep is None or not rep.question_id:
-        return False
-    await admin_set_questions_active([rep.question_id], False)
-    await set_report_status(report_id, "hidden", resolution)
-    return True
-
-
-async def open_report_ids(limit: int = 20, only_unanalyzed: bool = True) -> list[int]:
-    async with async_session() as session:
-        q = select(QuestionReport.id).order_by(QuestionReport.id).limit(limit)
-        q = q.where(QuestionReport.status == "new") if only_unanalyzed else q.where(QuestionReport.status.in_(("new", "analyzed")))
-        return [r[0] for r in (await session.execute(q)).all()]

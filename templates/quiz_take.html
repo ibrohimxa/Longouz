@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="/static/style.css">
   <link rel="stylesheet" href="/static/figure.css">
   <link rel="stylesheet" href="/static/exam.css">
+  <link rel="stylesheet" href="/static/quiz-tools.css">
   <script src="/static/theme-init.js"></script>
 </head>
 <body data-logged-in="true"
@@ -25,6 +26,8 @@
       data-drill="{{ drill }}"
       data-question-count="{{ mode_info.question_count }}"
       data-time-limit-minutes="{{ mode_info.time_limit_minutes }}"
+      data-block="{{ block_specs }}"
+      data-adaptive="{{ 'true' if adaptive else 'false' }}"
       data-attempt-token="{{ attempt_token }}">
 
   <header class="site-header quiz-header">
@@ -35,10 +38,6 @@
       <span class="quiz-mode-badge quiz-mode-badge-{{ mode }}">{{ mode_info.name }}</span>
       <span class="quiz-subject-label">{{ subject_name }}</span>
       <span id="quiz-timer" class="quiz-timer">--:--</span>
-      <button type="button" id="qr-open" class="qr-open-btn" title="Shu savol bo'yicha shikoyat qilish" hidden>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
-        <span>Shikoyat qilish</span>
-      </button>
       <button class="theme-toggle" aria-label="Rejimni almashtirish" title="Kunduzgi/tungi rejim">
         <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
@@ -133,37 +132,6 @@
     </div>
   </div>
 
-  <!-- SHIKOYAT OYNASI (o'ng tarafdan ochiladi) -->
-  <div id="qr-backdrop" class="qr-backdrop" hidden></div>
-  <aside id="qr-panel" class="qr-panel" role="dialog" aria-modal="true" aria-labelledby="qr-title" hidden>
-    <div class="qr-head">
-      <h3 id="qr-title">Savol bo'yicha shikoyat</h3>
-      <button type="button" id="qr-close" class="qr-x" aria-label="Yopish">&times;</button>
-    </div>
-    <div class="qr-body">
-      <p class="qr-qno" id="qr-qno"></p>
-      <blockquote class="qr-qtext" id="qr-qtext"></blockquote>
-      <fieldset class="qr-cats" id="qr-cats">
-        <legend>Muammo nimada?</legend>
-        <label><input type="radio" name="qr-cat" value="wrong_answer"> To'g'ri javob noto'g'ri belgilangan</label>
-        <label><input type="radio" name="qr-cat" value="typo"> Imlo / grammatik xato</label>
-        <label><input type="radio" name="qr-cat" value="unclear"> Savol tushunarsiz yoki noaniq</label>
-        <label><input type="radio" name="qr-cat" value="bad_options"> Variantlar xato (ikkita to'g'ri yoki hech biri)</label>
-        <label><input type="radio" name="qr-cat" value="figure"> Chizma / rasm xato yoki ko'rinmayapti</label>
-        <label><input type="radio" name="qr-cat" value="outdated"> Ma'lumot eskirgan</label>
-        <label><input type="radio" name="qr-cat" value="other" checked> Boshqa</label>
-      </fieldset>
-      <label class="qr-lbl" for="qr-details">Batafsil yozing: nima xato va qanday bo'lishi kerak?</label>
-      <textarea id="qr-details" maxlength="1000" rows="5" placeholder="Masalan: 3-variant to'g'ri, chunki ..."></textarea>
-      <p class="qr-count"><span id="qr-n">0</span>/1000</p>
-      <p id="qr-msg" class="qr-msg" role="status"></p>
-    </div>
-    <div class="qr-foot">
-      <button type="button" id="qr-cancel" class="btn-secondary">Bekor qilish</button>
-      <button type="button" id="qr-send" class="btn-primary">Yuborish</button>
-    </div>
-  </aside>
-
   {% include "_owl_widget.html" %}
 
   <script src="/static/devtools-guard.js"></script>
@@ -172,8 +140,8 @@
   <script src="/static/quiz-style.js"></script>
   <script src="/static/figure.js"></script>
   <script src="/static/quiz.js"></script>
-  <script src="/static/quiz-report.js"></script>
-  <script src="/static/calculator.js"></script>
   <script src="/static/formula-sheet.js"></script>
+  <script src="/static/calc-engine.js"></script>
+  <script src="/static/quiz-tools.js"></script>
 </body>
 </html>

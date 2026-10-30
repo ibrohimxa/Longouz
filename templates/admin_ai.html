@@ -59,7 +59,7 @@
       </form>
       <section class="panel" style="margin-top:22px;max-width:640px;">
         <h2 class="panel-title">Kalitlarni shu yerdan kiriting</h2>
-        <p class="panel-sub">Saqlansa <code>.env</code> ga yoziladi va darhol ishlaydi (qayta ishga tushirish shart emas). Bo'sh qoldirilgan maydon o'zgarmaydi.</p>
+        <p class="panel-sub">Kalit saqlashdan oldin tekshiriladi: noto'g'ri bo'lsa saqlanmaydi va sababi ko'rsatiladi. Bo'sh maydon o'zgarmaydi. Cloudflare va Google kalitlari — <a href="{{ admin_prefix }}/keys">Kalitlar</a> bo'limida.</p>
         <form id="ai-keys-form" autocomplete="off">
           <div class="field"><label>Gemini API kaliti <small style="color:var(--ink-soft)">(hozir: {{ key_masks.GEMINI_API_KEY }})</small></label>
             <input type="password" name="GEMINI_API_KEY" placeholder="AIza..." autocomplete="new-password"></div>
@@ -80,9 +80,10 @@
         try {
           var r = await fetch('{{ admin_prefix }}/api/ai/keys', {method: 'POST', headers: {'Content-Type': 'application/json', 'X-Requested-With': 'fetch'}, body: JSON.stringify(data)});
           var j = await r.json();
-          msg.textContent = r.ok ? 'Saqlandi. "Hozir tekshirish" ni bosing.' : (j.detail || 'Xato');
-          if (r.ok) setTimeout(function () { location.reload(); }, 900);
-        } catch (err) { msg.textContent = 'Tarmoq xatosi.'; }
+          msg.textContent = r.ok ? ('Saqlandi.' + ((j.notes || []).length ? ' ' + j.notes.join(' ') : '') + ((j.errors || []).length ? ' Xato: ' + j.errors.join(' | ') : '')) : (j.detail || 'Xato');
+          msg.style.color = r.ok && !(j.errors || []).length ? '' : '#e5484d';
+          if (r.ok && !(j.errors || []).length) setTimeout(function () { location.reload(); }, 1400);
+        } catch (err) { msg.textContent = 'Server javobini o\'qib bo\'lmadi (qayta kiring yoki sahifani yangilang).'; msg.style.color = '#e5484d'; }
       });
       </script>
 

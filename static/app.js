@@ -9,53 +9,10 @@
   // ==========================================================================
   const introScreen = document.getElementById("intro-screen");
 
-  if (introScreen) {
-    const alreadyShown = sessionStorage.getItem("longouz_intro_shown");
-
-    if (alreadyShown) {
-      introScreen.remove();
-      startPageAnimations();
-    } else {
-      document.body.classList.add("intro-active");
-      sessionStorage.setItem("longouz_intro_shown", "1");
-
-      // MUHIM: intro har doim (progress bar mavjud bo'lsa ham, bo'lmasa ham)
-      // yashirilishi SHART — aks holda #intro-screen butun sahifani abadiy
-      // qoplab, hech qanday bosishga (login/register tugmalariga ham)
-      // yo'l qo'ymay qoladi. Avval bu funksiya faqat "bar" topilganda
-      // ishlaydigan setInterval ichida edi — login/register sahifalarida
-      // progress-bar elementi umuman yo'q edi, shu sababli intro hech qachon
-      // yopilmasdi. Endi hideIntro() bar bor-yo'qligidan qat'i nazar chaqiriladi.
-      function hideIntro() {
-        introScreen.classList.add("intro-hide");
-        setTimeout(() => {
-          introScreen.remove();
-          document.body.classList.remove("intro-active");
-          startPageAnimations();
-        }, 600);
-      }
-
-      // Progress bar 2 soniyada 0% → 100% to'ladi (agar sahifada mavjud bo'lsa)
-      const bar = document.getElementById("intro-progress-bar");
-      if (bar) {
-        let width = 0;
-        const interval = setInterval(() => {
-          width += 1;
-          bar.style.width = width + "%";
-          if (width >= 100) {
-            clearInterval(interval);
-            setTimeout(hideIntro, 300); // 300ms kutib, keyin intro'ni yashiramiz
-          }
-        }, 20); // 20ms * 100 = 2000ms = 2 soniya
-      } else {
-        // Progress bar yo'q sahifalarda (masalan login/register) — shunchaki
-        // taxminan bir xil vaqtdan keyin (2.3s) intro'ni yashiramiz.
-        setTimeout(hideIntro, 2300);
-      }
-    }
-  } else {
-    startPageAnimations();
-  }
+  // v219: 3 soniyalik kirish ekrani sahifani bloklab qo'yardi — endi darhol olib tashlanadi
+  if (introScreen) introScreen.remove();
+  document.body.classList.remove("intro-active");
+  startPageAnimations();
 
   // ==========================================================================
   // 2. TYPEWRITER EFFEKT — ikki xil gap navbatma-navbat yozilib-o'chiriladi

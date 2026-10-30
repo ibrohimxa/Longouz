@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Imtihon yo'riqnomasi — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/features215.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true">
+  <div class="app-shell">
+    {% set nav_active = 'guide' %}{% include "_app_sidebar.html" %}
+    <div class="app-content">
+      {% include "_announcement_banner.html" %}
+      <div class="f215-page">
+        <div class="app-topbar"><div><h1>Imtihon yo'riqnomasi</h1><p>DTM va Milliy sertifikat: tuzilma, vaqt, ball va qaysi sinf mavzularini o'rganish kerak</p></div></div>
+        <div class="f215-card">
+          <h2>DTM (kirish imtihoni) — 2025/2026</h2>
+          <table class="f215-tbl">
+            <tr><th>Blok</th><th>Savollar</th><th>Har biri</th><th>Maks. ball</th></tr>
+            <tr><td>Majburiy: ona tili, matematika, O'zbekiston tarixi</td><td>30 (10+10+10)</td><td>1,1</td><td>33</td></tr>
+            <tr><td>1-ixtisoslik fani</td><td>30</td><td>3,1</td><td>93</td></tr>
+            <tr><td>2-ixtisoslik fani</td><td>30</td><td>2,1</td><td>63</td></tr>
+            <tr><td><b>Jami</b></td><td><b>90</b></td><td></td><td><b>{{ max_ball|int }}</b></td></tr>
+          </table>
+          <p class="f215-muted" style="margin-top:10px">Umumiy vaqt — 180 daqiqa (3 soat; javoblar varag'ini to'ldirish ham shu vaqtga kiradi). Majburiy fanlarga 60 daqiqa, ikki ixtisoslik fani uchun 120 daqiqa mo'ljallanadi. Milliy sertifikati bor abituriyentlar sertifikat berilgan fandan imtiyoz oladi. Kasbiy yoki ijodiy imtihonli yo'nalishlarda faqat majburiy fanlar (60 daqiqa) topshiriladi. Rasmiy ma'lumotlar o'zgarishi mumkin — <a href="https://oliygoh.uz/post/test-savollarini-ishlash-uchun-qancha-vaqt-beriladi-2026-yil-qabul-tartibi" target="_blank" rel="noopener">oliygoh.uz</a> va <a href="https://uzbmb.uz" target="_blank" rel="noopener">uzbmb.uz</a> saytlarida tekshiring.</p>
+          <a class="f215-btn" href="/dtm-blok" style="margin-top:8px">DTM blok mock yechish</a>
+        </div>
+        <div class="f215-card">
+          <h2>Milliy sertifikat</h2>
+          <p class="f215-muted">Umumta'lim fanlaridan (tarix, ona tili, rus tili, matematika, fizika, kimyo, biologiya, geografiya va boshqalar) Bilimni baholash va malakani tasdiqlash agentligi o'tkazadi. Sertifikat berilgan kundan boshlab 3 yil amal qiladi. Sertifikatda 75% va undan yuqori natija olgan abituriyent OTM kirish imtihonida shu fan bo'yicha maksimal ball oladi.</p>
+          <table class="f215-tbl" style="margin-top:8px"><tr><th>Daraja</th><th>Minimal ball</th></tr>
+            {% for th, nm in cert_levels %}<tr><td>{{ nm }}</td><td>{{ th|int }}+</td></tr>{% endfor %}
+          </table>
+        </div>
+        <h2 style="margin:22px 0 10px">Fanlar bo'yicha: qaysi sinf mavzulari kerak</h2>
+        {% for s in subjects %}
+        <details class="f215-acc"{% if loop.first %} open{% endif %}>
+          <summary><span>{{ s.name }}</span><span class="f215-pill">{% for m in s.modes %}{{ m.mode_name }} · {{ m.topics_total }} mavzu{% if not loop.last %} / {% endif %}{% endfor %}</span></summary>
+          <div class="in">
+            {% for m in s.modes %}
+              <p class="f215-muted"><b>{{ m.mode_name }}</b>{% if m.format %} — {{ m.format }}{% endif %}{% if m.total %}: {{ m.total }} savol{% endif %}{% if m.time %}, {{ m.time }} daqiqa{% endif %}</p>
+              {% for g in m.grades %}
+              <div class="f215-grade"><b>{% if g.grade %}{{ g.grade }}-sinf{% else %}Umumiy{% endif %}</b> <span class="f215-muted">· {{ g.count }} mavzu</span>
+                <ul>{% for t in g.topics %}<li>{{ t }}</li>{% endfor %}</ul></div>
+              {% endfor %}
+              {% if not loop.last %}<hr style="border:0;border-top:1px solid var(--line);margin:14px 0">{% endif %}
+            {% endfor %}
+            <a class="f215-btn ghost" href="/quiz?subject={{ s.code }}" style="margin-top:12px">{{ s.name }} testlari</a>
+          </div>
+        </details>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% include "_owl_widget.html" %}
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/app.js"></script>
+
+</body>
+</html>

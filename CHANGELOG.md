@@ -2,6 +2,60 @@
 
 Har yuborilgan zip: `longouz_v<N>.zip`, versiya raqami `VERSION` faylida.
 
+## v222 — xavfsizlik: koddagi admin paroli olib tashlandi
+- `admin_auth.py`: ADMIN_PASSWORD berilmasa endi admin panel yopiq (avval ochiq GitHub reposida ko'rinadigan standart parol ishlardi).
+- Vercel Environment Variables'ga kalitlar qo'shildi (WEB_SECRET_KEY, Google, Turnstile, WEB_COOKIE_SECURE, yangi ADMIN_PASSWORD).
+- Oxirgi Vercel xatosi ("functions va builds birga ishlatib bo'lmaydi") v221 dagi `vercel.json` bilan tuzatiladi.
+
+## v221 — Vercel konfiguratsiyasi va kalitlar ajratildi
+- `vercel.json`: `builds` (`main.py` + `@vercel/python`) va `routes` (`/(.*)` → `main.py`) ko'rinishiga o'tkazildi; statik fayllarni ham FastAPI beradi (kesh sarlavhalari bilan).
+- `.vercelignore` qo'shildi: `.env`, `.web_secret_key.local`, `*.db`, sertifikatlar va .bat fayllar Vercel'ga yuklanmaydi.
+- `vercel_env_namuna.txt`: Vercel Environment Variables uchun kerakli nomlar (qiymatsiz).
+- Baza manzili `DATABASE_URL`, `POSTGRES_URL` yoki `NEON_DATABASE_URL` dan olinadi.
+
+## v220 — kabinetdagi tog'cha qaytarildi va yaxshilandi
+- Kabinet (dashboard) yuqori kartasidagi kichik tog' rasmi joyiga qaytdi; kun/tun rejimi almashganda quyosh va oy almashadi.
+- Kunduzgi rejim endi har doim yorug' kun: moviy osmon, quyosh (o'rni soatga qarab biroz siljiydi), oy va yulduzlar yo'q; kartaning chap qismi ham moviy (oldin to'q ko'k qolardi).
+- Tunda shahar chiroqlari yonadi, kunduzi o'chadi; binolar, daraxtlar va "LONGO" yozuvi ikkala rejimda ham ko'rinadi.
+- Planshetda oy sarlavha ustiga tushmaydi.
+- Tema almashish animatsiyasi 2.3 s → 1.3 s (sahifa qotmasligi uchun).
+- Bosh sahifa v219 dagidek fonsiz qoldi.
+
+## v219 — oddiy fon, tezroq sayt
+- **Bosh sahifa**: tog' manzarasi, quyosh va oy (tushib-chiqish animatsiyasi) butunlay olib tashlandi. Tungi rejim — to'q yashil-qora, kunduzgi — oq; tema almashganda faqat ranglar 0.35 soniyada yumshoq o'zgaradi. Barcha elementlar joyida qoldi.
+- **Kabinet (dashboard)**: hero'dagi tog'/quyosh/oy va har soniyada qayta chiziladigan skript olib tashlandi — oddiy yashil karta.
+- **Tezlik**: 3 soniyalik kirish (intro) ekrani olib tashlandi (bosh sahifa, kirish, ro'yxatdan o'tish darhol ochiladi); sahifalar gzip bilan siqiladi (bosh sahifa ~50 KB → ~11 KB); statik fayllar keshlanadi; og'ir blur (backdrop-filter) va telefonda doimiy animatsiyalar o'chirildi; Vercel'da fon yuklash bir instansni 12 soniyadan ortiq band qilmaydi.
+
+## v218 — katta ekranlar, mobil tuzatishlar, Turnstile zaxirasi, kalitlar sahifasi
+- **Moslashuvchanlik**: 2K/4K/5K ekranlarda sayt zoom orqali butun ekranni to'ldiradi (max-width cheklovlari olib tashlandi); suzuvchi boyqush tugmasi telefonda skroll paytida yashirinadi va pastki kontentni yopmaydi; bosh sahifadagi osmon/oy telefonda sakramaydi (manzil satri o'zgarishi e'tiborga olinmaydi), hero matni planshetda markazlandi.
+- **Fan nomi**: "Ona tili va adabiyot" hamma joyda bir xil.
+- **Cloudflare Turnstile**: 9 soniyada yuklanmasa avtomatik zaxira rejimi (IP bo'yicha cheklov bilan), xato kodlari aniq; admin panelda `TURNSTILE_MODE` (o'chirish) va zaxira sozlamasi.
+- **Ro'yxatdan o'tish → Pro**: mavjud email + to'g'ri parol bilan sotib olishda tarif yangilanadi va akkauntga kiriladi; sotib olish oynasida "Google bilan davom etish".
+- **Admin → Kalitlar** (`/neo/keys`): Claude, Gemini, Turnstile, Google kalitlari saqlashdan oldin format va jonli tekshiriladi, bazada shifrlanadi (Fernet), maskalangan ko'rsatiladi.
+- **GitHub/Vercel xavfsizligi**: `deploy_longouz.bat` `.env` ni indeksdan chiqaradi va kalit qoldig'i topilsa yuborishni to'xtatadi; `.gitignore` kengaytirildi.
+- **Savollar**: tarix (sanalar, voqealar), ingliz tili (noto'g'ri fe'llar, lug'at, sinonim/antonim, sifat darajalari, predloglar), rus tili (urg'usiz unlilar, ъ/ь, tuslanish), ona tili (imlo, sinonim/antonim) bo'yicha jadvaldan tuzilgan yangi savollar; `CONTENT_VERSION=v217q`.
+
+## v215 — ro'yxatdan o'tish oqimi, shikoyatlar, kalkulyator, Vercel mustahkamlandi
+- **Ro'yxatdan o'tish/kirish**: bosh sahifada fan tanlansa (`?subject=` + `lz_subject` cookie) ro'yxatdan o'tgach fan va daraja QAYTA so'ralmaydi — to'g'ri panelga o'tadi. "Bepul/Boshlash" fansiz bosilsa — faqat fan so'raladi (daraja olib tashlandi). Pro/Ultra sotib olgach test boshlashda akkaunt qayta so'ralmaydi (redirect sarlavhasi xatosi tuzatildi, Vercel'da foydalanuvchi keshi o'chirildi).
+- **Google**: "Google bilan davom etish" — akkaunt bor bo'lsa kiradi, yo'q bo'lsa ro'yxatdan o'tkazadi (login va register bir xil). Oddiy ro'yxatdan o'tishda email mavjud va parol to'g'ri bo'lsa ham kiradi.
+- **Cloudflare Turnstile**: skript qayta-qayta yuklanadi, render qayta uriniladi, xato kodlari (110200 = domen ruxsat etilmagan) aniq ko'rsatiladi, CSP `child-src`/`worker-src` qo'shildi, token bo'lmasa yuborish bloklanadi.
+- **Mavzular chiqmasligi (Vercel)**: bank bo'laklab, davom ettiriladigan tarzda yuklanadi (`/api/seed-step`, fon vazifa, sahifalardan ping, build paytida `cloud_setup.py`); mavzu ro'yxati bo'sh bo'lsa "tayyorlanmoqda" xabari va avtomatik qayta urinish.
+- **Vercel**: `requirements.txt` ga `aiosqlite`, `vercel.json` build bosqichi mustahkamlandi.
+- **AI kalitlari**: `ai_key_defaults.py` (qiymatlar qo'sh tirnoqda), tartib: env/.env → admin panel → `ai_key_defaults.py`; tirnoq, BOM va "KEY=" qo'shimchasi avtomatik tozalanadi.
+- **Shikoyat**: test paytida tepada "Shikoyat" tugmasi → o'ng yon panel (10 ta sabab + izoh). Admin panelda yangi bo'lim `/neo/reports`: statistika, filtrlar, Claude tahlili (hukm, ishonch, tuzatish taklifi), tuzatishni tasdiqlash, rad etish, savolni yashirish, avtomatik rejim (ishonch ≥ chegara bo'lsa o'zi tuzatadi), shikoyat qilgan foydalanuvchiga xabar.
+- **Kalkulyator** (matematika, fizika, kimyo, biologiya; tarix va tillarda yo'q): xavfsiz ifoda yechuvchi (`eval`siz), DEG/RAD, o'zgaruvchilar, tenglama yechish; matematika — formulalar yechuvchi, kvadrat tenglama va tizim, kombinatorika, foiz; fizika — formulalar, doimiylar, birlik o'zgartirgich; kimyo — molyar massa (maktab/aniq massalar), tenglashtirgich, mol hisobi; biologiya — DNK→iRNK→oqsil, Chargaff, Xardi–Vaynberg, Mendel.
+- **Ochiq javob uchun belgilar klaviaturasi** (tarix, ona tili, ingliz, rus tillarida chiqmaydi): matematika (², √, π, ±, ≤…), fizika (10ⁿ, birliklar, yunon harflari), kimyo (indekslar, zaryadlar, →, ⇌), biologiya (genotip belgilari). Javob tekshiruvi `^`, `sqrt`, `->` yozuvlarini ham tushunadi.
+- **Bank**: matematika, fizika, kimyo, biologiya va ingliz tili uchun kod orqali HISOBLANADIGAN ~1 100 ta yangi savol (`content/gen_v215.py`; to'g'ri javob xato bo'lishi mumkin emas), mavjud mavzularga qo'shildi. Jami ≈ 5 700 savol.
+- **Telefon moslashuvi**: test oynasida savollar paneli gorizontal siljiydi, boyqush tugmasi kalkulyator ochilganda yashiriladi, kalkulyator/belgilar klaviaturasi kichik ekranga moslandi, ochiq javob maslahati fanga mos; admin pastki paneli gorizontal siljiydi va yorliqlar sig'adi; shikoyatlar sahifasi filtrlari tuzatildi.
+- `CONTENT_VERSION = v215`: yangi savollar avtomatik yuklanadi.
+- **DTM blok mock** (`/dtm-blok`, Pro/Ultra): haqiqiy DTM tuzilmasi — 90 savol / 180 daqiqa: majburiy 3 fan (ona tili, matematika, tarix; 30 savol, ×1,1), 1-ixtisoslik (30 savol, ×3,1), 2-ixtisoslik (30 savol, ×2,1); maksimum 189 ball, natija bloklar bo'yicha.
+- **AI adaptiv test**: savol qiyinligi foydalanuvchi javobiga qarab o'zgaradi (to'g'ri → qiyinroq, xato → osonroq); mavzu sahifasida "AI adaptiv test" tugmasi.
+- **Chuqur tahlil va prognoz** (`/analytics`): fan va mavzu statistikasi, kuchsiz/kuchli mavzular, haftalik progress, oxirgi natijalarga ko'ra DTM ball prognozi (189 dan).
+- **Imtihon yo'riqnomasi** (`/guide`): DTM va Milliy sertifikat tuzilmasi, vaqt, ball, sinflar bo'yicha o'rganiladigan mavzular.
+- **Mavzu kvotasi**: har mavzuda Bepul 25, Pro ~60 (2,4×), Ultra ~125 (5×) savol; urinishdagi savollar soni shunga mos (25/60/125). Savol kam mavzularda ulush bo'yicha taqsimlanadi (45%/75%/100%), shunda pullik tariflarda ham qo'shimcha savol qoladi.
+- **Admin → Savol banki** (`/neo/bank`): har mavzu uchun Bepul/Pro/Ultra savollar soni va 125 gacha kamchilik.
+- `CONTENT_VERSION = v215q`.
+
 ## v206 — Vercel + GitHub, Studio, kengaytirilgan bank
 - **Vercel**: `api/index.py`, `vercel.json`, Neon/Postgres (NullPool), seans va avtosaqlash bazada, chizmalar bazada (`qfigures`), lazy init. Domen sotib olmasdan `*.vercel.app` da ishlaydi. `cloud_setup.py` — bazani bir marta tayyorlaydi. Joylash: `deploy_longouz.bat` (zipni ustiga tashlash → GitHub → Vercel avtomatik).
 - **Google kirish** tuzatildi (sayt manzili avtomatik aniqlanadi), **Cloudflare Turnstile** kirish/ro'yxatdan o'tish/parol tiklashda ishlaydi; kalitlar admin panelda saqlanadi.

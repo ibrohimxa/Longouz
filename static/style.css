@@ -758,17 +758,16 @@ svg { display: block; }
 .app-content {
   flex: 1;
   min-width: 0;
-  padding: 32px 40px;
-  /* Katta monitorda (1280px+) content haddan ziyod kengayib ketmasin */
-  max-width: 1200px;
+  padding: 32px clamp(20px, 2.4vw, 48px);
+  /* Ekranni to'liq egallaydi (oldin 1200px bilan cheklangan edi) */
+  max-width: none;
 }
 
 /* 1280px+ ekranlarda butun app-shell markazlashadi */
 @media (min-width: 1280px) {
   .app-shell {
-    max-width: 1440px;
-    margin-left: auto;
-    margin-right: auto;
+    max-width: none;
+    width: 100%;
   }
 }
 
@@ -4176,7 +4175,7 @@ img[src$="logo-owl.png"]{object-fit:contain}
 @media (max-width:900px){.site-header .brand .lg-word{display:inline}}
 
 /* Rejim almashganda butun ekran silliq o'zgaradi */
-html.theme-anim *,html.theme-anim *::before,html.theme-anim *::after{transition:background-color 1.1s ease,color 1.1s ease,border-color 1.1s ease,box-shadow 1.1s ease,fill 1.1s ease,stroke 1.1s ease,opacity .4s ease!important}
+html.theme-anim *,html.theme-anim *::before,html.theme-anim *::after{transition:background-color .6s ease,color .6s ease,border-color .6s ease,box-shadow .6s ease,fill .6s ease,stroke .6s ease,opacity .3s ease!important}
 
 /* ---- Telefon (<=640px): bo'limlar PASTKI panelga o'tadi, ortiqchasi "Yana" tugmasi ortida ---- */
 @media (max-width: 640px) {
@@ -4206,3 +4205,25 @@ html.theme-anim *,html.theme-anim *::before,html.theme-anim *::after{transition:
 @media (min-width: 1920px) { html { font-size: 17px; } }
 @media (min-width: 2300px) { html { font-size: 19px; } }
 @media (min-width: 3000px) { html { font-size: 24px; } }
+
+
+/* ===== v217: KATTA EKRANLAR (2K / 4K / televizor) — interfeys ekranga mutanosib kattalashadi ===== */
+@media (min-width: 2200px) { html { zoom: 1.3; } }
+@media (min-width: 2800px) { html { zoom: 1.7; } }
+@media (min-width: 3400px) { html { zoom: 2.05; } }
+@media (min-width: 5000px) { html { zoom: 3; } }
+@supports not (zoom: 1) {
+  @media (min-width: 2200px) { html { font-size: 20px; } }
+  @media (min-width: 3400px) { html { font-size: 28px; } }
+}
+
+/* ===== v217: suzuvchi boyqush — kontentni to'smasligi uchun ===== */
+#owl-pin-button { transition: opacity .25s ease, transform .25s ease, box-shadow .2s ease; }
+html.owl-scrolling #owl-pin-button { opacity: .25; }
+@media (max-width: 900px) {
+  #owl-pin-button { width: 46px; height: 46px; right: max(10px, env(safe-area-inset-right)); opacity: .92; }
+  html.owl-scrolling #owl-pin-button { opacity: 0; transform: translateX(70px); pointer-events: none; }
+}
+@media (max-width: 900px) and (orientation: landscape) { #owl-pin-button { width: 40px; height: 40px; bottom: 10px; } }
+/* kontent oxirida boyqush ostida qolib ketmasin */
+.app-content { padding-bottom: max(32px, 88px); }

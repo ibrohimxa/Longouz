@@ -53,7 +53,7 @@
 .abtn.danger { color: var(--error); border-color: rgba(248,81,73,.45); } .abtn.ghost { background: transparent; }
 
 /* ---------- Tahrirlagich ---------- */
-.editor-content { max-width: 1400px; }
+.editor-content { max-width: none; }
 .ebar { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 14px; margin-bottom: 10px; border: 1px solid var(--line); border-radius: 14px; background: color-mix(in srgb, var(--bg-elevated) 92%, transparent); backdrop-filter: blur(10px); }
 .ebar-back { color: var(--ink-soft); text-decoration: none; font-weight: 700; padding: 6px 10px; border-radius: 8px; }
 .ebar-back:hover { background: var(--bg-hover); color: var(--ink); }
@@ -226,3 +226,12 @@ h2.inline-edit:empty::before { content: "Savol matni…"; color: var(--ink-soft)
 .aopt .o-txt:focus { outline: none; border-color: var(--accent-green); box-shadow: 0 0 0 3px rgba(47,191,131,.18); }
 .optwrap { margin-bottom: 6px; } .optwrap .afig { margin: 4px 0 10px 30px; }
 .epanel .fb-prev { display: none; }
+
+/* v215: telefonda admin pastki paneli — gorizontal siljiydi, yorliqlar sig'adi */
+@media (max-width: 640px) {
+  .app-sidebar .sidebar-nav { overflow-x: auto; justify-content: flex-start; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .app-sidebar .sidebar-nav::-webkit-scrollbar { display: none; }
+  .app-sidebar .sidebar-nav .sidebar-link { flex: 0 0 68px; max-width: none; }
+  .app-sidebar .sidebar-nav .sb-lbl { font-size: .58rem; }
+  select, input[type="number"], input[type="text"], input[type="search"] { max-width: 100%; }
+}

@@ -3,50 +3,15 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/index.py",
+      "src": "main.py",
       "use": "@vercel/python",
-      "config": {
-        "maxLambdaSize": "50mb",
-        "includeFiles": [
-          "templates/**",
-          "content/**",
-          "static/**",
-          "*.py",
-          "requirements.txt",
-          ".env.example"
-        ]
-      }
-    },
-    {
-      "src": "static/**",
-      "use": "@vercel/static"
+      "config": { "maxLambdaSize": "60mb" }
     }
   ],
   "routes": [
     {
-      "src": "/static/(.*)",
-      "dest": "/static/$1",
-      "headers": { "cache-control": "public, max-age=31536000, immutable" }
-    },
-    {
       "src": "/(.*)",
-      "dest": "/api/index.py"
+      "dest": "main.py"
     }
-  ],
-  "functions": {
-    "api/index.py": {
-      "maxDuration": 60,
-      "memory": 1024
-    }
-  },
-  "crons": [
-    {
-      "path": "/api/cron/reports",
-      "schedule": "0 3 * * *"
-    }
-  ],
-  "env": {
-    "PYTHONUNBUFFERED": "1",
-    "PYTHONDONTWRITEBYTECODE": "1"
-  }
+  ]
 }

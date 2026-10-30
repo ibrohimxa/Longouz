@@ -11,7 +11,6 @@ Keyingi qadamlarda qo'shiladi: Gemini/Claude AI, testlar, baholash.
 import os
 import uuid
 import secrets
-import hmac
 import random
 import re
 import logging
@@ -55,8 +54,6 @@ import admin_auth
 ADMIN_PREFIX = admin_auth.ADMIN_URL_PREFIX
 import oauth_google
 import turnstile
-import report_ai
-from urllib.parse import quote
 import ielts_topics
 from auth import (
     hash_password, verify_password, create_access_token, decode_access_token,
@@ -114,18 +111,23 @@ _CSP_POLICY = (
     "connect-src 'self' https://challenges.cloudflare.com; "
     "frame-src https://challenges.cloudflare.com https://accounts.google.com; "
     "child-src https://challenges.cloudflare.com blob:; "
-    "worker-src 'self' blob: https://challenges.cloudflare.com; "
+    "worker-src 'self' blob:; "
     "frame-ancestors 'none'; "
     "object-src 'none'; "
     "base-uri 'self';"
 )
 
 
+# v219: HTML/JSON javoblar siqiladi (sekin mobil internetda sahifa ancha tez ochiladi)
+from starlette.middleware.gzip import GZipMiddleware as _GZip
+app.add_middleware(_GZip, minimum_size=1200, compresslevel=5)
+
 @app.middleware("http")
 async def security_headers_middleware(request: Request, call_next):
     if runtime.IS_VERCEL:
         await _ensure_db_ready()
         await db.load_env_overrides()  # 45 soniyada bir marta: boshqa instansda saqlangan kalitlar
+        _kick_seed(request)
     response = await call_next(request)
     try:
         import question_figures as _qf
@@ -138,11 +140,13 @@ async def security_headers_middleware(request: Request, call_next):
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-    response.headers["Permissions-Policy"] = "geolocation=(), camera=(), payment=(), private-state-token-redemption=*, private-state-token-issuance=*, browsing-topics=()"
+    response.headers["Permissions-Policy"] = "geolocation=(), camera=(), payment=()"
     response.headers["Content-Security-Policy"] = _CSP_POLICY
     # HSTS faqat HAQIQIY HTTPS ulanishida ma'noga ega (brauzer HTTP orqali
     # kelgan HSTS sarlavhasini e'tiborsiz qoldiradi, lekin lokal http://
     # rivojlantirishda chalkashtirmaslik uchun shart bo'lganda qo'shamiz).
+    if request.url.path.startswith("/static/") and "Cache-Control" not in response.headers:
+        response.headers["Cache-Control"] = "public, max-age=300, stale-while-revalidate=604800"
     if request.url.scheme == "https":
         response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains"
     return response
@@ -168,7 +172,9 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
 async def http_exception_handler(request: Request, exc: StarletteHTTPException):
     # HTTPException'lar (401, 404, va h.k.) — bu bizning o'zimiz ataylab
     # qaytaradigan, xavfsiz xabarlar, shuning uchun o'zgarishsiz qaytariladi.
-    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+    if exc.status_code in (301, 302, 303, 307, 308) and exc.headers and exc.headers.get("Location"):
+        return RedirectResponse(exc.headers["Location"], status_code=302)
+    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail}, headers=exc.headers or None)
 
 
 @app.exception_handler(RequestValidationError)
@@ -215,6 +221,47 @@ app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), na
 
 
 _DB_READY = False
+_SEED_DONE = False
+_SEED_TASK = None
+
+
+def _kick_seed(request: Request):
+    """Vercel: tayyor savollar bazasi hali to'liq yuklanmagan bo'lsa, fon vazifasi sifatida davom ettiradi.
+    (Fon vazifa instans muzlatilsa to'xtashi mumkin — shuning uchun sahifalar /api/seed-step ni ham chaqiradi.)"""
+    global _SEED_TASK
+    if _SEED_DONE or request.url.path.startswith(("/static", "/api/seed-step")):
+        return
+    if _SEED_TASK is not None and not _SEED_TASK.done():
+        return
+
+    async def _run():
+        global _SEED_DONE
+        try:
+            res = await exam_db.seed_step(budget=12)  # v219: instansni uzoq band qilmasin
+            if res.get("done"):
+                _SEED_DONE = True
+        except Exception:  # noqa: BLE001
+            logger.exception("Fon rejimida savollarni yuklashda xato")
+
+    import asyncio as _asyncio
+    _SEED_TASK = _asyncio.create_task(_run())
+
+
+@app.get("/api/seed-step")
+@limiter.limit("30/minute")
+async def api_seed_step(request: Request):
+    """Savollar bazasini bo'laklab yuklaydi (Vercel). Sahifadagi kichik skript tugaguncha takror chaqiradi."""
+    global _SEED_DONE
+    if _SEED_DONE:
+        return JSONResponse({"done": True})
+    try:
+        res = await exam_db.seed_step(budget=40)
+    except Exception:  # noqa: BLE001
+        logger.exception("seed-step xatosi")
+        return JSONResponse({"done": False, "error": True})
+    if res.get("done"):
+        _SEED_DONE = True
+    return JSONResponse(res)
 
 
 @app.on_event("startup")
@@ -266,8 +313,44 @@ async def home(request: Request):
     user = await get_current_user(request)
     if user:
         return RedirectResponse("/dashboard", status_code=302)
-    return templates.TemplateResponse(request, "home.html", {"user": None})
+    return templates.TemplateResponse(request, "home.html")
 
+
+
+# ---------------------------------------------------------------------------
+# FAN TANLOVI (bosh sahifadan): foydalanuvchi bosh sahifada fanni bosgan bo'lsa,
+# ro'yxatdan o'tgach onboarding'da fan/darajani QAYTA so'ramaymiz.
+# ---------------------------------------------------------------------------
+SUBJECT_COOKIE = "lz_subject"
+DEFAULT_LEVEL = "ortacha"
+
+
+def _valid_subject(code: str | None) -> str:
+    code = (code or "").strip()
+    return code if code in db.SUBJECT_CODES else ""
+
+
+def _remember_subject(response, code: str):
+    if code:
+        response.set_cookie(SUBJECT_COOKIE, code, max_age=60 * 60 * 24, httponly=True, samesite="lax")
+
+
+async def _auto_onboard(request: Request, user, form_subject: str = ""):
+    """Fan avval tanlangan bo'lsa (forma yoki cookie) — onboarding'ni o'tkazib yuboradi. Qaytaradi: user."""
+    if user.onboarding_done:
+        return user
+    code = _valid_subject(form_subject) or _valid_subject(request.cookies.get(SUBJECT_COOKIE))
+    if code:
+        await db.complete_onboarding(user.id, code, DEFAULT_LEVEL, "dtm")
+        refreshed = await db.get_user_by_id(user.id)
+        return refreshed or user
+    return user
+
+
+def _after_auth_destination(user, next_url: str = "") -> str:
+    if next_url and next_url.startswith("/") and not next_url.startswith("//"):
+        return next_url if user.onboarding_done or next_url.startswith("/onboarding") else "/onboarding"
+    return "/dashboard" if user.onboarding_done else "/onboarding"
 
 # ---------------------------------------------------------------------------
 # Ro'yxatdan o'tish
@@ -281,7 +364,13 @@ async def register_page(request: Request):
     plan = request.query_params.get("plan", "free")
     if plan not in ("free", "pro", "ultra"):
         plan = "free"
-    return templates.TemplateResponse(request, "register.html", {"error": GOOGLE_ERROR_TEXT.get(request.query_params.get("error", "")), "plan": plan})
+    subject = _valid_subject(request.query_params.get("subject")) or _valid_subject(request.cookies.get(SUBJECT_COOKIE))
+    resp = templates.TemplateResponse(request, "register.html", {
+        "error": GOOGLE_ERROR_TEXT.get(request.query_params.get("error", "")), "plan": plan,
+        "subject": subject, "subject_name": db.SUBJECT_NAMES.get(subject, ""),
+    })
+    _remember_subject(resp, _valid_subject(request.query_params.get("subject")))
+    return resp
 
 
 @app.post("/register", response_class=HTMLResponse)
@@ -293,13 +382,14 @@ async def register_submit(
     password: str = Form(...),
     password_confirm: str = Form(...),
     plan: str = Form("free"),
+    subject: str = Form(""),
     cf_turnstile_response: str = Form("", alias="cf-turnstile-response"),
-    cf_unavailable: str = Form("", alias="cf-unavailable"),
+    cf_fallback: str = Form("", alias="cf-turnstile-fallback"),
 ):
     email = email.strip().lower()
 
     if turnstile.is_active_for_request(request):
-        turnstile_ok = await turnstile.verify_turnstile(cf_turnstile_response, turnstile.client_ip(request), cf_unavailable == "1")
+        turnstile_ok = await turnstile.check(request, cf_turnstile_response, cf_fallback)
         if not turnstile_ok:
             return templates.TemplateResponse(request, "register.html", {
                 "error": "Bot ekanligingiz aniqlandi (yoki tekshiruv muddati o'tdi). Sahifani yangilab, qayta urinib ko'ring.",
@@ -313,7 +403,17 @@ async def register_submit(
 
     existing = await db.get_user_by_email(email)
     if existing:
-        return templates.TemplateResponse(request, "register.html", {"error": "Bu email allaqachon ro'yxatdan o'tgan.", "plan": plan})
+        # Hisob allaqachon bor: parol to'g'ri bo'lsa — shunchaki kiritamiz (ro'yxatdan o'tish ham, kirish ham bir xil ishlaydi)
+        if verify_password(password, existing.password_hash):
+            await db.update_streak(existing.id)
+            existing = await _auto_onboard(request, existing, subject)
+            resp = RedirectResponse(_after_auth_destination(existing), status_code=302)
+            set_session_cookie(resp, create_access_token(existing.id))
+            return resp
+        return templates.TemplateResponse(request, "register.html", {
+            "error": "Bu email allaqachon ro'yxatdan o'tgan. Parol to'g'ri kiritilsa, avtomatik kirasiz — yoki \"Kirish\" sahifasidan foydalaning.",
+            "plan": plan, "subject": _valid_subject(subject), "subject_name": db.SUBJECT_NAMES.get(_valid_subject(subject), ""),
+        })
 
     password_hash = hash_password(password)
     # MUHIM: hisob HAR DOIM "free" tarifda yaratiladi — pulli (pro/ultra)
@@ -323,10 +423,15 @@ async def register_submit(
     user = await db.create_user(email=email, password_hash=password_hash, first_name=first_name.strip(), plan="free")
     await db.create_notification(user.id, "welcome", body="LongoUZ platformasiga xush kelibsiz! O'rganishni hoziroq boshlang.")
 
+    user = await _auto_onboard(request, user, subject)
     token = create_access_token(user.id)
-    response = RedirectResponse("/onboarding", status_code=302)
-    set_session_cookie(response, token)
     if plan in ("pro", "ultra"):
+        response = RedirectResponse(f"/upgrade?plan={plan}&auto=1", status_code=302) if user.onboarding_done else RedirectResponse("/onboarding", status_code=302)
+    else:
+        response = RedirectResponse(_after_auth_destination(user), status_code=302)
+    set_session_cookie(response, token)
+    response.delete_cookie(SUBJECT_COOKIE)
+    if plan in ("pro", "ultra") and not user.onboarding_done:
         # Onboarding tugagach shu tarif uchun karta kiritish oynasi avtomatik
         # ochilishi uchun eslatib turamiz (qisqa muddatli, faqat shu oqim uchun).
         response.set_cookie(
@@ -362,14 +467,14 @@ async def checkout_register_submit(
     password_confirm: str = Form(...),
     plan: str = Form(...),
     cf_turnstile_response: str = Form("", alias="cf-turnstile-response"),
-    cf_unavailable: str = Form("", alias="cf-unavailable"),
+    cf_fallback: str = Form("", alias="cf-turnstile-fallback"),
 ):
     email = email.strip().lower()
     if plan not in ("pro", "ultra"):
         plan = "pro"
 
     if turnstile.is_active_for_request(request):
-        turnstile_ok = await turnstile.verify_turnstile(cf_turnstile_response, turnstile.client_ip(request), cf_unavailable == "1")
+        turnstile_ok = await turnstile.check(request, cf_turnstile_response, cf_fallback)
         if not turnstile_ok:
             return templates.TemplateResponse(request, "register.html", {
                 "error": "Bot ekanligingiz aniqlandi (yoki tekshiruv muddati o'tdi). Sahifani yangilab, qayta urinib ko'ring.",
@@ -383,7 +488,20 @@ async def checkout_register_submit(
 
     existing = await db.get_user_by_email(email)
     if existing:
-        return templates.TemplateResponse(request, "register.html", {"error": "Bu email allaqachon ro'yxatdan o'tgan.", "plan": plan})
+        # Hisob oldin ro'yxatdan o'tgan bo'lsa: parol to'g'ri bo'lsa — kiritib, tanlangan tarifni faollashtiramiz
+        # (ilgari "email band" xatosi chiqardi va foydalanuvchi ro'yxatdan o'tgani hisobga olinmagandek tuyulardi).
+        if verify_password(password, existing.password_hash):
+            await db.admin_set_user_plan(existing.id, plan)
+            await db.update_streak(existing.id)
+            existing = await _auto_onboard(request, existing)
+            response = RedirectResponse(_after_auth_destination(existing, "/profile?upgraded=1"), status_code=302)
+            set_session_cookie(response, create_access_token(existing.id))
+            response.delete_cookie(SUBJECT_COOKIE)
+            return response
+        return templates.TemplateResponse(request, "login.html", {
+            "error": "Bu email allaqachon ro'yxatdan o'tgan, lekin parol mos kelmadi. Avval kirish (parolingiz bilan), so'ng tarifni tanlang.",
+            "next": f"/upgrade?plan={plan}&auto=1",
+        })
 
     password_hash = hash_password(password)
     # Bu yerda — oddiy /register'dan farqli — hisob TO'G'RIDAN-TO'G'RI
@@ -392,9 +510,12 @@ async def checkout_register_submit(
     user = await db.create_user(email=email, password_hash=password_hash, first_name=first_name.strip(), plan=plan)
     await db.create_notification(user.id, "welcome", body=f"LongoUZ platformasiga xush kelibsiz! {plan.upper()} tarifingiz faollashtirildi.")
 
+    # Fan bosh sahifada tanlangan bo'lsa (cookie) — onboarding o'tkazib yuboriladi; aks holda faqat fan so'raladi.
+    user = await _auto_onboard(request, user)
     token = create_access_token(user.id)
-    response = RedirectResponse("/onboarding", status_code=302)
+    response = RedirectResponse(_after_auth_destination(user), status_code=302)
     set_session_cookie(response, token)
+    response.delete_cookie(SUBJECT_COOKIE)
     return response
 
 
@@ -425,12 +546,12 @@ async def login_submit(
     email: str = Form(...),
     password: str = Form(...),
     cf_turnstile_response: str = Form("", alias="cf-turnstile-response"),
-    cf_unavailable: str = Form("", alias="cf-unavailable"),
+    cf_fallback: str = Form("", alias="cf-turnstile-fallback"),
 ):
     email = email.strip().lower()
 
     if turnstile.is_active_for_request(request):
-        if not await turnstile.verify_turnstile(cf_turnstile_response, turnstile.client_ip(request), cf_unavailable == "1"):
+        if not await turnstile.check(request, cf_turnstile_response, cf_fallback):
             return templates.TemplateResponse(request, "login.html", {
                 "error": "Bot tekshiruvi o'tmadi (yoki muddati tugadi). Sahifani yangilab, qayta urinib ko'ring.",
             })
@@ -442,18 +563,16 @@ async def login_submit(
 
     await db.update_streak(user.id)
     await db.update_last_login_and_check_welcome_back(user.id)
+    user = await _auto_onboard(request, user)
 
     token = create_access_token(user.id)
     # next URL: avval form hidden input dan, keyin cookie dan olamiz
     form_data = await request.form()
     next_url = (form_data.get("next") or request.cookies.get("lz_oauth_next", "") or "").strip()
-    if next_url and next_url.startswith("/") and not next_url.startswith("//"):
-        destination = next_url
-    else:
-        destination = "/dashboard" if user.onboarding_done else "/onboarding"
-    response = RedirectResponse(destination, status_code=302)
+    response = RedirectResponse(_after_auth_destination(user, next_url), status_code=302)
     set_session_cookie(response, token)
     response.delete_cookie("lz_oauth_next")
+    response.delete_cookie(SUBJECT_COOKIE)
     return response
 
 
@@ -481,8 +600,6 @@ GOOGLE_ERROR_TEXT = {
     "google_network": "Server Google bilan bog'lana olmadi (tarmoq). Birozdan so'ng urinib ko'ring.",
     "google_email_unverified": "Google hisobingizdagi email tasdiqlanmagan.",
     "google_no_email": "Google hisobidan email olinmadi.",
-    "google_exists": "Bu Google hisobi bilan allaqachon ro'yxatdan o'tgansiz. Quyidagi \"Google bilan kirish\" tugmasini bosing.",
-    "google_not_found": "Bu Google hisobi bilan akkaunt topilmadi. Avval ro'yxatdan o'ting — \"Google bilan ro'yxatdan o'tish\" ni bosing.",
 }
 
 
@@ -490,13 +607,13 @@ GOOGLE_ERROR_TEXT = {
 async def google_login(request: Request):
     if not oauth_google.is_enabled():
         return RedirectResponse("/login?error=google_not_configured", status_code=302)
-    intent = "register" if request.query_params.get("intent") == "register" else "login"
-    state = oauth_google.make_state(SECRET_KEY, intent)
+    state = oauth_google.make_state(SECRET_KEY)
     # next= parametrini cookie ga yozamiz — callback da shu yerga qaytamiz
     next_url = request.query_params.get("next", "")
     response = RedirectResponse(
         oauth_google.build_authorize_url(oauth_google.redirect_uri_for(request), state), status_code=302,
     )
+    _remember_subject(response, _valid_subject(request.query_params.get("subject")))
     if next_url and next_url.startswith("/") and not next_url.startswith("//"):
         response.set_cookie("lz_oauth_next", next_url[:200], max_age=600, httponly=True, samesite="lax")
     return response
@@ -513,8 +630,7 @@ async def google_callback(request: Request, code: str = "", state: str = "", err
     if error or not code:
         return RedirectResponse("/login?error=google_cancelled", status_code=302)
 
-    intent = oauth_google.parse_state(state, SECRET_KEY)
-    if intent is None:
+    if not oauth_google.verify_state(state, SECRET_KEY):
         logger.warning("Google OAuth: state noto'g'ri yoki eskirgan.")
         return RedirectResponse("/login?error=google_state_mismatch", status_code=302)
 
@@ -524,13 +640,6 @@ async def google_callback(request: Request, code: str = "", state: str = "", err
 
     email = userinfo["email"]
     user = await db.get_user_by_email(email)
-    # Niyatga qarab farqlaymiz: "Ro'yxatdan o'tish" sahifasidan kelgan, lekin hisob
-    # allaqachon bor -> kirish sahifasiga; "Kirish" sahifasidan kelgan, lekin hisob
-    # yo'q -> ro'yxatdan o'tish sahifasiga (aniq xabar bilan).
-    if intent == "register" and user is not None:
-        return RedirectResponse("/login?error=google_exists&email=" + quote(email), status_code=302)
-    if intent == "login" and user is None:
-        return RedirectResponse("/register?error=google_not_found&email=" + quote(email), status_code=302)
     is_new_user = user is None
     if user is None:
         # Yangi foydalanuvchi — Google orqali birinchi marta kirmoqda.
@@ -549,17 +658,16 @@ async def google_callback(request: Request, code: str = "", state: str = "", err
         await db.create_notification(user.id, "welcome", body="LongoUZ platformasiga xush kelibsiz! O'rganishni hoziroq boshlang.")
     else:
         await db.update_last_login_and_check_welcome_back(user.id)
+    # Ro'yxatdan o'tish ham, kirish ham BIR XIL: hisob bo'lsa kiradi, bo'lmasa yaratiladi.
+    # Fan bosh sahifada tanlangan bo'lsa — onboarding o'tkazib yuboriladi.
+    user = await _auto_onboard(request, user)
     token = create_access_token(user.id)
-    # next URL: avval form hidden input dan, keyin cookie dan olamiz
-    form_data = await request.form()
-    next_url = (form_data.get("next") or request.cookies.get("lz_oauth_next", "") or "").strip()
-    if next_url and next_url.startswith("/") and not next_url.startswith("//"):
-        destination = next_url
-    else:
-        destination = "/dashboard" if user.onboarding_done else "/onboarding"
-    response = RedirectResponse(destination, status_code=302)
+    # next URL faqat cookie'dan olinadi (callback GET so'rov — forma yo'q)
+    next_url = (request.cookies.get("lz_oauth_next", "") or "").strip()
+    response = RedirectResponse(_after_auth_destination(user, next_url), status_code=302)
     set_session_cookie(response, token)
     response.delete_cookie("lz_oauth_next")
+    response.delete_cookie(SUBJECT_COOKIE)
     return response
 
 
@@ -1126,6 +1234,11 @@ IMPORT_MODES = ("dtm", "certificate", "ielts", "cefr")
 
 import studio as _studio  # noqa: E402
 _studio.register(app, ADMIN_PREFIX, require_admin, current_admin_username, templates, IMPORT_MODES)
+import reports as _reports  # noqa: E402
+import features215 as _f215  # noqa: E402
+_reports.register(app, ADMIN_PREFIX, require_admin, current_admin_username, templates, limiter, get_current_user)
+import keys_admin as _keys_admin  # noqa: E402
+_keys_admin.register(app, ADMIN_PREFIX, require_admin, current_admin_username, templates)
 
 
 @app.get(f"{ADMIN_PREFIX}/import", response_class=HTMLResponse)
@@ -1819,21 +1932,22 @@ async def admin_ai_save_keys(request: Request):
         body = await request.json()
     except ValueError:
         raise HTTPException(status_code=400, detail="JSON noto'g'ri.")
-    import ai_keys
-    saved = []
+    import keys_admin
+    saved, notes, errors = [], [], []
     for name, value in (body or {}).items():
         if name not in _ALLOWED_KEY_NAMES or not isinstance(value, str) or not value.strip():
             continue
-        if len(value) > 300:
-            raise HTTPException(status_code=400, detail="Qiymat juda uzun.")
-        try:
-            ai_keys.save(name, value)
-        except ValueError as exc:
-            raise HTTPException(status_code=400, detail=str(exc))
-        await db.save_env_override(name, value.strip())
-        saved.append(name)
+        res = await keys_admin.save_key(name, value)
+        if res.get("ok"):
+            saved.append(name)
+            if res.get("warn"):
+                notes.append(f"{name}: {res.get('msg')}")
+        else:
+            errors.append(f"{name}: {res.get('msg')}")
     await db.log_admin_action(current_admin_username(request), "ai_keys", ", ".join(saved) or "-")
-    return {"ok": True, "saved": saved}
+    if errors and not saved:
+        raise HTTPException(status_code=400, detail=" | ".join(errors))
+    return {"ok": True, "saved": saved, "notes": notes, "errors": errors}
 
 
 @app.post(f"{ADMIN_PREFIX}/ai/test", response_class=HTMLResponse)
@@ -1953,233 +2067,6 @@ async def support_submit(request: Request, subject: str = Form(""), body: str = 
 
 
 # ---------------------------------------------------------------------------
-# SAVOL SHIKOYATLARI — test paytida "Shikoyat qilish" tugmasi. Foydalanuvchi savol bo'yicha
-# kamchilikni yozadi -> admin panelda ("Shikoyatlar") ko'rinadi -> Claude tahlil qiladi,
-# tuzatish taklif qiladi (rejimga qarab admin tasdiqlaydi yoki avtomatik qo'llanadi).
-# ---------------------------------------------------------------------------
-
-class QuestionReportBody(BaseModel):
-    attempt_token: str
-    index: int
-    category: str = "other"
-    details: str = ""
-
-
-@app.post("/api/question-report")
-@limiter.limit("12/minute")
-async def api_question_report(request: Request, body: QuestionReportBody):
-    user = await get_current_user(request)
-    if user is None:
-        raise HTTPException(status_code=401, detail="Avval tizimga kiring.")
-    details = (body.details or "").strip()
-    if body.category == "other" and len(details) < 5:
-        raise HTTPException(status_code=422, detail="Iltimos, kamchilikni qisqacha yozing (kamida 5 belgi).")
-    session = await db.get_quiz_session(body.attempt_token, user.id)
-    if not session or not (0 <= body.index < len(session.get("questions") or [])):
-        raise HTTPException(status_code=404, detail="Savol topilmadi (test sessiyasi tugagan bo'lishi mumkin).")
-    q = session["questions"][body.index]
-    qid = q.get("id") if isinstance(q.get("id"), int) else None
-    options, correct = q.get("options") or [], q.get("correct_index", -1)
-    if qid:  # bazadagi kanonik holat (test paytida variantlar aralashtirilgan bo'ladi)
-        row = await db.get_question_row(qid)
-        if row is not None:
-            import json as _json
-            options, correct = _json.loads(row.options_json or "[]"), row.correct_index
-    rep, created = await db.create_question_report(
-        user.id, qid, session.get("subject", ""), session.get("mode", ""), q.get("topic") or session.get("topic", ""),
-        q.get("question", ""), options, correct, body.category, details,
-    )
-    if created and qid:
-        # Ko'p o'quvchi shikoyat qilgan savol — admin ko'rib chiqquncha vaqtincha yashiriladi (sozlanadi)
-        hide_after = int(await db.get_setting("reports_hide_after", "0") or 0)
-        if hide_after and body.category in ("wrong_answer", "bad_options") and \
-                await db.count_reports_for_question(qid) >= hide_after:
-            await db.admin_set_questions_active([qid], False)
-            await db.set_report_status(rep.id, "hidden", f"{hide_after} ta o'quvchi shikoyat qilgani uchun avtomatik yashirildi")
-        elif await db.get_setting("reports_mode", "suggest") == "auto" and not runtime.IS_VERCEL:
-            import asyncio as _aio
-            _aio.create_task(_auto_analyze_one(rep.id))
-    return JSONResponse({"ok": True, "duplicate": not created,
-                         "message": "Shikoyatingiz allaqachon qabul qilingan." if not created else "Rahmat! Shikoyatingiz adminlarga yuborildi."})
-
-
-async def _report_settings() -> dict:
-    mode = await db.get_setting("reports_mode", "suggest")
-    return {
-        "mode": mode if mode in ("off", "suggest", "auto") else "suggest",
-        "threshold": max(60, min(100, int(await db.get_setting("reports_auto_threshold", "90") or 90))),
-        "hide_after": max(0, int(await db.get_setting("reports_hide_after", "0") or 0)),
-    }
-
-
-async def _notify_reporter(rep_id: int, text: str):
-    rep = await db.get_question_report(rep_id)
-    if rep is not None:
-        try:
-            await db.create_notification(rep.user_id, "report", body=text, title="Shikoyatingiz ko'rib chiqildi")
-        except Exception:  # noqa: BLE001
-            logger.exception("Shikoyat bildirishnomasi yuborilmadi")
-
-
-async def _auto_analyze_one(rep_id: int) -> dict:
-    cfg = await _report_settings()
-    if cfg["mode"] == "off":
-        return {"ok": False, "error": "Shikoyatlarni tahlil qilish o'chirilgan."}
-    res = await report_ai.analyze_report(rep_id, cfg["threshold"] if cfg["mode"] == "auto" else None)
-    if res.get("auto_applied"):
-        await _notify_reporter(rep_id, "Rahmat! Siz xabar bergan savol tekshirilib, tuzatildi.")
-        await db.log_admin_action("AI", "report_auto_fix", f"shikoyat #{rep_id}")
-    return res
-
-
-@app.get("/api/cron/reports")
-async def cron_reports(request: Request):
-    """Vercel Cron (kuniga bir marta) yoki tashqi cron: yangi shikoyatlarni tahlil qiladi. CRON_SECRET kerak."""
-    secret = os.getenv("CRON_SECRET", "")
-    auth = request.headers.get("authorization", "")
-    if not secret or not hmac.compare_digest(auth, f"Bearer {secret}"):
-        raise HTTPException(status_code=401, detail="Ruxsat yo'q.")
-    cfg = await _report_settings()
-    if cfg["mode"] == "off":
-        return JSONResponse({"ok": True, "skipped": "off"})
-    done = fixed = 0
-    for rid in await db.open_report_ids(limit=6):
-        r = await _auto_analyze_one(rid)
-        done += 1 if r.get("ok") else 0
-        fixed += 1 if r.get("auto_applied") else 0
-    return JSONResponse({"ok": True, "analyzed": done, "auto_fixed": fixed})
-
-
-REPORTS_PAGE_SIZE = 20
-
-
-@app.get(f"{ADMIN_PREFIX}/reports", response_class=HTMLResponse)
-async def admin_reports_page(request: Request, status: str = "open", page: int = 1):
-    if not require_admin(request):
-        return RedirectResponse(f"{ADMIN_PREFIX}/login", status_code=302)
-    import json as _json
-    page = max(1, page)
-    total = await db.count_question_reports(status if status != "all" else "")
-    rows = await db.list_question_reports(status if status != "all" else "", limit=REPORTS_PAGE_SIZE, offset=(page - 1) * REPORTS_PAGE_SIZE)
-    items = []
-    for row in rows:
-        r = row["r"]
-        try:
-            ai = _json.loads(r.ai_json) if r.ai_json else None
-        except ValueError:
-            ai = None
-        items.append({**row, "options": _json.loads(r.options_json or "[]"), "ai": ai})
-    counts = {k: await db.count_question_reports(k) for k in ("open", "fixed", "hidden", "dismissed")}
-    return templates.TemplateResponse(request, "admin_reports.html", {
-        "items": items, "status": status, "page": page, "total": total,
-        "total_pages": max(1, -(-total // REPORTS_PAGE_SIZE)), "counts": counts,
-        "cfg": await _report_settings(), "ai_ready": report_ai.ai_available(),
-        "categories": db.REPORT_CATEGORIES, "subject_names": db.SUBJECT_NAMES, "active_tab": "reports",
-    })
-
-
-@app.get(f"{ADMIN_PREFIX}/api/reports/count")
-async def admin_reports_count(request: Request):
-    if not require_admin(request):
-        raise HTTPException(status_code=401, detail="Admin kerak.")
-    return JSONResponse({"count": await db.count_question_reports("new")})
-
-
-@app.post(f"{ADMIN_PREFIX}/api/reports/settings")
-async def admin_reports_settings(request: Request):
-    if not require_admin(request):
-        raise HTTPException(status_code=401, detail="Admin kerak.")
-    data = await request.json()
-    mode = data.get("mode") if data.get("mode") in ("off", "suggest", "auto") else "suggest"
-    await db.set_setting("reports_mode", mode)
-    await db.set_setting("reports_auto_threshold", str(max(60, min(100, int(data.get("threshold") or 90)))))
-    await db.set_setting("reports_hide_after", str(max(0, min(50, int(data.get("hide_after") or 0)))))
-    await db.log_admin_action(current_admin_username(request), "reports_settings", f"mode={mode}")
-    return JSONResponse({"ok": True})
-
-
-@app.post(f"{ADMIN_PREFIX}/api/reports/analyze-batch")
-async def admin_reports_analyze_batch(request: Request):
-    if not require_admin(request):
-        raise HTTPException(status_code=401, detail="Admin kerak.")
-    cfg = await _report_settings()
-    done = fixed = failed = 0
-    last_error = ""
-    for rid in await db.open_report_ids(limit=5):
-        res = await report_ai.analyze_report(rid, cfg["threshold"] if cfg["mode"] == "auto" else None)
-        if res.get("ok"):
-            done += 1
-            if res.get("auto_applied"):
-                fixed += 1
-                await _notify_reporter(rid, "Rahmat! Siz xabar bergan savol tekshirilib, tuzatildi.")
-        else:
-            failed += 1
-            last_error = res.get("error", "")
-    left = len(await db.open_report_ids(limit=500))
-    return JSONResponse({"ok": failed == 0 or done > 0, "analyzed": done, "auto_fixed": fixed, "failed": failed,
-                         "left": left, "error": last_error})
-
-
-@app.post(f"{ADMIN_PREFIX}/api/reports/{{report_id}}/analyze")
-async def admin_report_analyze(request: Request, report_id: int):
-    if not require_admin(request):
-        raise HTTPException(status_code=401, detail="Admin kerak.")
-    res = await report_ai.analyze_report(report_id, None)
-    if not res.get("ok"):
-        raise HTTPException(status_code=503, detail=res.get("error", "Tahlil qilib bo'lmadi."))
-    return JSONResponse(res)
-
-
-@app.post(f"{ADMIN_PREFIX}/api/reports/{{report_id}}/apply")
-async def admin_report_apply(request: Request, report_id: int):
-    """AI taklif qilgan (yoki admin tahrirlagan) tuzatishni qo'llaydi. Body: {"fix": {...}} — bo'sh bo'lsa AI taklifi."""
-    if not require_admin(request):
-        raise HTTPException(status_code=401, detail="Admin kerak.")
-    import json as _json
-    try:
-        data = await request.json()
-    except ValueError:
-        data = {}
-    fix = data.get("fix")
-    if not fix:
-        rep = await db.get_question_report(report_id)
-        ai = _json.loads(rep.ai_json) if rep and rep.ai_json else {}
-        fix = ai.get("fix")
-    if not fix:
-        raise HTTPException(status_code=422, detail="Qo'llash uchun tuzatish yo'q — avval tahlil qiling yoki qo'lda yozing.")
-    ok, msg = await db.apply_report_fix(report_id, fix, "Admin tasdiqladi")
-    if not ok:
-        raise HTTPException(status_code=422, detail=msg)
-    await db.log_admin_action(current_admin_username(request), "report_fix", f"shikoyat #{report_id}")
-    await _notify_reporter(report_id, "Rahmat! Siz xabar bergan savol tekshirilib, tuzatildi.")
-    return JSONResponse({"ok": True})
-
-
-@app.post(f"{ADMIN_PREFIX}/api/reports/{{report_id}}/{{action}}")
-async def admin_report_action(request: Request, report_id: int, action: str):
-    if not require_admin(request):
-        raise HTTPException(status_code=401, detail="Admin kerak.")
-    admin_name = current_admin_username(request)
-    if action == "hide":
-        ok = await db.hide_question_for_report(report_id, "Admin yashirdi")
-        msg = "Savol yashirildi." if ok else "Savol bazada topilmadi."
-    elif action == "dismiss":
-        ok = await db.set_report_status(report_id, "dismissed", "Admin rad etdi")
-        msg = "Shikoyat rad etildi."
-    elif action == "revert":
-        ok, msg = await db.revert_report_fix(report_id)
-    elif action == "reopen":
-        ok = await db.set_report_status(report_id, "new", "")
-        msg = "Qayta ochildi."
-    else:
-        raise HTTPException(status_code=404, detail="Noma'lum amal.")
-    if not ok:
-        raise HTTPException(status_code=422, detail=msg)
-    await db.log_admin_action(admin_name, f"report_{action}", f"shikoyat #{report_id}")
-    return JSONResponse({"ok": True, "message": msg})
-
-
-# ---------------------------------------------------------------------------
 # ADMIN — foydalanuvchi xabarlari (Yordam bo'limidan kelgan). Har bir yangi
 # xabar "o'qilmagan" holatda keladi va sidebar'dagi belgida ko'rinadi.
 # ---------------------------------------------------------------------------
@@ -2254,16 +2141,13 @@ async def onboarding_page(request: Request):
             status_code=302,
         )
     if user.onboarding_done:
-        # Onboarding tugagan foydalanuvchi — agar subject berilgan bo'lsa to'g'ridan shu fanga
-        sub = request.query_params.get("subject", "")
-        if sub and sub in db.SUBJECT_CODES:
-            return RedirectResponse(f"/quiz?subject={sub}", status_code=302)
         return RedirectResponse("/dashboard", status_code=302)
-
-    # Home'dan fan bosib kelgan bo'lsa, shu fanni oldindan tanlangan qilib ko'rsatamiz
-    preset_subject = request.query_params.get("subject", "")
-    if preset_subject not in db.SUBJECT_CODES:
-        preset_subject = ""
+    # Fan bosh sahifada allaqachon tanlangan bo'lsa — qayta so'ramaymiz
+    user = await _auto_onboard(request, user, request.query_params.get("subject", ""))
+    if user.onboarding_done:
+        resp = RedirectResponse("/dashboard", status_code=302)
+        resp.delete_cookie(SUBJECT_COOKIE)
+        return resp
 
     return templates.TemplateResponse(request, "onboarding.html", {
         "user": user,
@@ -2271,7 +2155,6 @@ async def onboarding_page(request: Request):
         "levels": db.LEVELS,
         "certificates": db.CERTIFICATE_TYPES,
         "error": None,
-        "preset_subject": preset_subject,
     })
 
 
@@ -2279,8 +2162,8 @@ async def onboarding_page(request: Request):
 async def onboarding_submit(
     request: Request,
     subject: str = Form(...),
-    level: str = Form(...),
-    certificate_type: str = Form(...),
+    level: str = Form(DEFAULT_LEVEL),
+    certificate_type: str = Form("dtm"),
 ):
     user = await get_current_user(request)
     if user is None:
@@ -2391,16 +2274,12 @@ async def quiz_select_page(request: Request):
         for s in db.SUBJECTS
     }
 
-    # URL'dan fan kodi kelsa (home'dan bosib kelganda) shu fanni tanlangan qilib ko'rsatamiz
-    url_subject = request.query_params.get("subject", "")
-    effective_subject = url_subject if url_subject in db.SUBJECT_CODES else (user.subject or db.SUBJECTS[0]["code"])
-
     return templates.TemplateResponse(request, "quiz_select.html", {
         "user": user,
         "subjects": db.SUBJECTS,
         "levels": db.LEVELS,
         "modes_by_subject": modes_by_subject,
-        "default_subject": effective_subject,
+        "default_subject": user.subject or db.SUBJECTS[0]["code"],
         "default_level": user.level or "boshlangich",
         "default_level_name": db.LEVEL_NAMES.get(user.level, "O'rtacha"),
         "full_mock_access": db.get_plan_limits(user.plan)["full_mock_access"],
@@ -2463,11 +2342,22 @@ async def quiz_take_page(request: Request):
     drill = request.query_params.get("drill", "")[:40]
     if exam_rules.is_tiered(subject, mode):
         mode_info = db._mode_with_exam_rules(subject, mode_info)
+    # v215: DTM blok mock (?block=physics,chemistry) va adaptiv test (?adaptive=1)
+    block_specs = [c for c in request.query_params.get("block", "").split(",") if c in db.SUBJECT_CODES]
+    block_specs = block_specs[:2] if len(block_specs) == 2 and block_specs[0] != block_specs[1] else []
+    adaptive = request.query_params.get("adaptive", "") == "1" and not block_specs
+    if block_specs:
+        subject, mode = block_specs[0], "dtm"
+        mode_info = {**db.TEST_MODE_BY_CODE["dtm"], "question_count": _f215.BLOCK_TOTAL, "time_limit_minutes": _f215.BLOCK_MINUTES}
+    elif adaptive:
+        mode_info = {**mode_info, "question_count": int(request.query_params.get("n", "20") or 20) if (request.query_params.get("n", "20") or "20").isdigit() else 20}
 
     return templates.TemplateResponse(request, "quiz_take.html", {
+        "block_specs": ",".join(block_specs),
+        "adaptive": adaptive,
         "user": user,
         "subject": subject,
-        "subject_name": db.SUBJECT_NAMES.get(subject, subject),
+        "subject_name": "DTM blok mock" if block_specs else db.SUBJECT_NAMES.get(subject, subject),
         "level": level,
         "mode": mode,
         "mode_info": mode_info,
@@ -2568,7 +2458,7 @@ async def upgrade_submit(
     request: Request,
     plan: str = Form(...),
     cf_turnstile_response: str = Form("", alias="cf-turnstile-response"),
-    cf_unavailable: str = Form("", alias="cf-unavailable"),
+    cf_fallback: str = Form("", alias="cf-turnstile-fallback"),
 ):
     user = await get_current_user(request)
     if user is None:
@@ -2577,7 +2467,7 @@ async def upgrade_submit(
             status_code=302,
         )
     if turnstile.is_active_for_request(request):
-        if not await turnstile.verify_turnstile(cf_turnstile_response, turnstile.client_ip(request), cf_unavailable == "1"):
+        if not await turnstile.check(request, cf_turnstile_response, cf_fallback):
             return RedirectResponse(f"/upgrade?plan={plan}&auto=1&error=bot", status_code=302)
     if plan not in ("free", "pro", "ultra"):
         raise HTTPException(status_code=400, detail="Noto'g'ri tarif.")
@@ -3431,7 +3321,7 @@ async def api_quiz_generate(request: Request, body: QuizRequest):
 
 class QuizAutosaveRequest(BaseModel):
     attempt_token: str
-    answers: dict[str, int | str] = {}
+    answers: dict[str, int] = {}
     current_index: int = 0
     remaining_seconds: int | None = None
 
@@ -3500,8 +3390,9 @@ async def api_quiz_submit(request: Request, body: QuizSubmitRequest):
     level = session.get("level", user.level or "boshlangich")
     topic = session.get("topic") or body.topic or ""
     sess_meta = session.get("meta") or {}
-    tiered = exam_rules.is_tiered(subject, mode)
-    special_topic = topic in ("__missed__", "__checkpoint__", "__drill__", "")
+    is_block = bool(sess_meta.get("block_mock"))
+    tiered = exam_rules.is_tiered(subject, mode) and not is_block
+    special_topic = topic in ("__missed__", "__checkpoint__", "__drill__", "__block__", "")
     total_count = len(questions)
     correct_count = 0
     answered_count = 0
@@ -3557,7 +3448,8 @@ async def api_quiz_submit(request: Request, body: QuizSubmitRequest):
         if is_correct:
             correct_count += 1
         graded.append({"is_correct": bool(is_correct), "difficulty": q.get("difficulty"),
-                       "block": q.get("block"), "section": q.get("section"), "qtype": q.get("qtype") or "closed"})
+                       "block": q.get("block"), "section": q.get("section"), "qtype": q.get("qtype") or "closed",
+                       "subject": q.get("_subject"), "coef": q.get("_coef"), "role": q.get("_role")})
 
         # --- MAVZULASHTIRILGAN PROGRESS + XATO SAVOLLAR BANKI ---
         # "Mavzusiz test" (xato savollarni takrorlash) rejimida ham
@@ -3565,12 +3457,14 @@ async def api_quiz_submit(request: Request, body: QuizSubmitRequest):
         # o'chadi, xato bo'lsa yana bir bor "missed" hisoblanadi.
         if topic == "__missed__":
             record_topic = q.get("_missed_topic", "")
+        elif is_block:
+            record_topic = q.get("topic", "")
         elif tiered and special_topic:
             record_topic = q.get("topic", "")  # nazorat / mashq / to'liq imtihon: har bir savol o'z mavzusiga yoziladi
         else:
             record_topic = topic
         await db.record_topic_answer(
-            user_id=user.id, subject=subject, mode=mode, topic=record_topic,
+            user_id=user.id, subject=(q.get("_subject") if is_block else subject) or subject, mode=mode, topic=record_topic,
             question_text=q.get("question", ""),
             question_json=_json.dumps(
                 {k: v for k, v in q.items() if not k.startswith("_")}, ensure_ascii=False,
@@ -3578,7 +3472,7 @@ async def api_quiz_submit(request: Request, body: QuizSubmitRequest):
             is_correct=bool(is_correct),
         )
 
-    result = scoring.score_session(subject, mode, graded, sess_meta) if tiered else None
+    result = _f215.score_block(graded, sess_meta.get("specs") or []) if is_block else (scoring.score_session(subject, mode, graded, sess_meta) if tiered else None)
     if result is None:
         result = scoring.score_result(mode, correct_count, total_count)
     result["answered"] = answered_count
@@ -3605,7 +3499,7 @@ async def api_quiz_submit(request: Request, body: QuizSubmitRequest):
     await db.clear_autosaved_progress(body.attempt_token)
 
     certificate = None
-    if scoring.certificate_eligible(result):
+    if not is_block and scoring.certificate_eligible(result):
         cert = await db.create_certificate(
             user_id=user.id, subject=subject, mode=mode,
             score_label=result["label"], quiz_log_id=log.id,
@@ -3998,6 +3892,18 @@ async def api_balance_topup(request: Request, amount: int = Form(...), method: s
     return JSONResponse({"status": "ok", "balance": new_balance})
 
 
+# v215: DTM blok mock, adaptiv test, analitika, yo'riqnoma (yuqoridagi barcha yordamchilar aniqlangandan keyin ulanadi)
+_f215.register(app, get_current_user, templates, limiter, shuffle_question_options, _public_question)
+
+
+@app.get(f"{ADMIN_PREFIX}/bank", response_class=HTMLResponse)
+async def admin_bank_page(request: Request):
+    if not require_admin(request):
+        return RedirectResponse(f"{ADMIN_PREFIX}/login", status_code=302)
+    return templates.TemplateResponse(request, "admin_bank.html", {"active_tab": "bank", "status": await _f215.bank_status()})
+
+
+
 if __name__ == "__main__":
     import asyncio
     import re as _re
@@ -4094,3 +4000,4 @@ if __name__ == "__main__":
         asyncio.run(_serve_all())
     except KeyboardInterrupt:
         pass
+

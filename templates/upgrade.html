@@ -112,7 +112,7 @@
   <script src="/static/purchase.js"></script>
   {% if turnstile_active(request) %}
   <script src="/static/turnstile-helper.js"></script>
-  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=lgTurnstileReady" async defer></script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=lgTurnstileReady" async defer onerror="window.lgTurnstileFailed&&window.lgTurnstileFailed()"></script>
   {% endif %}
   <script>
     (function () {

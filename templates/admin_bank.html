@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Savol banki — Admin — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/admin-dash.css">
+  <link rel="stylesheet" href="/static/admin.css">
+  <link rel="stylesheet" href="/static/admin-studio.css">
+  
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true" data-admin-prefix="{{ admin_prefix }}">
+  <div class="app-shell">
+    {% include "_admin_sidebar.html" %}
+    <div class="app-content">
+      <div class="app-topbar"><div>
+        <h1>Savol banki</h1>
+        <p>Har mavzu uchun maqsad: Bepul 25 · Pro 60 · Ultra 125 savol. Kamchilik — to'ldirish kerak bo'lgan savollar soni.</p>
+      </div></div>
+
+      
+      <div class="st-card" style="margin-bottom:14px;overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:.9rem">
+          <tr style="text-align:left"><th>Fan</th><th>Mavzu</th><th>Jami savol</th><th>Kamchilik (125 gacha)</th></tr>
+          {% for s in status.subjects %}
+          <tr><td><b>{{ s.subject }}</b></td><td>{{ s.topics }}</td><td>{{ s.total }}</td><td>{{ s.need }} ({{ s.short }} mavzu to'liq emas)</td></tr>
+          {% endfor %}
+        </table>
+      </div>
+      {% for s in status.subjects %}
+      <details class="st-card" style="margin-bottom:10px">
+        <summary><b>{{ s.subject }}</b> — {{ s.total }} savol, kamchilik {{ s.need }}</summary>
+        <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.85rem;margin-top:8px">
+          <tr style="text-align:left"><th>Rejim</th><th>Mavzu</th><th>Bepul</th><th>Pro</th><th>Ultra</th><th>Jami</th><th>Kerak</th></tr>
+          {% for r in s.rows[:400] %}
+          <tr><td>{{ r.mode }}</td><td>{{ r.topic }}</td><td>{{ r.free }}</td><td>{{ r.pro }}</td><td>{{ r.ultra }}</td><td>{{ r.total }}</td><td>{{ r.need }}</td></tr>
+          {% endfor %}
+        </table></div>
+      </details>
+      {% endfor %}
+    </div>
+  </div>
+</body>
+</html>

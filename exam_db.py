@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import logging
 import random
+import time
 
 from sqlalchemy import select, func, delete as sa_delete
 
@@ -18,7 +19,7 @@ import exam_rules as ER
 logger = logging.getLogger(__name__)
 
 # Tayyor kontent versiyasi: oshirilsa yangi savollar/mavzular qo'shiladi (mavjudlari qayta yozilmaydi).
-CONTENT_VERSION = "v206"
+CONTENT_VERSION = "v218q"
 
 _KIND_OF = {"closed": "c", "open": "o", "match": "m"}
 
@@ -313,6 +314,44 @@ async def seed_exam_content() -> None:
             added_total += await _seed_pack(subject, mode, pack["topics"], pack["questions"], keep[(subject, mode)])
     await db.set_setting(flag, "1")
     logger.info("Tayyor savollar bazasi yuklandi: %s ta yangi savol.", added_total)
+
+
+async def seed_step(budget: float = 40.0) -> dict:
+    """Serverless (Vercel) uchun BO'LAKLAB yuklash: har chaqiruv vaqt byudjeti ichida bir nechta paketni yuklaydi,
+    qolganini keyingi chaqiruv davom ettiradi. Natija: {"done": bool, "left": N, "added": N}."""
+    ver = CONTENT_VERSION
+    flag = f"seed_exam_content_{ver}"
+    if await db.get_setting(flag, "") == "1":
+        return {"done": True, "left": 0, "added": 0}
+    try:
+        import content
+    except ImportError:
+        return {"done": True, "left": 0, "added": 0}
+    if not await db.claim_lock("seed_lock", ttl=100):
+        return {"done": False, "left": -1, "added": 0, "busy": True}
+    started = time.monotonic()
+    packs = content.load_packs()
+    keep = pack_keep_keys(packs)
+    added_total = 0
+    left = 0
+    try:
+        for idx, pack in enumerate(packs):
+            subject = pack["subject"]
+            for mode in pack["modes"]:
+                key = f"seedpack_{ver}_{idx}_{subject}_{mode}"
+                if await db.get_setting(key, "") == "1":
+                    continue
+                if time.monotonic() - started > budget:
+                    left += 1
+                    continue
+                added_total += await _seed_pack(subject, mode, pack["topics"], pack["questions"], keep[(subject, mode)])
+                await db.set_setting(key, "1")
+        if left == 0:
+            await db.set_setting(flag, "1")
+            logger.info("Tayyor savollar bazasi bo'laklab yuklandi (+%s).", added_total)
+    finally:
+        await db.release_lock("seed_lock")
+    return {"done": left == 0, "left": left, "added": added_total}
 
 
 async def _seed_pack(subject: str, mode: str, topics: list[dict], questions: list[dict], keep_keys: set | None = None) -> int:

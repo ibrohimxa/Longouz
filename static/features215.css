@@ -1,0 +1,68 @@
+/* LongoUZ v215 — DTM blok mock, analitika, yo'riqnoma, adaptiv banner */
+.f215-banner { display: flex; align-items: center; gap: 14px; padding: 14px 16px; margin: 14px 0; border-radius: 16px; border: 1px solid rgba(74,158,255,.4); background: linear-gradient(135deg, rgba(74,158,255,.14), rgba(47,191,131,.1)); color: var(--ink); text-decoration: none; transition: transform .15s, border-color .15s; }
+.f215-banner:hover { transform: translateY(-2px); border-color: var(--accent-blue); }
+.f215-banner b { display: block; font-size: 1rem; }
+.f215-banner small { display: block; color: var(--ink-soft, #8b98a9); font-size: .82rem; margin-top: 2px; line-height: 1.35; }
+.f215-banner-ico { flex: none; width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: rgba(74,158,255,.18); color: var(--accent-blue); }
+.f215-banner-ico svg { width: 24px; height: 24px; }
+
+.f215-page { max-width: min(100%, 1400px); }
+.f215-card { background: var(--bg-elevated); border: 1px solid var(--line); border-radius: 18px; padding: 20px; margin-bottom: 18px; }
+.f215-card h2 { margin: 0 0 6px; font-size: 1.15rem; }
+.f215-muted { color: var(--ink-soft, #8b98a9); font-size: .88rem; line-height: 1.5; }
+.f215-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.f215-sel { display: block; }
+.f215-sel span { display: block; font-weight: 600; font-size: .86rem; margin-bottom: 6px; }
+.f215-sel select { width: 100%; padding: 11px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: inherit; }
+.f215-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 22px; border-radius: 12px; border: 0; background: var(--accent-green); color: #04120b; font: 700 .95rem inherit; font-family: inherit; cursor: pointer; text-decoration: none; }
+.f215-btn:disabled, .f215-btn.is-disabled { opacity: .5; cursor: not-allowed; }
+.f215-btn.ghost { background: var(--bg-hover); color: var(--ink); border: 1px solid var(--line); }
+
+.f215-struct { display: grid; gap: 10px; margin-top: 12px; }
+.f215-row { display: grid; grid-template-columns: 34px 1fr auto auto; gap: 12px; align-items: center; padding: 12px 14px; border-radius: 14px; background: var(--bg); border: 1px solid var(--line); }
+.f215-row .ico { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: rgba(47,191,131,.14); color: var(--accent-green); font-weight: 800; font-size: .8rem; }
+.f215-row.s1 .ico { background: rgba(123,97,255,.16); color: #9b8bff; }
+.f215-row.s2 .ico { background: rgba(236,72,153,.15); color: #f472b6; }
+.f215-row b { font-size: .95rem; }
+.f215-row small { display: block; color: var(--ink-soft, #8b98a9); font-size: .78rem; }
+.f215-pill { padding: 4px 10px; border-radius: 999px; background: var(--bg-hover); font-size: .78rem; font-weight: 600; white-space: nowrap; }
+.f215-total { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+.f215-total .f215-pill { background: rgba(47,191,131,.14); color: var(--accent-green); }
+
+.f215-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
+.f215-stat { background: var(--bg-elevated); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; }
+.f215-stat b { display: block; font-size: 1.5rem; }
+.f215-stat span { color: var(--ink-soft, #8b98a9); font-size: .8rem; }
+.f215-bars { display: flex; align-items: flex-end; gap: 10px; height: 150px; padding-top: 10px; }
+.f215-bar { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 6px; height: 100%; }
+.f215-bar i { display: block; width: 100%; max-width: 46px; min-height: 4px; border-radius: 8px 8px 3px 3px; background: linear-gradient(180deg, #14e0b4, #0aa57f); }
+.f215-bar em { font-style: normal; font-size: .72rem; color: var(--ink-soft, #8b98a9); }
+.f215-bar small { font-size: .7rem; font-weight: 700; }
+.f215-subj { display: grid; grid-template-columns: 130px 1fr 64px; gap: 10px; align-items: center; padding: 8px 0; }
+.f215-meter { height: 10px; border-radius: 99px; background: var(--bg-hover); overflow: hidden; }
+.f215-meter i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, #4a9eff, #2fbf83); }
+.f215-up { color: var(--accent-green); } .f215-down { color: #ff7b72; }
+.f215-forecast { text-align: center; padding: 10px 0 2px; }
+.f215-forecast .big { font-size: 2.6rem; font-weight: 800; font-family: Fraunces, serif; color: var(--accent-green); }
+.f215-forecast .of { color: var(--ink-soft, #8b98a9); }
+.f215-weak { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px dashed var(--line); font-size: .9rem; }
+.f215-weak:last-child { border-bottom: 0; }
+.f215-weak a { color: var(--accent-blue); text-decoration: none; white-space: nowrap; }
+
+.f215-acc { border: 1px solid var(--line); border-radius: 14px; margin-bottom: 10px; background: var(--bg-elevated); overflow: hidden; }
+.f215-acc > summary { cursor: pointer; padding: 14px 16px; font-weight: 700; list-style: none; display: flex; justify-content: space-between; gap: 10px; }
+.f215-acc > summary::-webkit-details-marker { display: none; }
+.f215-acc[open] > summary { border-bottom: 1px solid var(--line); }
+.f215-acc .in { padding: 12px 16px 16px; }
+.f215-grade { margin: 10px 0 0; }
+.f215-grade b { font-size: .9rem; }
+.f215-grade ul { margin: 6px 0 0; padding-left: 18px; color: var(--ink-soft, #8b98a9); font-size: .84rem; columns: 2; column-gap: 24px; }
+.f215-tbl { width: 100%; border-collapse: collapse; font-size: .88rem; }
+.f215-tbl td, .f215-tbl th { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left; }
+@media (max-width: 700px) {
+  .f215-grid2 { grid-template-columns: 1fr; }
+  .f215-stats { grid-template-columns: 1fr 1fr; }
+  .f215-row { grid-template-columns: 34px 1fr auto; } .f215-row .f215-pill:last-child { grid-column: 2 / -1; justify-self: start; }
+  .f215-subj { grid-template-columns: 96px 1fr 54px; }
+  .f215-grade ul { columns: 1; }
+}

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tahlil va prognoz — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/features215.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true">
+  <div class="app-shell">
+    {% set nav_active = 'analytics' %}{% include "_app_sidebar.html" %}
+    <div class="app-content">
+      {% include "_announcement_banner.html" %}
+      <div class="f215-page">
+        <div class="app-topbar"><div><h1>Chuqur analitika va prognoz</h1><p>Fan va mavzu bo'yicha statistika, kuchsiz tomonlar va DTM ball prognozi</p></div></div>
+        <div id="an-empty" class="f215-card" hidden><h2>Hali ma'lumot yo'q</h2><p class="f215-muted">Bir nechta test yeching — shundan keyin bu yerda statistika va ball prognozi paydo bo'ladi.</p><a class="f215-btn" href="/quiz" style="margin-top:10px">Test boshlash</a></div>
+        <div id="an-root">
+          <div class="f215-stats" id="an-stats"></div>
+          <div class="f215-card"><h2>Haftalik progress</h2><p class="f215-muted" id="an-week-note"></p><div class="f215-bars" id="an-week"></div></div>
+          <div class="f215-card"><h2>DTM ball prognozi</h2>
+            <p class="f215-muted">So'nggi urinishlaringiz (yangilariga ko'proq vazn) asosida taxminiy ball. Ixtisoslik fanlarini tanlang:</p>
+            <div class="f215-grid2" style="margin:10px 0"><label class="f215-sel"><span>1-ixtisoslik (×3,1)</span><select id="an-s1"></select></label><label class="f215-sel"><span>2-ixtisoslik (×2,1)</span><select id="an-s2"></select></label></div>
+            <div class="f215-forecast"><div class="big" id="an-ball">—</div><div class="of">/ {{ 189 }} ball (taxminiy)</div><p class="f215-muted" id="an-fnote"></p></div>
+            <a class="f215-btn" href="/dtm-blok" style="margin-top:8px">Blok mock yechish</a>
+          </div>
+          <div class="f215-card"><h2>Fanlar bo'yicha</h2><div id="an-subj"></div></div>
+          <div class="f215-grid2">
+            <div class="f215-card"><h2>Kuchsiz mavzular</h2><div id="an-weak"></div></div>
+            <div class="f215-card"><h2>Kuchli mavzular</h2><div id="an-strong"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% include "_owl_widget.html" %}
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/app.js"></script>
+  <script src="/static/analytics215.js"></script>
+</body>
+</html>

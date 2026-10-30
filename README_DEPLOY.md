@@ -15,12 +15,13 @@ Domen sotib olish shart emas: sayt `https://<loyiha>.vercel.app` manzilida ishla
 ## 2. GitHub repo
 1. https://github.com/new → nom: **Longouz** (Private tavsiya) → Create.
 2. `deploy_longouz.bat` ni oching, kerak bo'lsa yuqoridagi `TARGET` papkani o'zgartiring (standart: `C:\Users\Usmon\Documents\LongoUZ`).
-3. Yangi zipni (`longouz_v206.zip`) `deploy_longouz.bat` ustiga **sudrab tashlang**. Birinchi marta repo manzilini so'raydi (`https://github.com/<login>/Longouz.git`) va GitHub'ga kirishni (brauzer oynasi) so'raydi.
+3. Yangi zipni (`longouz_v215.zip`) `deploy_longouz.bat` ustiga **sudrab tashlang**. Birinchi marta repo manzilini so'raydi (`https://github.com/<login>/Longouz.git`) va GitHub'ga kirishni (brauzer oynasi) so'raydi.
    - `.env`, `.git`, `*.db` GitHub'ga **yuborilmaydi** (kalitlar xavfsiz).
 
 ## 3. Vercel
 1. https://vercel.com → **Continue with GitHub** → **Add New → Project** → `Longouz` repo → **Import**.
-2. Framework: *Other*. Build sozlamalari `vercel.json` da tayyor — o'zgartirmang.
+2. Framework: *Other*. Build Command / Output Directory maydonlarini **bo'sh** qoldiring — `vercel.json` (v221) `@vercel/python` orqali `main.py` ni to'g'ridan-to'g'ri ishga tushiradi, barcha manzillar (`/static` ham) shu yerga yo'naltiriladi.
+   Kalitlar: kompyuterda — `.env` (GitHub'ga ham, Vercel'ga ham yuklanmaydi: `.gitignore` + `.vercelignore`). Vercel'da — Settings → Environment Variables (ro'yxat: `vercel_env_namuna.txt`; `.env` matnini u yerga import qilish mumkin) yoki admin panel → **Kalitlar** (`/neo/keys`).
 3. **Environment Variables** (Settings → Environment Variables) ga quyidagilarni kiriting:
 
 | Nom | Qiymat |
@@ -37,7 +38,8 @@ Domen sotib olish shart emas: sayt `https://<loyiha>.vercel.app` manzilida ishla
    Keyin **Deployments → Redeploy**. Sayt manzili Vercel panelida ko'rinadi.
 4. Bundan keyin: yangi zipni `deploy_longouz.bat` ga tashlasangiz — GitHub yangilanadi, Vercel 1–3 daqiqada o'zi qayta joylaydi.
 
-> Kalitlarni admin paneldan ham kiritish mumkin: `/neo` → **AI holati / Sozlamalar** (bazada saqlanadi).
+> **Kalitlarni kod yoki GitHub'ga YOZMANG.** Eng oson yo'l: `/neo` → **Kalitlar** (Claude, Gemini, Cloudflare Turnstile, Google). Kalit saqlashdan oldin tekshiriladi, bazada SHIFRLANGAN saqlanadi va sahifada to'liq ko'rinmaydi. `.env` fayli `.gitignore` da; `deploy_longouz.bat` esa o'zgarishlar ichida kalit topsa GitHub'ga yubormay to'xtaydi.
+> Cloudflare Turnstile ishlamasa: `/neo/keys` da rejimni "o'chirilgan" qiling yoki Hostname ro'yxatiga domenni qo'shing. Vidjet 9 soniyada javob bermasa foydalanuvchi baribir davom eta oladi (IP bo'yicha qattiq limit bilan).
 
 ## 4. Google bilan kirish
 1. https://console.cloud.google.com → loyiha yarating → **APIs & Services → OAuth consent screen**: *External*, ilova nomi `LongoUZ`, email. *Testing* holatida bo'lsa — **Test users** ga o'z Gmail manzillaringizni qo'shing (yoki **Publish app**).
@@ -66,3 +68,10 @@ Domen sotib olish shart emas: sayt `https://<loyiha>.vercel.app` manzilida ishla
 - *Turnstile "invalid domain"*: hostname ro'yxatida Vercel manzili bormi.
 - *Sayt sekin ochilsa*: birinchi so'rov (cold start) 2–4 soniya olishi mumkin.
 - *Savollar chiqmasa*: `cloud_setup.py` ishlaganini va `DATABASE_URL` to'g'riligini tekshiring.
+
+
+## v215 qo'shimchalari
+- **Bank yuklanishi Vercel'da**: birinchi so'rovlarda bank bo'laklab yuklanadi (1–2 daqiqa); bo'sh mavzu ro'yxati ko'rinsa sahifani qayta yuklang. Tezlashtirish: Vercel build'da `DATABASE_URL` bor bo'lsa `cloud_setup.py` bankni oldindan yuklaydi.
+- **AI kalitlari**: Vercel → Settings → Environment Variables (`ANTHROPIC_API_KEY`, `GEMINI_API_KEY`); yoki `ai_key_defaults.py` ichida **qo'sh tirnoq** bilan yozing: `"GEMINI_API_KEY": "AIza..."`. Env bo'lsa u ustun.
+- **Turnstile "check chiqmayapti"**: Cloudflare → Turnstile → widget → Hostname management ga `*.vercel.app` va o'z domeningizni qo'shing (xato kodi 110200 shuni bildiradi); `TURNSTILE_SITE_KEY` va `TURNSTILE_SECRET_KEY` bir xil widgetdan bo'lsin.
+- **Shikoyatlar**: admin panel → Shikoyatlar. "Tahlil" uchun AI kaliti kerak.

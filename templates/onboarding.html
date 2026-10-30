@@ -33,6 +33,7 @@
       <form method="post" action="/onboarding" id="onboarding-form">
         <input type="hidden" name="subject" id="selected-subject" required>
         <input type="hidden" name="certificate_type" value="dtm">
+        <input type="hidden" name="level" value="ortacha">
 
         <!-- 1-QADAM: Fan tanlash -->
         <div class="ob-step">
@@ -74,7 +75,7 @@
               <div class="subject-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
               </div>
-              <h3>O'zbek tili va Adabiyot</h3>
+              <h3>Ona tili va adabiyot</h3>
             </div>
 
             <div class="subject-select-card" data-subject="chemistry">
@@ -101,27 +102,8 @@
           </div>
         </div>
 
-        <!-- 2-QADAM: Daraja (accordion — fan tanlangandan keyin chiqadi) -->
-        <div id="level-section">
-          <div class="ob-step">
-            <div class="ob-step-label">
-              <span class="ob-step-num">2</span>
-              Darajangizni tanlang
-            </div>
-            <div class="ob-options ob-options-level">
-              {% for l in levels %}
-              <label class="ob-card">
-                <input type="radio" name="level" value="{{ l.code }}" required>
-                <span class="ob-card-title">{{ l.name }}</span>
-              </label>
-              {% endfor %}
-            </div>
-          </div>
-
-          <button type="submit" class="btn-primary btn-primary-block ob-submit">
-            Testni boshlash
-          </button>
-        </div>
+        <noscript><button type="submit" class="btn-primary btn-primary-block ob-submit">Davom etish</button></noscript>
+        <p class="ob-note" style="text-align:center;opacity:.7;font-size:.9rem;margin-top:14px">Fanni bosing — darhol boshlaysiz. Keyin istalgan vaqtda profilda almashtirish mumkin.</p>
 
       </form>
     </div>
@@ -132,28 +114,15 @@
   </footer>
 
   <script>
-    // Fan kartalarini bosish — hidden input'ga yozadi, accordion ochadi
-    function selectSubjectCard(code) {
-      document.querySelectorAll(".subject-select-card").forEach(function(c) {
-        c.classList.toggle("selected", c.dataset.subject === code);
-      });
-      document.getElementById("selected-subject").value = code;
-      var levelSection = document.getElementById("level-section");
-      if (levelSection) {
-        levelSection.classList.add("level-open");
-        setTimeout(function() {
-          levelSection.scrollIntoView({ behavior: "smooth", block: "nearest" });
-        }, 100);
-      }
-    }
+    // Fan kartasini bosish — darhol yuboriladi (daraja endi so'ralmaydi)
     document.querySelectorAll(".subject-select-card").forEach(function(card) {
-      card.addEventListener("click", function() { selectSubjectCard(card.dataset.subject); });
+      card.addEventListener("click", function() {
+        document.querySelectorAll(".subject-select-card").forEach(function(c) { c.classList.remove("selected"); });
+        card.classList.add("selected");
+        document.getElementById("selected-subject").value = card.dataset.subject;
+        document.getElementById("onboarding-form").submit();
+      });
     });
-    // Home sahifasidan bosilgan fan oldindan tanlanadi
-    var presetSubject = "{{ preset_subject|default('') }}";
-    if (presetSubject) {
-      selectSubjectCard(presetSubject);
-    }
   </script>
   <script src="/static/devtools-guard.js"></script>
 </body>

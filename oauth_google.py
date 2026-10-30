@@ -108,36 +108,22 @@ def _sign(payload: str, secret: str) -> str:
     return hmac.new(secret.encode(), payload.encode(), hashlib.sha256).hexdigest()[:32]
 
 
-def make_state(secret: str, intent: str = "login") -> str:
-    """Imzolangan, cookie'siz state: hostlar (localhost <-> 127.0.0.1) almashsa ham ishlaydi.
-    intent: "login" (Google bilan kirish) yoki "register" (Google bilan ro'yxatdan o'tish) —
-    imzo ichida, shuning uchun foydalanuvchi uni o'zgartira olmaydi."""
-    intent = "register" if intent == "register" else "login"
+def make_state(secret: str) -> str:
+    """Imzolangan, cookie'siz state: hostlar (localhost <-> 127.0.0.1) almashsa ham ishlaydi."""
     nonce = secrets.token_urlsafe(12)
     ts = str(int(time.time()))
-    body = f"{nonce}.{ts}.{intent[0]}"
+    body = f"{nonce}.{ts}"
     return f"{body}.{_sign(body, secret)}"
 
 
-def parse_state(state: str, secret: str, max_age: int = 900) -> str | None:
-    """To'g'ri bo'lsa intent ("login"/"register"), aks holda None."""
-    try:
-        parts = (state or "").split(".")
-        if len(parts) == 3:  # eski formatdagi state (deploy paytida yo'lda qolganlar)
-            nonce, ts, sig = parts
-            body, intent = f"{nonce}.{ts}", "login"
-        else:
-            nonce, ts, flag, sig = parts
-            body, intent = f"{nonce}.{ts}.{flag}", ("register" if flag == "r" else "login")
-        if not hmac.compare_digest(sig, _sign(body, secret)):
-            return None
-        return intent if 0 <= time.time() - int(ts) <= max_age else None
-    except (ValueError, TypeError):
-        return None
-
-
 def verify_state(state: str, secret: str, max_age: int = 900) -> bool:
-    return parse_state(state, secret, max_age) is not None
+    try:
+        nonce, ts, sig = (state or "").split(".")
+        if not hmac.compare_digest(sig, _sign(f"{nonce}.{ts}", secret)):
+            return False
+        return 0 <= time.time() - int(ts) <= max_age
+    except (ValueError, TypeError):
+        return False
 
 
 def build_authorize_url(redirect_uri: str, state: str) -> str:

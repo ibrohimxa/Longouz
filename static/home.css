@@ -210,7 +210,7 @@ html[data-theme="light"] body.home .hm-pbtn.main { background: linear-gradient(1
 .hm-stage { padding-top: 40px; }
 .hm-float-ai { right: -10px; top: 0; } .hm-float-plan { right: -16px; bottom: 46px; }
 @media (max-width: 1180px) { .hm-float-plan { right: 0; bottom: 56px; } .hm-float { max-width: 210px; padding: 9px 11px; } }
-@media (max-width: 980px) { .hm-hero-grid { grid-template-columns: 1fr; } .hm-hero-text { text-align: center; } .hm-hero-text .hm-lead { margin-left: auto; margin-right: auto; } .hm-cta-row, .hm-proof { justify-content: center; } .lap { max-width: 560px; } }
+@media (max-width: 980px) { .hm-hero-grid { grid-template-columns: 1fr; } .hm-hero-text { text-align: center; } .hm-hero-text p.hm-lead { margin-left: auto; margin-right: auto; } .hm-cta-row, .hm-proof { justify-content: center; } .lap { max-width: 560px; } }
 @media (max-width: 560px) { .hm-hero-text .typewriter-brand { font-size: 2.6rem; } .hm-proof { flex-direction: column; text-align: center; } .hm-play small { display: none; } .stab { padding: 6px 10px; font-size: .7rem; } .hm-stage { padding-top: 8px; } }
 @media (max-width: 980px) { .hm-hero-text .typewriter-wrap, .hm-hero-text .typewriter-text-wrap { text-align: center; } }
 
@@ -363,3 +363,32 @@ html[data-theme="dark"] body.home .site-footer .footer-brand, html[data-theme="d
 /* boshqa sahifalar (login/register/onboarding/verify) footeri */
 html[data-theme="light"] .site-footer { color: #2f4a57; }
 html[data-theme="light"] .auth-page .site-footer { color: #2f4a57; }
+
+/* v217: katta ekranlarda bosh sahifa kengroq */
+@media (min-width: 1700px) {
+  .hm-wrap { max-width: 1400px; }
+  .hm-hero .hm-wrap { max-width: 1560px; }
+}
+
+/* ======= v219: tog' manzarasi, quyosh va oy olib tashlandi — oddiy, tez fon =======
+   Tun: to'q yashil-qora. Kun: oq. Tema almashganda faqat ranglar yumshoq o'zgaradi. */
+body.home { --h-bg: #06120f; --h-bg2: #0a1a17; background: #06120f !important; background-image: none !important; }
+html[data-theme="light"] body.home { --h-bg: #ffffff; --h-bg2: #f4faf7; --h-card: #ffffff; --h-line: #e1ece7; background: #ffffff !important; }
+html, body.home { transition: background-color .35s ease, color .35s ease; }
+.sky-bg { display: none !important; }
+html[data-theme="dark"] body.home main, body.home main { text-shadow: none !important; }
+html[data-theme="light"] body.home main h1, html[data-theme="light"] body.home main h2,
+html[data-theme="light"] body.home main h3, html[data-theme="light"] body.home main p { text-shadow: none !important; }
+/* bo'limlarni ajratish uchun yengil navbatma-navbat fon */
+body.home .hm-sec.alt { background: var(--h-bg2); }
+body.home .site-header { background: color-mix(in srgb, var(--h-bg) 92%, transparent); backdrop-filter: none; -webkit-backdrop-filter: none; }
+body.home .site-footer, html[data-theme="light"] body.home .site-footer { background: var(--h-bg2); backdrop-filter: none; -webkit-backdrop-filter: none; }
+/* tezlik: blur va doimiy animatsiyalar yengillashtirildi */
+.hm-float .hm-fin, .hm-float, .demo-modal { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+html[data-theme="dark"] .hm-float .hm-fin { background: #0f221e; }
+.hm-float .hm-fin { will-change: transform; }
+.hm-glass { animation: none !important; }
+body.home .site-header, body.home .hm-step, body.home .hm-subj, body.home .hm-cert, body.home .hm-plan,
+body.home .hm-float .hm-fin, body.home .hm-pill, body.home .hm-ai-card { transition: transform .2s, border-color .35s, background-color .35s, color .35s, box-shadow .2s; }
+body.home h1, body.home h2, body.home h3, body.home p, body.home .hm-lead { transition: color .35s; }
+@media (max-width: 760px) { .hm-float .hm-fin, .hm-play-ic, .hm-glowpath { animation: none !important; } }

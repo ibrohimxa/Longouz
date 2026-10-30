@@ -1,0 +1,20 @@
+# Vercel → Project → Settings → Environment Variables
+# Bu yerda faqat NOMLAR. Qiymatlarni kompyuteringizdagi .env dan oling.
+# Eng oson yo'l: Environment Variables sahifasida ".env" faylini import qilish
+# (yoki matnini nusxalab "Paste .env" maydoniga tashlash) — keyin quyidagilarni qo'shing.
+#
+# MAJBURIY (Vercel uchun):
+DATABASE_URL=            # Neon Postgres (Vercel → Storage → Neon ulasangiz o'zi qo'shiladi)
+WEB_SECRET_KEY=          # uzun tasodifiy satr (64+ belgi); o'zgartirmang, aks holda hamma chiqib ketadi
+ADMIN_PASSWORD=          # admin panel paroli (/neo/login)
+WEB_COOKIE_SECURE=true
+#
+# IXTIYORIY (admin panel → Kalitlar /neo/keys dan ham kiritish mumkin):
+GEMINI_API_KEY=
+ANTHROPIC_API_KEY=
+TURNSTILE_SITE_KEY=
+TURNSTILE_SECRET_KEY=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+# SITE_BASE_URL — bo'sh qoldiring (Vercel domeni avtomatik aniqlanadi) yoki o'z domeningiz: https://longouz.uz
+SITE_BASE_URL=

@@ -134,6 +134,19 @@ if not defined CHANGED (
 
 if "!VER!"=="" set "VER=yangilash"
 git -C "!ROOT!" add -A
+rem --- XAVFSIZLIK: .env va kalitlar GitHub'ga HECH QACHON ketmasin ---
+git -C "!ROOT!" rm --cached -q --ignore-unmatch .env .env.local .web_secret_key.local deploy_config.txt >nul 2>nul
+set "LEAK="
+for /f "delims=" %%i in ('git -C "!ROOT!" diff --cached -U0 ^| findstr /R /C:"sk-ant-api[0-9A-Za-z_-][0-9A-Za-z_-]*" /C:"GOCSPX-[0-9A-Za-z_-][0-9A-Za-z_-]*" /C:"AIzaSy[0-9A-Za-z_-][0-9A-Za-z_-]*"') do set "LEAK=1"
+if defined LEAK (
+  git -C "!ROOT!" reset -q
+  echo.
+  echo  TO'XTATILDI: o'zgarishlar ichida KALIT ko'rindi ^(sk-ant-... / AIza... / GOCSPX-...^).
+  echo  Kalitni fayldan olib tashlang va kalitlarni admin panel ^(/neo/keys^) yoki Vercel Environment Variables orqali kiriting.
+  echo  GitHub'ga hech narsa yuborilmadi.
+  pause
+  exit /b 1
+)
 git -C "!ROOT!" commit -m "Yangilash: !VER!"
 if errorlevel 1 (
   echo.

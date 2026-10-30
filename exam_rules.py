@@ -35,9 +35,9 @@ TIER_TOPIC_TOTALS = {"free": 45, "pro": 85, "ultra": 150}
 
 # Mavzu bo'yicha mashqda bitta urinishdagi savollar soni va ko'rinadigan qiyinlik.
 TIER_PRACTICE = {
-    "free":  {"count": 10, "max_difficulty": 2},
-    "pro":   {"count": 16, "max_difficulty": 3},
-    "ultra": {"count": 40, "max_difficulty": 3},
+    "free":  {"count": 25, "max_difficulty": 3},
+    "pro":   {"count": 60, "max_difficulty": 3},
+    "ultra": {"count": 125, "max_difficulty": 3},
 }
 
 # Mashq/nazorat testlari uchun (mavzu bo'yicha) savol-narx

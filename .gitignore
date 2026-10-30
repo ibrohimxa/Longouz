@@ -1,11 +1,23 @@
+# Maxfiy va mahalliy fayllar — hech qachon Git'ga yuklanmasligi kerak
 .env
-.env.*
-*.db
-*.pyc
-__pycache__/
-.venv/
-.vercel/
-node_modules/
-certs/
 .web_secret_key.local
-.secrets-backup/
+*.db
+__pycache__/
+*.pyc
+
+.vercel
+public/
+.venv/
+node_modules/
+*.local
+deploy_config.txt
+
+# v217: kalitlar
+.env.*
+!.env.example
+*.pem
+*.key
+.web_secret_key.local
+
+# lokal HTTPS sertifikatlari
+certs/

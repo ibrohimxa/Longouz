@@ -25,6 +25,9 @@
   const variant = body.dataset.variant || "main";
   const checkpointMode = body.dataset.checkpoint === "true";
   const drillKind = body.dataset.drill || "";
+  const blockSpecs = body.dataset.block || "";           // DTM blok mock: "physics,chemistry"
+  const adaptiveMode = body.dataset.adaptive === "true"; // AI-adaptiv test
+  let adaptiveTotal = questionCount;
 
   const loadingEl = document.getElementById("quiz-loading");
   const errorEl = document.getElementById("quiz-error");
@@ -106,26 +109,10 @@
     }, 10000);
   }
 
-  // Shikoyat oynasi (quiz-report.js) joriy savolni shu orqali biladi
-  window.LZQuizState = {
-    token: attemptToken,
-    index: function () { return currentIndex; },
-    total: function () { return questions.length; },
-    question: function () { return questions[currentIndex] || null; },
-    ready: function () { return questions.length > 0 && !submitted; },
-  };
-  // Ochiq savol kiritish maydoni: yozuv va izoh FANGA moslashadi (avval hamma fanda tarixcha edi)
-  const OPEN_UI = {
-    history:   { ph: "Masalan: 1370 yoki Amir Temur", hint: "Yil, nom yoki atamani qisqa yozing. Katta-kichik harf va apostrof farqi hisobga olinmaydi.", sym: [] },
-    math:      { ph: "Masalan: 12, -2,5, 3/4 yoki 5²", hint: "Faqat javobni yozing (son yoki kasr: 3/4, 0,75). Ildiz va π uchun yaxlitlangan qiymat yoki savolda so'ralgan ko'rinishni yozing.", sym: ["²", "³", "/", "-", ",", "%", "°", "×10^"] },
-    physics:   { ph: "Masalan: 20 m/s, 4,5·10⁻³ yoki 9,8", hint: "Sonni yozing; birlikni yozsangiz ham bo'ladi (20 m/s). Katta/kichik sonlar: 3×10^8 yoki 3e8.", sym: ["²", "³", "⁻¹", "⁻²", "×10^", "/", "°", ","] },
-    chemistry: { ph: "Masalan: 22,4, 0,5 yoki H₂SO₄", hint: "Son yoki formulani yozing. Indekslar uchun pastdagi tugmalardan foydalaning (H₂O, SO₄²⁻).", sym: ["₂", "₃", "₄", "₅", "⁺", "⁻", "²", "→", ",", "/"] },
-    biology:   { ph: "Masalan: 46, 3:1 yoki mitoz", hint: "Son, nisbat (3:1) yoki atamani qisqa yozing. Katta-kichik harf va apostrof farqi hisobga olinmaydi.", sym: ["%", ":", "/", "²", ","] },
-    native:    { ph: "Masalan: ravish yoki -gan", hint: "So'z, qo'shimcha yoki atamani yozing. Katta-kichik harf va apostrof (o', g') turi farq qilmaydi.", sym: ["o'", "g'", "oʻ", "gʻ"] },
-    english:   { ph: "Type your answer, e.g. went", hint: "Faqat so'rangan so'z yoki shaklni yozing. Katta-kichik harf farq qilmaydi.", sym: [] },
-    russian:   { ph: "Например: глагол", hint: "Faqat so'rangan so'z yoki shaklni yozing. Katta-kichik harf farq qilmaydi.", sym: [] },
-  };
-  const OPEN_DEFAULT = { ph: "Javobingizni yozing", hint: "Javobni qisqa yozing. Katta-kichik harf va apostrof farqi hisobga olinmaydi.", sym: [] };
+  // Tashqi vositalar (shikoyat, kalkulyator) uchun joriy holat
+  Object.defineProperty(window, "LZQuiz", { configurable: true, get() {
+    return { index: currentIndex, question: questions[currentIndex] || null, answer: answers[currentIndex], token: attemptToken };
+  } });
 
   let renderedIndex = -1;
   function renderQuestion() {
@@ -144,6 +131,7 @@
       else { sectionEl.hidden = true; }
     }
     renderPalette();
+    try { window.dispatchEvent(new CustomEvent("lz:question")); } catch (e) {}
 
     if (q.type === "open") {
       const wrap = document.createElement("div");
@@ -154,8 +142,8 @@
       inp.type = "text";
       inp.autocomplete = "off";
       inp.spellcheck = false;
-      const ui = OPEN_UI[subject] || OPEN_DEFAULT;
-      inp.placeholder = ui.ph;
+      const _ph = { math: "Masalan: 12 yoki 3/4 yoki √2", physics: "Masalan: 2,5 yoki 3·10⁸", chemistry: "Masalan: 22,4 yoki H₂SO₄", biology: "Masalan: 25 yoki Aa" };
+      inp.placeholder = _ph[subject] || "Masalan: 1370 yoki Amir Temur";
       inp.value = typeof answers[currentIndex] === "string" ? answers[currentIndex] : "";
       inp.addEventListener("input", () => {
         const v = inp.value.trim();
@@ -163,30 +151,15 @@
         updatePaletteState();
       });
       inp.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") { e.preventDefault(); if (currentIndex < questions.length - 1) { currentIndex++; renderQuestion(); } }
+        if (e.key === "Enter") { e.preventDefault(); if (adaptiveMode) { nextBtn.click(); } else if (currentIndex < questions.length - 1) { currentIndex++; renderQuestion(); } }
       });
       const hint = document.createElement("span");
       hint.className = "quiz-open-hint";
-      hint.textContent = ui.hint;
-      wrap.append(lab, inp);
-      if (ui.sym && ui.sym.length) {
-        const bar = document.createElement("div");
-        bar.className = "quiz-open-sym";
-        ui.sym.forEach((sy) => {
-          const sb = document.createElement("button");
-          sb.type = "button"; sb.textContent = sy; sb.title = "Qo'shish: " + sy;
-          sb.addEventListener("click", () => {
-            const a = inp.selectionStart == null ? inp.value.length : inp.selectionStart, b2 = inp.selectionEnd == null ? a : inp.selectionEnd;
-            inp.value = inp.value.slice(0, a) + sy + inp.value.slice(b2);
-            inp.setSelectionRange(a + sy.length, a + sy.length); inp.focus();
-            inp.dispatchEvent(new Event("input"));
-          });
-          bar.appendChild(sb);
-        });
-        wrap.appendChild(bar);
-      }
-      wrap.appendChild(hint);
+      const _hint = { math: "Faqat javobni yozing (son, kasr yoki ifoda). Vergul va nuqta farqi yo'q.", physics: "Sonni yozing; 10ⁿ uchun belgilar tugmalaridan foydalaning. Birlik shart emas.", chemistry: "Son yoki formulani yozing; indeks va zaryad uchun belgilar tugmalari bor.", biology: "Son, genotip yoki atamani qisqa yozing." };
+      hint.textContent = _hint[subject] || "Yil, nom yoki atamani qisqa yozing. Katta-kichik harf va apostrof farqi hisobga olinmaydi.";
+      wrap.append(lab, inp, hint);
       optionsEl.appendChild(wrap);
+      if (window.LZTools) { try { window.LZTools.decorateOpenInput(wrap, inp); } catch (e) {} }
       setTimeout(() => { try { inp.focus(); } catch (e) {} }, 30);
     }
 
@@ -217,18 +190,20 @@
       optionsEl.appendChild(btn);
     });
 
-    progressFill.style.width = `${((currentIndex + 1) / questions.length) * 100}%`;
-    progressLabel.textContent = `${currentIndex + 1} / ${questions.length} savol`;
+    const shownTotal = adaptiveMode ? adaptiveTotal : questions.length;
+    progressFill.style.width = `${((currentIndex + 1) / shownTotal) * 100}%`;
+    progressLabel.textContent = `${currentIndex + 1} / ${shownTotal} savol` + (adaptiveMode ? " · AI qiyinlikni moslaydi" : "");
 
     prevBtn.disabled = currentIndex === 0;
-    const isLast = currentIndex === questions.length - 1;
+    if (adaptiveMode) prevBtn.style.display = "none";
+    const isLast = adaptiveMode ? currentIndex + 1 >= adaptiveTotal : currentIndex === questions.length - 1;
     nextBtn.style.display = isLast ? "none" : "inline-flex";
     finishBtn.style.display = isLast ? "inline-flex" : "none";
   }
 
   function renderPalette() {
     if (!paletteEl) return;
-    if (questions.length < 2) { paletteEl.innerHTML = ""; return; }
+    if (adaptiveMode || questions.length < 2) { paletteEl.innerHTML = ""; return; }
     if (paletteEl.childElementCount !== questions.length) {
       paletteEl.innerHTML = "";
       questions.forEach((_, i) => {
@@ -257,7 +232,25 @@
     }
   });
 
+  let adaptiveBusy = false;
   nextBtn.addEventListener("click", () => {
+    if (adaptiveMode && currentIndex === questions.length - 1) {
+      if (adaptiveBusy) return;
+      const a = answers[currentIndex];
+      if (a === undefined || a === "") { progressLabel.textContent = "Avval javob tanlang — keyingi savol shunga qarab tanlanadi"; return; }
+      adaptiveBusy = true;
+      fetch("/api/adaptive/next", {
+        method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ attempt_token: attemptToken, index: currentIndex, answer: a }),
+      }).then((r) => r.json().then((j) => { if (!r.ok) throw new Error(j.detail || "Keyingi savol yuklanmadi"); return j; }))
+        .then((j) => {
+          if (j.done) { finishQuiz(); return; }
+          questions.push(j.question); currentIndex++; renderQuestion();
+        })
+        .catch((e) => { progressLabel.textContent = e.message; })
+        .finally(() => { adaptiveBusy = false; });
+      return;
+    }
     if (currentIndex < questions.length - 1) {
       currentIndex++;
       renderQuestion();
@@ -269,7 +262,7 @@
   function finishQuiz() {
     if (submitted) return;
     submitted = true;
-    document.dispatchEvent(new Event("lz-quiz-finished"));
+    try { window.dispatchEvent(new CustomEvent("lz:finished")); } catch (e) {}
     clearInterval(timerHandle);
     clearInterval(autosaveHandle);
     _clearAttemptRef(); // test yakunlandi — active attempt tozalanadi
@@ -426,10 +419,13 @@
   }
 
   // ---------- Savollarni yuklash ----------
-  fetch("/api/quiz/generate", {
+  const _genUrl = blockSpecs ? "/api/block/generate" : (adaptiveMode ? "/api/adaptive/start" : "/api/quiz/generate");
+  fetch(_genUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
+    body: blockSpecs ? JSON.stringify({ specs: blockSpecs.split(","), attempt_token: attemptToken })
+      : adaptiveMode ? JSON.stringify({ subject: subject, mode: mode, topic: topic || null, total: questionCount, attempt_token: attemptToken })
+      : JSON.stringify({
       subject: subject,
       level: level,
       topic: missedMode || topicsGroup || drillKind ? null : topic,
@@ -445,24 +441,16 @@
     }),
   })
     .then(async (res) => {
-      if (res.status === 401) {
-        // Sessiya tugagan — login sahifasiga qaytaramiz, test URL saqlanadi
-        const next = encodeURIComponent(location.pathname + location.search);
-        location.href = "/login?next=" + next;
-        return new Promise(() => {}); // zinhor davom etmasin
-      }
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        const e = new Error(errData.detail || "Test yuklab bo'lmadi.");
-        e._status = res.status;
-        throw e;
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || "Test yuklab bo'lmadi.");
       }
       return res.json();
     })
     .then((data) => {
-      if (!data) return; // 401 redirect bo'lgan holat
       questions = data.questions || [];
       if (!questions.length) throw new Error("Savollar topilmadi.");
+      if (data.adaptive && data.total) adaptiveTotal = data.total;
       if (data.time_limit_minutes) {
         timeLimitMinutes = data.time_limit_minutes;
         remainingSeconds = timeLimitMinutes * 60;
@@ -470,21 +458,14 @@
 
       loadingEl.style.display = "none";
       bodyEl.style.display = "block";
-      document.dispatchEvent(new Event("lz-quiz-ready"));
       if (window.LZQuizStyle) window.LZQuizStyle.applyLayout(document, data.layout);
       renderQuestion();
       startTimer();
       startAutosave();
+      try { window.dispatchEvent(new CustomEvent("lz:ready")); } catch (e) {}
     })
     .catch((err) => {
       loadingEl.style.display = "none";
-      if (err._status === 402) {
-        // Tarif chekloviga urildi — upgrade sahifasiga yo'naltirish
-        errorEl.style.display = "block";
-        errorTextEl.innerHTML = (err.message || "Bu rejim sizning tarifingizda mavjud emas.") +
-          ' <a href="/upgrade" style="color:var(--accent,#2fbf83);text-decoration:underline">Tarifni yangilash →</a>';
-        return;
-      }
       errorEl.style.display = "block";
       errorTextEl.textContent = err.message || "Test hozircha ishlamayapti. Birozdan so'ng qayta urinib ko'ring.";
     });

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Kalitlar — Admin — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/admin-dash.css">
+  <link rel="stylesheet" href="/static/admin.css">
+  <link rel="stylesheet" href="/static/admin-studio.css">
+  
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true" data-admin-prefix="{{ admin_prefix }}">
+  <div class="app-shell">
+    {% include "_admin_sidebar.html" %}
+    <div class="app-content">
+      <div class="app-topbar"><div>
+        <h1>Kalitlar</h1>
+        <p>Claude, Gemini, Cloudflare Turnstile va Google kalitlari. Kalit saqlashdan oldin tekshiriladi, sahifada to'liq ko'rsatilmaydi va kod yoki GitHub'ga yozilmaydi.</p>
+      </div></div>
+
+      
+
+      <style>
+        .kx-card{margin-bottom:14px;padding:18px}
+        .kx-card h2{margin:0 0 4px;font-size:1.05rem}
+        .kx-row{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;padding:14px 0;border-top:1px solid var(--line)}
+        .kx-row:first-of-type{border-top:0}
+        .kx-top{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+        .kx-top b{font-size:.95rem}
+        .kx-badge{font-size:.72rem;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--ink-soft)}
+        .kx-badge.ok{color:#10b981;border-color:rgba(16,185,129,.5)} .kx-badge.no{color:#e5484d;border-color:rgba(229,72,77,.5)}
+        .kx-help{font-size:.82rem;color:var(--ink-soft);margin:0}
+        .kx-form{display:flex;flex-wrap:wrap;gap:8px}
+        .kx-form input[type=password],.kx-form input[type=text]{flex:1 1 260px;min-width:0;height:40px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg-elevated);color:var(--ink)}
+        .kx-btn{height:40px;padding:0 16px;border-radius:10px;border:1px solid var(--line);background:var(--bg-elevated);color:var(--ink);cursor:pointer;font-weight:600}
+        .kx-btn.pri{background:var(--accent-green,#22d3a0);color:#04261d;border-color:transparent}
+        .kx-btn.dan{color:#e5484d}
+        .kx-msg{font-size:.85rem;min-height:1.2em;margin:0}
+        .kx-msg.err{color:#e5484d}.kx-msg.ok{color:#10b981}.kx-msg.warn{color:#f59e0b}
+        .kx-note{font-size:.84rem;color:var(--ink-soft);line-height:1.55}
+        .kx-note code{word-break:break-all}
+        .kx-sw{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:8px}
+      </style>
+
+      <div class="st-card kx-card">
+        <h2>Xavfsizlik</h2>
+        <p class="kx-note">Kalitlar <b>kod ichida emas</b>. Vercel'da bazada <b>shifrlangan</b> saqlanadi, mahalliy kompyuterda <code>.env</code> faylida (u <code>.gitignore</code> da, GitHub'ga yuklanmaydi). Bu sahifada kalit hech qachon to'liq ko'rinmaydi. Noto'g'ri kalit kiritilsa — <b>saqlanmaydi</b>, sababi yoziladi. "Tozalash" bosilsa avvalgi (muhit) qiymatga qaytadi.</p>
+      </div>
+
+      <div class="st-card kx-card">
+        <h2>Cloudflare Turnstile rejimi</h2>
+        <p class="kx-note">Hozirgi sayt manzili: <code>{{ host }}</code>. Cloudflare → Turnstile → widget → <b>Hostname</b> ro'yxatida aynan shu domen bo'lishi shart (masalan <code>longouz.vercel.app</code>). Bu sahifada Turnstile {{ "FAOL" if ts_active_here else "faol emas (mahalliy manzil yoki kalit yo'q yoki o'chirilgan)" }}.</p>
+        <div class="kx-sw">
+          <label>Rejim:
+            <select id="ts-mode" class="kx-btn"><option value="auto" {{ 'selected' if ts_mode != 'off' }}>Yoqilgan (kalit bo'lsa)</option><option value="off" {{ 'selected' if ts_mode == 'off' }}>Butunlay o'chirilgan</option></select></label>
+          <label>Vidjet yuklanmasa:
+            <select id="ts-fb" class="kx-btn"><option value="on" {{ 'selected' if ts_fallback }}>Davom etishga ruxsat (IP bo'yicha qattiq limit bilan)</option><option value="off" {{ 'selected' if not ts_fallback }}>Qat'iy: tekshiruvsiz kirish yo'q</option></select></label>
+          <span class="kx-msg" id="ts-msg"></span>
+        </div>
+      </div>
+
+      {% set ns = namespace(group='') %}
+      {% for r in rows %}
+        {% if r.group != ns.group %}
+          {% if ns.group %}</div>{% endif %}
+          {% set ns.group = r.group %}
+          <div class="st-card kx-card"><h2>{{ r.group }}</h2>
+          {% if r.group == 'Google bilan kirish' %}<p class="kx-note">Google Cloud Console → OAuth client → <b>Authorized redirect URIs</b> ga aynan shu manzilni qo'shing: <code>{{ redirect_uri }}</code></p>{% endif %}
+        {% endif %}
+        <div class="kx-row" data-name="{{ r.name }}">
+          <div class="kx-top"><b>{{ r.label }}</b>
+            <span class="kx-badge {{ 'ok' if r.set else 'no' }}" data-badge>{{ 'Kiritilgan' if r.set else 'Kiritilmagan' }}</span>
+            <span class="kx-badge">manba: {{ r.source }}</span>
+            <span class="kx-badge" data-mask>{{ r.mask }}</span></div>
+          <p class="kx-help">{{ r.help }}</p>
+          <div class="kx-form">
+            <input type="{{ 'password' if r.secret else 'text' }}" placeholder="Yangi qiymat" autocomplete="new-password" data-input>
+            <button type="button" class="kx-btn pri" data-act="save">Tekshirib saqlash</button>
+            <button type="button" class="kx-btn" data-act="test">Hozirgisini tekshirish</button>
+            <button type="button" class="kx-btn dan" data-act="clear">Tozalash</button>
+          </div>
+          <p class="kx-msg" data-msg></p>
+        </div>
+      {% endfor %}
+      {% if ns.group %}</div>{% endif %}
+    </div>
+  </div>
+  <script>
+  (function () {
+    var P = "{{ admin_prefix }}";
+    function call(path, body) {
+      return fetch(P + path, {method: "POST", headers: {"Content-Type": "application/json", "X-Requested-With": "fetch"}, body: JSON.stringify(body)})
+        .then(function (r) { return r.json().catch(function () { return {ok: false, msg: "Server javobi noto'g'ri (HTTP " + r.status + "). Qayta kiring."}; })
+          .then(function (j) { if (r.status === 401) j = {ok: false, msg: "Sessiya tugagan — admin sifatida qayta kiring."}; return j; }); })
+        .catch(function () { return {ok: false, msg: "Tarmoq xatosi."}; });
+    }
+    function show(row, j, okText) {
+      var m = row.querySelector("[data-msg]");
+      m.className = "kx-msg " + (!j.ok ? "err" : (j.warn ? "warn" : "ok"));
+      m.textContent = j.msg || okText || "";
+    }
+    document.querySelectorAll(".kx-row").forEach(function (row) {
+      var name = row.getAttribute("data-name"), inp = row.querySelector("[data-input]");
+      row.addEventListener("click", async function (e) {
+        var act = e.target && e.target.getAttribute && e.target.getAttribute("data-act"); if (!act) return;
+        var btn = e.target; btn.disabled = true; var old = btn.textContent; btn.textContent = "…";
+        var j;
+        if (act === "save") {
+          if (!inp.value.trim()) { j = {ok: false, msg: "Avval qiymatni kiriting."}; }
+          else { j = await call("/api/keys/save", {name: name, value: inp.value}); if (j.ok) { inp.value = ""; } }
+        } else if (act === "test") { j = await call("/api/keys/test", {name: name}); }
+        else { if (!confirm("Bu kalit tozalansinmi?")) { btn.disabled = false; btn.textContent = old; return; } j = await call("/api/keys/clear", {name: name}); }
+        show(row, j);
+        if (j.ok && j.mask !== undefined) {
+          row.querySelector("[data-mask]").textContent = j.mask;
+          var b = row.querySelector("[data-badge]"); var has = j.mask && j.mask !== "—";
+          b.textContent = has ? "Kiritilgan" : "Kiritilmagan"; b.className = "kx-badge " + (has ? "ok" : "no");
+        }
+        btn.disabled = false; btn.textContent = old;
+      });
+    });
+    function opt(id, name) {
+      document.getElementById(id).addEventListener("change", async function () {
+        var j = await call("/api/keys/option", {name: name, value: this.value});
+        var m = document.getElementById("ts-msg"); m.className = "kx-msg " + (j.ok ? "ok" : "err"); m.textContent = j.msg || "";
+      });
+    }
+    opt("ts-mode", "TURNSTILE_MODE"); opt("ts-fb", "TURNSTILE_FALLBACK");
+  })();
+  </script>
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

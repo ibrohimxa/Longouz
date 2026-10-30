@@ -59,8 +59,16 @@
   }
 
   // holat: ranglar (14 ta) + raqamlar
+  // v220: kunduzgi rejim har doim KUN (quyosh ko'rinadi, oy va yulduzlar yo'q); quyosh o'rni soatga qarab biroz siljiydi
+  var DAY_BG = "linear-gradient(120deg, #1550b0 0%, #2a7fe0 55%, #5ab0f5 100%)";
+  var MOON_X = 118;
+  function fitMoon() {
+    var w = hero.clientWidth || 1000;
+    MOON_X = w < 1000 ? 250 : 118; // planshetda oy sarlavha ustiga tushmasin
+  }
   function stateFor(light) {
     var h = nowHour(), cols, n;
+    if (light) h = Math.min(16, Math.max(8.5, h));
     if (!light) {
       cols = NIGHT.sky.concat(NIGHT.far, NIGHT.mid, NIGHT.main, NIGHT.hero);
       n = { stars: 1, glow: 1, sunX: 360, sunY: SUN_HIDE, sunO: 0, moonY: MOON_UP, moonO: 1 };
@@ -77,7 +85,7 @@
     var pos = sunPos(h), night = h < 5 || h > 20.3;
     n = {
       stars: Math.max(0, 0.9 - d * 1.6), glow: 0.15, sunX: pos.x, sunY: night ? SUN_HIDE : pos.y, sunO: night ? 0 : 1,
-      moonY: d > 0.45 ? MOON_HIDE : MOON_UP, moonO: d > 0.45 ? 0 : 1
+      moonY: MOON_HIDE, moonO: 0
     };
     return { cols: cols, n: n, day: !night && d > 0.3 };
   }
@@ -93,13 +101,14 @@
     if (stars) stars.style.opacity = String(n.stars);
     if (glowC) glowC.style.opacity = String(n.glow);
     if (sun) { sun.setAttribute("transform", "translate(" + n.sunX.toFixed(1) + " " + n.sunY.toFixed(1) + ")"); sun.style.display = n.sunO > 0.01 ? "" : "none"; sun.style.opacity = String(n.sunO); }
-    if (moon) { moon.setAttribute("transform", "translate(118 " + n.moonY.toFixed(1) + ")"); moon.style.display = n.moonO > 0.01 ? "" : "none"; moon.style.opacity = String(n.moonO); }
+    if (moon) { moon.setAttribute("transform", "translate(" + MOON_X + " " + n.moonY.toFixed(1) + ")"); moon.style.display = n.moonO > 0.01 ? "" : "none"; moon.style.opacity = String(n.moonO); }
     if (horizon) {
       var low = Math.min(1, Math.max(0, (n.sunY - 105) / 110)) * Math.min(1, Math.max(0, n.sunO));
       horizon.setAttribute("transform", "translate(" + n.sunX.toFixed(1) + " " + Math.min(n.sunY, 214).toFixed(1) + ")");
       horizon.style.opacity = light ? String(low.toFixed(3)) : "0";
     }
     hero.classList.toggle("is-day", !!light);
+    if (light) hero.style.setProperty("--hero-bg", DAY_BG); else hero.style.removeProperty("--hero-bg");
   }
 
   var current = null, raf = 0;
@@ -140,6 +149,8 @@
   }
 
   function isLight() { return document.documentElement.getAttribute("data-theme") === "light"; }
+  fitMoon();
+  window.addEventListener("resize", function () { var o = MOON_X; fitMoon(); if (o !== MOON_X && current) render(current.cols, current.n, isLight()); });
   go(isLight(), false);
   if (isLight()) { // sahifa ochilganda quyosh tog' ortidan asta ko'tariladi
     var land = stateFor(true);
@@ -163,7 +174,7 @@
       try { localStorage.setItem("longouz_theme", next); } catch (err) { /* ignore */ }
       setTimeout(function () { skipObserver = false; }, 0);
     }, 480);
-    setTimeout(function () { root.classList.remove("theme-anim"); }, 2300);
+    setTimeout(function () { root.classList.remove("theme-anim"); }, 1300);
   }, true);
   new MutationObserver(function () { if (!skipObserver) go(isLight(), true); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
   setInterval(function () { if (!raf || true) { var t = stateFor(isLight()); current = t; render(t.cols, t.n, isLight()); if (!isLight()) hero.style.removeProperty("--hero-bg"); } }, 60000);

@@ -60,6 +60,10 @@
           <div class="pm-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="8" r="3.8"/><path d="M4.5 20.5a7.5 7.5 0 0115 0"/></svg><input type="text" id="pm-name" value="{{ (user.first_name or '') if user else '' }}" placeholder="Ism Familiya" autocomplete="cc-name"></div>
         </div>
         {% else %}
+        <a class="pm-google" id="pm-google" href="/auth/google/login?next=%2Fupgrade%3Fplan%3Dpro%26auto%3D1" style="display:flex;align-items:center;justify-content:center;gap:10px;height:46px;border-radius:12px;background:#fff;color:#15222a;font-weight:600;font-size:.92rem;text-decoration:none;border:1px solid rgba(0,0,0,.12);margin:0 0 4px">
+          {% include "_auth_google_icon.html" %}<span>Google bilan davom etish</span>
+        </a>
+        <p class="pm-or" style="text-align:center;margin:2px 0 6px;font-size:.78rem;opacity:.7">yoki email bilan</p>
         <div class="pm-field">
           <label for="pm-name"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="7.5" r="4"/><path d="M4 21a8 8 0 0116 0z"/></svg>Ismingiz</label>
           <div class="pm-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="8" r="3.8"/><path d="M4.5 20.5a7.5 7.5 0 0115 0"/></svg><input type="text" id="pm-name" name="first_name" placeholder="Ismingizni kiriting" autocomplete="name" required></div>

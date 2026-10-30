@@ -1,110 +1,138 @@
-/* Cloudflare Turnstile — chidamli (explicit) render.
-   - Vidjet yashirin oynada (karta/checkout) bo'lsa ham, oyna ochilganda chiziladi.
-   - api.js kech yuklansa/bloklansa: har 400ms urinadi; 15s ichida token chiqmasa "Qayta urinish" tugmasi.
-   - Vidjet xato bersa (domen ruxsatsiz, tarmoq, kengaytma bloklagan): forma "cf-unavailable=1" bilan
-     yuboriladi, server foydalanuvchini bloklamaydi (rate-limit ostida). */
+/* Cloudflare Turnstile — ishonchli yuklash va chizish (v217).
+   - api.js ni o'zi yuklaydi (sahifada bo'lmasa), takroran yuklamaydi (ikki marta yuklash vidjetni "aylantirib" qo'yardi);
+   - vidjet yashirin oynada (karta/checkout) bo'lsa ham, oyna ochilganda chiziladi;
+   - "Tekshirilmoqda…" holati va aniq xato kodi ko'rsatiladi (110200 = domen Cloudflare'da qo'shilmagan);
+   - 9 soniyada token kelmasa yoki xato chiqsa — ZAXIRA YO'L: forma baribir yuboriladi (server IP bo'yicha qattiq cheklov qo'llaydi),
+     shunda foydalanuvchi hech qachon "aylanib" qolgan vidjet ortida qulflanib qolmaydi;
+   - tekshiruv tugagach, kutib turgan yuborish avtomatik davom etadi. */
 (function () {
   "use strict";
   var widgets = new WeakMap();
-  var TIMEOUT_MS = 15000;
+  var loadTries = 0;
+  var FALLBACK_MS = 9000;
+  var API = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=lgTurnstileReady";
 
-  function ensureFlag(form) {
-    var f = form.querySelector('input[name="cf-unavailable"]');
-    if (!f) { f = document.createElement("input"); f.type = "hidden"; f.name = "cf-unavailable"; f.value = ""; form.appendChild(f); }
-    return f;
+  var ERR_TEXT = {
+    "110200": "Bu domen Cloudflare Turnstile'da ruxsat etilmagan (admin: Cloudflare → Turnstile → Hostname ro'yxatiga shu domenni qo'shing).",
+    "110100": "Turnstile site key noto'g'ri.", "110110": "Turnstile site key noto'g'ri.",
+    "300030": "Brauzer tekshiruvdan o'tolmadi.", "600010": "Tekshiruv vaqti tugadi."
+  };
+
+  function isVisible(el) { return !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length); }
+  function statusOf(slot) { var f = slot.closest("form"); return f ? f.querySelector("[data-turnstile-status]") : null; }
+  function say(slot, txt, ok) {
+    var st = statusOf(slot); if (!st) return;
+    st.textContent = txt || ""; st.style.color = ok ? "#10b981" : "";
   }
-  function setStatus(form, msg, retry) {
-    var st = form && form.querySelector("[data-turnstile-status]");
-    if (!st) return;
-    st.textContent = msg || "";
-    var old = st.parentNode.querySelector(".au-cf-retry");
-    if (old) old.remove();
-    if (retry) {
-      var b = document.createElement("button");
-      b.type = "button"; b.className = "au-cf-retry"; b.textContent = "Qayta urinish";
-      b.onclick = function () { resetSlot(retry); };
-      st.parentNode.appendChild(b);
-    }
+  function tokenOf(form) {
+    var i = form.querySelector('input[name="cf-turnstile-response"]');
+    return i && i.value ? i.value : "";
   }
-  function resetSlot(slot) {
-    var form = slot.closest("form");
-    var id = widgets.get(slot);
-    if (form) { ensureFlag(form).value = ""; setStatus(form, ""); }
-    try { if (id !== undefined) window.turnstile.reset(id); } catch (e) {}
-    arm(slot);
+  function fallbackInput(form) {
+    var i = form.querySelector('input[name="cf-turnstile-fallback"]');
+    if (!i) { i = document.createElement("input"); i.type = "hidden"; i.name = "cf-turnstile-fallback"; form.appendChild(i); }
+    return i;
   }
-  function arm(slot) {
-    clearTimeout(slot._cfTimer);
-    slot._cfTimer = setTimeout(function () {
-      var form = slot.closest("form");
-      var inp = form && form.querySelector('input[name="cf-turnstile-response"]');
-      if (form && (!inp || !inp.value)) {
-        ensureFlag(form).value = "1";
-        setStatus(form, "Tekshiruv uzoq davom etdi. Davom etishingiz mumkin yoki qayta urinib ko'ring.", slot);
-      }
-    }, TIMEOUT_MS);
+  function enableFallback(slot, why) {
+    var form = slot.closest("form"); if (!form || tokenOf(form)) return;
+    if (fallbackInput(form).value === "1") return;
+    fallbackInput(form).value = "1";
+    say(slot, (why ? why + " " : "") + "Tekshiruvsiz davom etishingiz mumkin — tugmani bosing.");
+    if (form.__lgPending) { form.__lgPending = false; submitAgain(form); }
+  }
+  function submitAgain(form) {
+    try { if (form.requestSubmit) form.requestSubmit(); else form.submit(); } catch (e) { form.submit(); }
+  }
+
+  function ensureApi() {
+    if (window.turnstile) return;
+    var existing = document.querySelector('script[src*="challenges.cloudflare.com/turnstile"]');
+    if (existing) return;                                   // sahifaning o'z <script> i bor — ikkinchisini QO'SHMAYMIZ
+    if (loadTries >= 3) return;
+    loadTries++;
+    var s = document.createElement("script");
+    s.src = API; s.async = true;
+    s.onerror = function () {
+      if (s.parentNode) s.parentNode.removeChild(s);
+      document.querySelectorAll(".turnstile-slot").forEach(function (sl) {
+        say(sl, loadTries >= 3 ? "Cloudflare tekshiruvi yuklanmadi (tarmoq yoki reklama-bloker)." : "Tekshiruv yuklanmoqda…");
+        if (loadTries >= 3) enableFallback(sl);
+      });
+      setTimeout(ensureApi, 1500 * loadTries);
+    };
+    document.head.appendChild(s);
   }
 
   function renderSlot(slot) {
-    if (!window.turnstile || widgets.has(slot)) return;
-    var form = slot.closest("form");
-    if (form) ensureFlag(form);
-    if (!slot.style.minHeight) slot.style.minHeight = "65px";
+    if (widgets.has(slot) || !isVisible(slot)) return;
+    if (!window.turnstile || !window.turnstile.render) { say(slot, "Tekshiruv yuklanmoqda…"); ensureApi(); armTimer(slot); return; }
+    var id;
     try {
-      var id = window.turnstile.render(slot, {
+      id = window.turnstile.render(slot, {
         sitekey: slot.getAttribute("data-sitekey"),
         theme: "auto",
-        size: "flexible",
-        appearance: "always",
+        "refresh-expired": "auto",
         retry: "auto",
         "retry-interval": 4000,
-        "refresh-expired": "auto",
         callback: function () {
-          clearTimeout(slot._cfTimer);
-          if (form) { ensureFlag(form).value = ""; setStatus(form, ""); }
+          say(slot, "✓ Tekshiruv o'tdi", true); setTimeout(function () { say(slot, ""); }, 1800);
+          var f = slot.closest("form"); if (f && f.__lgPending) { f.__lgPending = false; submitAgain(f); }
         },
-        "expired-callback": function () { try { window.turnstile.reset(id); } catch (e) {} arm(slot); },
+        "expired-callback": function () { try { window.turnstile.reset(id); } catch (e) {} },
         "timeout-callback": function () { try { window.turnstile.reset(id); } catch (e) {} },
-        "error-callback": function () {
-          if (form) {
-            ensureFlag(form).value = "1";
-            setStatus(form, "Tekshiruv vidjeti yuklanmadi. Davom etishingiz mumkin yoki qayta urinib ko'ring.", slot);
-          }
-          return true;
-        },
+        "error-callback": function (code) {
+          enableFallback(slot, ERR_TEXT[String(code)] || ("Tekshiruv vidjeti xato berdi" + (code ? " (" + code + ")" : "") + "."));
+          return false;
+        }
       });
       widgets.set(slot, id);
-      arm(slot);
-    } catch (e) { /* keyingi urinishda */ }
+      say(slot, "Tekshirilmoqda…");
+      armTimer(slot);
+    } catch (e) { setTimeout(renderAll, 800); }
   }
 
-  function renderAll() { document.querySelectorAll(".turnstile-slot").forEach(renderSlot); }
+  function armTimer(slot) {
+    if (slot.__lgTimer) return;
+    slot.__lgTimer = setTimeout(function () {
+      var f = slot.closest("form");
+      if (f && !tokenOf(f)) enableFallback(slot, "Cloudflare tekshiruvi javob bermadi.");
+    }, FALLBACK_MS);
+  }
+
+  function renderAll() {
+    var slots = document.querySelectorAll(".turnstile-slot");
+    if (!slots.length) return;
+    slots.forEach(renderSlot);
+  }
+
+  window.lgTurnstileFailed = function () {          // sahifadagi api.js yuklanmadi (bloker/tarmoq) — darhol zaxira yo'l
+    document.querySelectorAll(".turnstile-slot").forEach(function (sl) { say(sl, "Cloudflare tekshiruvi yuklanmadi."); enableFallback(sl); });
+  };
   window.lgTurnstileReady = renderAll;
   window.lgTurnstileRender = renderAll;
-
-  // api.js hali yuklanmagan bo'lsa ham, yuklanishi bilan chizish (onload kechiksa/ishlamasa)
-  var tries = 0;
-  var poll = setInterval(function () {
-    renderAll();
-    if (++tries > 75) clearInterval(poll);
-  }, 400);
 
   document.addEventListener("submit", function (e) {
     var form = e.target;
     var slot = form.querySelector && form.querySelector(".turnstile-slot");
     if (!slot) return;
-    var input = form.querySelector('input[name="cf-turnstile-response"]');
-    var flag = form.querySelector('input[name="cf-unavailable"]');
-    if ((!input || !input.value) && !(flag && flag.value === "1")) {
-      e.preventDefault();
-      setStatus(form, "Iltimos, \"Men robot emasman\" tekshiruvini kuting (bir necha soniya).");
-      renderAll();
-    }
+    if (tokenOf(form)) return;
+    if (fallbackInput(form).value === "1") return;           // zaxira yo'l yoqilgan — yuboramiz
+    e.preventDefault();
+    form.__lgPending = true;                                 // token kelishi bilan o'zi yuboriladi
+    say(slot, "Cloudflare tekshiruvi tugashini kutyapmiz (bir necha soniya)…");
+    armTimer(slot);
+    renderAll();
   }, true);
 
-  var mo = new MutationObserver(renderAll);
-  document.addEventListener("DOMContentLoaded", function () {
-    mo.observe(document.body, { attributes: true, subtree: true, attributeFilter: ["hidden", "class", "style"] });
+  function boot() {
     renderAll();
-  });
+    var n = 0;
+    var iv = setInterval(function () {
+      n++; renderAll();
+      var pending = Array.prototype.some.call(document.querySelectorAll(".turnstile-slot"), function (s) { return !widgets.has(s) && isVisible(s); });
+      if (!pending || n > 40) clearInterval(iv);
+    }, 750);
+    if (document.body) new MutationObserver(renderAll).observe(document.body, { attributes: true, subtree: true, attributeFilter: ["hidden", "class", "style"] });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot); else boot();
 })();

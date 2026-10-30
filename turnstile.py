@@ -30,8 +30,13 @@ def secret_key() -> str:
     return ai_keys.get("TURNSTILE_SECRET_KEY")
 
 
+def mode() -> str:
+    """TURNSTILE_MODE: 'off' — admin paneldan butunlay o'chirilgan; boshqa qiymat (yoki bo'sh) — kalit bo'lsa yoqiladi."""
+    return (ai_keys.get("TURNSTILE_MODE") or "auto").strip().lower()
+
+
 def is_enabled() -> bool:
-    return bool(site_key() and secret_key())
+    return mode() != "off" and bool(site_key() and secret_key())
 
 
 def __getattr__(name):  # eski kod uchun
@@ -83,43 +88,79 @@ def client_ip(request) -> str:
 
 
 _VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
-
-
-# Cloudflare javobidagi SOZLAMA xatolari (kalit noto'g'ri/yo'q) — bunda foydalanuvchi aybdor emas,
-# shuning uchun uni bloklamaymiz (admin panelda ogohlantirish chiqadi). Faqat haqiqiy "robot"
-# yoki eskirgan/ishlatilgan token rad etiladi.
+# Kalit/sozlamadagi xato (foydalanuvchi aybi emas) — bunda foydalanuvchini bloklamaymiz
 _CONFIG_ERRORS = {"missing-input-secret", "invalid-input-secret", "bad-request", "internal-error"}
-LAST_ERROR: dict = {"codes": [], "at": 0.0}
 
 
-async def verify_turnstile(token: str, remote_ip: str = "", widget_unavailable: bool = False) -> bool:
-    """True = o'tkazish. widget_unavailable=True: brauzerda vidjet umuman yuklanmadi/xato berdi
-    (Cloudflare bloklangan, domen ruxsatsiz, tarmoq) — foydalanuvchi bloklab qo'yilmaydi,
-    lekin so'rov rate-limit (10/daq) ostida qoladi."""
-    import time as _t
-    if not is_enabled():
-        return True
-    if not token:
-        if widget_unavailable:
-            logger.warning("Turnstile vidjeti brauzerda ishlamadi — foydalanuvchi o'tkazildi (rate-limit ostida).")
-            LAST_ERROR.update(codes=["widget-unavailable"], at=_t.time())
-            return True
-        return False
-
-    payload = {"secret": secret_key(), "response": token}
+async def verify_detail(token: str, remote_ip: str = "", secret: str | None = None) -> tuple[bool, list[str], str]:
+    """Qaytadi: (muvaffaqiyat, xato kodlari, holat). holat: ok | rejected | network."""
+    payload = {"secret": secret if secret is not None else secret_key(), "response": token or ""}
     if remote_ip:
         payload["remoteip"] = remote_ip
-
     try:
         async with aiohttp.ClientSession() as session:
             async with session.post(_VERIFY_URL, data=payload, timeout=aiohttp.ClientTimeout(total=8)) as resp:
-                data = await resp.json()
-                if data.get("success"):
-                    return True
-                codes = data.get("error-codes") or []
-                logger.warning(f"Turnstile rad etdi: {codes}")
-                LAST_ERROR.update(codes=codes, at=_t.time())
-                return bool(set(codes) & _CONFIG_ERRORS)
-    except Exception as e:
-        logger.warning(f"Turnstile tekshiruvi ishlamadi (tarmoq muammosi bo'lishi mumkin): {e}")
+                data = await resp.json(content_type=None)
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Turnstile tekshiruvi ishlamadi (tarmoq): %s", e)
+        return False, [], "network"
+    codes = [str(c) for c in (data.get("error-codes") or [])]
+    if data.get("success"):
+        return True, codes, "ok"
+    logger.warning("Turnstile rad etdi: %s", codes)
+    return False, codes, "rejected"
+
+
+async def verify_turnstile(token: str, remote_ip: str = "") -> bool:
+    """Eski interfeys: True = o'tkazish mumkin."""
+    if not is_enabled():
         return True
+    if not token:
+        return False
+    ok, codes, state = await verify_detail(token, remote_ip)
+    if ok:
+        return True
+    if state == "network":
+        return True          # Cloudflare vaqtincha ishlamasa foydalanuvchini bloklamaymiz
+    if set(codes) & _CONFIG_ERRORS:
+        logger.error("Turnstile SECRET KEY noto'g'ri sozlangan (%s) — tekshiruv o'tkazib yuborildi. Admin → Kalitlar.", codes)
+        return True
+    return False
+
+
+# --- Zaxira yo'l: vidjet brauzerda yuklanmasa (reklama-bloker, tarmoq, domen sozlamasi) foydalanuvchi qulflanib qolmasin.
+#     Bunda tekshiruv o'rniga IP bo'yicha qattiq cheklov qo'llanadi (10 daqiqada 4 ta urinish).
+_FALLBACK_HITS: dict[str, list[float]] = {}
+
+
+def fallback_allowed() -> bool:
+    return (ai_keys.get("TURNSTILE_FALLBACK") or "on").strip().lower() != "off"
+
+
+def _fallback_rate_ok(ip: str, limit: int = 4, window: int = 600) -> bool:
+    import time
+    now = time.time()
+    hits = [t for t in _FALLBACK_HITS.get(ip, []) if now - t < window]
+    if len(hits) >= limit:
+        _FALLBACK_HITS[ip] = hits
+        return False
+    hits.append(now)
+    _FALLBACK_HITS[ip] = hits
+    if len(_FALLBACK_HITS) > 5000:
+        _FALLBACK_HITS.clear()
+    return True
+
+
+async def check(request, token: str, fallback_flag: str = "") -> bool:
+    """Formalar uchun yagona tekshiruv. True — davom etish mumkin."""
+    if not is_active_for_request(request):
+        return True
+    ip = client_ip(request)
+    if token:
+        return await verify_turnstile(token, ip)
+    if fallback_flag and fallback_allowed():
+        ok = _fallback_rate_ok(ip or "?")
+        if not ok:
+            logger.warning("Turnstile zaxira yo'li: IP %s uchun urinishlar chegarasi oshdi.", ip)
+        return ok
+    return False

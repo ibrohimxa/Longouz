@@ -6,57 +6,65 @@
       <nav class="sidebar-nav">
         <a href="{{ admin_prefix }}" class="sidebar-link{{ ' active' if active_tab == 'dashboard' else '' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-          Umumiy holat
+          <span class="sb-lbl">Umumiy holat</span>
         </a>
         <a href="{{ admin_prefix }}/users" class="sidebar-link{{ ' active' if active_tab == 'users' else '' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-          Foydalanuvchilar
+          <span class="sb-lbl">Foydalanuvchilar</span>
         </a>
         <a href="{{ admin_prefix }}/topics" class="sidebar-link{{ ' active' if active_tab == 'questions' else '' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
-          Savollar banki
+          <span class="sb-lbl">Savollar banki</span>
         </a>
         <a href="{{ admin_prefix }}/studio" class="sidebar-link{{ ' active' if active_tab == 'studio' else '' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 5.6L20 10l-5.6 2.4L12 18l-2.4-5.6L4 10l5.6-2.4z"/></svg>
-          Studio (AI)
+          <span class="sb-lbl">Studio (AI)</span>
         </a>
         <a href="{{ admin_prefix }}/import" class="sidebar-link{{ ' active' if active_tab == 'import' else '' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          Import (PDF / fayl)
+          <span class="sb-lbl">Import (PDF / fayl)</span>
         </a>
         <a href="{{ admin_prefix }}/certificates" class="sidebar-link{{ ' active' if active_tab == 'certificates' else '' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.5 13.5L17 22l-5-3-5 3 1.5-8.5"/></svg>
-          Sertifikatlar
+          <span class="sb-lbl">Sertifikatlar</span>
         </a>
         <a href="{{ admin_prefix }}/announcements" class="sidebar-link{{ ' active' if active_tab == 'announcements' else '' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-          Bildirishnomalar
+          <span class="sb-lbl">Bildirishnomalar</span>
         </a>
         <a href="{{ admin_prefix }}/messages" class="sidebar-link{{ ' active' if active_tab == 'messages' else '' }}" style="position:relative;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-          Xabarlar
+          <span class="sb-lbl">Xabarlar</span>
           <span id="admin-unread-badge" hidden style="margin-left:auto; background:var(--error); color:#fff; font-size:0.72rem; font-weight:700; line-height:1; border-radius:999px; padding:3px 7px;">0</span>
         </a>
         <a href="{{ admin_prefix }}/reports" class="sidebar-link{{ ' active' if active_tab == 'reports' else '' }}" style="position:relative;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
-          Shikoyatlar
+          <span class="sb-lbl">Shikoyatlar</span>
           <span id="admin-reports-badge" hidden style="margin-left:auto; background:var(--error); color:#fff; font-size:0.72rem; font-weight:700; line-height:1; border-radius:999px; padding:3px 7px;">0</span>
+        </a>
+        <a href="{{ admin_prefix }}/keys" class="sidebar-link{{ ' active' if active_tab == 'keys' else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.6 7.6a5.5 5.5 0 11-7.8 7.8 5.5 5.5 0 017.8-7.8zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+          <span class="sb-lbl">Kalitlar</span>
+        </a>
+        <a href="{{ admin_prefix }}/bank" class="sidebar-link{{ ' active' if active_tab == 'bank' else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.7-4 3-9 3s-9-1.3-9-3"/><path d="M3 5v14c0 1.7 4 3 9 3s9-1.3 9-3V5"/></svg>
+          <span class="sb-lbl">Savol banki</span>
         </a>
         <a href="{{ admin_prefix }}/log" class="sidebar-link{{ ' active' if active_tab == 'log' else '' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          Admin jurnali
+          <span class="sb-lbl">Admin jurnali</span>
         </a>
         <a href="{{ admin_prefix }}/ai" class="sidebar-link{{ ' active' if active_tab == 'ai' else '' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 9h.01M15 9h.01M9 15c1 1 5 1 6 0"/></svg>
-          AI holati
+          <span class="sb-lbl">AI holati</span>
         </a>
         <a href="{{ admin_prefix }}/settings" class="sidebar-link{{ ' active' if active_tab == 'settings' else '' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-          Sozlamalar
+          <span class="sb-lbl">Sozlamalar</span>
         </a>
         <a href="/" class="sidebar-link" target="_blank">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>
-          Saytni ko'rish
+          <span class="sb-lbl">Saytni ko'rish</span>
         </a>
       </nav>
       <div class="sidebar-footer">
@@ -67,7 +75,7 @@
         </button>
         <a href="{{ admin_prefix }}/logout" class="sidebar-link">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          Admin sessiyasidan chiqish
+          <span class="sb-lbl">Admin sessiyasidan chiqish</span>
         </a>
       </div>
     </aside>
@@ -93,19 +101,12 @@
         }
         refreshUnreadCount();
         setInterval(refreshUnreadCount, 30000);
-      })();
-      (function () {
-        const b = document.getElementById("admin-reports-badge");
-        if (!b) return;
-        async function r() {
-          try {
-            const res = await fetch("{{ admin_prefix }}/api/reports/count");
-            if (!res.ok) return;
-            const d = await res.json();
-            b.textContent = d.count > 99 ? "99+" : String(d.count);
-            b.hidden = !(d.count > 0);
-          } catch (e) {}
+        const rb = document.getElementById("admin-reports-badge");
+        if (rb) {
+          const upd = () => fetch("{{ admin_prefix }}/api/reports/count").then(r => r.ok ? r.json() : null).then(d => {
+            if (d && d.count > 0) { rb.textContent = d.count > 99 ? "99+" : String(d.count); rb.hidden = false; } else { rb.hidden = true; }
+          }).catch(() => {});
+          upd(); setInterval(upd, 45000);
         }
-        r(); setInterval(r, 45000);
       })();
     </script>

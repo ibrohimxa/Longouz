@@ -31,7 +31,7 @@ import auth as user_auth  # SECRET_KEY va ALGORITHM'ni QAYTA ISHLATAMIZ (bitta m
 logger = logging.getLogger(__name__)
 
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "NEO")
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "")  # kodda standart parol YO'Q — faqat .env / Vercel Environment Variables
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "")  # v221: koddagi standart parol olib tashlandi (repo ochiq)
 
 if not ADMIN_PASSWORD:
     logger.warning(
@@ -41,7 +41,7 @@ if not ADMIN_PASSWORD:
         "qatorini to'ldiring."
     )
 
-if ADMIN_PASSWORD in ("xamroyevi10", "xamroyevi", "xamroyevi6"):
+if ADMIN_PASSWORD in ("xamroyevi10", "xamroyevi"):
     raise RuntimeError(
         "XAVFSIZLIK TO'XTATUVI: ADMIN_PASSWORD hali ham ilgari oshkor bo'lgan "
         "qiymatlardan biri (\"xamroyevi10\" yoki \"xamroyevi6\") da turibdi — bu "

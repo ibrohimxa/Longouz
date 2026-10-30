@@ -1,15 +1,16 @@
+# Vercel'ga yuklanmaydigan fayllar (kalitlar va lokal fayllar)
 .env
 .env.*
+!.env.example
+.web_secret_key.local
 *.db
-__pycache__
+*.log
+__pycache__/
 *.pyc
-.venv
-certs
+certs/
+public/
+.venv/
 *.bat
 *.sh
-setup_run.py
-https_cert.py
-migrate_sqlite_to_postgres.py
-README_*.md
-public
-node_modules
+requirements-local.txt
+deploy_config.txt

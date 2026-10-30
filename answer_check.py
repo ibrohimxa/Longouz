@@ -142,6 +142,7 @@ def numbers_match(user_text, accepted_text) -> bool | None:
 def normalize_text(text) -> str:
     s = _prep(text).lower()
     s = s.replace("‑", "-")
+    s = s.replace("^", "").replace("sqrt", "√").replace("->", "→").replace("<->", "⇌").replace("⇄", "⇌")
     s = re.sub(r"[\"“”«».,;:!?()\[\]{}]", " ", s)
     return re.sub(r"\s+", " ", s).strip()
 

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DTM blok mock — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/features215.css">
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true">
+  <div class="app-shell">
+    {% set nav_active = 'block' %}{% include "_app_sidebar.html" %}
+    <div class="app-content">
+      {% include "_announcement_banner.html" %}
+      <div class="f215-page">
+        <div class="app-topbar"><div><h1>DTM haqiqiy format</h1><p>5 fan bo'yicha 90 savollik blok mock — real imtihondagidek tuzilma, vaqt va ball</p></div></div>
+        <div class="f215-card">
+          <h2>Ixtisoslik fanlarini tanlang</h2>
+          <p class="f215-muted">Majburiy fanlar (ona tili, matematika, O'zbekiston tarixi) avtomatik qo'shiladi.</p>
+          <div class="f215-grid2" style="margin-top:12px">
+            <label class="f215-sel"><span>1-ixtisoslik fani (har biri ×3,1)</span><select id="bm-s1">{% for s in subjects %}<option value="{{ s.code }}"{% if s.code == 'physics' %} selected{% endif %}>{{ s.name }}</option>{% endfor %}</select></label>
+            <label class="f215-sel"><span>2-ixtisoslik fani (har biri ×2,1)</span><select id="bm-s2">{% for s in subjects %}<option value="{{ s.code }}"{% if s.code == 'chemistry' %} selected{% endif %}>{{ s.name }}</option>{% endfor %}</select></label>
+          </div>
+          <div class="f215-struct">
+            <div class="f215-row"><span class="ico">M</span><div><b>3 majburiy fan</b><small>Ona tili · Matematika · O'zbekiston tarixi — 10 tadan</small></div><span class="f215-pill">30 savol</span><span class="f215-pill">×1,1 = 33 ball</span></div>
+            <div class="f215-row s1"><span class="ico">1</span><div><b id="bm-n1">1-ixtisoslik</b><small>Har bir to'g'ri javob 3,1 ball</small></div><span class="f215-pill">30 savol</span><span class="f215-pill">×3,1 = 93 ball</span></div>
+            <div class="f215-row s2"><span class="ico">2</span><div><b id="bm-n2">2-ixtisoslik</b><small>Har bir to'g'ri javob 2,1 ball</small></div><span class="f215-pill">30 savol</span><span class="f215-pill">×2,1 = 63 ball</span></div>
+          </div>
+          <div class="f215-total"><span class="f215-pill">Jami 90 savol</span><span class="f215-pill">180 daqiqa</span><span class="f215-pill">Maksimal {{ max_ball|int }} ball</span></div>
+          <p class="f215-muted" id="bm-err" style="color:#ff7b72;margin-top:10px" hidden>Ikki xil ixtisoslik fanini tanlang.</p>
+          <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+            {% if full_access %}<button class="f215-btn" id="bm-go">Blok mockni boshlash</button>{% else %}<a class="f215-btn" href="/upgrade">Pro/Ultra'ni yoqish</a>{% endif %}
+            <a class="f215-btn ghost" href="/guide">Imtihon yo'riqnomasi</a>
+          </div>
+          {% if not full_access %}<p class="f215-muted" style="margin-top:10px">Blok mock Pro va Ultra tariflarda ochiladi. Mavzu bo'yicha mashqlar bepul davom etadi.</p>{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% include "_owl_widget.html" %}
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/app.js"></script>
+  <script>
+  (function () {
+    const s1 = document.getElementById("bm-s1"), s2 = document.getElementById("bm-s2"), go = document.getElementById("bm-go"), err = document.getElementById("bm-err");
+    function sync() {
+      document.getElementById("bm-n1").textContent = s1.options[s1.selectedIndex].text + " (1-ixtisoslik)";
+      document.getElementById("bm-n2").textContent = s2.options[s2.selectedIndex].text + " (2-ixtisoslik)";
+      const same = s1.value === s2.value; err.hidden = !same; if (go) go.disabled = same;
+    }
+    s1.addEventListener("change", sync); s2.addEventListener("change", sync); sync();
+    if (go) go.addEventListener("click", () => { location.href = "/quiz/take?block=" + s1.value + "," + s2.value; });
+  })();
+  </script>
+</body>
+</html>
