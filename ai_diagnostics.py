@@ -29,6 +29,8 @@ _MESSAGES = {
 
 def classify(error: object) -> str:
     text = str(error).lower()
+    if "127.0.0.1" in text or "proxy" in text:
+        return "network"  # mahalliy proksi/tarmoq to'sig'i — kalit xatosi emas
     for kind, needles in _RULES:
         if any(n in text for n in needles):
             return kind
@@ -53,3 +55,9 @@ def failure_hint() -> str:
         if now - ts <= _RECENT_SECONDS
     ]
     return " ".join(lines)
+
+
+def blocked(provider: str, window: int = 1800) -> bool:
+    """Provayder yaqinda kredit/kalit xatosi bergan bo'lsa (30 daqiqa) — uni o'tkazib yuboramiz (sayt kutib qolmasin)."""
+    rec = _last_errors.get(provider)
+    return bool(rec and rec[1] in ("credit", "auth") and time.time() - rec[0] <= window)

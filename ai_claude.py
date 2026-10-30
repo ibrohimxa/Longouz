@@ -40,6 +40,12 @@ def _get_client() -> AsyncAnthropic | None:
     if not key:
         _client, _client_key = None, ""
         return None
+    try:
+        import ai_diagnostics as _diag
+        if _diag.blocked("claude") and key == _client_key:
+            return None  # kredit tugagan / kalit rad etilgan — 30 daqiqa Gemini ishlaydi
+    except Exception:  # noqa: BLE001
+        pass
     if _client is None or key != _client_key:
         headers = {"anthropic-workspace-id": ANTHROPIC_WORKSPACE_ID} if ANTHROPIC_WORKSPACE_ID else {}
         _client, _client_key = AsyncAnthropic(api_key=key, default_headers=headers), key

@@ -61,11 +61,11 @@
         <h2 class="panel-title">Kalitlarni shu yerdan kiriting</h2>
         <p class="panel-sub">Kalit saqlashdan oldin tekshiriladi: noto'g'ri bo'lsa saqlanmaydi va sababi ko'rsatiladi. Bo'sh maydon o'zgarmaydi. Cloudflare va Google kalitlari — <a href="{{ admin_prefix }}/keys">Kalitlar</a> bo'limida.</p>
         <form id="ai-keys-form" autocomplete="off">
-          <div class="field"><label>Gemini API kaliti <small style="color:var(--ink-soft)">(hozir: {{ key_masks.GEMINI_API_KEY }})</small></label>
-            <input type="password" name="GEMINI_API_KEY" placeholder="AIza..." autocomplete="new-password"></div>
+          <div class="field"><label>Gemini API kaliti — BEPUL (aistudio.google.com/app/apikey) <small style="color:var(--ink-soft)">(hozir: {{ key_masks.GEMINI_API_KEY }})</small></label>
+            <input type="password" name="GEMINI_API_KEY" placeholder="AQ.… yoki AIza…" autocomplete="new-password"></div>
           <div class="field"><label>Gemini modeli <small style="color:var(--ink-soft)">(hozir: {{ key_masks.GEMINI_MODEL }})</small></label>
             <input type="text" name="GEMINI_MODEL" placeholder="gemini-flash-latest"></div>
-          <div class="field"><label>Claude (Anthropic) kaliti <small style="color:var(--ink-soft)">(hozir: {{ key_masks.ANTHROPIC_API_KEY }})</small></label>
+          <div class="field"><label>Claude (Anthropic) kaliti — pullik, kredit kerak <small style="color:var(--ink-soft)">(hozir: {{ key_masks.ANTHROPIC_API_KEY }})</small></label>
             <input type="password" name="ANTHROPIC_API_KEY" placeholder="sk-ant-..." autocomplete="new-password"></div>
           <button type="submit" class="btn-primary">Saqlash</button>
           <span id="ai-keys-msg" style="margin-left:12px;"></span>

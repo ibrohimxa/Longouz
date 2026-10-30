@@ -22,8 +22,8 @@ logger = logging.getLogger(__name__)
 
 KEYS = [
     # (name, label, group, secret?, help)
-    ("ANTHROPIC_API_KEY", "Claude (Anthropic) kaliti", "AI", True, "console.anthropic.com → API Keys. 'sk-ant-' bilan boshlanadi."),
-    ("GEMINI_API_KEY", "Gemini (Google AI) kaliti", "AI", True, "aistudio.google.com → Get API key. 'AIza' bilan boshlanadi."),
+    ("ANTHROPIC_API_KEY", "Claude (Anthropic) kaliti", "AI", True, "PULLIK (ixtiyoriy): console.anthropic.com → API Keys, 'sk-ant-' bilan boshlanadi. Ishlashi uchun Billing'da kredit kerak; kredit bo'lmasa sayt Gemini'dan foydalanadi."),
+    ("GEMINI_API_KEY", "Gemini (Google AI) kaliti", "AI", True, "BEPUL: aistudio.google.com/app/apikey → Create API key. 'AQ.' yoki 'AIza' bilan boshlanadi. Sayt AI'si asosan shu orqali ishlaydi."),
     ("TURNSTILE_SITE_KEY", "Turnstile — Site key", "Cloudflare Turnstile", False, "Cloudflare → Turnstile → widget → Site Key ('0x4…')."),
     ("TURNSTILE_SECRET_KEY", "Turnstile — Secret key", "Cloudflare Turnstile", True, "Cloudflare → Turnstile → widget → Secret Key. Faqat serverda ishlatiladi."),
     ("GOOGLE_CLIENT_ID", "Google — Client ID", "Google bilan kirish", False, "Google Cloud Console → Credentials → OAuth client. '….apps.googleusercontent.com'."),
@@ -33,7 +33,7 @@ _INFO = {k[0]: k for k in KEYS}
 
 _FORMAT = {
     "ANTHROPIC_API_KEY": (re.compile(r"^sk-ant-[A-Za-z0-9_\-]{20,}$"), "Claude kaliti 'sk-ant-' bilan boshlanadigan uzun matn bo'lishi kerak. Boshqa joydan nusxalangan bo'lishi mumkin."),
-    "GEMINI_API_KEY": (re.compile(r"^AIza[0-9A-Za-z_\-]{30,}$"), "Gemini kaliti 'AIza' bilan boshlanadigan matn bo'lishi kerak."),
+    "GEMINI_API_KEY": (re.compile(r"^(AIza[0-9A-Za-z_\-]{30,}|AQ\.[0-9A-Za-z_\-\.]{20,})$"), "Gemini kaliti 'AIza…' yoki 'AQ.…' bilan boshlanadi (aistudio.google.com/app/apikey dan nusxalang)."),
     "TURNSTILE_SITE_KEY": (re.compile(r"^0x[0-9A-Za-z_\-]{10,}$"), "Turnstile Site key '0x' bilan boshlanadi. Secret key'ni noto'g'ri joyga qo'ymadingizmi?"),
     "TURNSTILE_SECRET_KEY": (re.compile(r"^0x[0-9A-Za-z_\-]{10,}$"), "Turnstile Secret key '0x' bilan boshlanadi."),
     "GOOGLE_CLIENT_ID": (re.compile(r"^[0-9]+-[0-9a-z]+\.apps\.googleusercontent\.com$"), "Google Client ID '123…-abc….apps.googleusercontent.com' ko'rinishida bo'lishi kerak."),
@@ -84,7 +84,8 @@ async def _probe_ai(name: str, value: str) -> tuple[str, str]:
     if kind == "auth":
         return "bad", "Provayder bu kalitni QABUL QILMADI (noto'g'ri yoki o'chirilgan kalit). Qaytadan nusxalang."
     if kind == "credit":
-        return "warn", "Kalit to'g'ri ko'rinadi, lekin hisobda mablag' (kredit) yo'q."
+        return "warn", ("Kalit to'g'ri va saqlandi, lekin Anthropic hisobida kredit yo'q — Claude API pullik (bepul tarifi yo'q). "
+                        "console.anthropic.com → Billing'da hisob to'ldirilgach o'zi ishlaydi. Shu vaqtgacha sayt BEPUL Gemini orqali ishlaydi.")
     if kind == "quota":
         return "warn", "Kalit to'g'ri ko'rinadi, lekin so'rovlar limiti tugagan/band."
     if kind == "model":
@@ -128,6 +129,9 @@ async def save_key(name: str, raw: str) -> dict:
     try:
         ai_keys.save(name, value)           # mahalliyda .env ga; Vercel'da yozilmaydi (jim)
         await db.save_env_override(name, value)
+        if name == "ANTHROPIC_API_KEY":
+            # Kredit bo'lmasa AI repetitor avval bepul Gemini'ni ishlatsin; Claude ishlasa — avval Claude
+            await db.set_setting("ai_primary_repetitor", "gemini" if state == "warn" else "claude")
     except Exception:  # noqa: BLE001
         logger.exception("Kalitni saqlab bo'lmadi")
         return {"ok": False, "msg": "Saqlashda xato (baza). Server logiga qarang."}

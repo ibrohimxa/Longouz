@@ -26,6 +26,11 @@ Har yuborilgan zip: `longouz_v<N>.zip`, versiya raqami `VERSION` faylida.
 - **Kabinet (dashboard)**: hero'dagi tog'/quyosh/oy va har soniyada qayta chiziladigan skript olib tashlandi — oddiy yashil karta.
 - **Tezlik**: 3 soniyalik kirish (intro) ekrani olib tashlandi (bosh sahifa, kirish, ro'yxatdan o'tish darhol ochiladi); sahifalar gzip bilan siqiladi (bosh sahifa ~50 KB → ~11 KB); statik fayllar keshlanadi; og'ir blur (backdrop-filter) va telefonda doimiy animatsiyalar o'chirildi; Vercel'da fon yuklash bir instansni 12 soniyadan ortiq band qilmaydi.
 
+## v227 — AI kalitlari: Gemini bepul asosiy, Claude ixtiyoriy
+- Gemini kaliti yangi formatda ('AQ.…') ham qabul qilinadi (eski 'AIza…' ham).
+- Claude API pullik: kredit bo'lmasa kalit saqlanadi, aniq izoh chiqadi, AI repetitor avtomatik bepul Gemini'ga o'tadi; kredit/kalit xatosidan keyin Claude 30 daqiqa o'tkazib yuboriladi (sayt kutib qolmaydi).
+- Kalitlar sahifasida qaysi kalit bepul/pullik ekani va qayerdan olinishi yozilgan.
+
 ## v226 — qayta ishga tushirish va tekshiruv
 - Tashriflar statistikasi Vercel'da ham saqlanadi (so'rov ichida darhol yoziladi).
 - Cloudflare Turnstile hostname (longouz.vercel.app) qo'shildi — tekshiruv ishlaydi.
