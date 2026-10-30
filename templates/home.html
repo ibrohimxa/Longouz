@@ -22,9 +22,11 @@
     </a>
     <nav class="site-nav" aria-label="Asosiy navigatsiya">
       <a href="/#how" class="site-nav-section-link">Qanday ishlaydi</a>
+      <a href="/#features" class="site-nav-section-link">Imkoniyatlar</a>
       <a href="/#subjects" class="site-nav-section-link">Fanlar</a>
       <a href="/#ai" class="site-nav-section-link">AI</a>
       <a href="/#plans" class="site-nav-section-link">Tariflar</a>
+      <a href="/#faq" class="site-nav-section-link">Savol-javob</a>
       {% if request.cookies.get('longouz_session') and not request.state.drop_session %}
         <a href="/dashboard" class="nav-cta nav-sm">Kabinet</a>
       {% else %}
@@ -107,6 +109,63 @@
           <div class="hm-feat"><span class="hm-ic" style="background:rgba(80,150,255,.15);color:#4a8bff"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></span><span><b>Tezkor javoblar</b><small>Aniq, qisqa va amaliy javoblar</small></span></div>
           <div class="hm-feat"><span class="hm-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20V3H6.5A2.5 2.5 0 004 5.5z"/></svg></span><span><b>Chuqur tushuntirish va testlar</b><small>Mavzuni bosqichma-bosqich tushuntiradi, misollar va testlar bilan mustahkamlaydi.</small></span></div>
           <i class="hm-glass"></i><i class="hm-glass b"></i>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ===================== IMKONIYATLAR (v225) ===================== -->
+    <section class="hm-sec" id="features">
+      <div class="hm-wrap">
+        <div class="ft-head" data-reveal>
+          <span class="hm-pill">Imkoniyatlar</span>
+          <h2>Nima uchun LongoUZ?</h2>
+          <p>Oddiy test to'plamidan farqli — LongoUZ har bir javobingizdan o'rganadi va tayyorgarlikni sizga moslaydi.</p>
+        </div>
+
+        <div class="ft-row" data-reveal>
+          <div class="ft-text">
+            <span class="ft-ic ft-ic-a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 10-5.997.125 4 4 0 00-2.526 5.77 4 4 0 00.556 6.588A4 4 0 1012 18z"/><path d="M12 5a3 3 0 115.997.125 4 4 0 012.526 5.77 4 4 0 01-.556 6.588A4 4 0 1112 18z"/><path d="M12 5v13"/></svg></span>
+            <h3>Moslashuvchan (adaptiv) testlar</h3>
+            <p>Tizim bilim darajangizni aniqlab, savollar qiyinligini har safar moslaydi: to'g'ri javob bersangiz — qiyinroq, xato qilsangiz — shu mavzudan osonroq savol keladi. Xato qilgan mavzularingiz alohida "Adaptiv test" sifatida qayta beriladi.</p>
+            <div class="ft-tags"><span>Shaxsiy murakkablik</span><span>Zaif mavzular</span><span>Qayta mashq</span></div>
+          </div>
+          <div class="ft-card">
+            <div class="ft-card-h"><span>Murakkablik darajasi</span><b class="ft-lvl">Yuqori</b></div>
+            <div class="ft-meter"><span>Oson</span><i style="--w:100%" class="done"></i></div>
+            <div class="ft-meter"><span>O'rtacha</span><i style="--w:100%" class="done"></i></div>
+            <div class="ft-meter on"><span>Qiyin</span><i style="--w:68%"></i></div>
+            <div class="ft-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.8L20 10l-6.1 1.2L12 17l-1.9-5.8L4 10l6.1-1.2z"/></svg>Keyingi savol tanlanmoqda…</div>
+          </div>
+        </div>
+
+        <div class="ft-row rev" data-reveal>
+          <div class="ft-text">
+            <span class="ft-ic ft-ic-b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M9 15l2 2 4-4"/></svg></span>
+            <h3>DTM'ning haqiqiy formati</h3>
+            <p>5 fan bo'yicha 90 savollik blok mock: 3 ta majburiy fan va 2 ta ixtisoslik fani, rasmiy ball koeffitsientlari bilan. Shuningdek mavzuli testlar va milliy sertifikat formatidagi testlar — har biridan keyin batafsil tahlil.</p>
+            <div class="ft-tags"><span>Blok mock test</span><span>Mavzuli testlar</span><span>Milliy sertifikat</span></div>
+          </div>
+          <div class="ft-card">
+            <div class="ft-badges"><span class="b1">DTM</span><span class="b2">90 savol</span><span class="b3">3 soat</span></div>
+            <div class="ft-line"><span class="dot g"></span>3 majburiy fan <em>(×1,1)</em><b>30 savol</b></div>
+            <div class="ft-line"><span class="dot p"></span>1-ixtisoslik fani <em>(×3,1)</em><b>30 savol</b></div>
+            <div class="ft-line"><span class="dot r"></span>2-ixtisoslik fani <em>(×2,1)</em><b>30 savol</b></div>
+            <a class="ft-link" href="/dtm-blok">Blok mockni boshlash →</a>
+          </div>
+        </div>
+
+        <div class="ft-row" data-reveal>
+          <div class="ft-text">
+            <span class="ft-ic ft-ic-c"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M8 17V11M13 17V7M18 17v-4"/></svg></span>
+            <h3>Chuqur tahlil va ball prognozi</h3>
+            <p>Fan va mavzu bo'yicha batafsil statistika: kuchsiz tomonlaringiz aniqlanadi, natijalaringiz asosida taxminiy imtihon bali hisoblanadi, rivojlanishingiz grafikda ko'rinadi.</p>
+            <div class="ft-tags"><span>Fan statistikasi</span><span>Kuchsiz mavzular</span><span>Ball prognozi</span></div>
+          </div>
+          <div class="ft-card">
+            <div class="ft-card-h"><span>Haftalik natija</span><b class="ft-up">↗ +12%</b></div>
+            <div class="ft-bars">{% for h, d in [(38,'Du'),(46,'Se'),(42,'Ch'),(58,'Pa'),(54,'Ju'),(66,'Sh'),(74,'Ya')] %}<div><i style="--h:{{ h }}%"></i><span>{{ d }}</span></div>{% endfor %}</div>
+          </div>
         </div>
       </div>
     </section>
@@ -231,6 +290,26 @@
 
     {% with pm_member=False %}{% include "_purchase_modal.html" %}{% endwith %}
 
+
+    <!-- ===================== SAVOL-JAVOB (v225) ===================== -->
+    <section class="hm-sec alt" id="faq">
+      <div class="hm-wrap faq-wrap">
+        <div class="ft-head" data-reveal>
+          <span class="hm-pill">Savol-javob</span>
+          <h2>Ko'p beriladigan savollar</h2>
+        </div>
+        <div class="faq-list" data-reveal>
+          <details><summary>LongoUZ bepulmi?</summary><p>Ha — ro'yxatdan o'tib, har bir mavzu bo'yicha bepul testlarni yechishingiz mumkin. Pro va Ultra tariflarida savollar soni ko'payadi, AI repetitor, blok mock va batafsil tahlil ochiladi.</p></details>
+          <details><summary>Savollar haqiqiy imtihonga mosmi?</summary><p>Savollar DTM test sinovlari va milliy sertifikat imtihonlari dasturi (6–11-sinf darsliklari) asosida tuzilgan. Fizika, matematika, kimyo va biologiyada chizmali savollar ham bor.</p></details>
+          <details><summary>DTM blok mock qanday hisoblanadi?</summary><p>90 ta savol: majburiy fanlar (ona tili, matematika, O'zbekiston tarixi) — har biri 10 tadan, ball ×1,1; 1-ixtisoslik fani 30 ta (×3,1); 2-ixtisoslik fani 30 ta (×2,1). Maksimal ball — 189.</p></details>
+          <details><summary>AI repetitor nima qiladi?</summary><p>Xato qilgan savolingizni bosqichma-bosqich tushuntiradi, mavzu bo'yicha savollaringizga javob beradi va qo'shimcha mashq tavsiya qiladi. Pro va Ultra tariflarida ishlaydi.</p></details>
+          <details><summary>Google orqali kirsam, alohida akkaunt ochiladimi?</summary><p>Yo'q. Shu Gmail bilan avval ro'yxatdan o'tgan bo'lsangiz — o'sha akkauntingizga kirasiz. Bo'lmasa, avtomatik yangi akkaunt ochiladi. Keyingi safar ham shu tugma bilan kirasiz.</p></details>
+          <details><summary>Sertifikat haqiqiyligini qanday tekshiraman?</summary><p>Har bir LongoUZ sertifikatida QR kod va raqam bor. <a href="/verify">Tekshirish sahifasida</a> raqamni kiriting yoki QR kodni skaner qiling.</p></details>
+          <details><summary>To'lov va tarifni qanday o'zgartiraman?</summary><p>Kabinetdagi "Balans" yoki "Tariflar" bo'limidan. Savollar bo'lsa — <a href="/support">Yordam</a> bo'limiga yozing, admin javob beradi.</p></details>
+        </div>
+      </div>
+    </section>
+
     <!-- ===================== TOG' (yakuniy blok) ===================== -->
     <section class="hm-final" data-reveal>
       <h2>O'rganish yo'lingiz <span>shu yerdan boshlanadi</span></h2>
@@ -247,15 +326,21 @@
     </div>
   </main>
 
-  <footer class="site-footer site-footer-full">
-    <div class="site-footer-top">
-      <a href="/" class="brand footer-brand">{% include "_brandmark.html" %}</a>
-      <nav class="footer-links" aria-label="Footer navigatsiyasi">
-        <a href="/#how">Qanday ishlaydi</a><a href="/#subjects">Fanlar</a><a href="/#ai">AI</a><a href="/#plans">Tariflar</a><a href="/login">Kirish</a><a href="/register">Ro'yxatdan o'tish</a>
-      </nav>
+  <footer class="site-footer site-footer-full lz-foot">
+    <div class="lz-foot-grid">
+      <div class="lz-foot-brand">
+        <a href="/" class="brand footer-brand">{% include "_brandmark.html" %}</a>
+        <p>DTM, milliy sertifikat va IELTS'ga sun'iy intellekt yordamida tayyorlanish platformasi. Har bir o'quvchi uchun sifatli va zamonaviy ta'lim.</p>
+      </div>
+      <nav aria-label="Platforma"><h4>Platforma</h4><a href="/#how">Qanday ishlaydi</a><a href="/#features">Imkoniyatlar</a><a href="/#ai">AI repetitor</a><a href="/#plans">Tariflar</a></nav>
+      <nav aria-label="Imtihonlar"><h4>Imtihonlar</h4><a href="/dtm-blok">DTM blok mock</a><a href="/quiz">Mavzuli testlar</a><a href="/#subjects">Fanlar</a><a href="/guide">Imtihon yo'riqnomasi</a></nav>
+      <nav aria-label="Yordam"><h4>Yordam</h4><a href="/#faq">Savol-javob</a><a href="/support">Bog'lanish</a><a href="/verify">Sertifikatni tekshirish</a><a href="/login">Kirish</a></nav>
+      <nav aria-label="Huquqiy"><h4>Huquqiy</h4><a href="/terms">Foydalanish shartlari</a><a href="/privacy">Maxfiylik siyosati</a></nav>
     </div>
-    <p>Har bir o'quvchi uchun sifatli va zamonaviy ta'lim.</p>
-    <p>&copy; LongoUZ — Barcha huquqlar himoyalangan.</p>
+    <div class="lz-foot-bottom">
+      <p>&copy; {{ now_year if now_year else 2026 }} LongoUZ — Barcha huquqlar himoyalangan.</p>
+      <p class="lz-foot-note">Sertifikatlar QR kod orqali tekshiriladi · Ma'lumotlaringiz himoyalangan</p>
+    </div>
   </footer>
 
   {% include "_owl_widget.html" %}

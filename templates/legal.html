@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="{{ title }} — LongoUZ">
+  <title>{{ title }} — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/auth.css">
+  <script src="/static/theme-init.js"></script>
+  <style>
+    .lg-page{max-width:820px;margin:0 auto;padding:36px 20px 60px}
+    .lg-page h1{font-size:clamp(1.6rem,4vw,2.3rem);margin:0 0 6px}
+    .lg-page .lg-upd{color:var(--ink-soft);font-size:.88rem;margin:0 0 26px}
+    .lg-page h2{font-size:1.15rem;margin:26px 0 8px;font-family:Inter,sans-serif}
+    .lg-page p,.lg-page li{line-height:1.7;color:var(--ink-soft)}
+    .lg-page a{color:var(--accent-green)}
+    .vf-form{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}
+    .vf-form input{flex:1 1 240px;padding:13px 14px;border-radius:12px;border:1.5px solid var(--border,rgba(127,127,127,.3));background:var(--bg-elevated);color:inherit;font-size:1rem}
+    .vf-form button{padding:13px 22px;border-radius:12px;border:0;background:var(--accent-green);color:#04120b;font-weight:700;cursor:pointer}
+  </style>
+</head>
+<body class="auth-page">
+  {% include "_auth_header.html" %}
+  <main class="lg-page">
+    <h1>{{ title }}</h1>
+    {% if updated %}<p class="lg-upd">Oxirgi yangilanish: {{ updated }}</p>{% endif %}
+    {% if kind == 'verify' %}
+      <p>Sertifikatdagi tekshirish raqamini kiriting (QR kod ostida yozilgan) yoki QR kodni telefon kamerasi bilan skaner qiling.</p>
+      <form class="vf-form" method="get" action="/verify">
+        <input name="id" placeholder="masalan: LZ-2026-AB12CD" value="{{ vid or '' }}" required maxlength="80" autocomplete="off">
+        <button type="submit">Tekshirish</button>
+      </form>
+      {% if vid %}<p style="color:var(--error)">Bunday raqamli sertifikat topilmadi. Raqamni tekshirib qayta kiriting.</p>{% endif %}
+    {% elif kind == 'terms' %}
+      <h2>1. Umumiy qoidalar</h2>
+      <p>LongoUZ (keyingi o'rinlarda — «Platforma») DTM test sinovlari, milliy sertifikat va IELTS imtihonlariga tayyorlanish uchun onlayn xizmat. Ro'yxatdan o'tish yoki Platformadan foydalanish orqali siz ushbu shartlarga rozilik bildirasiz.</p>
+      <h2>2. Akkaunt</h2>
+      <p>Akkaunt email va parol yoki Google akkaunti orqali ochiladi. Bitta odam — bitta akkaunt. Parolingizni boshqalarga bermang; akkauntingizdagi harakatlar uchun o'zingiz javobgarsiz.</p>
+      <h2>3. Tariflar va to'lov</h2>
+      <p>Bepul tarifda cheklangan imkoniyatlar mavjud. Pro va Ultra tariflari tanlangan muddatga amal qiladi. To'lov bo'yicha savollar «Yordam» bo'limi orqali ko'rib chiqiladi.</p>
+      <h2>4. Kontent</h2>
+      <p>Savollar, izohlar, chizmalar va dizayn LongoUZ mulki hisoblanadi. Ularni ruxsatsiz nusxalash, tarqatish yoki tijorat maqsadida ishlatish taqiqlanadi.</p>
+      <h2>5. Natijalar va sertifikatlar</h2>
+      <p>Platformadagi ball prognozi va sertifikatlar tayyorgarlik darajasini ko'rsatadi va rasmiy davlat hujjati hisoblanmaydi. Haqiqiy imtihon natijasi sizning tayyorgarligingizga bog'liq.</p>
+      <h2>6. Cheklovlar</h2>
+      <p>Platformani buzishga, avtomatlashtirilgan so'rovlar bilan yuklashga yoki boshqa foydalanuvchilarga zarar yetkazishga urinish akkauntni bloklashga sabab bo'ladi.</p>
+      <h2>7. O'zgarishlar</h2>
+      <p>Shartlar yangilanishi mumkin; muhim o'zgarishlar haqida Platformada xabar beriladi. Savollar: <a href="/support">Yordam</a>.</p>
+    {% else %}
+      <h2>Qanday ma'lumot to'planadi</h2>
+      <ul><li>Ro'yxatdan o'tishda: ism, email (Google orqali kirsangiz — Google bergan ism va email).</li>
+      <li>O'qish jarayonida: tanlangan fanlar, test natijalari, xatolar va faollik statistikasi.</li>
+      <li>Texnik: sahifa ochilishlari soni (shaxsni aniqlamaydigan qisqa xesh ko'rinishida).</li></ul>
+      <h2>Nima uchun ishlatiladi</h2>
+      <p>Faqat xizmatni ko'rsatish uchun: natijalaringizni saqlash, tahlil va ball prognozini hisoblash, shaxsiy o'quv rejasini tuzish, xavfsizlik va sayt sifatini yaxshilash.</p>
+      <h2>Himoya</h2>
+      <p>Parollar shifrlangan (hash) holda saqlanadi, ulanish HTTPS orqali. Ma'lumotlaringiz uchinchi shaxslarga sotilmaydi. AI repetitorga yuborilgan savollar faqat javob olish uchun AI xizmatiga uzatiladi.</p>
+      <h2>Sizning huquqlaringiz</h2>
+      <p>Ma'lumotlaringizni ko'rish, tuzatish yoki akkauntni o'chirishni so'rash uchun <a href="/support">Yordam</a> bo'limiga yozing.</p>
+    {% endif %}
+  </main>
+  <footer class="site-footer"><p>&copy; LongoUZ — Barcha huquqlar himoyalangan. · <a href="/terms">Shartlar</a> · <a href="/privacy">Maxfiylik</a> · <a href="/verify">Sertifikatni tekshirish</a></p></footer>
+  <script src="/static/app.js"></script>
+</body>
+</html>

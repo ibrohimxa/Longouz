@@ -3807,6 +3807,26 @@ async def ielts_history_page(request: Request):
 # ochiq tekshirish sahifasi (QR kod shu yerga olib boradi)
 # ---------------------------------------------------------------------------
 
+@app.get("/terms", response_class=HTMLResponse)
+async def terms_page(request: Request):
+    return templates.TemplateResponse(request, "legal.html", {"kind": "terms", "title": "Foydalanish shartlari", "updated": "30.10.2026"})
+
+
+@app.get("/privacy", response_class=HTMLResponse)
+async def privacy_page(request: Request):
+    return templates.TemplateResponse(request, "legal.html", {"kind": "privacy", "title": "Maxfiylik siyosati", "updated": "30.10.2026"})
+
+
+@app.get("/verify", response_class=HTMLResponse)
+async def verify_page(request: Request, id: str = ""):
+    vid = (id or "").strip()[:80]
+    if vid:
+        cert = await db.get_certificate_by_verification_id(vid)
+        if cert is not None:
+            return RedirectResponse(f"/certificate/{vid}", status_code=302)
+    return templates.TemplateResponse(request, "legal.html", {"kind": "verify", "title": "Sertifikat haqiqiyligini tekshirish", "vid": vid})
+
+
 @app.get("/certificate/{verification_id}", response_class=HTMLResponse)
 async def certificate_verify_page(request: Request, verification_id: str):
     """

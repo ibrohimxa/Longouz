@@ -26,6 +26,12 @@ Har yuborilgan zip: `longouz_v<N>.zip`, versiya raqami `VERSION` faylida.
 - **Kabinet (dashboard)**: hero'dagi tog'/quyosh/oy va har soniyada qayta chiziladigan skript olib tashlandi — oddiy yashil karta.
 - **Tezlik**: 3 soniyalik kirish (intro) ekrani olib tashlandi (bosh sahifa, kirish, ro'yxatdan o'tish darhol ochiladi); sahifalar gzip bilan siqiladi (bosh sahifa ~50 KB → ~11 KB); statik fayllar keshlanadi; og'ir blur (backdrop-filter) va telefonda doimiy animatsiyalar o'chirildi; Vercel'da fon yuklash bir instansni 12 soniyadan ortiq band qilmaydi.
 
+## v225 — Imkoniyatlar, Savol-javob, to'liq footer, huquqiy sahifalar
+- Bosh sahifa: "Imkoniyatlar" bo'limi (adaptiv testlar, DTM haqiqiy formati 90 savol ×1,1/×3,1/×2,1, tahlil va ball prognozi), "Savol-javob" (7 ta savol), menyuga "Imkoniyatlar" va "Savol-javob".
+- To'liq footer: Platforma / Imtihonlar / Yordam / Huquqiy ustunlari, "Barcha huquqlar himoyalangan".
+- Yangi sahifalar: `/terms` (Foydalanish shartlari), `/privacy` (Maxfiylik siyosati), `/verify` (sertifikat raqami bo'yicha tekshirish).
+- Google kirish: xato xabari ikki marta chiqmaydi; akkaunt bo'lsa — kiradi, bo'lmasa — yangisi ochiladi.
+
 ## v224 — doimiy baza, admin, Pro qulfi, sayt tahlili, chizmali savollar
 - **Login qayta so'ralishi tuzatildi**: foydalanuvchilar endi doimiy Postgres bazada (Supabase, Frankfurt) saqlanadi; Vercel serveri ham Frankfurt'ga (fra1) ko'chirildi. Yaroqsiz sessiya cookie'si avtomatik tozalanadi.
 - **Header**: kichik "Kirish" / "Ro'yxatdan o'tish"; kirgan foydalanuvchiga faqat "Kabinet"; sarlavha foni to'liq yopiq.
