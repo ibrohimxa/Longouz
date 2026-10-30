@@ -8,9 +8,24 @@
       "config": {
         "maxLambdaSize": "60mb"
       }
+    },
+    {
+      "src": "static/**",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
+    {
+      "src": "/static/qfig/(.*)",
+      "dest": "main.py"
+    },
+    {
+      "src": "/static/(.*)",
+      "dest": "/static/$1",
+      "headers": {
+        "cache-control": "public, max-age=600, stale-while-revalidate=604800"
+      }
+    },
     {
       "src": "/(.*)",
       "dest": "main.py"

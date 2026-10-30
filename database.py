@@ -916,8 +916,17 @@ async_session = async_sessionmaker(engine, expire_on_commit=False)
 
 
 async def init_web_db():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    for _attempt in range(3):
+        try:
+            async with engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
+            break
+        except Exception as exc:  # noqa: BLE001 — bir vaqtda ikki server nusxasi jadval yaratsa (Vercel)
+            if _attempt == 2:
+                raise
+            logger.warning("Jadvallarni yaratishda to'qnashuv, qayta urinish: %s", type(exc).__name__)
+            import asyncio as _aio
+            await _aio.sleep(1.5)
     await _migrate_missing_columns()
     await _wipe_legacy_bank_once()
     await _load_plan_limit_overrides()
