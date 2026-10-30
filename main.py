@@ -162,7 +162,10 @@ async def security_headers_middleware(request: Request, call_next):
         if response.status_code == 200 and "text/html" in response.headers.get("content-type", ""):
             import insights as _ins
             _ins.record(request, ADMIN_PREFIX)
-            _ins.schedule_flush()
+            if runtime.IS_VERCEL:
+                await _ins.flush(force=True)  # Vercel fon vazifasini muzlatadi — darhol yozamiz
+            else:
+                _ins.schedule_flush()
     except Exception:  # noqa: BLE001
         pass
     if getattr(request.state, "drop_session", False):
