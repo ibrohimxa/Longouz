@@ -123,7 +123,7 @@ from starlette.middleware.gzip import GZipMiddleware as _GZip
 app.add_middleware(_GZip, minimum_size=1200, compresslevel=5)
 
 # v223: yagona manzil — eski *.vercel.app manzillari (longouz-v1xf..., longo-uz) asosiy manzilga yo'naltiriladi.
-# Asosiy manzil SITE_BASE_URL dan olinadi (masalan https://longouz-uz.vercel.app). Faqat production'da ishlaydi.
+# Asosiy manzil SITE_BASE_URL dan olinadi (masalan https://longouz.vercel.app). Faqat production'da ishlaydi.
 def _canonical_host() -> str:
     from urllib.parse import urlsplit
     u = (os.getenv("SITE_BASE_URL") or "").strip()
