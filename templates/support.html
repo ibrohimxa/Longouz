@@ -34,6 +34,16 @@
         <h3>Yangi xabar yozish</h3>
         <form method="post" action="/support" class="admin-question-form">
           <div class="field">
+            <label for="support_kind">Turi</label>
+            <select name="kind" id="support_kind">
+              <option value="Savol">Savol</option>
+              <option value="Shikoyat">Shikoyat</option>
+              <option value="Texnik xato">Texnik xato (sahifa ishlamayapti)</option>
+              <option value="To'lov">To'lov / tarif</option>
+              <option value="Taklif">Taklif</option>
+            </select>
+          </div>
+          <div class="field">
             <label for="support_subject">Mavzu (ixtiyoriy)</label>
             <input type="text" name="subject" id="support_subject" maxlength="200" placeholder="masalan: To'lov bo'yicha savol">
           </div>

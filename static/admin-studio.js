@@ -49,7 +49,7 @@
     (function next() {
       if (n >= chunks.length) { items = out; renderItems(); status("AI: " + out.length + " savol."); $("d-ai").disabled = false; return; }
       status("AI tahlil: " + (n + 1) + "/" + chunks.length);
-      api("/api/studio/ai-parse", {text: chunks[n].c, subject: $("d-subject").value, mode: $("d-mode").value, hint: $("d-hint").value}).then(function (j) {
+      api("/api/studio/ai-parse", {text: chunks[n].c, subject: $("d-subject").value, mode: $("d-mode").value, hint: (($("d-topic") && $("d-topic").value.trim()) ? ("Barcha savollar mavzusi: " + $("d-topic").value.trim() + ". ") : "") + $("d-hint").value}).then(function (j) {
         j.items.forEach(function (it) { it.src = docs[chunks[n].i].name; out.push(it); }); n++; next();
       }).catch(function (e) { status(e.message + " (" + (n + 1) + "-bo'lak)"); $("d-ai").disabled = false; if (out.length) { items = out; renderItems(); } });
     })();
@@ -76,6 +76,7 @@
     var hide = $("d-hide-dup").checked, html = "", shown = 0;
     items.forEach(function (it, i) {
       if (it.sel === undefined) it.sel = !it.dup;
+      var _ft = $("d-topic") && $("d-topic").value.trim(); if (_ft && !it._topicSet) { it.topic = _ft; it._topicSet = true; }
       if (hide && it.dup) return; shown++;
       html += '<div class="st-item' + (it.dup ? " dup" : "") + '" data-i="' + i + '"><div class="meta"><label><input type="checkbox" class="sel" ' + (it.sel ? "checked" : "") + '> #' + (it.no || i + 1) + '</label>' +
         '<span class="st-badge">' + it.qtype + '</span>' + (it.solved ? '<span class="st-badge">AI yechdi</span>' : "") + (it.dup ? '<span class="st-badge">takror</span>' : "") +

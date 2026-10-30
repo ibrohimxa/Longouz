@@ -25,12 +25,11 @@
       <a href="/#subjects" class="site-nav-section-link">Fanlar</a>
       <a href="/#ai" class="site-nav-section-link">AI</a>
       <a href="/#plans" class="site-nav-section-link">Tariflar</a>
-      {% if request.cookies.get('longouz_session') %}
-        <a href="/dashboard">Kabinet</a>
-        <a href="/logout" class="nav-cta">Chiqish</a>
+      {% if request.cookies.get('longouz_session') and not request.state.drop_session %}
+        <a href="/dashboard" class="nav-cta nav-sm">Kabinet</a>
       {% else %}
-        <a href="/login">Kirish</a>
-        <a href="/register" class="nav-cta">Ro'yxatdan o'tish</a>
+        <a href="/login" class="nav-ghost nav-sm">Kirish</a>
+        <a href="/register" class="nav-cta nav-sm">Ro'yxatdan o'tish</a>
       {% endif %}
       <button class="theme-toggle" aria-label="Rejimni almashtirish" title="Kunduzgi/tungi rejim">
         <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>

@@ -7,13 +7,13 @@
    ko'rsatiladi (aniq so'ralganidek).
    ========================================================================== #}
 <div class="app-header">
-  <div class="app-header-account">
+  <a class="app-header-account" href="/profile" title="Profil va sozlamalar" style="text-decoration:none;color:inherit;cursor:pointer">
     <div class="app-header-avatar"{% if user and user.avatar_color %} style="background: {{ user.avatar_color }}; color: #07130d;"{% endif %}>{{ ((user.first_name or "?")[0] if user else "?")|upper }}</div>
     <div class="app-header-user-info">
       <span class="app-header-name">{{ user.first_name or "Foydalanuvchi" if user else "" }}</span>
       {% if user %}<span class="app-header-plan plan-badge-{{ user.plan }}">{{ user.plan|upper }}</span>{% endif %}
     </div>
-  </div>
+  </a>
 
   <div class="app-header-actions">
     <button type="button" class="theme-toggle" aria-label="Kunduzgi / tungi rejim" title="Kunduzgi / tungi rejim">

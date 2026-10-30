@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Sayt tahlili — Admin — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/admin-dash.css">
+  <link rel="stylesheet" href="/static/admin.css">
+  <link rel="stylesheet" href="/static/admin-studio.css">
+  
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true" data-admin-prefix="{{ admin_prefix }}">
+  <div class="app-shell">
+    {% include "_admin_sidebar.html" %}
+    <div class="app-content">
+      <div class="app-topbar"><div>
+        <h1>Sayt tahlili</h1>
+        <p>Tashriflar, ro'yxatdan o'tishlar, testlar, shikoyatlar — va Claude'ning xulosasi hamda takliflari.</p>
+      </div></div>
+      <style>
+        .ins-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+        .ins-kpi{padding:14px 16px;border-radius:14px;background:var(--bg-elevated);border:1px solid var(--border,rgba(127,127,127,.2))}
+        .ins-kpi b{display:block;font-size:1.5rem}.ins-kpi span{font-size:.8rem;opacity:.75}
+        .ins-card{padding:18px;border-radius:16px;background:var(--bg-elevated);border:1px solid var(--border,rgba(127,127,127,.2));margin-bottom:16px}
+        .ins-bars{display:flex;align-items:flex-end;gap:6px;height:150px;padding-top:10px}
+        .ins-bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:.66rem;opacity:.9}
+        .ins-bar i{display:block;width:100%;border-radius:6px 6px 0 0;background:linear-gradient(180deg,#5be3a8,#2fbf83);min-height:2px}
+        .ins-bar u{text-decoration:none;font-weight:700}
+        .ins-tbl{width:100%;border-collapse:collapse;font-size:.88rem}.ins-tbl td{padding:6px 4px;border-bottom:1px solid rgba(127,127,127,.15)}
+        .ins-ai ul{margin:6px 0 12px 18px;padding:0}.ins-ai li{margin:4px 0}
+        .ins-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:900px){.ins-grid{grid-template-columns:1fr}}
+      </style>
+      <div class="ins-kpis">
+        <div class="ins-kpi"><b>{{ s.today.uniq }}</b><span>Bugun tashrifchi</span></div>
+        <div class="ins-kpi"><b>{{ s.today.hits }}</b><span>Bugun sahifa ochilishi</span></div>
+        <div class="ins-kpi"><b>{{ s.week_uniq }}</b><span>7 kunlik tashrifchi</span></div>
+        <div class="ins-kpi"><b>{{ c.users or 0 }}</b><span>Jami foydalanuvchi</span></div>
+        <div class="ins-kpi"><b>{{ c.paid or 0 }}</b><span>Pro / Ultra</span></div>
+        <div class="ins-kpi"><a href="{{ admin_prefix }}/reports" style="color:inherit;text-decoration:none"><b>{{ c.reports_open or 0 }}</b><span>Ochiq shikoyat (savollar)</span></a></div>
+        <div class="ins-kpi"><a href="{{ admin_prefix }}/messages" style="color:inherit;text-decoration:none"><b>{{ c.support_unread or 0 }}</b><span>O'qilmagan yordam xabari</span></a></div>
+      </div>
+      <div class="ins-card">
+        <h3 style="margin:0 0 6px">Kunlik tashrifchilar (14 kun)</h3>
+        <div class="ins-bars">{% for d in s.daily %}<div class="ins-bar" title="{{ d.day }}: {{ d.uniq }} tashrifchi, {{ d.hits }} ochilish"><u>{{ d.uniq }}</u><i style="height:{{ (d.hits / max_hits * 120)|round|int }}px"></i>{{ d.day }}</div>{% endfor %}</div>
+      </div>
+      <div class="ins-grid">
+        <div class="ins-card"><h3 style="margin:0 0 8px">Eng ko'p ochilgan sahifalar (7 kun)</h3>
+          <table class="ins-tbl">{% for p in s.top_pages %}<tr><td>{{ p.path }}</td><td style="text-align:right">{{ p.hits }}</td></tr>{% else %}<tr><td>Hali ma'lumot yo'q</td></tr>{% endfor %}</table>
+        </div>
+        <div class="ins-card"><h3 style="margin:0 0 8px">Ro'yxatdan o'tish va testlar (14 kun)</h3>
+          <table class="ins-tbl"><tr><td><b>Kun</b></td><td><b>Yangi</b></td><td><b>Test</b></td></tr>
+          {% for i in range((ov.days or [])|length) %}<tr><td>{{ ov.days[i] }}</td><td>{{ ov.signups[i] }}</td><td>{{ ov.quizzes[i] }}</td></tr>{% endfor %}</table>
+        </div>
+      </div>
+      <div class="ins-card ins-ai">
+        <h3 style="margin:0 0 6px">Claude tahlili</h3>
+        <p style="margin:0 0 10px;opacity:.8">Yuqoridagi barcha raqamlar Claude'ga yuboriladi: u muammolarni va keyingi qadamlarni yozadi.</p>
+        <button class="btn-primary" id="ins-go">Claude bilan tahlil qilish</button> <span id="ins-st" style="margin-left:10px"></span>
+        <div id="ins-out" style="margin-top:14px"></div>
+      </div>
+      <script>
+      (function(){
+        var b=document.getElementById('ins-go'),st=document.getElementById('ins-st'),out=document.getElementById('ins-out');
+        function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+        function list(a){return (a&&a.length)?'<ul>'+a.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul>':'<p>—</p>';}
+        b.onclick=async function(){
+          b.disabled=true; st.textContent='Tahlil qilinmoqda... (30 soniyagacha)'; out.innerHTML='';
+          try{
+            var r=await fetch('{{ admin_prefix }}/api/insights/analyze',{method:'POST',headers:{'X-Requested-With':'fetch'}});
+            var j=await r.json();
+            if(!j.ok){st.textContent=j.detail||'Xato';return;}
+            var d=j.result||{}; st.textContent='Tayyor';
+            out.innerHTML='<p><b>Xulosa:</b> '+esc(d.xulosa)+'</p><b>Muammolar</b>'+list(d.muammolar)+'<b>Takliflar</b>'+list(d.takliflar)+(d.birinchi_ish?'<p><b>Bugun birinchi ish:</b> '+esc(d.birinchi_ish)+'</p>':'');
+          }catch(e){st.textContent='Server javobini o\'qib bo\'lmadi.';}
+          finally{b.disabled=false;}
+        };
+      })();
+      </script>
+    </div>
+  </div>
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

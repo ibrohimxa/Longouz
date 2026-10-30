@@ -4227,3 +4227,23 @@ html.owl-scrolling #owl-pin-button { opacity: .25; }
 @media (max-width: 900px) and (orientation: landscape) { #owl-pin-button { width: 40px; height: 40px; bottom: 10px; } }
 /* kontent oxirida boyqush ostida qolib ketmasin */
 .app-content { padding-bottom: max(32px, 88px); }
+
+/* v224: header tugmalari ixcham (Kirish / Ro'yxatdan o'tish / Kabinet) */
+.site-nav .nav-sm { padding: 7px 14px !important; font-size: .82rem !important; line-height: 1.2; border-radius: 999px; font-weight: 600; white-space: nowrap; box-shadow: none !important; }
+.site-nav .nav-ghost { border: 1.5px solid currentColor; color: inherit; text-decoration: none; opacity: .9; }
+.site-nav .nav-ghost:hover { opacity: 1; }
+.site-nav .nav-ghost.is-current, .site-nav .nav-cta.is-current { outline: 2px solid rgba(47,191,131,.45); outline-offset: 2px; }
+@media (max-width: 560px) {
+  .site-nav .nav-sm { padding: 6px 10px !important; font-size: .74rem !important; }
+  body.home .site-header .site-nav a.nav-ghost { display: inline-flex !important; }
+}
+@media (max-width: 360px) { .site-nav .nav-sm { padding: 5px 8px !important; font-size: .68rem !important; } }
+@media (max-width: 430px) {
+  .site-header { gap: 6px; }
+  .site-header .site-nav { gap: 6px !important; }
+  .site-header .brand .lg-word { font-size: .98rem !important; }
+  .site-header .brand .lg-owl { height: 1.6rem !important; width: auto; }
+  .site-nav .nav-sm { padding: 5px 9px !important; font-size: .7rem !important; }
+  .site-header .theme-toggle { width: 50px !important; height: 28px !important; }
+}
+@media (max-width: 350px) { .site-header .brand .lg-word { display: none; } }

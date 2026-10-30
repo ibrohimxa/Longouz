@@ -1,0 +1,61 @@
+{# v224: Pro qulfi — bepul foydalanuvchi AI repetitor (yoki data-pro-lock) ni bossa, sahifadan chiqmasdan tarif tanlash oynasi chiqadi #}
+<div class="plock-overlay" id="plock" hidden role="dialog" aria-modal="true" aria-labelledby="plock-title">
+  <div class="plock-box">
+    <button type="button" class="plock-x" data-plock-close aria-label="Yopish">&times;</button>
+    <div class="plock-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
+    <h3 id="plock-title"><span data-plock-feature>AI repetitor</span> — Pro va Ultra tariflarida</h3>
+    <p class="plock-sub">Jonli AI o'qituvchi xatolaringizni tushuntiradi, savollaringizga javob beradi va mavzuni bosqichma-bosqich o'rgatadi.</p>
+    <div class="plock-plans">
+      <a class="plock-plan" href="/upgrade?plan=pro&auto=1">
+        <b>Pro</b><span>99 000 so'm/oy</span>
+        <small>AI repetitor, barcha fanlar, batafsil statistika</small>
+      </a>
+      <a class="plock-plan best" href="/upgrade?plan=ultra&auto=1">
+        <em>Eng to'liq</em><b>Ultra</b><span>199 000 so'm/oy</span>
+        <small>Pro + ustuvor AI, shaxsiy o'quv rejasi, cheksiz mock</small>
+      </a>
+    </div>
+    <div class="plock-actions">
+      <button type="button" class="plock-cancel" data-plock-close>Bekor qilish</button>
+      <a class="plock-buy" href="/upgrade?plan=pro&auto=1">Sotib olish</a>
+    </div>
+  </div>
+</div>
+<style>
+.plock-overlay{position:fixed;inset:0;z-index:5000;background:rgba(3,10,9,.62);display:grid;place-items:center;padding:16px}
+.plock-overlay[hidden]{display:none}
+.plock-box{position:relative;width:min(460px,100%);background:var(--bg-elevated,#0f1f1c);color:var(--ink,#eef7f4);border:1px solid rgba(47,191,131,.28);border-radius:20px;padding:26px 22px 20px;box-shadow:0 24px 60px rgba(0,0,0,.45);text-align:center}
+.plock-x{position:absolute;right:12px;top:8px;background:none;border:0;color:inherit;font-size:1.6rem;cursor:pointer;opacity:.7}
+.plock-ic{width:52px;height:52px;margin:0 auto 10px;border-radius:16px;display:grid;place-items:center;background:rgba(47,191,131,.15);color:#2fbf83}
+.plock-ic svg{width:26px;height:26px}
+.plock-box h3{margin:0 0 6px;font-size:1.12rem}
+.plock-sub{margin:0 0 16px;font-size:.88rem;opacity:.8;line-height:1.45}
+.plock-plans{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.plock-plan{position:relative;display:flex;flex-direction:column;gap:3px;padding:14px 10px;border-radius:14px;border:1.5px solid rgba(127,127,127,.28);text-decoration:none;color:inherit;transition:border-color .2s,transform .2s}
+.plock-plan:hover{border-color:#2fbf83;transform:translateY(-2px)}
+.plock-plan b{font-size:1.05rem}.plock-plan span{font-weight:700;color:#2fbf83;font-size:.9rem}.plock-plan small{font-size:.74rem;opacity:.75;line-height:1.35}
+.plock-plan.best{border-color:#2fbf83;background:rgba(47,191,131,.08)}
+.plock-plan em{position:absolute;top:-9px;left:50%;transform:translateX(-50%);font-style:normal;font-size:.62rem;font-weight:700;background:#2fbf83;color:#04120b;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.plock-actions{display:flex;gap:10px}
+.plock-actions>*{flex:1;padding:11px;border-radius:12px;font-weight:700;font-size:.92rem;cursor:pointer;text-decoration:none;text-align:center}
+.plock-cancel{background:transparent;border:1.5px solid rgba(127,127,127,.4);color:inherit}
+.plock-buy{background:linear-gradient(135deg,#5be3a8,#2fbf83);color:#04120b;border:0}
+[data-theme="light"] .plock-box{background:#fff;color:#0d2230}
+@media (max-width:420px){.plock-plans{grid-template-columns:1fr}}
+</style>
+<script>
+(function(){
+  var ov=document.getElementById('plock'); if(!ov) return; if(ov.parentNode!==document.body) document.body.appendChild(ov);
+  function open(feature){ var f=ov.querySelector('[data-plock-feature]'); if(f&&feature) f.textContent=feature; ov.hidden=false; document.body.style.overflow='hidden'; }
+  function close(){ ov.hidden=true; document.body.style.overflow=''; }
+  document.addEventListener('click',function(e){
+    var a=e.target.closest&&e.target.closest('a[href="/repetitor"],a[href^="/repetitor?"],a[href*="locked=repetitor"],[data-pro-lock]');
+    if(!a) return;
+    e.preventDefault(); e.stopPropagation();
+    open(a.getAttribute('data-pro-lock')||'AI repetitor');
+  },true);
+  ov.addEventListener('click',function(e){ if(e.target===ov||e.target.closest('[data-plock-close]')) close(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&!ov.hidden) close(); });
+  window.lgProLock=open;
+})();
+</script>

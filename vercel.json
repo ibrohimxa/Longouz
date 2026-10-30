@@ -5,7 +5,9 @@
     {
       "src": "main.py",
       "use": "@vercel/python",
-      "config": { "maxLambdaSize": "60mb" }
+      "config": {
+        "maxLambdaSize": "60mb"
+      }
     }
   ],
   "routes": [
@@ -13,5 +15,8 @@
       "src": "/(.*)",
       "dest": "main.py"
     }
+  ],
+  "regions": [
+    "fra1"
   ]
 }

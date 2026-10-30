@@ -36,13 +36,16 @@
       <section class="st-pane" id="p-doc">
         <div class="st-card">
           <div class="st-row">
+            <label class="st-grow"><b>1. Mavzu nomi</b> (ixtiyoriy — bo'sh qolsa AI o'zi aniqlaydi) <input id="d-topic" placeholder="masalan: Nyutonning ikkinchi qonuni" list="d-topic-list"><datalist id="d-topic-list"></datalist></label>
+          </div>
+          <div class="st-row">
             <label>Rejim <select id="d-mode">{% for m in modes %}<option value="{{ m.code }}">{{ m.name }}</option>{% endfor %}</select></label>
             <label>Fan <select id="d-subject"><option value="auto">Avtomatik</option>{% for s in subjects %}<option value="{{ s.code }}">{{ s.name }}</option>{% endfor %}</select></label>
             <label>Tarif <select id="d-tier"><option value="free">Free</option><option value="pro">Pro</option><option value="ultra">Ultra</option></select></label>
             <label class="st-grow">Ko'rsatma (ixtiyoriy) <input id="d-hint" placeholder="masalan: faqat 2-bo'lim, javoblar oxirida"></label>
           </div>
           <div class="drop-zone" id="d-drop"><input type="file" id="d-file" multiple accept=".pdf,.docx,.xlsx,.json,.csv,.tsv,.txt,.md,.html,.htm,.zip,.png,.jpg,.jpeg,.webp">
-            <b>Fayl(lar)ni tashlang yoki bosing</b><small>PDF · Word · Excel · JSON · CSV · TXT · rasm · ZIP</small></div>
+            <b>2. Fayl(lar)ni shu yashikka tashlang yoki bosing</b><small>PDF · Word · Excel · JSON · CSV · TXT · rasm · ZIP — Claude o'qiydi, savollarni ajratadi, javob va izohni tekshiradi</small></div>
           <div class="st-row"><button class="btn-primary" id="d-go">1. O'qish</button>
             <button class="btn-secondary" id="d-ai" disabled>2. AI bilan aniqlashtirish</button>
             <button class="btn-secondary" id="d-vis" disabled>Skaner / rasm uchun (AI ko'rish)</button>

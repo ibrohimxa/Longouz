@@ -392,3 +392,5 @@ body.home .site-header, body.home .hm-step, body.home .hm-subj, body.home .hm-ce
 body.home .hm-float .hm-fin, body.home .hm-pill, body.home .hm-ai-card { transition: transform .2s, border-color .35s, background-color .35s, color .35s, box-shadow .2s; }
 body.home h1, body.home h2, body.home h3, body.home p, body.home .hm-lead { transition: color .35s; }
 @media (max-width: 760px) { .hm-float .hm-fin, .hm-play-ic, .hm-glowpath { animation: none !important; } }
+/* v224: sarlavha to'liq yopiq fon — orqadagi matn ko'rinmasin */
+body.home .site-header { background: var(--h-bg) !important; }

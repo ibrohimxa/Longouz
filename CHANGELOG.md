@@ -26,6 +26,16 @@ Har yuborilgan zip: `longouz_v<N>.zip`, versiya raqami `VERSION` faylida.
 - **Kabinet (dashboard)**: hero'dagi tog'/quyosh/oy va har soniyada qayta chiziladigan skript olib tashlandi — oddiy yashil karta.
 - **Tezlik**: 3 soniyalik kirish (intro) ekrani olib tashlandi (bosh sahifa, kirish, ro'yxatdan o'tish darhol ochiladi); sahifalar gzip bilan siqiladi (bosh sahifa ~50 KB → ~11 KB); statik fayllar keshlanadi; og'ir blur (backdrop-filter) va telefonda doimiy animatsiyalar o'chirildi; Vercel'da fon yuklash bir instansni 12 soniyadan ortiq band qilmaydi.
 
+## v224 — doimiy baza, admin, Pro qulfi, sayt tahlili, chizmali savollar
+- **Login qayta so'ralishi tuzatildi**: foydalanuvchilar endi doimiy Postgres bazada (Supabase, Frankfurt) saqlanadi; Vercel serveri ham Frankfurt'ga (fra1) ko'chirildi. Yaroqsiz sessiya cookie'si avtomatik tozalanadi.
+- **Header**: kichik "Kirish" / "Ro'yxatdan o'tish"; kirgan foydalanuvchiga faqat "Kabinet"; sarlavha foni to'liq yopiq.
+- **Profil**: yuqoridagi avatar va ism bosilsa — Profil va sozlamalar.
+- **AI repetitor**: bepul foydalanuvchi bossa sahifadan chiqmasdan Pro/Ultra tanlash oynasi (Bekor qilish / Sotib olish).
+- **Yordam**: xabar turi (Savol / Shikoyat / Texnik xato / To'lov / Taklif) — admin "Xabarlar" bo'limiga boradi.
+- **Admin**: login `neo` (katta-kichik harf farqsiz), parol faqat Vercel env'da; koddagi eski parol satrlari olib tashlandi. Yangi **Sayt tahlili** (`/neo/insights`): kunlik tashrifchilar, eng ko'p ochilgan sahifalar, ro'yxatdan o'tish/testlar, ochiq shikoyatlar va "Claude bilan tahlil qilish". Studio: avval mavzu nomi, keyin fayl yashigi.
+- **Savollar**: 150+ yangi chizmali savol (richag, gidravlik press, qiya tekislik, elektr zanjirlari, v–t grafigi, Pifagor, yuzalar, parabola/to'g'ri chiziq grafiklari, diagrammalar, koordinatalar, aylana burchaklari, atom tuzilishi, Pennet katagi) — javoblar kod bilan hisoblangan. `CONTENT_VERSION=v224q`.
+- `/api/health` — baza holatini tekshirish.
+
 ## v218 — katta ekranlar, mobil tuzatishlar, Turnstile zaxirasi, kalitlar sahifasi
 - **Moslashuvchanlik**: 2K/4K/5K ekranlarda sayt zoom orqali butun ekranni to'ldiradi (max-width cheklovlari olib tashlandi); suzuvchi boyqush tugmasi telefonda skroll paytida yashirinadi va pastki kontentni yopmaydi; bosh sahifadagi osmon/oy telefonda sakramaydi (manzil satri o'zgarishi e'tiborga olinmaydi), hero matni planshetda markazlandi.
 - **Fan nomi**: "Ona tili va adabiyot" hamma joyda bir xil.

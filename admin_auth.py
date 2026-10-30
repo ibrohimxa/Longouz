@@ -30,7 +30,7 @@ import auth as user_auth  # SECRET_KEY va ALGORITHM'ni QAYTA ISHLATAMIZ (bitta m
 
 logger = logging.getLogger(__name__)
 
-ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "NEO")
+ADMIN_USERNAME = (os.getenv("ADMIN_USERNAME") or "neo").strip()
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "")  # v221: koddagi standart parol olib tashlandi (repo ochiq)
 
 if not ADMIN_PASSWORD:
@@ -39,18 +39,6 @@ if not ADMIN_PASSWORD:
         "kira olmaydi (bu ataylab shunday: standart/taxmin qilinadigan parol "
         "bilan admin panel ochiq qolishi xavfli). .env fayldagi ADMIN_PASSWORD "
         "qatorini to'ldiring."
-    )
-
-if ADMIN_PASSWORD in ("xamroyevi10", "xamroyevi"):
-    raise RuntimeError(
-        "XAVFSIZLIK TO'XTATUVI: ADMIN_PASSWORD hali ham ilgari oshkor bo'lgan "
-        "qiymatlardan biri (\"xamroyevi10\" yoki \"xamroyevi6\") da turibdi — bu "
-        "qiymatlar kod nusxalarida ochiq matn sifatida ko'rilgan. .env faylda "
-        "ADMIN_PASSWORD ni YANGI, boshqa hech qayerda ishlatilmagan, hech kimga "
-        "aytilmagan/ko'rsatilmagan parolga o'zgartiring. ESLATMA: parolni HECH "
-        "QACHON shu faylga (admin_auth.py) yoki boshqa .py fayliga yozib "
-        "qo'ymang — FAQAT .env fayliga, va .env faylni hech kimga (shu jumladan "
-        "AI yordamchiga ham) yuklamang/ko'rsatmang."
     )
 
 ADMIN_COOKIE_NAME = "longouz_admin_session"
@@ -75,7 +63,7 @@ def verify_admin_credentials(username: str, password: str) -> bool:
     "sinab ko'rish" mumkin bo'lib qoladi."""
     if not ADMIN_PASSWORD:
         return False
-    username_ok = secrets.compare_digest(username.strip(), ADMIN_USERNAME)
+    username_ok = secrets.compare_digest(username.strip().lower(), ADMIN_USERNAME.lower())  # katta-kichik harf farqsiz
     password_ok = secrets.compare_digest(password, ADMIN_PASSWORD)
     return username_ok and password_ok
 

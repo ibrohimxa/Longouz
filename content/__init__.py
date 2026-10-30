@@ -60,6 +60,8 @@ def load_packs():
     try:
         from . import gen_v217
         gen_v217.extend(packs)
+        from . import gen_v224
+        gen_v224.extend(packs)
     except Exception as e:  # pragma: no cover
         import logging
         logging.getLogger(__name__).warning("gen_v217 yuklanmadi: %s", e)

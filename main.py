@@ -158,6 +158,15 @@ async def security_headers_middleware(request: Request, call_next):
             await db.save_qfigs(pending)
     except Exception:  # noqa: BLE001
         logger.exception("Chizma rasmlarini bazaga yozib bo'lmadi")
+    try:
+        if response.status_code == 200 and "text/html" in response.headers.get("content-type", ""):
+            import insights as _ins
+            _ins.record(request, ADMIN_PREFIX)
+            _ins.schedule_flush()
+    except Exception:  # noqa: BLE001
+        pass
+    if getattr(request.state, "drop_session", False):
+        response.delete_cookie(COOKIE_NAME)
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
@@ -268,6 +277,21 @@ def _kick_seed(request: Request):
     _SEED_TASK = _asyncio.create_task(_run())
 
 
+@app.get("/api/health")
+async def api_health():
+    """Holat: baza turi va ulanish (maxfiy ma'lumot chiqarilmaydi)."""
+    info = {"db": "sqlite" if db.IS_SQLITE else "postgres", "ok": False}
+    try:
+        from sqlalchemy import text as _t
+        async with db.async_session() as session:
+            await session.execute(_t("select 1"))
+            info["users"] = (await session.execute(_t("select count(*) from web_users"))).scalar()
+        info["ok"] = True
+    except Exception as exc:  # noqa: BLE001
+        info["error"] = type(exc).__name__ + ": " + str(exc)[:160].replace(os.getenv("DATABASE_URL", "") or "\x00", "***")
+    return JSONResponse(info)
+
+
 @app.get("/api/seed-step")
 @limiter.limit("30/minute")
 async def api_seed_step(request: Request):
@@ -314,8 +338,12 @@ async def get_current_user(request: Request) -> db.WebUser | None:
         return None
     user_id = decode_access_token(token)
     if user_id is None:
+        request.state.drop_session = True  # v224: yaroqsiz token — cookie tozalanadi (header "Chiqish" ko'rsatmasin)
         return None
-    return await db.get_user_by_id(user_id)
+    user = await db.get_user_by_id(user_id)
+    if user is None:
+        request.state.drop_session = True
+    return user
 
 
 async def require_user(request: Request) -> db.WebUser:
@@ -1260,6 +1288,8 @@ import features215 as _f215  # noqa: E402
 _reports.register(app, ADMIN_PREFIX, require_admin, current_admin_username, templates, limiter, get_current_user)
 import keys_admin as _keys_admin  # noqa: E402
 _keys_admin.register(app, ADMIN_PREFIX, require_admin, current_admin_username, templates)
+import insights as _insights  # noqa: E402
+_insights.register(app, ADMIN_PREFIX, require_admin, templates)
 
 
 @app.get(f"{ADMIN_PREFIX}/import", response_class=HTMLResponse)
@@ -2068,7 +2098,7 @@ async def support_page(request: Request):
 
 @app.post("/support", response_class=HTMLResponse)
 @limiter.limit("10/minute")
-async def support_submit(request: Request, subject: str = Form(""), body: str = Form(...)):
+async def support_submit(request: Request, subject: str = Form(""), body: str = Form(...), kind: str = Form("Savol")):
     user = await get_current_user(request)
     if user is None:
         return RedirectResponse(
@@ -2083,7 +2113,8 @@ async def support_submit(request: Request, subject: str = Form(""), body: str = 
             "user": user, "messages": messages, "sent": "", "error": "Xabar matni bo'sh bo'lishi mumkin emas.",
         })
 
-    await db.create_support_message(user.id, subject.strip(), clean_body)
+    kind = kind if kind in ("Savol", "Shikoyat", "Texnik xato", "To'lov", "Taklif") else "Savol"
+    await db.create_support_message(user.id, f"[{kind}] " + subject.strip()[:180], clean_body)
     return RedirectResponse("/support?sent=1", status_code=302)
 
 
