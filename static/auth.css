@@ -133,3 +133,11 @@ html[data-theme="light"] .au-wave .w1{fill:rgba(20,160,130,.14)}html[data-theme=
   .auth-page .site-nav .theme-toggle{display:none}
   .auth-page .site-header{padding-inline:10px}.auth-page .site-header .brand .lg-word{font-size:1rem}
 }
+/* v231: email tekshiruv ishorasi */
+.au-email-hint{margin:6px 2px 0;font-size:.83rem;line-height:1.4;color:var(--muted,#9fb3ad)}
+.au-email-hint.is-ok{color:#2fd39b}
+.au-email-hint.is-warn{color:#f5b84a}
+.au-email-hint a{color:#2fd39b;font-weight:600;text-decoration:none}
+.au-hint-fix{margin-left:6px;padding:3px 10px;border-radius:999px;border:1px solid currentColor;background:transparent;color:inherit;font:inherit;font-size:.8rem;cursor:pointer}
+html[data-theme="light"] .au-email-hint.is-ok{color:#0f8a5f}
+html[data-theme="light"] .au-email-hint.is-warn{color:#a8650a}

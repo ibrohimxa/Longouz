@@ -1511,8 +1511,9 @@ async def _wipe_legacy_bank_once():
 
 async def get_user_by_email(email: str) -> WebUser | None:
     async with async_session() as session:
-        result = await session.execute(select(WebUser).where(WebUser.email == email))
-        return result.scalar_one_or_none()
+        email = (email or "").strip().lower()
+        result = await session.execute(select(WebUser).where(func.lower(WebUser.email) == email).order_by(WebUser.id).limit(1))
+        return result.scalars().first()
 
 
 async def get_user_by_id(user_id: int) -> WebUser | None:

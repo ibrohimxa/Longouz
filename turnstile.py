@@ -153,15 +153,22 @@ def _fallback_rate_ok(ip: str, limit: int = 30, window: int = 600) -> bool:
 
 
 async def check(request, token: str, fallback_flag: str = "") -> bool:
-    """Formalar uchun yagona tekshiruv. True — davom etish mumkin."""
+    """Formalar uchun yagona tekshiruv. True — davom etish mumkin.
+
+    v231: tekshiruv "yumshoq" — vidjet yuklanmasa, domen Cloudflare'da ruxsat etilmagan bo'lsa (110200),
+    token eskirgan bo'lsa (forma qayta yuborilganda) yoki foydalanuvchi vidjet tugashini kutmasdan
+    bossa ham haqiqiy o'quvchi BLOKLANMAYDI — bunda IP bo'yicha cheklov (10 daqiqada 30 urinish)
+    ishlaydi. Avval bu holatlarda "Bot ekanligingiz aniqlandi" chiqib, tarif sotib olgan o'quvchidan
+    qaytadan ro'yxatdan o'tish so'ralardi."""
     if not is_active_for_request(request):
         return True
     ip = client_ip(request)
     if token:
-        return await verify_turnstile(token, ip)
-    if fallback_flag and fallback_allowed():
-        ok = _fallback_rate_ok(ip or "?")
-        if not ok:
-            logger.warning("Turnstile zaxira yo'li: IP %s uchun urinishlar chegarasi oshdi.", ip)
-        return ok
-    return False
+        if await verify_turnstile(token, ip):
+            return True
+    if not fallback_allowed():
+        return False
+    ok = _fallback_rate_ok(ip or "?")
+    if not ok:
+        logger.warning("Turnstile zaxira yo'li: IP %s uchun urinishlar chegarasi oshdi.", ip)
+    return ok

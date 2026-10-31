@@ -2,6 +2,13 @@
 
 Har yuborilgan zip: `longouz_v<N>.zip`, versiya raqami `VERSION` faylida.
 
+## v231 — kirish, ro'yxatdan o'tish va tarif sotib olish oqimi
+- **Tarif sotib olgandan keyin qayta ro'yxatdan o'tish so'ralardi** — sababi: Cloudflare tekshiruvi (domen Cloudflare'da ruxsat etilmagan / vidjet yuklanmagan / forma qayta yuborilgan) o'tmasa, tarif oynasidagi forma ro'yxatdan o'tish sahifasiga «Bot ekanligingiz aniqlandi» xatosi bilan qaytarardi. Endi tekshiruv o'tmasa ham haqiqiy o'quvchi bloklanmaydi (IP bo'yicha cheklov qoladi) — hisob ochiladi, tarif faollashadi, fan tanlanadi va kabinetga o'tadi.
+- **Email tekshiruvi**: email yozilganda darhol tekshiriladi — xato yozilgan domen («gmial.com» → «gmail.com ni nazarda tutdingizmi?» tugmasi bilan), bunday hisob bor-yo'qligi (ro'yxatdan o'tishda: «hisob allaqachon bor — Kirish», kirishda: «hisob topilmadi — Ro'yxatdan o'tish»). Tarif oynasida ham.
+- **Kirish xatolari aniq**: «hisob topilmadi» va «parol noto'g'ri» alohida; xatodan keyin yozilgan ism/email o'chib ketmaydi; email katta-kichik harf farqi hisobga olinmaydi.
+- **Yangi o'quvchi** (Google yoki email orqali) tarif tugmasidan kelgan bo'lsa: kirish → fan tanlash → tarif oynasi avtomatik ochiladi (avval fan tanlangach tarif unutilib qolardi).
+- Shikoyat #3 (ona tili, «Monosemantik (bir ma'noli)») — v230 dagi tuzatish bilan yopildi.
+
 ## v230 — skrinshotlardagi xatolar, savollar sifati, qiyin blok mock
 - **Test yakunlash**: «Testni yakunlash» endi bir marta bosilganda yakunlanadi (ikki marta bosish olib tashlandi); javobsiz savollar soni yuklanish ekranida ko'rsatiladi.
 - **DTM blok mock (90 savol)**: har fandan eng qiyin savollar (qiyinlik 3, hisob-kitobli/ko'p bosqichli masalalar birinchi), mavzular bo'yicha teng taqsimlanadi, oldingi mocklarda tushgan savollar oxiriga suriladi, faqat DTM'dagi kabi yopiq (4 variantli) savollar.

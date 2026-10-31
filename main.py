@@ -430,6 +430,23 @@ async def _auto_onboard(request: Request, user, form_subject: str = ""):
     return user
 
 
+AFTER_ONBOARD_COOKIE = "lz_after_onboard"
+
+
+def _safe_next(next_url: str) -> str:
+    next_url = (next_url or "").strip()
+    return next_url if next_url.startswith("/") and not next_url.startswith("//") else ""
+
+
+def _remember_after_onboard(response, user, next_url: str = ""):
+    """Yangi o'quvchi fan tanlash (onboarding) sahifasiga yuborilsa, tanlab bo'lgach asl maqsadiga
+    (masalan, tarif sotib olish oynasi) qaytishi uchun eslab qolamiz."""
+    nxt = _safe_next(next_url)
+    if nxt and not user.onboarding_done and not nxt.startswith("/onboarding"):
+        response.set_cookie(AFTER_ONBOARD_COOKIE, nxt[:200], max_age=60 * 60, httponly=True, samesite="lax")
+    return response
+
+
 def _after_auth_destination(user, next_url: str = "") -> str:
     if next_url and next_url.startswith("/") and not next_url.startswith("//"):
         return next_url if user.onboarding_done or next_url.startswith("/onboarding") else "/onboarding"
@@ -451,6 +468,7 @@ async def register_page(request: Request):
     resp = templates.TemplateResponse(request, "register.html", {
         "error": GOOGLE_ERROR_TEXT.get(request.query_params.get("error", "")), "plan": plan,
         "subject": subject, "subject_name": db.SUBJECT_NAMES.get(subject, ""),
+        "email": (request.query_params.get("email") or "")[:120],
     })
     _remember_subject(resp, _valid_subject(request.query_params.get("subject")))
     return resp
@@ -470,19 +488,22 @@ async def register_submit(
     cf_fallback: str = Form("", alias="cf-turnstile-fallback"),
 ):
     email = email.strip().lower()
+    _keep = {"plan": plan, "subject": _valid_subject(subject), "subject_name": db.SUBJECT_NAMES.get(_valid_subject(subject), ""),
+             "first_name": first_name.strip(), "email": email}
 
     if turnstile.is_active_for_request(request):
         turnstile_ok = await turnstile.check(request, cf_turnstile_response, cf_fallback)
         if not turnstile_ok:
             return templates.TemplateResponse(request, "register.html", {
-                "error": "Bot ekanligingiz aniqlandi (yoki tekshiruv muddati o'tdi). Sahifani yangilab, qayta urinib ko'ring.",
-                "plan": plan,
+                "error": "Juda ko'p urinish bo'ldi. 10 daqiqadan so'ng qayta urinib ko'ring yoki «Google bilan davom etish»ni bosing.", **_keep,
             })
 
+    if not _EMAIL_RE.match(email):
+        return templates.TemplateResponse(request, "register.html", {"error": "Email manzil noto'g'ri yozilgan (masalan: ism@gmail.com).", **_keep})
     if password != password_confirm:
-        return templates.TemplateResponse(request, "register.html", {"error": "Parollar bir xil emas.", "plan": plan})
+        return templates.TemplateResponse(request, "register.html", {"error": "Parollar bir xil emas.", **_keep})
     if len(password) < 6:
-        return templates.TemplateResponse(request, "register.html", {"error": "Parol kamida 6 belgidan iborat bo'lishi kerak.", "plan": plan})
+        return templates.TemplateResponse(request, "register.html", {"error": "Parol kamida 6 belgidan iborat bo'lishi kerak.", **_keep})
 
     existing = await db.get_user_by_email(email)
     if existing:
@@ -494,8 +515,8 @@ async def register_submit(
             set_session_cookie(resp, create_access_token(existing.id))
             return resp
         return templates.TemplateResponse(request, "register.html", {
-            "error": "Bu email allaqachon ro'yxatdan o'tgan. Parol to'g'ri kiritilsa, avtomatik kirasiz — yoki \"Kirish\" sahifasidan foydalaning.",
-            "plan": plan, "subject": _valid_subject(subject), "subject_name": db.SUBJECT_NAMES.get(_valid_subject(subject), ""),
+            "error": "Bu email bilan hisob allaqachon bor — parol mos kelmadi. To'g'ri parolni kiriting (avtomatik kirasiz) yoki hisob Google orqali ochilgan bo'lsa «Google bilan davom etish»ni bosing.",
+            **_keep, "account_exists": True,
         })
 
     password_hash = hash_password(password)
@@ -560,14 +581,16 @@ async def checkout_register_submit(
         turnstile_ok = await turnstile.check(request, cf_turnstile_response, cf_fallback)
         if not turnstile_ok:
             return templates.TemplateResponse(request, "register.html", {
-                "error": "Bot ekanligingiz aniqlandi (yoki tekshiruv muddati o'tdi). Sahifani yangilab, qayta urinib ko'ring.",
-                "plan": plan,
+                "error": "Juda ko'p urinish bo'ldi. 10 daqiqadan so'ng qayta urinib ko'ring yoki «Google bilan davom etish»ni bosing.",
+                "plan": plan, "first_name": first_name.strip(), "email": email,
             })
 
+    if not _EMAIL_RE.match(email):
+        return templates.TemplateResponse(request, "register.html", {"error": "Email manzil noto'g'ri yozilgan (masalan: ism@gmail.com).", "plan": plan, "first_name": first_name.strip(), "email": email})
     if password != password_confirm:
-        return templates.TemplateResponse(request, "register.html", {"error": "Parollar bir xil emas.", "plan": plan})
+        return templates.TemplateResponse(request, "register.html", {"error": "Parollar bir xil emas.", "plan": plan, "first_name": first_name.strip(), "email": email})
     if len(password) < 6:
-        return templates.TemplateResponse(request, "register.html", {"error": "Parol kamida 6 belgidan iborat bo'lishi kerak.", "plan": plan})
+        return templates.TemplateResponse(request, "register.html", {"error": "Parol kamida 6 belgidan iborat bo'lishi kerak.", "plan": plan, "first_name": first_name.strip(), "email": email})
 
     existing = await db.get_user_by_email(email)
     if existing:
@@ -578,12 +601,13 @@ async def checkout_register_submit(
             await db.update_streak(existing.id)
             existing = await _auto_onboard(request, existing)
             response = RedirectResponse(_after_auth_destination(existing, "/profile?upgraded=1"), status_code=302)
+            _remember_after_onboard(response, existing, "/profile?upgraded=1")
             set_session_cookie(response, create_access_token(existing.id))
             response.delete_cookie(SUBJECT_COOKIE)
             return response
         return templates.TemplateResponse(request, "login.html", {
-            "error": "Bu email allaqachon ro'yxatdan o'tgan, lekin parol mos kelmadi. Avval kirish (parolingiz bilan), so'ng tarifni tanlang.",
-            "next": f"/upgrade?plan={plan}&auto=1",
+            "error": "Bu email bilan hisob allaqachon bor, lekin parol mos kelmadi. Shu hisobga kiring — tarif oynasi o'zi ochiladi.",
+            "next": f"/upgrade?plan={plan}&auto=1", "email": email,
         })
 
     password_hash = hash_password(password)
@@ -602,6 +626,30 @@ async def checkout_register_submit(
     return response
 
 
+_EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[a-z]{2,}$", re.I)
+_EMAIL_TYPOS = {"gmial.com": "gmail.com", "gmai.com": "gmail.com", "gmal.com": "gmail.com", "gmail.co": "gmail.com",
+                "gmail.con": "gmail.com", "gmail.cm": "gmail.com", "gamil.com": "gmail.com", "gmail.ru": "gmail.com",
+                "gmali.com": "gmail.com", "gnail.com": "gmail.com", "mail.ri": "mail.ru", "yandex.r": "yandex.ru",
+                "yahoo.co": "yahoo.com", "icloud.co": "icloud.com", "outlok.com": "outlook.com"}
+
+
+@app.get("/api/auth/email-check")
+@limiter.limit("40/minute")
+async def auth_email_check(request: Request, email: str = ""):
+    """Ro'yxatdan o'tish / kirish formasi uchun: email to'g'ri yozilganmi va bunday hisob bormi."""
+    email = (email or "").strip().lower()
+    if not _EMAIL_RE.match(email):
+        return {"valid": False, "exists": False}
+    domain = email.rsplit("@", 1)[1]
+    suggest = email.rsplit("@", 1)[0] + "@" + _EMAIL_TYPOS[domain] if domain in _EMAIL_TYPOS else ""
+    try:
+        exists = bool(await db.get_user_by_email(email))
+    except Exception:  # noqa: BLE001
+        logger.exception("email-check")
+        return {"valid": True, "exists": None, "suggest": suggest}
+    return {"valid": True, "exists": exists, "suggest": suggest}
+
+
 # ---------------------------------------------------------------------------
 # Login
 # ---------------------------------------------------------------------------
@@ -614,7 +662,7 @@ async def login_page(request: Request):
     next_url = request.query_params.get("next", "")
     resp = templates.TemplateResponse(request, "login.html", {
         "error": GOOGLE_ERROR_TEXT.get(request.query_params.get("error", "")),
-        "next": next_url,
+        "next": next_url, "email": (request.query_params.get("email") or "")[:120],
     })
     # next= ni cookie ga ham yozamiz — form login va Google OAuth ikkalasi uchun
     if next_url and next_url.startswith("/") and not next_url.startswith("//"):
@@ -640,9 +688,18 @@ async def login_submit(
             })
 
     user = await db.get_user_by_email(email)
+    form_next = ((await request.form()).get("next") or "").strip()
 
-    if not user or not verify_password(password, user.password_hash):
-        return templates.TemplateResponse(request, "login.html", {"error": "Email yoki parol noto'g'ri."})
+    if not user:
+        return templates.TemplateResponse(request, "login.html", {
+            "error": "Bu email bilan hisob topilmadi. Emailni tekshiring yoki «Ro'yxatdan o'tish»ni bosing.",
+            "email": email, "next": form_next, "no_account": True,
+        })
+    if not verify_password(password, user.password_hash):
+        return templates.TemplateResponse(request, "login.html", {
+            "error": "Parol noto'g'ri. Agar hisobni Google orqali ochgan bo'lsangiz, «Google bilan davom etish»ni bosing.",
+            "email": email, "next": form_next,
+        })
 
     await db.update_streak(user.id)
     await db.update_last_login_and_check_welcome_back(user.id)
@@ -650,9 +707,9 @@ async def login_submit(
 
     token = create_access_token(user.id)
     # next URL: avval form hidden input dan, keyin cookie dan olamiz
-    form_data = await request.form()
-    next_url = (form_data.get("next") or request.cookies.get("lz_oauth_next", "") or "").strip()
+    next_url = (form_next or request.cookies.get("lz_oauth_next", "") or "").strip()
     response = RedirectResponse(_after_auth_destination(user, next_url), status_code=302)
+    _remember_after_onboard(response, user, next_url)
     set_session_cookie(response, token)
     response.delete_cookie("lz_oauth_next")
     response.delete_cookie(SUBJECT_COOKIE)
@@ -748,6 +805,7 @@ async def google_callback(request: Request, code: str = "", state: str = "", err
     # next URL faqat cookie'dan olinadi (callback GET so'rov — forma yo'q)
     next_url = (request.cookies.get("lz_oauth_next", "") or "").strip()
     response = RedirectResponse(_after_auth_destination(user, next_url), status_code=302)
+    _remember_after_onboard(response, user, next_url)
     set_session_cookie(response, token)
     response.delete_cookie("lz_oauth_next")
     response.delete_cookie(SUBJECT_COOKIE)
@@ -2271,6 +2329,11 @@ async def onboarding_submit(
 
     await db.complete_onboarding(user.id, subject, level, certificate_type)
 
+    after = _safe_next(request.cookies.get(AFTER_ONBOARD_COOKIE, ""))
+    if after:
+        response = RedirectResponse(after, status_code=302)
+        response.delete_cookie(AFTER_ONBOARD_COOKIE)
+        return response
     intended_plan = request.cookies.get("intended_plan")
     if intended_plan in ("pro", "ultra"):
         response = RedirectResponse(f"/upgrade?plan={intended_plan}&auto=1", status_code=302)

@@ -8,10 +8,10 @@
   <link rel="icon" type="image/png" href="/static/logo-owl.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css?v=230">
+  <link rel="stylesheet" href="/static/style.css?v=231">
   <link rel="stylesheet" href="/static/auth.css">
-  <link rel="stylesheet" href="/static/news.css?v=230">
-  <script src="/static/theme-init.js?v=230"></script>
+  <link rel="stylesheet" href="/static/news.css?v=231">
+  <script src="/static/theme-init.js?v=231"></script>
 </head>
 <body class="auth-page">
   {% include "_auth_header.html" %}
@@ -37,7 +37,7 @@
     {% endif %}
   </main>
   <footer class="site-footer"><p>&copy; LongoUZ — Barcha huquqlar himoyalangan. · <a href="/terms">Shartlar</a> · <a href="/privacy">Maxfiylik</a></p></footer>
-  <script src="/static/app.js?v=230"></script>
+  <script src="/static/app.js?v=231"></script>
   <script>
     document.querySelectorAll("[data-click]").forEach(function (a) {
       a.addEventListener("click", function () { try { navigator.sendBeacon("/api/news/" + a.dataset.click + "/seen?click=1"); } catch (e) {} });

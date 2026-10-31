@@ -8,9 +8,9 @@
   <link rel="icon" type="image/png" href="/static/logo-owl.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css?v=230">
-  <link rel="stylesheet" href="/static/auth.css">
-  <script src="/static/theme-init.js?v=230"></script>
+  <link rel="stylesheet" href="/static/style.css?v=231">
+  <link rel="stylesheet" href="/static/auth.css?v=231">
+  <script src="/static/theme-init.js?v=231"></script>
 </head>
 <body class="auth-page auth-login">
   {% with auth_page='login' %}{% include "_auth_header.html" %}{% endwith %}
@@ -48,7 +48,8 @@
           <div class="au-field">
             <label for="email">Email</label>
             <div class="au-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.4"/><path d="M3.5 7l8.5 6.2L20.5 7"/></svg>{% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
-        <input type="email" id="email" name="email" placeholder="Email manzilingiz" autocomplete="email" required></div>
+        <input type="email" inputmode="email" autocapitalize="off" spellcheck="false" id="email" name="email" value="{{ email or '' }}" placeholder="Email manzilingiz" autocomplete="email" required></div>
+            <p class="au-email-hint" id="email-hint" hidden aria-live="polite"></p>
           </div>
           <div class="au-field">
             <label for="password">Parol</label>

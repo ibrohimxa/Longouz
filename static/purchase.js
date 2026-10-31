@@ -77,3 +77,23 @@
     }
   }, true);
 })();
+
+/* v231: tarif oynasida email — hisob bor bo'lsa ogohlantiramiz (parol to'g'ri bo'lsa shu hisobga tarif qo'shiladi). */
+(function () {
+  var inp = document.getElementById("pm-email"), hint = document.getElementById("pm-email-hint");
+  if (!inp || !hint) return;
+  var last = "", t = null;
+  function check() {
+    var v = (inp.value || "").trim().toLowerCase();
+    if (v === last) return; last = v;
+    if (v.indexOf("@") < 1) { hint.hidden = true; return; }
+    fetch("/api/auth/email-check?email=" + encodeURIComponent(v)).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+      if (!d || !d.valid) { hint.hidden = !d; if (d) { hint.textContent = "Email to'liq emas (masalan: ism@gmail.com)"; hint.style.color = "#f5b84a"; } return; }
+      if (d.suggest) { hint.textContent = d.suggest + " ni nazarda tutdingizmi?"; hint.style.color = "#f5b84a"; hint.hidden = false; return; }
+      if (d.exists) { hint.textContent = "Bu email bilan hisob bor — o'sha hisob parolini kiriting, tarif shu hisobga qo'shiladi."; hint.style.color = "#f5b84a"; hint.hidden = false; }
+      else if (d.exists === false) { hint.textContent = "✓ Yangi hisob ochiladi"; hint.style.color = "#2fd39b"; hint.hidden = false; }
+    }).catch(function () {});
+  }
+  inp.addEventListener("blur", check);
+  inp.addEventListener("input", function () { clearTimeout(t); t = setTimeout(check, 700); });
+})();
