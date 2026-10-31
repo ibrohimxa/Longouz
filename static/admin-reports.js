@@ -11,13 +11,16 @@
       .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.detail || "Xato " + r.status); return j; }); });
   }
 
+  var CAT = { wrong_answer: "Javob xato belgilangan", question_text: "Savol matni", options: "Variantlar", no_correct: "To'g'ri variant yo'q", figure: "Chizma", topic: "Mavzu", explanation: "Izoh", typo: "Imlo", duplicate: "Takror", other: "Boshqa" };
   function stats(d) {
     var c = d.counts || {};
     var items = [["Yangi", c["new"] || 0], ["Tahlil qilingan", c.analyzed || 0], ["Tuzatilgan", c.fixed || 0], ["Rad etilgan", c.dismissed || 0]];
     var cats = Object.keys(d.by_category || {}).sort(function (a, b) { return d.by_category[b] - d.by_category[a]; }).slice(0, 3)
-      .map(function (k) { return k + ": " + d.by_category[k]; }).join(", ");
+      .map(function (k) { return (CAT[k] || k) + ": " + d.by_category[k]; }).join(", ");
     $("rp-stats").innerHTML = items.map(function (x) { return '<div class="rp-stat"><b>' + x[1] + "</b>" + x[0] + "</div>"; }).join("") +
       (cats ? '<div class="rp-stat"><b style="font-size:.95rem">' + esc(cats) + "</b>Ko'p uchraydigan turlar</div>" : "");
+    var nb = $("btn-batch"), n = c["new"] || 0;
+    if (nb) { nb.disabled = !n; nb.textContent = n ? "🤖 Yangilarini tahlil qilish (" + Math.min(5, n) + " ta)" : "🤖 Yangi shikoyat yo'q"; }
   }
 
   function fixForm(r) {
@@ -50,7 +53,7 @@
       '<div class="rp-msg"><b>' + esc(r.category_name) + "</b>" + (r.message ? "<br>" + esc(r.message) : "") + (r.selected ? "<br><small>Foydalanuvchi tanlagan: " + esc(r.selected) + "</small>" : "") + "</div>" +
       ai + (r.admin_note ? '<div class="st-note">Izoh: ' + esc(r.admin_note) + "</div>" : "") +
       (open ? '<div class="rp-actions">' +
-        '<button class="btn-primary admin-btn-sm" data-a="analyze">🤖 ' + (r.verdict ? "Qayta tahlil" : "Claude bilan tahlil") + "</button>" +
+        '<button class="btn-primary admin-btn-sm" data-a="analyze">🤖 ' + (r.verdict ? "Qayta tahlil" : "AI bilan tahlil") + "</button>" +
         (r.fix || r.action === "deactivate" ? '<button class="btn-primary admin-btn-sm" data-a="apply">✅ Tuzatishni qo\'llash</button>' : "") +
         (r.question_id ? '<a class="btn-secondary admin-btn-sm" target="_blank" href="' + P + "/questions/" + r.question_id + '/edit">✏️ Qo\'lda tahrirlash</a>' +
           '<button class="btn-secondary admin-btn-sm" data-a="hide">🙈 Savolni yashirish</button>' : "") +
@@ -94,7 +97,7 @@
   $("f-subject").addEventListener("change", function () { page = 1; load(); });
   $("btn-reload").addEventListener("click", load);
   $("btn-batch").addEventListener("click", function () {
-    var b = this; b.disabled = true; $("batch-msg").textContent = "Claude tahlil qilmoqda… (1-2 daqiqa olishi mumkin)";
+    var b = this; b.disabled = true; $("batch-msg").textContent = "AI tahlil qilmoqda… (1-2 daqiqa olishi mumkin)";
     api("/api/reports/analyze-batch", "POST", { limit: 5, apply: $("cfg-auto-fix").checked }).then(function (r) {
       $("batch-msg").textContent = r.done + " ta tahlil qilindi" + (r.left ? ", yana " + r.left + " ta kutmoqda" : "") + ".";
       b.disabled = false; load();

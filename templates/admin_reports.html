@@ -8,12 +8,12 @@
   <link rel="icon" type="image/png" href="/static/logo-owl.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css?v=229">
+  <link rel="stylesheet" href="/static/style.css?v=230">
   <link rel="stylesheet" href="/static/admin-dash.css">
   <link rel="stylesheet" href="/static/admin.css">
   <link rel="stylesheet" href="/static/admin-studio.css">
   <link rel="stylesheet" href="/static/admin-reports.css">
-  <script src="/static/theme-init.js?v=229"></script>
+  <script src="/static/theme-init.js?v=230"></script>
 </head>
 <body data-logged-in="true" data-admin-prefix="{{ admin_prefix }}">
   <div class="app-shell">
@@ -21,7 +21,7 @@
     <div class="app-content">
       <div class="app-topbar"><div>
         <h1>Shikoyatlar</h1>
-        <p>Foydalanuvchilar test paytida savollar bo'yicha yuborgan shikoyatlar. Claude tahlil qiladi, siz tasdiqlaysiz — savol tuzatiladi.</p>
+        <p>Foydalanuvchilar test paytida savollar bo'yicha yuborgan shikoyatlar. AI (Claude yoki Gemini — qaysi biri ishlasa) tahlil qiladi, siz tasdiqlaysiz — savol tuzatiladi.</p>
       </div></div>
       {% if not ai_ready %}<div class="form-error">AI kaliti sozlanmagan — "Tahlil" ishlamaydi. <a href="{{ admin_prefix }}/ai">AI holati</a> bo'limida kalitni kiriting.</div>{% endif %}
 
@@ -29,7 +29,7 @@
 
       <div class="st-card rp-cfg">
         <strong>Avtomatik rejim</strong>
-        <label><input type="checkbox" id="cfg-auto-analyze" {{ 'checked' if cfg.auto_analyze }}> Yangi shikoyat kelganda Claude o'zi tahlil qilsin <small>(token sarflaydi)</small></label>
+        <label><input type="checkbox" id="cfg-auto-analyze" {{ 'checked' if cfg.auto_analyze }}> Yangi shikoyat kelganda AI o'zi tahlil qilsin <small>(token sarflaydi)</small></label>
         <label><input type="checkbox" id="cfg-auto-fix" {{ 'checked' if cfg.auto_fix }}> Ishonch yuqori bo'lsa, tuzatishni o'zi qo'llasin</label>
         <label>Ishonch chegarasi <input type="number" id="cfg-min-conf" min="70" max="100" value="{{ cfg.min_conf }}" style="width:70px"> %</label>
         <span class="st-note" id="cfg-msg"></span>
@@ -60,5 +60,6 @@
   </div>
   <script src="/static/admin-toast.js"></script>
   <script src="/static/admin-reports.js"></script>
+  <script src="/static/app.js?v=230"></script>
 </body>
 </html>

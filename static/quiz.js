@@ -194,8 +194,8 @@
       inp.type = "text";
       inp.autocomplete = "off";
       inp.spellcheck = false;
-      const _ph = { math: "Masalan: 12 yoki 3/4 yoki √2", physics: "Masalan: 2,5 yoki 3·10⁸", chemistry: "Masalan: 22,4 yoki H₂SO₄", biology: "Masalan: 25 yoki Aa" };
-      inp.placeholder = mode === "ielts" ? "TRUE / FALSE / NOT GIVEN yoki 1–2 so'z" : (_ph[subject] || "Masalan: 1370 yoki Amir Temur");
+      const _ph = { math: "Masalan: 12 yoki 3/4 yoki √2", physics: "Masalan: 2,5 yoki 3·10⁸", chemistry: "Masalan: 22,4 yoki H₂SO₄", biology: "Masalan: 25 yoki Aa", history: "Masalan: 1370 yoki Amir Temur", native: "Masalan: ko'chma yoki sifatdosh", english: "Masalan: went yoki kidney", russian: "Например: стеклянный" };
+      inp.placeholder = mode === "ielts" ? "TRUE / FALSE / NOT GIVEN yoki 1–2 so'z" : (_ph[q.subject || subject] || "Javobni qisqa yozing");
       inp.value = typeof answers[currentIndex] === "string" ? answers[currentIndex] : "";
       inp.addEventListener("input", () => {
         const v = inp.value.trim();
@@ -207,8 +207,8 @@
       });
       const hint = document.createElement("span");
       hint.className = "quiz-open-hint";
-      const _hint = { math: "Faqat javobni yozing (son, kasr yoki ifoda). Vergul va nuqta farqi yo'q.", physics: "Sonni yozing; 10ⁿ uchun belgilar tugmalaridan foydalaning. Birlik shart emas.", chemistry: "Son yoki formulani yozing; indeks va zaryad uchun belgilar tugmalari bor.", biology: "Son, genotip yoki atamani qisqa yozing." };
-      hint.textContent = mode === "ielts" ? "IELTS: TRUE / FALSE / NOT GIVEN yoki matndagi so'z(lar)ni yozing. Katta-kichik harf farqi yo'q." : (_hint[subject] || "Yil, nom yoki atamani qisqa yozing. Katta-kichik harf va apostrof farqi hisobga olinmaydi.");
+      const _hint = { math: "Faqat javobni yozing (son, kasr yoki ifoda). Vergul va nuqta farqi yo'q.", physics: "Sonni yozing; 10ⁿ uchun belgilar tugmalaridan foydalaning. Birlik shart emas.", chemistry: "Son yoki formulani yozing; indeks va zaryad uchun belgilar tugmalari bor.", biology: "Son, genotip yoki atamani qisqa yozing.", history: "Yil, nom yoki atamani qisqa yozing. Katta-kichik harf va apostrof farqi hisobga olinmaydi.", native: "So'z yoki atamani yozing. Katta-kichik harf va apostrof farqi hisobga olinmaydi.", english: "Write one word or a short phrase. Katta-kichik harf farqi yo'q.", russian: "Напишите слово или ответ. Регистр не важен." };
+      hint.textContent = mode === "ielts" ? "IELTS: TRUE / FALSE / NOT GIVEN yoki matndagi so'z(lar)ni yozing. Katta-kichik harf farqi yo'q." : (_hint[q.subject || subject] || "Javobni qisqa yozing. Katta-kichik harf va apostrof farqi hisobga olinmaydi.");
       wrap.append(lab, inp, hint);
       optionsEl.appendChild(wrap);
       if (window.LZTools) { try { window.LZTools.decorateOpenInput(wrap, inp); } catch (e) {} }
@@ -306,15 +306,7 @@
     if (navFinishBtn) { navFinishBtn.classList.remove("is-armed"); navFinishBtn.textContent = "Testni yakunlash"; }
   }
   function requestFinish(btn) {
-    const total = adaptiveMode ? adaptiveTotal : questions.length;
-    const empty = Math.max(0, total - answeredCount());
-    if (empty > 0 && !adaptiveMode && Date.now() - finishArmed > 4000) {
-      finishArmed = Date.now();
-      btn.classList.add("is-armed");
-      btn.textContent = `${empty} ta savol javobsiz — yakunlash uchun yana bosing`;
-      setTimeout(() => { if (Date.now() - finishArmed >= 3900) resetFinishConfirm(); }, 4000);
-      return;
-    }
+    // Bir marta bosish kifoya: javobsiz savollar soni yuklash oynasida ko'rsatiladi
     if (window.LZSheet) window.LZSheet.closeAll();
     finishQuiz();
   }
@@ -387,6 +379,11 @@
   function sendResult() {
     if (!lastPayload) return;
     Loader.show("submit");
+    try {
+      const _tot = adaptiveMode ? questions.length : questions.length;
+      const _empty = Math.max(0, _tot - answeredCount());
+      if (_empty > 0) { const s = document.getElementById("lz-loader-sub"); if (s) s.textContent = `${_tot - _empty} ta javob tekshirilmoqda · ${_empty} ta savol javobsiz qoldi`; }
+    } catch (e) {}
     resultEl.style.display = "none";
     try { localStorage.setItem("lz_pending_submit", JSON.stringify({ p: lastPayload, ts: Date.now() })); } catch (e) {}
     fetch("/api/quiz/submit", {

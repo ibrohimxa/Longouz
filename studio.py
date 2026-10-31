@@ -56,11 +56,17 @@ def _json_from_text(raw: str):
     return None
 
 
+_CLAUDE_OFF_UNTIL = 0.0
+
+
 async def ai_json(system: str, user: str | list, max_tokens: int = 6000, timeout: float = 50.0):
     """Claude (asosiy) -> Gemini (zaxira). JSON obyektini qaytaradi yoki None. user — matn yoki Claude content bloklari."""
     import ai_claude
     import ai_gemini
     client = ai_claude._get_client()
+    global _CLAUDE_OFF_UNTIL
+    if client is not None and time.monotonic() < _CLAUDE_OFF_UNTIL:
+        client = None  # Claude yaqinda kredit/kalit xatosi berdi — vaqtni yo'qotmay to'g'ridan-to'g'ri Gemini
     if client is not None:
         try:
             async def run():
@@ -75,6 +81,9 @@ async def ai_json(system: str, user: str | list, max_tokens: int = 6000, timeout
                 return data
         except Exception as exc:  # noqa: BLE001
             logger.warning("Claude JSON so'rovi ishlamadi: %s", exc)
+            low = str(exc).lower()
+            if any(w in low for w in ("credit", "billing", "invalid x-api-key", "authentication", "permission", "401", "403")):
+                _CLAUDE_OFF_UNTIL = time.monotonic() + 900
     if ai_gemini.is_gemini_configured() and isinstance(user, str):
         try:
             resp = await asyncio.wait_for(ai_gemini._call_gemini_with_retry(

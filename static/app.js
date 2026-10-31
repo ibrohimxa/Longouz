@@ -262,7 +262,7 @@
     const up = document.createElement("a");
     up.className = "sidebar-link"; up.href = "/upgrade";
     up.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 6 6 .9-4.5 4.4 1 6.2L12 16.6 6.5 19.5l1-6.2L3 8.9 9 8z"/></svg>Pro tarif';
-    drop.appendChild(up);
+    if (!document.querySelector(".lg-admin-tag")) drop.appendChild(up);
     if (!hidden.size && !logout) burger.hidden = true;
   }
   burger.addEventListener("click", (e) => { e.stopPropagation(); setOpen(!drop.classList.contains("open")); });
@@ -273,4 +273,33 @@
   if (mq.addEventListener) { mq.addEventListener("change", fit); mqPhone.addEventListener("change", fit); }
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
   fit();
+})();
+
+
+/* v230: telefonda profil/rejim/qo'ng'iroq paneli tepadagi (boyqushli) qatorga ko'chadi — bo'sh joy qolmaydi */
+(function () {
+  const header = document.querySelector(".app-content > .app-header");
+  const sidebar = document.querySelector(".app-sidebar");
+  if (!header || !sidebar || !window.matchMedia) return;
+  const home = header.parentNode, anchor = header.nextSibling;
+  const mq = window.matchMedia("(max-width: 640px)");
+  function place() {
+    if (mq.matches) {
+      if (header.parentNode !== sidebar) { const brand = sidebar.querySelector(".sidebar-brand"); sidebar.insertBefore(header, brand ? brand.nextSibling : sidebar.firstChild); }
+      header.classList.add("in-topbar");
+    } else {
+      header.classList.remove("in-topbar");
+      if (header.parentNode !== home) home.insertBefore(header, anchor && anchor.parentNode === home ? anchor : home.firstChild);
+    }
+  }
+  place();
+  if (mq.addEventListener) mq.addEventListener("change", place); else if (mq.addListener) mq.addListener(place);
+})();
+
+/* v230: matn yozilayotganda boyqush tugmasi yashiriladi (maydonni to'smaydi) */
+(function () {
+  const root = document.documentElement;
+  const isField = (el) => el && (el.tagName === "TEXTAREA" || el.isContentEditable || (el.tagName === "INPUT" && !/^(checkbox|radio|button|submit|range|color|file)$/i.test(el.type)));
+  document.addEventListener("focusin", (e) => { if (isField(e.target)) root.classList.add("lz-typing"); });
+  document.addEventListener("focusout", () => setTimeout(() => { if (!isField(document.activeElement)) root.classList.remove("lz-typing"); }, 60));
 })();

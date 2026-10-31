@@ -37,26 +37,74 @@ def _name(code: str) -> str:
 
 
 # ---------------------------------------------------------------- BLOK MOCK
-async def block_questions(plan: str, spec1: str, spec2: str) -> list[dict]:
-    """Majburiy 3 fandan 10 tadan + 2 ixtisoslik fanidan 30 tadan (jami 90) savol yig'adi."""
-    plan_cells = [(s, n, COEF_MANDATORY, "majburiy") for s, n in MANDATORY]
-    plan_cells += [(spec1, 30, COEF_SPEC1, "1-ixtisoslik"), (spec2, 30, COEF_SPEC2, "2-ixtisoslik")]
-    used_by_subject: dict[str, set[int]] = defaultdict(set)
-    out: list[dict] = []
-    for subject, n, coef, role in plan_cells:
-        rows = exam_db._unique(await exam_db._fetch(subject, "dtm", plan))
-        random.shuffle(rows)
-        # DTM blokida asosan yopiq savollar; yetmasa ochiq/moslashtirish bilan to'ldiriladi
-        rows.sort(key=lambda q: (q.qtype or "closed") != "closed")
-        got = []
-        for q in rows:
+def _hardness(q) -> float:
+    """Savol qiyinligi bahosi: belgilangan qiyinlik + hisob-kitob/matn murakkabligi."""
+    d = q.difficulty if q.difficulty in (1, 2, 3) else 2
+    text = q.question or ""
+    score = d * 100.0
+    score += min(len(text), 260) / 13.0                      # uzun shart — ko'p bosqichli masala
+    score += 6 if any(ch.isdigit() for ch in text) else 0     # hisoblash
+    score += 5 if (q.figure_json or "") else 0                # chizma/jadval
+    score += 4 if any(w in text.lower() for w in ("noto'g'ri", "barcha", "qaysi biri emas", "ketma-ketlik", "juftlik", "mos keladi")) else 0
+    return score + random.random() * 8                        # bir xil variant chiqmasligi uchun
+
+
+async def _seen_block_ids(user_id: int | None) -> set[int]:
+    """Foydalanuvchining oldingi blok mocklarida tushgan savollar — yangi mockda oxiriga suriladi."""
+    if not user_id:
+        return set()
+    seen: set[int] = set()
+    try:
+        async with db.async_session() as session:
+            rows = (await session.execute(
+                select(db.WebQuizLog.questions_json).where(db.WebQuizLog.user_id == user_id,
+                                                           db.WebQuizLog.topic.like("DTM blok mock%"))
+                .order_by(db.WebQuizLog.id.desc()).limit(6)
+            )).all()
+        for (qj,) in rows:
+            for q in json.loads(qj or "[]"):
+                if isinstance(q, dict) and isinstance(q.get("id"), int):
+                    seen.add(q["id"])
+    except Exception:  # noqa: BLE001 — tarix bo'lmasa ham mock ishlayveradi
+        logger.debug("blok mock tarixi o'qilmadi", exc_info=True)
+    return seen
+
+
+def _pick_hard(rows: list, n: int, seen: set[int]) -> list:
+    """Eng qiyin savollar: avval qiyinlik 3, so'ng 2 (1 — faqat yetmasa). Mavzular bo'yicha tarqatiladi."""
+    closed = [q for q in rows if (q.qtype or "closed") == "closed"]
+    pool = closed if len(closed) >= n else closed + [q for q in rows if (q.qtype or "closed") != "closed"]
+    scored = sorted(pool, key=lambda q: (q.id in seen, -_hardness(q)))
+    topics = {q.topic for q in scored}
+    per_topic_cap = max(1, -(-n // max(1, len(topics))) + 1)
+    got, per = [], defaultdict(int)
+    for strict in (True, False):
+        for q in scored:
             if len(got) >= n:
                 break
-            if q.id in used_by_subject[subject]:
+            if q in got:
                 continue
-            used_by_subject[subject].add(q.id)
+            if strict and (per[q.topic] >= per_topic_cap or (q.difficulty or 2) < 2):
+                continue
             got.append(q)
-        random.shuffle(got)
+            per[q.topic] += 1
+    # blok ichida: o'rta -> qiyin (haqiqiy imtihondagi kabi qiyinlik oshib boradi)
+    got.sort(key=lambda q: _hardness(q))
+    return got
+
+
+async def block_questions(plan: str, spec1: str, spec2: str, user_id: int | None = None) -> list[dict]:
+    """Majburiy 3 fandan 10 tadan + 2 ixtisoslik fanidan 30 tadan (jami 90). Har fandan ENG QIYIN savollar olinadi."""
+    plan_cells = [(s, n, COEF_MANDATORY, "majburiy") for s, n in MANDATORY]
+    plan_cells += [(spec1, 30, COEF_SPEC1, "1-ixtisoslik"), (spec2, 30, COEF_SPEC2, "2-ixtisoslik")]
+    seen = await _seen_block_ids(user_id)
+    used: set[int] = set()
+    out: list[dict] = []
+    for subject, n, coef, role in plan_cells:
+        # Blok mock — to'liq imtihon simulyatsiyasi: tarifdan qat'i nazar butun bankdan (eng qiyinlari) olinadi
+        rows = [q for q in exam_db._unique(await exam_db._fetch(subject, "dtm", "ultra")) if q.id not in used]
+        got = _pick_hard(rows, n, seen)
+        used.update(q.id for q in got)
         for q in got:
             d = db._question_to_dict(q)
             d["section"] = f"{_name(subject)} · {role} (×{coef})".replace(".", ",")
@@ -264,6 +312,17 @@ async def bank_status():
     for subj, mode, topic, mp, c in rows:
         d = agg.setdefault((subj, mode, topic), [0, 0, 0])
         d[min(int(mp or 0), 2)] += c
+    # Bir mavzu bir nechta rejimda (dtm + sertifikat) bir xil savollar bilan turadi — ikki marta sanalmasin
+    merged: dict = {}
+    for (subj, mode, topic), vals in agg.items():
+        cur = merged.get((subj, topic))
+        if cur is None:
+            merged[(subj, topic)] = [mode, vals]
+        else:
+            cur[0] = cur[0] + "/" + mode if mode not in cur[0].split("/") else cur[0]
+            if sum(vals) > sum(cur[1]):
+                cur[1] = vals
+    agg = {(subj, m, topic): v for (subj, topic), (m, v) in merged.items()}
     subjects = {}
     for (subj, mode, topic), (f, p_, u) in agg.items():
         tot = f + p_ + u
@@ -333,7 +392,7 @@ def register(app, get_current_user, templates, limiter, shuffle_question_options
             raise HTTPException(status_code=400, detail="Ikki xil ixtisoslik fanini tanlang.")
         if not db.get_plan_limits(user.plan)["full_mock_access"]:
             raise HTTPException(status_code=402, detail="DTM blok mock faqat Pro yoki Ultra tarifda mavjud.")
-        questions = await block_questions(user.plan, s1, s2)
+        questions = await block_questions(user.plan, s1, s2, user.id)
         if len(questions) < 30:
             raise HTTPException(status_code=404, detail="Blok uchun savollar hali yetarli emas.")
         questions = [shuffle_question_options(q) for q in questions]

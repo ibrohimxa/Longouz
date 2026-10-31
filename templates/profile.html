@@ -8,9 +8,9 @@
   <link rel="icon" type="image/png" href="/static/logo-owl.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css?v=229">
+  <link rel="stylesheet" href="/static/style.css?v=230">
   <link rel="stylesheet" href="/static/profile.css">
-  <script src="/static/theme-init.js?v=229"></script>
+  <script src="/static/theme-init.js?v=230"></script>
 </head>
 <body data-logged-in="true">
 
@@ -26,11 +26,12 @@
           <h1>{{ user.first_name or "Foydalanuvchi" }}
             <span class="plan-badge plan-badge-{{ user.plan }}">{{ user.plan|upper }}</span>
           </h1>
-          <p>{{ subject_name }} · {{ stats.level|capitalize if stats.level else "" }} daraja
-          {% if stats.certificate_type and stats.certificate_type != 'none' %}
-            · {{ stats.certificate_type|upper }} tayyorgarligi
-          {% endif %}
-          </p>
+          {% set _lv = {"boshlangich": "Boshlang'ich", "ortacha": "O'rtacha", "yuqori": "Yuqori"} %}
+          {% set _parts = [] %}
+          {% if subject_name and subject_name|string not in ("None", "") %}{% set _ = _parts.append(subject_name) %}{% endif %}
+          {% if stats.level %}{% set _ = _parts.append((_lv.get(stats.level) or stats.level|capitalize) ~ " daraja") %}{% endif %}
+          {% if stats.certificate_type and stats.certificate_type != 'none' %}{% set _ = _parts.append(stats.certificate_type|upper ~ " tayyorgarligi") %}{% endif %}
+          <p>{{ _parts|join(" · ") if _parts else "Fan va darajani pastdagi bo'limda tanlang" }}</p>
         </div>
       </div>
 
@@ -361,7 +362,7 @@
   {% include "_owl_widget.html" %}
 
   <script src="/static/devtools-guard.js"></script>
-  <script src="/static/app.js"></script>
+  <script src="/static/app.js?v=230"></script>
   <script src="/static/owl-chat.js"></script>
   <script src="/static/profile.js"></script>
 </body>

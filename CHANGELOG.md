@@ -2,6 +2,16 @@
 
 Har yuborilgan zip: `longouz_v<N>.zip`, versiya raqami `VERSION` faylida.
 
+## v230 — skrinshotlardagi xatolar, savollar sifati, qiyin blok mock
+- **Test yakunlash**: «Testni yakunlash» endi bir marta bosilganda yakunlanadi (ikki marta bosish olib tashlandi); javobsiz savollar soni yuklanish ekranida ko'rsatiladi.
+- **DTM blok mock (90 savol)**: har fandan eng qiyin savollar (qiyinlik 3, hisob-kitobli/ko'p bosqichli masalalar birinchi), mavzular bo'yicha teng taqsimlanadi, oldingi mocklarda tushgan savollar oxiriga suriladi, faqat DTM'dagi kabi yopiq (4 variantli) savollar.
+- **Savollar sifati** (shikoyat #3 va «savollar yaxshi emas» xabari bo'yicha): faqat to'g'ri variantda qavs ichidagi izoh bo'lib, javobni oshkor qilgan 240+ savol tozalandi (masalan «Monosemantik (bir ma'noli)» → «Monosemantik», izoh yechimga ko'chirildi); ochiq savollardagi «(Q...)» kabi bosh harf ishoralari olib tashlandi; oldingi savolga bog'liq «Shu jism…» kabi 35 ta savolga shart qo'shildi.
+- **Telefon sarlavhasi**: kun/tun tugmasining dumaloq surilgichi kesilib qolardi — tuzatildi; «LongoUZ» yozuvi telefonda ham ko'rinadi; bosh sahifa sarlavhasi shaffof emas (matn ostidan ko'rinmaydi); kirish sahifasida tugmalar tartibi bosh sahifadagidek.
+- **Kabinet (telefon)**: tepadagi faqat boyqush turgan bo'sh panelga profil, rejim tugmasi va qo'ng'iroq joylashdi; profilda «None · daraja» o'rniga to'g'ri yozuv; yozish paytida boyqush tugmasi maydonni to'smaydi.
+- **Mendeleyev jadvali**: 57–71 belgisi tufayli paydo bo'lgan bo'sh qator olib tashlandi; telefonda element raqami belgining ustiga chiqmaydi.
+- **Ochiq savol**: ishora va namuna har fanga mos (ona tili savolida «Amir Temur» namunasi chiqmaydi).
+- **Admin**: Shikoyatlar va Savol banki sahifalaridagi oq ramkalar sayt uslubiga keltirildi; bu sahifalarda pastki panel boshqalardek («Yana» bilan); pastki paneldagi «+4» belgisi yozuv ustiga chiqmaydi; Savol bankida bir savol ikki rejimda ikki marta sanalmaydi; shikoyat turlari o'zbekcha; yangi shikoyat bo'lmasa tahlil tugmasi o'chadi; Claude krediti tugaganda tahlil kutib qolmaydi — 15 daqiqa davomida to'g'ridan-to'g'ri Gemini ishlatiladi; foydalanuvchilar jadvali telefonda ixcham.
+
 ## v229.1 — server jurnalidagi xatolar tuzatildi
 - Admin: foydalanuvchini o'chirish 500 xato berardi (bildirishnomalar va boshqa bog'liq yozuvlar o'chirilmagan) — endi barcha bog'liq yozuvlar avtomatik o'chiriladi.
 - Admin: savolni tahrirlash sahifasi 500 xato berardi (funksiya yo'q edi) — tuzatildi; takror savol xatosi ham endi to'g'ri xabar beradi.

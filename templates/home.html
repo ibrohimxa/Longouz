@@ -8,11 +8,11 @@
   <link rel="icon" type="image/png" href="/static/logo-owl.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=Caveat:wght@600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css?v=229">
+  <link rel="stylesheet" href="/static/style.css?v=230">
   <link rel="stylesheet" href="/static/home.css">
-  <link rel="stylesheet" href="/static/news.css?v=229">
+  <link rel="stylesheet" href="/static/news.css?v=230">
   <link rel="stylesheet" href="/static/purchase.css">
-  <script src="/static/theme-init.js?v=229"></script>
+  <script src="/static/theme-init.js?v=230"></script>
 </head>
 <body class="home" data-logged-in="false">
   </div>
@@ -348,10 +348,10 @@
 
   {% include "_owl_widget.html" %}
   <script src="/static/devtools-guard.js"></script>
-  <script src="/static/app.js"></script>
+  <script src="/static/app.js?v=230"></script>
   <script src="/static/owl-chat.js"></script>
   <script src="/static/home-showcase.js"></script>
-  <script src="/static/news-strip.js?v=229" defer></script>
+  <script src="/static/news-strip.js?v=230" defer></script>
   <script>
     (function () {
       var toggleBtns = document.querySelectorAll(".billing-toggle-btn");
@@ -399,7 +399,7 @@
   </script>
   <script src="/static/purchase.js"></script>
   {% if turnstile_active(request) %}
-  <script src="/static/turnstile-helper.js?v=229"></script>
+  <script src="/static/turnstile-helper.js?v=230"></script>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=lgTurnstileReady" async defer onerror="window.lgTurnstileFailed&&window.lgTurnstileFailed()"></script>
   {% endif %}
 </body>

@@ -4277,3 +4277,89 @@ body.auth-page .site-header { background: rgba(4, 19, 26, .97) !important; -webk
 html[data-theme="light"] body.auth-page .site-header { background: rgba(243, 250, 248, .97) !important; }
 /* logotip rasmi: brauzerning sifatli kichraytirishi (qirrali/xira ko'rinmasin) */
 .lg-owl, .living-owl-img { image-rendering: auto !important; }
+
+
+/* ==========================================================================
+   v230: telefon tuzatishlari (skrinshotlar bo'yicha)
+   ========================================================================== */
+/* 1) Kun/tun tugmasi kichraytirilganda dumaloq surilgich chetdan chiqib, kesilib qolardi */
+@media (max-width: 430px) {
+  .site-header .theme-toggle::before { width: 20px !important; height: 20px !important; top: 3px !important; left: 3px !important; transform: translateX(23px) !important; }
+  html[data-theme="light"] .site-header .theme-toggle::before { transform: translateX(0) !important; }
+  .site-header .theme-toggle .icon-sun, .site-header .theme-toggle .icon-moon { top: 5px !important; width: 16px !important; height: 16px !important; }
+  .site-header .theme-toggle .icon-sun { left: 5px !important; } .site-header .theme-toggle .icon-moon { right: 5px !important; }
+}
+.app-header .theme-toggle, .sidebar-footer .theme-toggle { flex: none; }
+
+/* 2) Logotip yozuvi "LongoUZ" telefonda ham ko'rinsin (faqat juda tor ekranda yashiriladi) */
+@media (max-width: 420px) {
+  body.home .site-header .brand .lg-word, body.auth-page .site-header .brand .lg-word { display: inline !important; font-size: .95rem !important; }
+  body.home .site-header .brand .lg-owl, body.auth-page .site-header .brand .lg-owl { height: 30px !important; }
+  .site-header .brand { gap: 5px !important; min-width: 0; flex: 0 1 auto; }
+  .site-header .site-nav { flex: none; }
+}
+@media (max-width: 370px) {
+  body.home .site-header .brand .lg-word, body.auth-page .site-header .brand .lg-word { display: none !important; }
+}
+
+/* 3) Bosh sahifa sarlavhasi shaffof emas — pastdagi matn ostidan ko'rinmaydi */
+body.home .site-header { position: sticky; top: 0; z-index: 100; background: rgba(4, 19, 26, .96) !important; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(255,255,255,.06); }
+html[data-theme="light"] body.home .site-header { background: rgba(243, 250, 248, .97) !important; border-bottom-color: rgba(10,70,60,.1); }
+
+/* 4) Admin: aniqlanmagan --border oq chiziq berardi; kartalar sayt uslubida */
+:root { --border: var(--line); }
+.rp-stat, .rp-card, .st-card { background: var(--card); border-color: var(--line) !important; }
+.rp-stat { flex: 1 1 120px; }
+.rp-stat b { color: var(--accent-green, #2fbf83); }
+.rp-ai { border-color: var(--line) !important; }
+.admin-bank-wrap, .bank-card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; }
+details.bank-subj, .bank-subj { background: var(--card); border: 1px solid var(--line) !important; }
+
+/* 5) Pastki panel belgilari ("+4") yozuv ustiga chiqmasin — ikonka burchagida */
+@media (max-width: 640px) {
+  .app-sidebar .sidebar-nav .sidebar-link { position: relative; }
+  .app-sidebar .sidebar-nav .sidebar-link > span[id$="-badge"] { position: absolute; top: 2px; right: calc(50% - 22px); margin: 0 !important; padding: 2px 5px !important; font-size: .58rem !important; min-width: 16px; text-align: center; }
+}
+
+/* 6) Davriy jadval (test ichida): 57–71 belgisi qator balandligini oshirib bo'sh qator hosil qilardi;
+      telefonda raqam belgining ustiga chiqib qolardi */
+.fs-drawer .pt-marker { min-height: 0 !important; aspect-ratio: 1 / 1.08; padding: 0; line-height: 1.05; overflow: hidden; }
+@container (max-width: 560px) {
+  .fs-drawer .periodic-table-grid { gap: 1.5px; }
+  .fs-drawer .pt-element { aspect-ratio: 1 / 1.3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; }
+  .fs-drawer .pt-element-num { position: static !important; font-size: clamp(.36rem, 1.6cqi, .5rem) !important; line-height: 1; opacity: .75; }
+  .fs-drawer .pt-element-sym { margin-top: 0 !important; font-size: clamp(.58rem, 3.1cqi, .95rem) !important; line-height: 1.05; }
+  .fs-drawer .pt-marker { aspect-ratio: 1 / 1.3; font-size: clamp(.32rem, 1.35cqi, .5rem) !important; }
+}
+
+/* 7) Telefon: tepada faqat boyqush turgan bo'sh panel o'rniga — profil, rejim va qo'ng'iroq shu panelda */
+@media (max-width: 640px) {
+  .app-sidebar > .app-header.in-topbar { margin: 0 0 0 auto; padding: 0; border: 0; background: none; box-shadow: none; min-height: 0; gap: 8px; display: flex; align-items: center; width: auto; flex: 0 1 auto; position: static; }
+  .app-sidebar > .app-header.in-topbar .app-header-account { gap: 7px; min-width: 0; }
+  .app-sidebar > .app-header.in-topbar .app-header-avatar { width: 34px; height: 34px; font-size: .9rem; flex: none; }
+  .app-sidebar > .app-header.in-topbar .app-header-user-info { min-width: 0; }
+  .app-sidebar > .app-header.in-topbar .app-header-name { font-size: .82rem; max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+  .app-sidebar > .app-header.in-topbar .app-header-plan { font-size: .58rem; padding: 1px 6px; }
+  .app-sidebar > .app-header.in-topbar .app-header-actions { gap: 8px; margin-left: 4px; }
+  .app-sidebar > .app-header.in-topbar .theme-toggle { width: 54px; height: 30px; }
+  .app-sidebar > .app-header.in-topbar .theme-toggle::before { width: 22px; height: 22px; transform: translateX(26px); }
+  html[data-theme="light"] .app-sidebar > .app-header.in-topbar .theme-toggle::before { transform: translateX(0); }
+  .app-sidebar > .app-header.in-topbar .theme-toggle .icon-sun, .app-sidebar > .app-header.in-topbar .theme-toggle .icon-moon { top: 6px; width: 16px; height: 16px; }
+  .app-sidebar > .app-header.in-topbar .theme-toggle .icon-sun { left: 6px; } .app-sidebar > .app-header.in-topbar .theme-toggle .icon-moon { right: 6px; }
+  .app-sidebar > .app-header.in-topbar .notif-bell-btn { width: 38px; height: 38px; }
+  .app-sidebar > .app-header.in-topbar .notif-bell-panel { position: fixed; left: 10px; right: 10px; top: 60px; width: auto; max-width: none; }
+  .app-sidebar .sidebar-brand { flex: none; }
+}
+@media (max-width: 360px) { .app-sidebar > .app-header.in-topbar .app-header-user-info { display: none; } }
+
+/* 8) Boyqush tugmasi yozish paytida maydonlarni to'smasin */
+html.lz-typing #owl-pin-button { opacity: 0 !important; pointer-events: none; transform: scale(.6); transition: opacity .2s, transform .2s; }
+
+/* 9) Admin jadvallari telefonda: gorizontal suriladi, qatorlar ixcham (amallar bir qatorda) */
+@media (max-width: 760px) {
+  .admin-users-table-wrap, .admin-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; }
+  .admin-users-table { min-width: 860px; }
+  .admin-users-table td, .admin-users-table th { white-space: nowrap; padding: 9px 10px; vertical-align: middle; }
+  .admin-users-actions { display: flex; gap: 6px; align-items: center; }
+  .admin-users-actions .admin-inline-form { display: inline-flex; gap: 6px; align-items: center; margin: 0; }
+}
