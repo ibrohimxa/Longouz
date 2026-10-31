@@ -508,7 +508,13 @@ def register(app, prefix: str, require_admin, current_admin_username, templates,
     @app.post(f"{prefix}/api/reports/{{report_id}}/analyze")
     async def reports_analyze(request: Request, report_id: int):
         guard(request)
-        return JSONResponse(await analyze_report(report_id))
+        try:
+            return JSONResponse(await analyze_report(report_id))
+        except HTTPException as exc:
+            return JSONResponse({"detail": exc.detail}, status_code=exc.status_code)
+        except Exception:  # noqa: BLE001 — AI/tarmoq xatosi admin sahifasini "500" bilan buzmasin
+            logger.exception("Shikoyat tahlili xatosi")
+            return JSONResponse({"detail": "AI hozir javob bermadi (Gemini band yoki tarmoq). Bir daqiqadan so'ng qayta urinib ko'ring."}, status_code=502)
 
     @app.post(f"{prefix}/api/reports/analyze-batch")
     async def reports_analyze_batch(request: Request):

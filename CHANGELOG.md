@@ -2,6 +2,14 @@
 
 Har yuborilgan zip: `longouz_v<N>.zip`, versiya raqami `VERSION` faylida.
 
+## v229.1 — server jurnalidagi xatolar tuzatildi
+- Admin: foydalanuvchini o'chirish 500 xato berardi (bildirishnomalar va boshqa bog'liq yozuvlar o'chirilmagan) — endi barcha bog'liq yozuvlar avtomatik o'chiriladi.
+- Admin: savolni tahrirlash sahifasi 500 xato berardi (funksiya yo'q edi) — tuzatildi; takror savol xatosi ham endi to'g'ri xabar beradi.
+- Ro'yxatdan o'tish / kirish: Cloudflare vidjeti ishlamaganda zaxira yo'l 10 daqiqada atigi 4 urinishga ruxsat berardi — haqiqiy foydalanuvchilar bloklanib qolardi; endi 30 ta.
+- AI: Gemini modeli band bo'lsa (503 "high demand") boshqa Gemini modeliga avtomatik o'tadi; ochiq javoblarni AI tekshiruvi tezlashdi (kreditsiz Claude chaqirilmaydi, sonli javoblar AI'siz hal qilinadi) — natija tezroq chiqadi.
+- Baza ulanishi bir lahza uzilsa, foydalanuvchini aniqlash bir marta qayta uriniladi (500 xato o'rniga).
+- Admin shikoyat tahlili AI javob bermasa sahifa buzilmaydi — tushunarli xabar chiqadi.
+
 ## v229 — telefonda test oynasi, panellar, yuklanish ekrani, yangiliklar, yangi savollar
 - **Test sahifasi (telefon)**: sarlavha bitta qatorda (360 px ham sig'adi), savol kartasi ekranni to'liq egallaydi (avval 0,75 marta kichraytirilgan edi); savol raqamlari qatori olib tashlandi — pastdagi «1 / 30 ▴» tugmasi bosilganda savollar ro'yxati ochiladi (javob berilgan/javobsiz ko'rinadi); «Oldingi / Keyingi» tugmalari pastda doim ko'rinadi; savol tepasidagi bo'sh katakcha olib tashlandi.
 - **Yagona panel tizimi**: formulalar, kalkulyator, shikoyat va savollar ro'yxati — telefonda sarlavha ostidan to'liq ekran ochiladi, tutqichni pastga sursangiz yarim ekranga kichrayadi, yana sursangiz yopiladi; bittasi ochilsa, boshqasi o'zi yopiladi; orqadagi sahifa o'zgarmaydi. Kompyuterda o'ng tomondagi panel savolni yopmaydi.

@@ -58,26 +58,48 @@ def is_gemini_configured() -> bool:
 # o'rniga, 1-2 marta qisqa kutib qayta urinamiz — ko'pincha ikkinchi
 # urinishda muvaffaqiyatli bo'ladi. ai_router.py'dagi umumiy vaqt chegarasi
 # ICHIDA qolishi uchun juda qisqa kutamiz.
-_RETRY_DELAYS_SECONDS = [1.0, 2.0]
+_RETRY_DELAYS_SECONDS = [0.8]
+# v229: model "band" bo'lsa (503 high demand / 429) — boshqa Gemini modeliga o'tamiz (avval faqat qayta urinib,
+# keyin taslim bo'lardi va AI repetitor/hakamlik "javob bermadi" bo'lib qolardi).
+_FAILOVER_MODELS = ("gemini-flash-latest", "gemini-2.5-flash", "gemini-flash-lite-latest", "gemini-2.5-flash-lite")
+_BUSY_UNTIL: dict = {}
 
 
 async def _call_gemini_with_retry(**kwargs):
-    """generate_content'ni chaqiradi, 503/429 kabi vaqtinchalik xatolarda
-    qisqa backoff bilan 1-2 marta qayta urinadi."""
+    """generate_content'ni chaqiradi: 503/429 kabi vaqtinchalik xatolarda qisqa qayta urinadi, model band bo'lsa yoki
+    topilmasa — keyingi Gemini modeliga o'tadi. Band bo'lgan model 2 daqiqa davomida oxiriga suriladi."""
     import asyncio
+    import time
 
+    first = kwargs.get("model") or GEMINI_MODEL
+    order = [first] + [m for m in _FAILOVER_MODELS if m != first]
+    now = time.time()
+    order.sort(key=lambda m: 1 if _BUSY_UNTIL.get(m, 0) > now else 0)
     last_error = None
-    for attempt, delay in enumerate([0.0] + _RETRY_DELAYS_SECONDS):
-        if delay:
-            await asyncio.sleep(delay)
-        try:
-            return await _get_client().aio.models.generate_content(**kwargs)
-        except genai_errors.APIError as e:
-            last_error = e
-            is_retryable = getattr(e, "code", None) in (503, 429) or "UNAVAILABLE" in str(e)
-            if not is_retryable:
-                raise
-            logger.info(f"Gemini vaqtincha band (urinish {attempt + 1}) — qayta urinilmoqda...")
+    for mi, model in enumerate(order):
+        kw = dict(kwargs, model=model)
+        if model != first and isinstance(kw.get("config"), dict) and "thinking_config" in kw["config"]:
+            cfg = dict(kw["config"])
+            cfg.pop("thinking_config", None)   # zaxira modellar thinking_level'ni qo'llab-quvvatlamasligi mumkin
+            kw["config"] = cfg
+        for attempt, delay in enumerate([0.0] + _RETRY_DELAYS_SECONDS):
+            if delay:
+                await asyncio.sleep(delay)
+            try:
+                resp = await _get_client().aio.models.generate_content(**kw)
+                _BUSY_UNTIL.pop(model, None)
+                return resp
+            except genai_errors.APIError as e:
+                last_error = e
+                text = str(e)
+                code = getattr(e, "code", None)
+                if code == 404 or "not_found" in text.lower():
+                    break                      # bunday model yo'q — keyingisiga
+                busy = code in (503, 429, 500) or "UNAVAILABLE" in text or "RESOURCE_EXHAUSTED" in text
+                if not busy:
+                    raise
+                logger.info(f"Gemini {model} band (urinish {attempt + 1}) — qayta urinilmoqda / boshqa model...")
+        _BUSY_UNTIL[model] = time.time() + 120
     raise last_error
 
 

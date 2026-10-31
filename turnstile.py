@@ -129,7 +129,8 @@ async def verify_turnstile(token: str, remote_ip: str = "") -> bool:
 
 
 # --- Zaxira yo'l: vidjet brauzerda yuklanmasa (reklama-bloker, tarmoq, domen sozlamasi) foydalanuvchi qulflanib qolmasin.
-#     Bunda tekshiruv o'rniga IP bo'yicha qattiq cheklov qo'llanadi (10 daqiqada 4 ta urinish).
+#     Bunda tekshiruv o'rniga IP bo'yicha cheklov qo'llanadi (10 daqiqada 30 ta urinish — mobil operatorlarda
+#     ko'p foydalanuvchi bitta IP dan chiqadi, 4 ta juda kam edi va haqiqiy foydalanuvchilar kira olmay qolardi).
 _FALLBACK_HITS: dict[str, list[float]] = {}
 
 
@@ -137,7 +138,7 @@ def fallback_allowed() -> bool:
     return (ai_keys.get("TURNSTILE_FALLBACK") or "on").strip().lower() != "off"
 
 
-def _fallback_rate_ok(ip: str, limit: int = 4, window: int = 600) -> bool:
+def _fallback_rate_ok(ip: str, limit: int = 30, window: int = 600) -> bool:
     import time
     now = time.time()
     hits = [t for t in _FALLBACK_HITS.get(ip, []) if now - t < window]

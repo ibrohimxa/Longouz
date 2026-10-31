@@ -3507,6 +3507,14 @@ async def api_quiz_submit(request: Request, body: QuizSubmitRequest):
             _raw = body.answers.get(str(_i))
             _t = _raw.strip() if isinstance(_raw, str) else ""
             if _t and len(_t) <= 80 and not exam_rules.check_open_answer(_t, _q.get("accept") or []):
+                # v229: son bilan son solishtirilgan bo'lsa (masalan 2210 va 2200) — qoida natijasi yakuniy, AI'ga yuborilmaydi
+                try:
+                    import answer_check as _ac
+                    _acc = _q.get("accept") or []
+                    if _ac.eval_expr(_t) is not None and _acc and all(_ac.eval_expr(a) is not None for a in _acc):
+                        continue
+                except Exception:  # noqa: BLE001
+                    pass
                 pending_open.append({"i": _i, "question": _q.get("question", ""), "accepted": _q.get("accept") or [], "user": _t})
     if pending_open and ai.is_any_ai_configured() and (await db.get_setting("ai_judge_open", "1")) == "1":
         try:

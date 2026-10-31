@@ -270,12 +270,14 @@ async def judge_open_answers(items: list[dict], subject: str) -> dict[int, bool]
     if not items:
         return {}
     items = items[:15]
-    if claude.is_claude_configured():
-        res = await _with_timeout(claude.judge_answers(items, subject), 10, "Claude (hakamlik)")
+    import ai_diagnostics as _diag
+    # v229: kreditsiz/kalitsiz provayder chaqirilmaydi va kutish qisqa — natija o'quvchiga tez chiqsin
+    if claude.is_claude_configured() and not _diag.blocked("claude"):
+        res = await _with_timeout(claude.judge_answers(items, subject), 6, "Claude (hakamlik)")
         if res:
             return res
-    if gemini.is_gemini_configured():
-        res = await _with_timeout(gemini.judge_answers(items, subject), 10, "Gemini (hakamlik)")
+    if gemini.is_gemini_configured() and not _diag.blocked("gemini"):
+        res = await _with_timeout(gemini.judge_answers(items, subject), 7, "Gemini (hakamlik)")
         if res:
             return res
     return {}

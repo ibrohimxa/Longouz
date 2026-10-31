@@ -588,6 +588,10 @@ class TopicProgress(Base):
     last_practiced_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 
+class DuplicateQuestionError(Exception):
+    """Shu fan va rejimda bir xil matnli savol allaqachon mavjud (admin qo'shish/tahrirlashda)."""
+
+
 class Question(Base):
     """
     SAVOLLAR BANKI — ENDI BAZADA (avval static_questions.py faylida qattiq
@@ -1515,12 +1519,25 @@ async def get_user_by_id(user_id: int) -> WebUser | None:
     cached = _cache_get(user_id)
     if cached is not None:
         return cached
-    async with async_session() as session:
-        result = await session.execute(select(WebUser).where(WebUser.id == user_id))
-        user = result.scalar_one_or_none()
-        if user is not None:
-            _cache_set(user_id, user)
-        return user
+    # v229: Supabase ulanishni vaqtincha uzsa ("terminating connection due to administrator command") — bir marta
+    # qisqa kutib qayta urinamiz; aks holda o'quvchi bir martalik tarmoq uzilishi uchun 500 xato ko'rardi.
+    for _attempt in range(2):
+        try:
+            async with async_session() as session:
+                result = await session.execute(select(WebUser).where(WebUser.id == user_id))
+                user = result.scalar_one_or_none()
+                if user is not None:
+                    _cache_set(user_id, user)
+                return user
+        except Exception as exc:  # noqa: BLE001
+            msg = str(exc).lower()
+            transient = any(k in msg for k in ("terminating connection", "connection was closed", "connection reset",
+                                                "administrator command", "timeout", "could not connect", "ssl"))
+            if _attempt == 0 and transient:
+                import asyncio as _aio
+                await _aio.sleep(0.4)
+                continue
+            raise
 
 
 async def create_user(email: str, password_hash: str, first_name: str = "", plan: str = "free") -> WebUser:
@@ -2332,21 +2349,33 @@ async def admin_set_user_plan(user_id: int, plan: str) -> bool:
 
 
 async def admin_delete_user(user_id: int) -> bool:
-    """Foydalanuvchi va unga tegishli barcha yozuvlarni (test tarixi,
-    sertifikatlar, chat) o'chiradi. QAYTARIB BO'LMAYDI — admin.py tomonida
-    tasdiqlashsiz chaqirilmasligi kerak."""
+    """Foydalanuvchi va unga tegishli BARCHA yozuvlarni o'chiradi. QAYTARIB BO'LMAYDI — admin tomonida
+    tasdiqlashsiz chaqirilmasligi kerak.
+    v229: web_users ga bog'langan hamma jadvallar (bildirishnomalar, yordam xabarlari, balans, AI/chat jurnali,
+    test tarixi, sertifikatlar, progress...) avtomatik topiladi — yangi jadval qo'shilsa ham o'chirish buzilmaydi
+    (avval bildirishnomalar qolib ketib, "foreign key" xatosi bilan o'chirish ishlamas edi)."""
     async with async_session() as session:
         user = await session.get(WebUser, user_id)
         if user is None:
             return False
-        for model in (WebQuizLog, UserCertificate, ChatLog, TopicProgress, MissedQuestion, CourseProgress):
-            result = await session.execute(select(model).where(model.user_id == user_id))
-            for row in result.scalars().all():
-                await session.delete(row)
+        deps = []
+        for t in Base.metadata.sorted_tables:
+            for fk in t.foreign_keys:
+                if fk.column.table.name == WebUser.__tablename__:
+                    deps.append((t, fk.parent))
+        # sorted_tables: avval "ota" jadvallar — teskari tartibda o'chiramiz (sertifikat test tarixidan oldin)
+        for t, col in reversed(deps):
+            await session.execute(t.delete().where(col == user_id))
         await session.delete(user)
         await session.commit()
         _cache_invalidate(user_id)  # o'chirilgan foydalanuvchi keshda "tirik" qolib ketmasin
         return True
+
+
+async def admin_get_question(question_id: int) -> "Question | None":
+    """Admin tahrirlash sahifasi uchun bitta savol (v229: yetishmayotgan funksiya qo'shildi)."""
+    async with async_session() as session:
+        return await session.get(Question, question_id)
 
 
 # =============================================================================
