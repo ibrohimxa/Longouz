@@ -122,3 +122,5 @@
   .quiz-main > * { min-width: 0; max-width: 100%; }
   .quiz-palette { max-width: calc(100vw - 24px); }
 }
+/* v228: telefon klaviaturasini yoqish tugmasi */
+#lzc-kbd.on { background: var(--accent-green, #2fbf83); color: #04120b; }

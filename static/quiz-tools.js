@@ -8,6 +8,7 @@
   var subject = body.dataset.subject || "";
   var token = body.dataset.attemptToken || "";
   var CALC_SUBJECTS = { math: 1, physics: 1, chemistry: 1, biology: 1 };
+  var TOUCH = !!(window.matchMedia && matchMedia("(pointer: coarse)").matches);
   var C = window.LZCalc;
 
   function el(tag, cls, html) { var n = document.createElement(tag); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; }
@@ -133,9 +134,9 @@
   function calcPaneHtml() {
     var keys = KEYS.map(function (row) { return row.map(function (k) { var cls = /^\d$|^\.$/.test(k) ? "num" : (k === "C" || k === "⌫") ? "clr" : /^[\/*\-+]$/.test(k) ? "op" : ""; return '<button type="button" class="' + cls + '" data-k="' + esc(k) + '">' + esc(KEYLABEL[k] || k) + "</button>"; }).join(""); }).join("");
     var consts = subject === "physics" || subject === "chemistry" ? '<select id="lzc-const" class="lzc-sel"><option value="">+ doimiy</option>' + C.CONST_INFO.map(function (c) { return '<option value="' + c[0] + '">' + c[0] + " — " + c[1] + " (" + c[2] + ")</option>"; }).join("") + "</select>" : "";
-    return '<input id="lzc-in" class="lzc-in" type="text" autocomplete="off" spellcheck="false" placeholder="Ifoda yoki formula: 2+3*4, sin(30), x^2-5x+6=0">' +
+    return '<input id="lzc-in" class="lzc-in" type="text" autocomplete="off" spellcheck="false"' + (TOUCH ? ' inputmode="none"' : '') + ' placeholder="Ifoda yoki formula: 2+3*4, sin(30), x^2-5x+6=0">' +
       '<div class="lzc-out" id="lzc-out">&nbsp;</div>' +
-      '<div class="lzc-row"><button type="button" class="lzc-mini" id="lzc-ans">Ans</button><button type="button" class="lzc-mini" id="lzc-e10">×10ⁿ</button>' + consts + '<button type="button" class="lzc-mini" id="lzc-copy" hidden>Javobga →</button></div>' +
+      '<div class="lzc-row"><button type="button" class="lzc-mini" id="lzc-ans">Ans</button><button type="button" class="lzc-mini" id="lzc-e10">×10ⁿ</button>' + (TOUCH ? '<button type="button" class="lzc-mini" id="lzc-kbd" title="Telefon klaviaturasi (harf/formula yozish uchun)">⌨</button>' : '') + consts + '<button type="button" class="lzc-mini" id="lzc-copy" hidden>Javobga →</button></div>' +
       '<div class="lzc-keys">' + keys + '<button type="button" class="eq" id="lzc-exe">=</button></div>' +
       '<div class="lzc-hist" id="lzc-hist"></div>' +
       '<p class="lzc-help">Formula kiriting: <code>a=3; b=4; sqrt(a^2+b^2)</code> yoki tenglama: <code>2x+3=11</code>. Funksiya argumentlari: <code>log(8;2)</code>.</p>';
@@ -164,6 +165,12 @@
   function currentOpenInput() { return document.querySelector(".quiz-open-answer input"); }
   function wireCalcPane() {
     var inp = $("#lzc-in");
+    var kb = $("#lzc-kbd");
+    if (kb) kb.addEventListener("click", function () {
+      var on = inp.getAttribute("inputmode") === "none";
+      if (on) inp.removeAttribute("inputmode"); else inp.setAttribute("inputmode", "none");
+      kb.classList.toggle("on", on); inp.blur(); setTimeout(function () { inp.focus(); }, 30);
+    });
     inp.addEventListener("input", function () { runCalc(false); });
     inp.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); runCalc(true); } });
     $$(".lzc-keys button[data-k]", calc).forEach(function (b) {
@@ -191,7 +198,7 @@
   }
 
   // ---------------------------------------------------------------- mini-formalar
-  function fieldHtml(id, label, val, ph) { return '<label class="lzc-f"><span>' + label + '</span><input type="text" data-f="' + id + '" value="' + esc(val == null ? "" : val) + '" placeholder="' + esc(ph || "") + '" autocomplete="off"></label>'; }
+  function fieldHtml(id, label, val, ph) { return '<label class="lzc-f"><span>' + label + '</span><input type="text" inputmode="decimal" data-f="' + id + '" value="' + esc(val == null ? "" : val) + '" placeholder="' + esc(ph || "") + '" autocomplete="off"></label>'; }
   function num(pane, id) {
     var i = $('[data-f="' + id + '"]', pane); if (!i) return NaN; var v = i.value.trim(); if (!v) return NaN;
     var r = C.run(v, { vars: {}, deg: true, ans: 0 }); return r.kind === "value" ? r.value : NaN;
@@ -316,7 +323,7 @@
   };
   function buildUnits(pane) {
     pane.innerHTML = '<div class="lzc-tool"><label class="lzc-f"><span>Kattalik</span><select id="lzu-cat" class="lzc-sel">' + Object.keys(UNITS).map(function (k) { return "<option>" + k + "</option>"; }).join("") + "</select></label>" +
-      '<div class="lzc-g3"><input type="text" id="lzu-v" class="lzc-in" value="1"><select id="lzu-a" class="lzc-sel"></select><select id="lzu-b" class="lzc-sel"></select></div><div class="lzc-res" id="lzu-r"></div></div>';
+      '<div class="lzc-g3"><input type="text" inputmode="decimal" id="lzu-v" class="lzc-in" value="1"><select id="lzu-a" class="lzc-sel"></select><select id="lzu-b" class="lzc-sel"></select></div><div class="lzc-res" id="lzu-r"></div></div>';
     var cat = $("#lzu-cat", pane), a = $("#lzu-a", pane), b = $("#lzu-b", pane), v = $("#lzu-v", pane), r = $("#lzu-r", pane);
     function fill() { var u = Object.keys(UNITS[cat.value]); a.innerHTML = u.map(function (x) { return "<option>" + x + "</option>"; }).join(""); b.innerHTML = a.innerHTML; b.selectedIndex = Math.min(1, u.length - 1); calcU(); }
     function calcU() {

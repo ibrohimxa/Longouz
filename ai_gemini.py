@@ -143,6 +143,7 @@ def _build_system_prompt(subject: str, effort: str = "normal") -> str:
 
 
 _FALLBACK_MODELS = ("gemini-flash-latest", "gemini-2.5-flash")
+_GOOD_MODEL: dict = {}
 _MATHY = __import__("re").compile(r"[0-9=+*/^<>%]|masala|hisobla|yech|formula|tenglama|isbot|nechta|necha")
 
 
@@ -191,9 +192,12 @@ async def ask_gemini(
             cfg["thinking_config"] = {"thinking_level": level_name}
         return cfg
 
-    attempts = [(GEMINI_MODEL, True), (GEMINI_MODEL, False)]
+    primary = ai_keys.get("GEMINI_MODEL", GEMINI_MODEL) or GEMINI_MODEL
+    if _GOOD_MODEL.get("m"):
+        primary = _GOOD_MODEL["m"]
+    attempts = [(primary, False)] if _GOOD_MODEL.get("think") is False else [(primary, True), (primary, False)]
     for fallback in _FALLBACK_MODELS:
-        if fallback != GEMINI_MODEL:
+        if fallback != primary:
             attempts.append((fallback, False))
 
     for model, with_thinking in attempts:
@@ -202,6 +206,8 @@ async def ask_gemini(
             text = (response.text or "").strip()
             if text:
                 ai_diagnostics.clear_error("gemini")
+                _GOOD_MODEL["think"] = with_thinking
+                _GOOD_MODEL["m"] = model  # keyingi so'rovlar to'g'ridan-to'g'ri ishlagan modeldan boshlanadi (tezroq)
                 return text
             logger.warning("Gemini bo'sh javob qaytardi (model=%s, thinking=%s) — keyingi urinish.", model, with_thinking)
         except genai_errors.APIError as e:

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Xotira — Admin — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/admin-dash.css">
+  <link rel="stylesheet" href="/static/admin.css">
+  <link rel="stylesheet" href="/static/admin-studio.css">
+  
+  <script src="/static/theme-init.js"></script>
+</head>
+<body data-logged-in="true" data-admin-prefix="{{ admin_prefix }}">
+  <div class="app-shell">
+    {% include "_admin_sidebar.html" %}
+    <div class="app-content">
+      <div class="app-topbar"><div>
+        <h1>Xotira</h1>
+        <p>Platforma haqidagi eslatmalar, rejalar va qilingan o'zgarishlar tarixi. AI yordamchi (Studio) shu xotirani o'qib javob beradi.</p>
+      </div></div>
+      <style>
+        .mem-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:900px){.mem-grid{grid-template-columns:1fr}}
+        .mem-card{padding:18px;border-radius:16px;background:var(--bg-elevated);border:1px solid var(--border,rgba(127,127,127,.2));margin-bottom:16px}
+        .mem-card textarea{width:100%;min-height:220px;padding:12px;border-radius:12px;border:1px solid rgba(127,127,127,.3);background:transparent;color:inherit;font:inherit;line-height:1.5;resize:vertical}
+        .mem-log{max-height:520px;overflow:auto}.mem-log div{padding:10px 0;border-bottom:1px solid rgba(127,127,127,.15)}
+        .mem-log small{opacity:.7}.mem-row{display:flex;gap:8px;margin-top:10px}.mem-row input{flex:1;padding:10px 12px;border-radius:10px;border:1px solid rgba(127,127,127,.3);background:transparent;color:inherit}
+      </style>
+      <div class="mem-grid">
+        <div class="mem-card"><h3 style="margin:0 0 8px">Eslatmalar</h3><textarea id="mem-notes" placeholder="Masalan: to'lov tizimi Click orqali; reklama 1-noyabrda boshlanadi…">{{ m.notes }}</textarea></div>
+        <div class="mem-card"><h3 style="margin:0 0 8px">Rejalar</h3><textarea id="mem-plans" placeholder="Keyingi qilinadigan ishlar…">{{ m.plans }}</textarea></div>
+      </div>
+      <button class="btn-primary" id="mem-save">Saqlash</button> <span id="mem-st" style="margin-left:10px"></span>
+      <div class="mem-card" style="margin-top:16px"><h3 style="margin:0 0 8px">O'zgarishlar tarixi</h3>
+        <div class="mem-row"><input id="mem-new" placeholder="Yangi yozuv qo'shish (masalan: 'Fizika bankiga 50 ta savol qo'shildi')"><button class="btn-secondary" id="mem-add">Qo'shish</button></div>
+        <div class="mem-log">{% for e in m.log|reverse %}<div><small>{{ e.t }} · {{ e.who }}</small><br>{{ e.text }}</div>{% else %}<div>Hali yozuv yo'q.</div>{% endfor %}</div>
+      </div>
+      <script>
+      (function(){
+        async function save(extra){
+          var st=document.getElementById('mem-st'); st.textContent='Saqlanmoqda…';
+          var body=Object.assign({notes:document.getElementById('mem-notes').value,plans:document.getElementById('mem-plans').value},extra||{});
+          try{var r=await fetch('{{ admin_prefix }}/api/memory/save',{method:'POST',headers:{'Content-Type':'application/json','X-Requested-With':'fetch'},body:JSON.stringify(body)});
+            st.textContent=r.ok?'Saqlandi':'Xato'; if(r.ok&&extra) location.reload();}catch(e){st.textContent='Xato';}
+        }
+        document.getElementById('mem-save').onclick=function(){save();};
+        document.getElementById('mem-add').onclick=function(){var v=document.getElementById('mem-new').value.trim(); if(v) save({log:v});};
+      })();
+      </script>
+    </div>
+  </div>
+  <script src="/static/devtools-guard.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

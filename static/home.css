@@ -14,7 +14,7 @@ html[data-theme="light"] body.home {
   --h-ink: #0d2230; --h-mute: #5d7480; --h-shadow: 0 18px 44px rgba(18,120,90,.12);
   background: radial-gradient(1100px 560px at 80% -60px, rgba(25,211,148,.22), transparent 62%), radial-gradient(800px 420px at 0% 10%, rgba(120,220,255,.16), transparent 60%), var(--h-bg);
 }
-body.home h1, body.home h2, body.home h3 { font-family: "Fraunces", Georgia, serif; }
+body.home h1, body.home h2, body.home h3 { font-family: "Fraunces", "Times New Roman", Times, serif; }
 .hm-wrap { max-width: 1180px; margin: 0 auto; padding: 0 28px; }
 .hm-pill { display: inline-flex; align-items: center; gap: 7px; padding: 6px 13px; border-radius: 999px; background: rgba(25,211,148,.12); color: var(--g); border: 1px solid rgba(25,211,148,.28); font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
 .hm-pill svg { width: 13px; height: 13px; }
@@ -453,3 +453,9 @@ body.home .site-header { background: var(--h-bg) !important; }
 @media (max-width:900px){.lz-foot-grid{grid-template-columns:1fr 1fr}.lz-foot-brand{grid-column:1/-1}}
 @media (max-width:420px){.lz-foot{padding:36px 18px 22px !important}.lz-foot-grid{gap:22px}}
 @media (min-width:1700px){.lz-foot-grid,.lz-foot-bottom{max-width:1400px}}
+/* v228: bosh sahifa matnlari tiniqroq */
+body.home { --h-ink: #f3f8f6; --h-mute: #c2d2cd; }
+html[data-theme="light"] body.home { --h-ink: #071a26; --h-mute: #2c4452; }
+body.home p, body.home .hm-lead { font-weight: 450; }
+.hm-float .hm-fin { will-change: auto !important; }
+body.home h1, body.home h2 { font-weight: 700; letter-spacing: -.005em; }

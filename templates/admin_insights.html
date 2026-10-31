@@ -58,6 +58,16 @@
           {% for i in range((ov.days or [])|length) %}<tr><td>{{ ov.days[i] }}</td><td>{{ ov.signups[i] }}</td><td>{{ ov.quizzes[i] }}</td></tr>{% endfor %}</table>
         </div>
       </div>
+      <div class="ins-grid">
+        <div class="ins-card"><h3 style="margin:0 0 8px">Eng faol o'quvchilar (30 kun)</h3>
+          <table class="ins-tbl"><tr><td><b>O'quvchi</b></td><td><b>Tarif</b></td><td><b>Test</b></td><td><b>To'g'ri</b></td></tr>
+          {% for u in top %}<tr><td>{{ u.name }}<br><small style="opacity:.7">{{ u.email }}</small></td><td>{{ u.plan|upper }}</td><td>{{ u.tests }}</td><td>{{ u.correct }}/{{ u.total }} ({{ u.pct }}%)</td></tr>{% else %}<tr><td colspan="4">Hali test yechilmagan</td></tr>{% endfor %}</table>
+        </div>
+        <div class="ins-card"><h3 style="margin:0 0 8px">AI holati</h3>
+          <table class="ins-tbl">{% for a in ai %}<tr><td>{{ a.label }}</td><td style="text-align:right;color:{{ '#2fbf83' if a.ok else '#e5a03a' }}">{{ a.state }}</td></tr>{% endfor %}</table>
+          <p style="margin:10px 0 0;font-size:.85rem;opacity:.8">Kalitlarni <a href="{{ admin_prefix }}/keys">Kalitlar</a> bo'limida boshqarasiz. Gemini bepul; Claude uchun Anthropic hisobida kredit kerak.</p>
+        </div>
+      </div>
       <div class="ins-card ins-ai">
         <h3 style="margin:0 0 6px">Claude tahlili</h3>
         <p style="margin:0 0 10px;opacity:.8">Yuqoridagi barcha raqamlar Claude'ga yuboriladi: u muammolarni va keyingi qadamlarni yozadi.</p>

@@ -261,8 +261,70 @@ async def apply_fix(report_id: int, admin: str, override: dict | None = None) ->
             await db.create_notification(uid, "report", body="Siz yuborgan shikoyat ko'rib chiqildi va savol tuzatildi. Rahmat — bu platformani yaxshilaydi!", title="Shikoyatingiz ko'rib chiqildi")
         except Exception:  # noqa: BLE001
             logger.debug("bildirishnoma yuborilmadi", exc_info=True)
-    await db.log_admin_action(admin, "report_fix", f"shikoyat #{report_id} -> savol #{qid}")
-    return {"ok": True, "question_id": qid, "resolved": len(reporters)}
+    regr = {"logs": 0, "users": 0}
+    try:
+        regr = await regrade_question(qid)
+    except Exception:  # noqa: BLE001
+        logger.exception("Qayta baholashda xato")
+    await db.log_admin_action(admin, "report_fix", f"shikoyat #{report_id} -> savol #{qid}; qayta baholandi: {regr['logs']} ta natija, {regr['users']} o'quvchi")
+    return {"ok": True, "question_id": qid, "resolved": len(reporters), "regraded": regr}
+
+
+async def regrade_question(qid: int) -> dict:
+    """Savol tuzatilgandan keyin: shu savol tushgan barcha test natijalarini qayta tekshiradi.
+    Yangi to'g'ri javobga mos javob bergan o'quvchining bali OSHADI (kamaytirilmaydi) va unga xabar boradi."""
+    import exam_rules
+    async with db.async_session() as session:
+        q = await session.get(db.Question, qid)
+        if q is None:
+            return {"logs": 0, "users": 0}
+        new_ci = q.correct_index
+        try:
+            opts = json.loads(q.options_json or "[]")
+        except ValueError:
+            opts = []
+        new_accept = opts if (q.qtype or "") == "open" else []
+        new_correct_text = (str(opts[new_ci]).strip().lower() if (q.qtype or "") != "open" and isinstance(new_ci, int) and 0 <= new_ci < len(opts) else "")
+        rows = (await session.execute(select(db.WebQuizLog).where(db.WebQuizLog.questions_json.like(f'%"id": {qid}%')))).scalars().all()
+        changed_users: dict[int, int] = {}
+        n_logs = 0
+        for log in rows:
+            try:
+                items = json.loads(log.questions_json or "[]")
+            except ValueError:
+                continue
+            gained = 0
+            for it in items:
+                if not isinstance(it, dict) or it.get("id") != qid or it.get("is_correct"):
+                    continue
+                ok = False
+                if (it.get("qtype") or "closed") == "open":
+                    ut = (it.get("user_text") or "").strip()
+                    ok = bool(ut) and exam_rules.check_open_answer(ut, new_accept or it.get("accept") or [])
+                else:
+                    ui, iopts = it.get("user_index"), it.get("options") or []
+                    # variantlar testda aralashtirilgan — raqam emas, tanlangan variant MATNI solishtiriladi
+                    chosen = str(iopts[ui]).strip().lower() if isinstance(ui, int) and 0 <= ui < len(iopts) else ""
+                    ok = bool(chosen) and bool(new_correct_text) and chosen == new_correct_text
+                    if ok:
+                        it["correct_index"] = ui
+                if ok:
+                    it["is_correct"] = True
+                    it["regraded"] = True
+                    gained += 1
+            if gained:
+                log.correct_count = min(log.total_count or 0, (log.correct_count or 0) + gained) or (log.correct_count or 0) + gained
+                log.questions_json = json.dumps(items, ensure_ascii=False)
+                n_logs += 1
+                changed_users[log.user_id] = changed_users.get(log.user_id, 0) + gained
+        await session.commit()
+    for uid, g in changed_users.items():
+        try:
+            await db.create_notification(uid, "report", title="Natijangiz qayta hisoblandi",
+                                         body=f"Testdagi bir savol tekshirilib tuzatildi. Sizning javobingiz to'g'ri deb qabul qilindi: natijangizga +{g} ta to'g'ri javob qo'shildi.")
+        except Exception:  # noqa: BLE001
+            logger.debug("bildirishnoma yuborilmadi", exc_info=True)
+    return {"logs": n_logs, "users": len(changed_users)}
 
 
 async def dismiss(report_id: int, note: str, admin: str) -> None:

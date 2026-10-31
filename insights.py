@@ -160,7 +160,85 @@ ANALYZE_SYSTEM = (
 )
 
 
+async def top_users(days: int = 30, limit: int = 15) -> list[dict]:
+    since = datetime.utcnow() - timedelta(days=days)
+    try:
+        async with db.async_session() as session:
+            rows = (await session.execute(
+                select(db.WebQuizLog.user_id, func.count(db.WebQuizLog.id), func.sum(db.WebQuizLog.correct_count), func.sum(db.WebQuizLog.total_count))
+                .where(db.WebQuizLog.created_at >= since).group_by(db.WebQuizLog.user_id)
+                .order_by(func.count(db.WebQuizLog.id).desc()).limit(limit))).all()
+            out = []
+            for uid, n, c, t in rows:
+                u = await session.get(db.WebUser, uid)
+                out.append({"name": (u.first_name if u else "—") or "—", "email": (u.email if u else ""), "plan": (u.plan if u else ""),
+                            "tests": n, "correct": int(c or 0), "total": int(t or 0), "pct": round(100 * (c or 0) / t) if t else 0})
+            return out
+    except Exception:  # noqa: BLE001
+        return []
+
+
+def ai_status() -> list[dict]:
+    try:
+        import ai_claude
+        import ai_diagnostics
+        import ai_gemini
+        out = []
+        for prov, label, conf in (("gemini", "Gemini (bepul, asosiy)", ai_gemini.is_gemini_configured()),
+                                  ("claude", "Claude (pullik)", bool(__import__("ai_config").anthropic_key()))):
+            rec = ai_diagnostics._last_errors.get(prov)
+            state = "kalit yo'q" if not conf else ("xato: " + rec[1] if rec else "ishlayapti / tayyor")
+            if prov == "claude" and rec and rec[1] == "credit":
+                state = "kredit yo'q (Gemini ishlatilmoqda)"
+            out.append({"label": label, "state": state, "ok": conf and not rec})
+        return out
+    except Exception:  # noqa: BLE001
+        return []
+
+
+MEMORY_KEY = "admin_memory_json"
+
+
+async def get_memory() -> dict:
+    try:
+        data = json.loads(await db.get_setting(MEMORY_KEY, "") or "{}")
+    except ValueError:
+        data = {}
+    return {"notes": data.get("notes", ""), "plans": data.get("plans", ""), "log": data.get("log", [])[-200:]}
+
+
+async def add_memory_log(text: str, who: str = "Claude") -> None:
+    m = await get_memory()
+    m["log"].append({"t": datetime.utcnow().strftime("%Y-%m-%d %H:%M"), "who": who, "text": text[:2000]})
+    await db.set_setting(MEMORY_KEY, json.dumps(m, ensure_ascii=False))
+
+
 def register(app, prefix: str, require_admin, templates) -> None:
+    @app.get(f"{prefix}/memory", response_class=HTMLResponse)
+    async def memory_page(request: Request):
+        if not require_admin(request):
+            return RedirectResponse(f"{prefix}/login", status_code=302)
+        return templates.TemplateResponse(request, "admin_memory.html", {"active_tab": "memory", "m": await get_memory()})
+
+    @app.post(f"{prefix}/api/memory/save")
+    async def memory_save(request: Request):
+        if not require_admin(request):
+            raise HTTPException(status_code=401, detail="Admin sifatida kiring.")
+        if request.headers.get("x-requested-with") != "fetch":
+            raise HTTPException(status_code=400, detail="Noto'g'ri so'rov.")
+        body = await request.json()
+        m = await get_memory()
+        if "notes" in body:
+            m["notes"] = str(body["notes"])[:20000]
+        if "plans" in body:
+            m["plans"] = str(body["plans"])[:20000]
+        if str(body.get("log", "")).strip():
+            m["log"].append({"t": datetime.utcnow().strftime("%Y-%m-%d %H:%M"), "who": "admin", "text": str(body["log"])[:2000]})
+        await db.set_setting(MEMORY_KEY, json.dumps(m, ensure_ascii=False))
+        # AI yordamchi shu xotirani kontekst sifatida o'qiydi
+        await db.set_setting("admin_memory", (m["notes"] + "\n\nREJALAR:\n" + m["plans"])[-6000:])
+        return JSONResponse({"ok": True})
+
     @app.get(f"{prefix}/insights", response_class=HTMLResponse)
     async def insights_page(request: Request):
         if not require_admin(request):
@@ -172,7 +250,7 @@ def register(app, prefix: str, require_admin, templates) -> None:
         except Exception:  # noqa: BLE001
             ov = {}
         return templates.TemplateResponse(request, "admin_insights.html", {
-            "active_tab": "insights", "s": s, "c": c, "ov": ov,
+            "active_tab": "insights", "s": s, "c": c, "ov": ov, "top": await top_users(), "ai": ai_status(),
             "max_hits": max([d["hits"] for d in s["daily"]] + [1]),
         })
 
@@ -188,7 +266,7 @@ def register(app, prefix: str, require_admin, templates) -> None:
             ov = await db.admin_overview()
         except Exception:  # noqa: BLE001
             ov = {}
-        payload = json.dumps({"tashriflar": s, "hisoblar": c, "faollik": ov}, ensure_ascii=False, default=str)[:24000]
+        payload = json.dumps({"tashriflar": s, "hisoblar": c, "faollik": ov, "eng_faol": await top_users(), "ai": ai_status()}, ensure_ascii=False, default=str)[:24000]
         import studio
         data = await studio.ai_json(ANALYZE_SYSTEM, payload, max_tokens=2500, timeout=55)
         if not data:

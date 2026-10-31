@@ -207,12 +207,69 @@ def text_match(user_text: str, accepted_text: str) -> bool:
     return False
 
 
+_EXPR_OK = re.compile(r"^[0-9.,+\-*/^()√π\s]+$")
+
+
+def eval_expr(text) -> float | None:
+    """Matematik ifodani xavfsiz hisoblaydi: √8, 2√2, sqrt(16), 3^2, 1 1/2, π/2, 'x = 3'. Birlik yoki harf bo'lsa — None."""
+    import ast
+    import math
+    s = _prep(text).lower().strip()
+    s = re.sub(r"^[a-z]\s*=\s*", "", s)                      # x = 3 -> 3
+    s = s.replace("sqrt", "√").replace("pi", "π").replace("×", "*").replace("·", "*").replace(":", "/").replace("÷", "/")
+    s = re.sub(r"(\d),(\d)", r"\1.\2", s)                      # 0,5 -> 0.5
+    if not s or not _EXPR_OK.match(s):
+        return None
+    s = re.sub(r"^\s*(\d+)\s+(\d+)\s*/\s*(\d+)\s*$", r"(\1+\2/\3)", s)   # 1 1/2 aralash kasr
+    s = re.sub(r"\s+", "", s)
+    s = re.sub(r"√\(", "sqrt(", s)
+    s = re.sub(r"√([0-9.]+|π)", r"sqrt(\1)", s)
+    s = s.replace("π", "pi").replace("^", "**")
+    s = re.sub(r"(\d|\))(sqrt|pi|\()", r"\1*\2", s)           # 2√2 -> 2*sqrt(2)
+    try:
+        tree = ast.parse(s, mode="eval")
+    except SyntaxError:
+        return None
+    def ev(n):
+        if isinstance(n, ast.Expression):
+            return ev(n.body)
+        if isinstance(n, ast.Constant) and isinstance(n.value, (int, float)):
+            return float(n.value)
+        if isinstance(n, ast.Name) and n.id == "pi":
+            return math.pi
+        if isinstance(n, ast.UnaryOp) and isinstance(n.op, (ast.UAdd, ast.USub)):
+            v = ev(n.operand)
+            return v if isinstance(n.op, ast.UAdd) else -v
+        if isinstance(n, ast.BinOp) and isinstance(n.op, (ast.Add, ast.Sub, ast.Mult, ast.Div, ast.Pow)):
+            a, b = ev(n.left), ev(n.right)
+            if isinstance(n.op, ast.Pow) and (abs(b) > 50 or abs(a) > 1e6):
+                raise ValueError
+            return {ast.Add: a + b, ast.Sub: a - b, ast.Mult: a * b}.get(type(n.op)) if not isinstance(n.op, (ast.Div, ast.Pow)) else (a / b if isinstance(n.op, ast.Div) else a ** b)
+        if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == "sqrt" and len(n.args) == 1:
+            v = ev(n.args[0])
+            if v < 0:
+                raise ValueError
+            return math.sqrt(v)
+        raise ValueError
+    try:
+        v = ev(tree)
+        return v if isinstance(v, float) and math.isfinite(v) else None
+    except (ValueError, ZeroDivisionError, OverflowError, TypeError):
+        return None
+
+
 def check_open_answer(user_answer, accepted: list[str]) -> bool:
     if user_answer is None:
         return False
     ua = str(user_answer)
     if not ua.strip():
         return False
+    uv = eval_expr(ua)
+    for acc in accepted or []:
+        if uv is not None:
+            av = eval_expr(acc)
+            if av is not None and abs(uv - av) <= 1e-9 + 0.005 * abs(av):
+                return True
     for acc in accepted or []:
         acc = str(acc)
         nm = numbers_match(ua, acc)

@@ -78,7 +78,7 @@ async def ai_json(system: str, user: str | list, max_tokens: int = 6000, timeout
     if ai_gemini.is_gemini_configured() and isinstance(user, str):
         try:
             resp = await asyncio.wait_for(ai_gemini._call_gemini_with_retry(
-                model=ai_keys.get("GEMINI_MODEL", "gemini-3.6-flash"), contents=user,
+                model=ai_keys.get("GEMINI_MODEL", "gemini-flash-latest"), contents=user,
                 config={"system_instruction": system, "max_output_tokens": max_tokens,
                         "automatic_function_calling": ai_gemini._NO_AFC_CONFIG}), timeout=timeout)
             return _json_from_text(resp.text or "")
@@ -557,11 +557,75 @@ async def _tool_get(qid: int) -> dict:
             "difficulty": q.difficulty, "min_plan": q.min_plan, "active": q.is_active, "has_figure": bool(q.figure_json), "grade": q.grade}
 
 
+GEMINI_ASSISTANT_SYSTEM = ASSISTANT_SYSTEM + (
+    " Sizga bazaning joriy holati (KONTEKST) JSON ko'rinishida beriladi — faqat shunga tayaning. Javobni FAQAT JSON qaytaring: "
+    '{"reply": "admin uchun o\'zbekcha javob", "actions": [{"type": "update_question"|"delete_question"|"create_questions", '
+    '"payload": {...propose_* vositalaridagi kabi maydonlar...}, "reason": "sabab"}]}. Taklif kerak bo\'lmasa actions — bo\'sh ro\'yxat.'
+)
+
+
+async def _assistant_context(last_text: str) -> dict:
+    import re as _re
+    ctx: dict = {}
+    try:
+        ctx["baza"] = (await bank_overview())["table"]
+    except Exception:  # noqa: BLE001
+        pass
+    try:
+        import insights
+        ctx["sayt"] = await insights.summary(7)
+        ctx["hisoblar"] = await insights._counts()
+    except Exception:  # noqa: BLE001
+        pass
+    try:
+        ctx["xotira"] = (await db.get_setting("admin_memory", ""))[-3000:]
+    except Exception:  # noqa: BLE001
+        pass
+    ids = [int(x) for x in _re.findall(r"(?:#|id[:\s]*)(\d{1,7})", last_text, _re.I)][:5]
+    if ids:
+        ctx["savollar"] = []
+        for qid in ids:
+            try:
+                ctx["savollar"].append(await _tool_get(qid))
+            except Exception:  # noqa: BLE001
+                pass
+    subj = next((c for c in ("math", "physics", "chemistry", "biology", "history", "english", "russian", "native")
+                 if c in last_text.lower() or {"math": "matemat", "physics": "fizika", "chemistry": "kimyo", "biology": "biolog",
+                                               "history": "tarix", "english": "ingliz", "russian": "rus tili", "native": "ona tili"}[c] in last_text.lower()), None)
+    if subj:
+        try:
+            ctx["mavzular"] = (await topic_report(subj, "dtm"))[:120]
+        except Exception:  # noqa: BLE001
+            pass
+    return ctx
+
+
+async def _run_assistant_gemini(msgs: list[dict]) -> dict:
+    import ai_gemini
+    if not ai_gemini.is_gemini_configured():
+        return {"reply": "AI kaliti ishlamayapti: Claude'da kredit yo'q va Gemini kaliti kiritilmagan. Admin → Kalitlar sahifasida BEPUL Gemini kalitini kiriting (aistudio.google.com/app/apikey).", "actions": []}
+    ctx = await _assistant_context(msgs[-1]["content"] if msgs else "")
+    convo = "\n".join(("ADMIN: " if m["role"] == "user" else "YORDAMCHI: ") + str(m["content"])[:2000] for m in msgs[-8:])
+    prompt = "KONTEKST:\n" + json.dumps(ctx, ensure_ascii=False, default=str)[:30000] + "\n\nSUHBAT:\n" + convo
+    data = await ai_json(GEMINI_ASSISTANT_SYSTEM, prompt, max_tokens=3000, timeout=45)
+    if not isinstance(data, dict):
+        return {"reply": "Gemini hozir javob bera olmadi (limit yoki tarmoq). Bir daqiqadan so'ng qayta urinib ko'ring.", "actions": []}
+    actions = []
+    for i, a in enumerate((data.get("actions") or [])[:10]):
+        if isinstance(a, dict) and a.get("type") in ("update_question", "delete_question", "create_questions"):
+            actions.append({"id": f"a{i + 1}", "type": a["type"], "payload": a.get("payload") or {}, "reason": str(a.get("reason", ""))[:400]})
+    return {"reply": str(data.get("reply", "")).strip() or "Tayyor.", "actions": actions, "provider": "gemini"}
+
+
 async def run_assistant(messages: list[dict]) -> dict:
     import ai_claude
+    import ai_diagnostics
     client = ai_claude._get_client()
     if client is None:
-        return {"reply": "Claude kaliti sozlanmagan. Admin → AI holati sahifasida ANTHROPIC_API_KEY ni kiriting.", "actions": []}
+        msgs0 = [{"role": "assistant" if m.get("role") == "assistant" else "user", "content": str(m.get("text", ""))[:4000]} for m in messages[-12:] if str(m.get("text", "")).strip()]
+        if not msgs0 or msgs0[-1]["role"] != "user":
+            return {"reply": "Savol yozing.", "actions": []}
+        return await _run_assistant_gemini(msgs0)
     msgs = [{"role": "assistant" if m.get("role") == "assistant" else "user", "content": str(m.get("text", ""))[:4000]} for m in messages[-12:] if str(m.get("text", "")).strip()]
     if not msgs or msgs[-1]["role"] != "user":
         return {"reply": "Savol yozing.", "actions": []}
@@ -577,6 +641,11 @@ async def run_assistant(messages: list[dict]) -> dict:
                 model=ai_keys.get("CLAUDE_MODEL", "claude-sonnet-5-5"), max_tokens=2500, system=ASSISTANT_SYSTEM, tools=_TOOLS, messages=msgs), timeout=40)
         except Exception as exc:  # noqa: BLE001
             logger.warning("Yordamchi xatosi: %s", exc)
+            ai_diagnostics.record_error("claude", exc)
+            if not reply and not actions:
+                # Claude kreditsiz/ishlamayapti — bepul Gemini bilan javob beramiz
+                base = [m for m in msgs if isinstance(m.get("content"), str)]
+                return await _run_assistant_gemini(base or msgs)
             reply = reply or "AI hozir javob bera olmadi. Birozdan so'ng qayta urinib ko'ring."
             break
         text_parts = [b.text for b in resp.content if getattr(b, "type", "") == "text"]

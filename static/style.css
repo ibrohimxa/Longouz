@@ -18,8 +18,8 @@
   --error: #F85149;
   --success: #2FBF83;
 
-  --font-display: "Fraunces", serif;
-  --font-body: "Inter", sans-serif;
+  --font-display: "Fraunces", "Times New Roman", Times, serif;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
 
   --radius: 10px;
   --shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
@@ -4247,3 +4247,21 @@ html.owl-scrolling #owl-pin-button { opacity: .25; }
   .site-header .theme-toggle { width: 50px !important; height: 28px !important; }
 }
 @media (max-width: 350px) { .site-header .brand .lg-word { display: none; } }
+
+/* ===== v228: tiniqlik — matn kontrasti, shrift qalinligi, silliqlash ===== */
+:root { --ink: #F1F6FA; --ink-soft: #B4C0CC; }
+[data-theme="light"] { --ink: #0a1a2e; --ink-soft: #33465e; }
+html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; -webkit-text-size-adjust: 100%; }
+body { font-weight: 450; }
+p, li, label, small, .dash-sub, .dash-kpi-label, .pf-me-info span, .notif-item-body { opacity: 1 !important; }
+.dash-sub, .dash-hero p { opacity: 1 !important; }
+img { image-rendering: auto; }
+.lg-owl, .living-owl-img { image-rendering: -webkit-optimize-contrast; }
+/* v228: sarlavha (tepadagi bar) biroz balandroq */
+.site-header { min-height: 72px; padding-top: 14px !important; padding-bottom: 14px !important; }
+@media (max-width: 560px) { .site-header { min-height: 64px; padding-top: 12px !important; padding-bottom: 12px !important; } }
+/* v228: boyqush (AI chat) tugmasi avvalgidek — doim to'liq ko'rinadi, aylantirganda xiralashmaydi */
+html.owl-scrolling #owl-pin-button { opacity: 1 !important; transform: none !important; pointer-events: auto !important; }
+#owl-pin-button { opacity: 1 !important; background: radial-gradient(circle at 50% 40%, #1d3b34, #0d1d19); border: 2px solid rgba(47,191,131,.55); box-shadow: 0 8px 22px rgba(0,0,0,.35), 0 0 0 4px rgba(47,191,131,.12); }
+[data-theme="light"] #owl-pin-button { background: radial-gradient(circle at 50% 40%, #ffffff, #e8f6ef); border-color: rgba(31,95,216,.35); }
+@media (max-width: 900px) { #owl-pin-button { width: 54px; height: 54px; } }

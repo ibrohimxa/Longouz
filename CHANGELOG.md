@@ -26,6 +26,14 @@ Har yuborilgan zip: `longouz_v<N>.zip`, versiya raqami `VERSION` faylida.
 - **Kabinet (dashboard)**: hero'dagi tog'/quyosh/oy va har soniyada qayta chiziladigan skript olib tashlandi — oddiy yashil karta.
 - **Tezlik**: 3 soniyalik kirish (intro) ekrani olib tashlandi (bosh sahifa, kirish, ro'yxatdan o'tish darhol ochiladi); sahifalar gzip bilan siqiladi (bosh sahifa ~50 KB → ~11 KB); statik fayllar keshlanadi; og'ir blur (backdrop-filter) va telefonda doimiy animatsiyalar o'chirildi; Vercel'da fon yuklash bir instansni 12 soniyadan ortiq band qilmaydi.
 
+## v228 — tiniqlik, kalkulyator, AI yordamchi, qayta baholash, Xotira
+- Matnlar tiniqroq: kontrast oshirildi (tun va kun), shrift silliqlash, sarlavha shrifti zaxirasi — Times New Roman; sarlavha paneli balandroq; boyqush (AI chat) tugmasi doim to'liq ko'rinadi.
+- Kalkulyator: telefonda qurilma klaviaturasi chiqmaydi (o'z tugmalari bor; kerak bo'lsa ⌨ bilan yoqiladi), son maydonlarida faqat raqam klaviaturasi.
+- AI: Gemini standart modeli "gemini-flash-latest", ishlagan model eslab qolinadi (tezroq). Admin Studio yordamchisi Claude kreditsiz bo'lsa bepul Gemini bilan ishlaydi (baza, sayt statistikasi va Xotira kontekst sifatida beriladi).
+- Shikoyat bo'yicha savol tuzatilganda shu savolni yechgan barcha natijalar qayta tekshiriladi: yangi to'g'ri javobga mos javob bergan o'quvchining bali oshadi va xabar boradi.
+- Ochiq javob: √8 = 2√2, sqrt(16) = 4, 1 1/2 = 3/2, π/2, 3^2, "x = 3" ham to'g'ri qabul qilinadi.
+- Admin: yangi "Xotira" bo'limi (eslatmalar, rejalar, o'zgarishlar tarixi), "Sayt tahlili"da eng faol o'quvchilar va AI holati.
+
 ## v227 — AI kalitlari: Gemini bepul asosiy, Claude ixtiyoriy
 - Gemini kaliti yangi formatda ('AQ.…') ham qabul qilinadi (eski 'AIza…' ham).
 - Claude API pullik: kredit bo'lmasa kalit saqlanadi, aniq izoh chiqadi, AI repetitor avtomatik bepul Gemini'ga o'tadi; kredit/kalit xatosidan keyin Claude 30 daqiqa o'tkazib yuboriladi (sayt kutib qolmaydi).
