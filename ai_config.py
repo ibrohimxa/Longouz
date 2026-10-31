@@ -43,7 +43,8 @@ ANTHROPIC_WORKSPACE_ID = os.getenv("ANTHROPIC_WORKSPACE_ID", "")
 # --- Gemini — tezkor, oddiy darajadagi repetitor chat ---
 # XAVFSIZLIK: xuddi yuqoridagidek — standart qiymatda haqiqiy kalit YO'Q.
 GEMINI_API_KEY = ai_keys.get("GEMINI_API_KEY")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-flash-latest")
+# v233: eng yangi BEPUL Gemini modeli (2026-yil sentabr, GA). gemini-4-argon bepul tarifda yo'q.
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
 GEMINI_MAX_TOKENS = 1000
 
 # --- Qaysi daraja qaysi AI'ga yo'naltirilsin ---

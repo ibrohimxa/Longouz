@@ -2063,7 +2063,7 @@ _ALLOWED_KEY_NAMES = set(db.ENV_OVERRIDE_NAMES)
 def _key_masks() -> dict:
     import ai_keys
     return {n: ai_keys.mask(ai_keys.get(n)) for n in ("GEMINI_API_KEY", "ANTHROPIC_API_KEY")} | {
-        "GEMINI_MODEL": ai_keys.get("GEMINI_MODEL", "gemini-flash-latest"), "CLAUDE_MODEL": ai_keys.get("CLAUDE_MODEL", "claude-sonnet-5-5")}
+        "GEMINI_MODEL": ai_keys.get("GEMINI_MODEL", "gemini-3.8-flash"), "CLAUDE_MODEL": ai_keys.get("CLAUDE_MODEL", "claude-sonnet-5-5")}
 
 
 @app.post(f"{ADMIN_PREFIX}/api/ai/keys")

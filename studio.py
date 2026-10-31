@@ -59,6 +59,24 @@ def _json_from_text(raw: str):
 _CLAUDE_OFF_UNTIL = 0.0
 
 
+def _blocks_to_gemini(blocks: list) -> list:
+    """Claude content bloklarini (matn / rasm / PDF) Gemini qismlariga o'giradi — PDF/rasm importi Gemini bilan ham ishlasin."""
+    import base64 as _b64
+    from google.genai import types as _gt
+    parts = []
+    for blk in blocks or []:
+        if not isinstance(blk, dict):
+            continue
+        kind = blk.get("type")
+        if kind == "text" and blk.get("text"):
+            parts.append(_gt.Part.from_text(text=str(blk["text"])))
+        elif kind in ("image", "document"):
+            src = blk.get("source") or {}
+            if src.get("type") == "base64" and src.get("data"):
+                parts.append(_gt.Part.from_bytes(data=_b64.b64decode(src["data"]), mime_type=src.get("media_type") or "application/pdf"))
+    return parts
+
+
 async def ai_json(system: str, user: str | list, max_tokens: int = 6000, timeout: float = 50.0):
     """Claude (asosiy) -> Gemini (zaxira). JSON obyektini qaytaradi yoki None. user — matn yoki Claude content bloklari."""
     import ai_claude
@@ -84,10 +102,11 @@ async def ai_json(system: str, user: str | list, max_tokens: int = 6000, timeout
             low = str(exc).lower()
             if any(w in low for w in ("credit", "billing", "invalid x-api-key", "authentication", "permission", "401", "403")):
                 _CLAUDE_OFF_UNTIL = time.monotonic() + 900
-    if ai_gemini.is_gemini_configured() and isinstance(user, str):
+    if ai_gemini.is_gemini_configured():
         try:
+            contents = user if isinstance(user, str) else _blocks_to_gemini(user)
             resp = await asyncio.wait_for(ai_gemini._call_gemini_with_retry(
-                model=ai_keys.get("GEMINI_MODEL", "gemini-flash-latest"), contents=user,
+                model=ai_keys.get("GEMINI_MODEL", "gemini-3.8-flash"), contents=contents,
                 config={"system_instruction": system, "max_output_tokens": max_tokens,
                         "automatic_function_calling": ai_gemini._NO_AFC_CONFIG}), timeout=timeout)
             return _json_from_text(resp.text or "")

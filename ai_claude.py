@@ -37,6 +37,10 @@ def _get_client() -> AsyncAnthropic | None:
     ANTHROPIC_WORKSPACE_ID faqat umumiy (tashkilot) kalitlar uchun header sifatida qo'shiladi."""
     global _client, _client_key
     key = anthropic_key()
+    # v233: egasining talabi — barcha AI Gemini orqali ishlaydi (Claude kreditsiz). Claude'ni qaytarish:
+    # Vercel'da AI_PROVIDER=claude (yoki auto) qo'shiladi.
+    if (ai_keys.get("AI_PROVIDER") or "gemini").strip().lower() == "gemini":
+        key = ""
     if not key:
         _client, _client_key = None, ""
         return None

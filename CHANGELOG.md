@@ -2,6 +2,12 @@
 
 Har yuborilgan zip: `longouz_v<N>.zip`, versiya raqami `VERSION` faylida.
 
+## v233 — barcha AI Gemini'da, eng yangi model
+- Barcha AI (repetitor, suzuvchi chat, ochiq javob tekshiruvi, Speaking/Writing baholash, admin Studio, AI yordamchi, shikoyat tahlili, PDF/rasm importi) endi faqat Gemini orqali ishlaydi — Claude kreditsiz bo'lgani uchun o'chirildi (kalit saqlanadi; qaytarish: `AI_PROVIDER=claude`).
+- Asosiy model: `gemini-3.8-flash` (2026-yil sentabr, bepul tarifdagi eng yangi). Band bo'lsa navbat bilan: gemini-3.6-flash → gemini-flash-latest → gemini-3.5-flash-lite → gemini-2.5-flash.
+- PDF va rasmdan savol import qilish endi Gemini bilan ham ishlaydi (avval faqat Claude bilan).
+- Yangi kalitlar o'rnatildi: Gemini, Google kirish (Client ID/Secret), Anthropic.
+
 ## v232 — Cloudflare Turnstile olib tashlandi
 - Kirish, ro'yxatdan o'tish va tarif oynasidan Cloudflare vidjeti, «Cloudflare Turnstile bilan himoyalangan» yozuvi va skripti butunlay olib tashlandi; server tekshiruvi ham o'chirildi. Botlardan himoya sifatida bir IP'dan daqiqasiga 10 ta urinish cheklovi qoladi. Kalitlar o'chirilmadi — kerak bo'lsa Vercel'da `TURNSTILE_ENABLE=true` bilan qaytariladi.
 
