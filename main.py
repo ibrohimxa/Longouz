@@ -363,12 +363,40 @@ async def require_user(request: Request) -> db.WebUser:
 # Bosh sahifa
 # ---------------------------------------------------------------------------
 
+_QCOUNT_CACHE = {"t": 0.0, "n": 0}
+
+
+async def _question_total() -> int:
+    """Bazadagi HAQIQIY (takrorlanmas) savollar soni — bir savol bir nechta rejimda bo'lsa ham bir marta sanaladi.
+    10 daqiqa keshlanadi — bosh sahifa tez ochilsin."""
+    import time as _t
+    if _QCOUNT_CACHE["n"] and _t.time() - _QCOUNT_CACHE["t"] < 600:
+        return _QCOUNT_CACHE["n"]
+    try:
+        from sqlalchemy import select as _sel, func as _fn
+        async with db.async_session() as _s:
+            n = (await _s.execute(
+                _sel(_fn.count(_fn.distinct(db.Question.question))).where(db.Question.is_active == True)  # noqa: E712
+            )).scalar() or 0
+        _QCOUNT_CACHE.update(t=_t.time(), n=int(n))
+    except Exception:
+        logger.exception("savollar sonini hisoblab bo'lmadi")
+    return _QCOUNT_CACHE["n"]
+
+
+def _question_total_label(n: int) -> str:
+    if n >= 1000:
+        return f"{(n // 500) * 500:,}".replace(",", " ") + "+"
+    return f"{n}+" if n else "Minglab"
+
+
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     user = await get_current_user(request)
     if user:
         return RedirectResponse("/dashboard", status_code=302)
-    return templates.TemplateResponse(request, "home.html")
+    qn = await _question_total()
+    return templates.TemplateResponse(request, "home.html", {"q_total_label": _question_total_label(qn)})
 
 
 
@@ -1296,6 +1324,8 @@ import keys_admin as _keys_admin  # noqa: E402
 _keys_admin.register(app, ADMIN_PREFIX, require_admin, current_admin_username, templates)
 import insights as _insights  # noqa: E402
 _insights.register(app, ADMIN_PREFIX, require_admin, templates)
+import news as _news  # noqa: E402
+_news.register(app, ADMIN_PREFIX, require_admin, templates)
 
 
 @app.get(f"{ADMIN_PREFIX}/import", response_class=HTMLResponse)
@@ -3557,7 +3587,14 @@ async def api_quiz_submit(request: Request, body: QuizSubmitRequest):
     await db.clear_autosaved_progress(body.attempt_token)
 
     certificate = None
-    if not is_block and scoring.certificate_eligible(result):
+    cert_note = ""
+    _min_time = max(60, int(total_count * 10))
+    if not is_block and scoring.certificate_eligible(result) and answered_count * 2 < total_count:
+        cert_note = (f"Sertifikat (PDF) berilmadi: savollarning kamida yarmiga javob berish kerak "
+                     f"(siz {answered_count} / {total_count} ta savolga javob berdingiz).")
+    elif not is_block and scoring.certificate_eligible(result) and int(body.time_spent_seconds or 0) < _min_time:
+        cert_note = "Sertifikat (PDF) berilmadi: test juda tez yakunlandi — savollar to'liq ishlanmadi."
+    elif not is_block and scoring.certificate_eligible(result):
         cert = await db.create_certificate(
             user_id=user.id, subject=subject, mode=mode,
             score_label=result["label"], quiz_log_id=log.id,
@@ -3566,6 +3603,8 @@ async def api_quiz_submit(request: Request, body: QuizSubmitRequest):
         )
         certificate = {"verification_id": cert.verification_id}
 
+    if cert_note:
+        result["certificate_note"] = cert_note
     return JSONResponse({
         "status": "saqlandi", "quiz_id": log.id, "result": result, "certificate": certificate,
     })

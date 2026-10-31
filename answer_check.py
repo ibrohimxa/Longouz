@@ -268,7 +268,14 @@ def check_open_answer(user_answer, accepted: list[str]) -> bool:
     for acc in accepted or []:
         if uv is not None:
             av = eval_expr(acc)
-            if av is not None and abs(uv - av) <= 1e-9 + 0.005 * abs(av):
+            if av is None:
+                continue
+            # butun sonli javob (masalan nukleotidlar soni) — faqat aniq teng bo'lsa to'g'ri;
+            # kasrli javobda yaxlitlash farqiga 0,5% gacha ruxsat (3,14 ≈ π, 1,41 ≈ √2)
+            if abs(av - round(av)) < 1e-9 and abs(uv - round(uv)) < 1e-9:
+                if round(av) == round(uv):
+                    return True
+            elif abs(uv - av) <= 1e-9 + 0.005 * abs(av):
                 return True
     for acc in accepted or []:
         acc = str(acc)

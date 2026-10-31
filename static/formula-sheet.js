@@ -528,6 +528,15 @@
     ).join("");
 
     return `
+      <div class="pt-builder" role="group" aria-label="Molyar massa hisoblagich">
+        <label class="pt-b-label" for="pt-b-in">Molyar massa</label>
+        <div class="pt-b-row">
+          <input type="text" class="pt-b-in" id="pt-b-in" placeholder="Elementni bosib «+» ni bosing yoki yozing: H2SO4" autocomplete="off" spellcheck="false" autocapitalize="off">
+          <button type="button" class="pt-b-clr" id="pt-b-clr" aria-label="Tozalash">&times;</button>
+        </div>
+        <output class="pt-b-out" id="pt-b-out">M = —</output>
+        <div class="pt-b-pick" id="pt-b-pick" hidden></div>
+      </div>
       <div class="pt-toolbar">
         <input type="search" class="fs-search pt-search" placeholder="Element qidirish (nomi, belgisi yoki raqami)…" aria-label="Element qidirish" autocomplete="off">
         <span class="pt-hint">Elementni bosing — tafsilotlari ko'rinadi</span>
@@ -550,6 +559,11 @@
     const isF = cat === "lanthanide" || cat === "actinide";
     const groupText = isF ? "—  (f-elementlar)" : group;
     const periodText = isF ? (cat === "lanthanide" ? 6 : 7) : period;
+    const pick = root.querySelector("#pt-b-pick");
+    if (pick) {
+      pick.hidden = false;
+      pick.innerHTML = `<span class="pt-b-sym pt-cat-${cat}">${sym}</span><span class="pt-b-name">${esc(name)}<small>Z = ${z} · Ar = ${String(mass).replace(".", ",")}</small></span><button type="button" class="pt-add pt-add-quick" data-sym="${sym}" aria-label="${sym} ni formulaga qo'shish">＋ Qo'shish</button>`;
+    }
     const panel = root.querySelector("#pt-detail-panel");
     panel.innerHTML = `
       <div class="pt-detail-symbol pt-cat-${cat}"><small>${z}</small>${sym}<em>${mass}</em></div>
@@ -568,7 +582,39 @@
           <div><b>Holati (25 °C)</b>${stateOf(z)}</div>
           <div class="pt-detail-wide"><b>Elektron konfiguratsiya</b><span class="pt-config">${electronConfig(z)}</span></div>
         </div>
+        <button type="button" class="pt-add" data-sym="${sym}">＋ ${sym} ni formulaga qo'shish</button>
       </div>`;
+  }
+
+  // v229: davriy jadvaldan formula yig'ib, molyar massani darhol hisoblash (masalan H, H, S, O×4 → H2SO4 = 98 g/mol)
+  function ptCalc(root) {
+    const inp = root.querySelector("#pt-b-in"), out = root.querySelector("#pt-b-out");
+    if (!inp || !out) return;
+    const v = inp.value.trim();
+    if (!v) { out.textContent = "M = —"; out.classList.remove("err"); return; }
+    try {
+      if (!window.LZCalc || !window.LZCalc.molarMass) throw new Error("Hisoblagich yuklanmadi");
+      const m = window.LZCalc.molarMass(v, true);
+      const pretty = v.replace(/(\d+)/g, (d) => d.split("").map((c) => "₀₁₂₃₄₅₆₇₈₉"[+c]).join(""));
+      out.textContent = `M(${pretty}) = ${String(Math.round(m.M * 1000) / 1000).replace(".", ",")} g/mol`;
+      out.classList.remove("err");
+    } catch (e) {
+      out.textContent = "Formulani tekshiring";
+      out.classList.add("err");
+    }
+  }
+  function ptAdd(root, sym) {
+    const inp = root.querySelector("#pt-b-in");
+    if (!inp) return;
+    const v = inp.value;
+    const m = v.match(/([A-Z][a-z]?)(\d*)$/);
+    if (m && m[1] === sym) {
+      const n = (parseInt(m[2] || "1", 10) || 1) + 1;
+      inp.value = v.slice(0, v.length - m[0].length) + sym + n;
+    } else {
+      inp.value = v + sym;
+    }
+    ptCalc(root);
   }
 
   function wirePeriodicTableEvents(root) {
@@ -580,6 +626,16 @@
         showElement(root, parseInt(btn.dataset.num, 10));
       });
     });
+
+    const bIn = root.querySelector("#pt-b-in");
+    if (bIn) {
+      bIn.addEventListener("input", () => ptCalc(root));
+      root.querySelector("#pt-b-clr").addEventListener("click", () => { bIn.value = ""; ptCalc(root); });
+      root.addEventListener("click", (e) => {
+        const add = e.target.closest(".pt-add");
+        if (add) ptAdd(root, add.dataset.sym);
+      });
+    }
 
     const search = root.querySelector(".pt-search");
     const legendItems = Array.from(root.querySelectorAll(".pt-legend-item"));
@@ -741,20 +797,21 @@
 
   const overlay = document.createElement("aside");
   overlay.id = "formula-sheet-overlay";
-  overlay.className = "formula-sheet-overlay fs-drawer";
-  overlay.setAttribute("role", "complementary");
+  overlay.className = "lz-sheet fs-drawer lz-sheet-wide" + (config.periodic ? " is-periodic" : "");
+  overlay.setAttribute("role", "dialog");
   overlay.setAttribute("aria-label", config.title);
-  overlay.setAttribute("aria-hidden", "true");
   overlay.innerHTML = `
-    <div class="formula-sheet-card${config.periodic ? " periodic-table-card" : " formula-wide-card"}">
-      <div class="formula-sheet-header">
-        <h3>${config.title}</h3>
-        <button type="button" class="formula-sheet-close" aria-label="Yopish">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-        </button>
+    <div class="lz-sheet-card">
+      <div class="lz-sheet-grab">
+        <span class="lz-sheet-handle" aria-hidden="true"></span>
+        <div class="lz-sheet-head">
+          <h3>${config.title}</h3>
+          <button type="button" class="lz-sheet-x" data-sheet-close aria-label="Yopish">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
       </div>
-      <p class="formula-sheet-sub">Test davomida ochiq tursin — savolga javob berganda yopilmaydi. Yopish uchun yana shu tugmani bosing.</p>
-      <div class="formula-sheet-scroll">${config.builder()}</div>
+      <div class="lz-sheet-scroll formula-sheet-scroll">${config.builder()}</div>
     </div>`;
 
   function mount() {
@@ -768,26 +825,12 @@
     if (config.periodic) wirePeriodicTableEvents(overlay);
     else wireFormulaSearch(overlay);
     if (config.tabs) wireBiologyTabs(overlay);
-
-    function syncTop() {
-      const header = document.querySelector(".site-header");
-      const h = header ? Math.round(header.getBoundingClientRect().bottom) : 0;
-      document.documentElement.style.setProperty("--fs-top", Math.max(h, 0) + "px");
+    if (window.LZSheet) {
+      // v229: telefonda to'liq ekran (sarlavha ostidan), tutqichni pastga sursangiz — yarim ekran / yopiladi.
+      // Boshqa panel (kalkulyator, shikoyat) ochilsa — bu panel o'zi yopiladi.
+      window.LZSheet.register("formula", overlay, { button: toggleBtn });
     }
-    function setOpen(open) {
-      syncTop();
-      overlay.classList.toggle("is-open", open);
-      overlay.setAttribute("aria-hidden", open ? "false" : "true");
-      if ("inert" in overlay) overlay.inert = !open;
-      document.body.classList.toggle("fs-open", open);
-      toggleBtn.classList.toggle("is-active", open);
-      toggleBtn.setAttribute("aria-pressed", open ? "true" : "false");
-    }
-    setOpen(false);
-    toggleBtn.addEventListener("click", () => setOpen(!overlay.classList.contains("is-open")));
-    overlay.querySelector(".formula-sheet-close").addEventListener("click", () => setOpen(false));
-    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && overlay.classList.contains("is-open")) setOpen(false); });
-    window.addEventListener("resize", syncTop);
+    window.addEventListener("lz:finished", () => { toggleBtn.hidden = true; });
   }
 
   if (document.readyState === "loading") {

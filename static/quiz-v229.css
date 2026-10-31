@@ -1,0 +1,397 @@
+/* ==========================================================================
+   LongoUZ v229 — TEST YECHISH OYNASI (telefonga to'liq moslashtirilgan)
+   - sarlavha bitta qatorda (360px telefonda ham), tugmalar bir xil o'lchamda;
+   - savol raqamlari qatori olib tashlandi — pastdagi "1 / 30 ▴" tugmasida;
+   - yagona panel tizimi (formulalar, kalkulyator, shikoyat, savollar ro'yxati);
+   - yuklanish ekrani: LongoUZ boyqushi atrofida yashil halqa aylanadi.
+   ========================================================================== */
+
+body.quiz-page { --lz-hdr: 60px; --lz-navbar: 0px; --lz-green: #22c58b; --lz-green-2: #12a874; background: var(--bg); }
+body.quiz-page > main, body.quiz-page main.quiz-main { zoom: 1 !important; }
+body.quiz-page .quiz-section-label[hidden] { display: none !important; }
+body.quiz-page.is-loading { overflow: hidden; }
+body.quiz-page.is-loading #owl-pin-button, body.quiz-page.is-loading #floating-chat-widget { display: none !important; }
+
+/* ------------------------------------------------------------------ SARLAVHA */
+body.quiz-page .quiz-header {
+  position: sticky; top: 0; z-index: 120;
+  display: flex; flex-wrap: nowrap; align-items: center; justify-content: space-between; gap: 10px;
+  min-height: 0; padding: 10px 20px !important;
+  background: var(--bg-elevated); border-bottom: 1px solid var(--line);
+}
+body.quiz-page .quiz-brand { flex: none; display: flex; align-items: center; gap: 8px; font-size: 1.2rem; min-width: 0; }
+body.quiz-page .quiz-brand .lg-owl { height: 2rem; }
+body.quiz-page .quiz-header-meta { display: flex; flex-wrap: nowrap; align-items: center; justify-content: flex-end; gap: 8px; min-width: 0; }
+body.quiz-page .quiz-header .lz-tool-btn,
+body.quiz-page .quiz-header .formula-sheet-toggle {
+  flex: none; height: 40px; min-width: 40px; padding: 0 12px; margin: 0; gap: 6px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 999px; border: 1px solid var(--line); background: var(--bg); color: var(--ink);
+  font: 600 .82rem var(--font-body); box-shadow: none; transform: none; cursor: pointer;
+  transition: background .18s ease, border-color .18s ease, color .18s ease;
+}
+body.quiz-page .quiz-header .lz-tool-btn svg, body.quiz-page .quiz-header .formula-sheet-toggle svg { width: 18px; height: 18px; }
+body.quiz-page .quiz-header .lz-tool-btn.is-active,
+body.quiz-page .quiz-header .formula-sheet-toggle.is-active { background: var(--lz-green); border-color: var(--lz-green); color: #04120b; }
+body.quiz-page .quiz-header .lz-tool-btn.is-active svg,
+body.quiz-page .quiz-header .formula-sheet-toggle.is-active svg,
+body.quiz-page .quiz-header .formula-sheet-toggle.is-active span { color: #04120b; }
+body.quiz-page .quiz-timer {
+  flex: none; height: 40px; display: inline-flex; align-items: center; justify-content: center;
+  min-width: 70px; padding: 0 12px; border-radius: 12px; font: 700 1.08rem/1 var(--font-body);
+  font-variant-numeric: tabular-nums; letter-spacing: .02em; background: var(--bg-hover); color: var(--ink);
+}
+body.quiz-page .quiz-timer.quiz-timer-warning { color: #fff; background: #d6453d; animation: lzTimerPulse 1s ease-in-out infinite; }
+@keyframes lzTimerPulse { 50% { opacity: .75; } }
+body.quiz-page .quiz-header .theme-toggle { flex: none; margin: 0; }
+
+@media (max-width: 760px) {
+  body.quiz-page .quiz-header { padding: 8px 10px !important; gap: 6px; padding-top: max(8px, env(safe-area-inset-top)) !important; }
+  body.quiz-page .quiz-brand .lg-word { display: none; }
+  body.quiz-page .quiz-brand .lg-owl { height: 34px; }
+  body.quiz-page .quiz-header .quiz-mode-badge,
+  body.quiz-page .quiz-header .quiz-subject-label { display: none !important; }
+  body.quiz-page .quiz-header-meta { gap: 6px; }
+  body.quiz-page .quiz-header .lz-tool-btn span,
+  body.quiz-page .quiz-header .formula-sheet-toggle span { display: none; }
+  body.quiz-page .quiz-header .lz-tool-btn,
+  body.quiz-page .quiz-header .formula-sheet-toggle { width: 40px; padding: 0; }
+  body.quiz-page .quiz-timer { height: 40px; min-width: 66px; padding: 0 8px; font-size: 1.02rem; }
+  body.quiz-page .quiz-header .theme-toggle { width: 52px !important; height: 30px !important; }
+  body.quiz-page .quiz-header .theme-toggle::before { width: 22px !important; height: 22px !important; transform: translateX(22px) !important; }
+  html[data-theme="light"] body.quiz-page .quiz-header .theme-toggle::before { transform: translateX(0) !important; }
+  body.quiz-page .quiz-header .theme-toggle .icon-sun, body.quiz-page .quiz-header .theme-toggle .icon-moon { top: 6px; width: 16px; height: 16px; }
+  body.quiz-page .quiz-header .theme-toggle .icon-sun { left: 6px; } body.quiz-page .quiz-header .theme-toggle .icon-moon { right: 6px; }
+}
+@media (max-width: 350px) {
+  body.quiz-page .quiz-header .theme-toggle { display: none; }
+  body.quiz-page .quiz-header .lz-tool-btn, body.quiz-page .quiz-header .formula-sheet-toggle { width: 36px; min-width: 36px; height: 36px; }
+}
+
+/* ------------------------------------------------------------------ ASOSIY QISM */
+body.quiz-page .quiz-main {
+  width: 100%; max-width: var(--qs-card-w, 760px); margin: 0 auto; padding: 22px 20px 120px; box-sizing: border-box; align-self: center;
+  transform: none !important; transition: padding-bottom .3s ease;
+}
+body.quiz-page.fs-open .quiz-main { transform: none !important; max-width: var(--qs-card-w, 760px); }
+body.quiz-page .quiz-loading-inline { display: none !important; }
+body.quiz-page .quiz-topline { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 0 8px; }
+body.quiz-page .quiz-meta-chip { display: inline-flex; align-items: center; gap: 6px; min-width: 0; font-size: .8rem; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+body.quiz-page .quiz-meta-chip b { color: var(--lz-green); font-weight: 700; padding: 3px 9px; border-radius: 999px; background: rgba(34,197,139,.12); }
+html[data-theme="light"] body.quiz-page .quiz-meta-chip b { color: #0b7f58; background: rgba(18,168,116,.12); }
+body.quiz-page .quiz-progress-label { margin: 0; font-size: .82rem; color: var(--ink-soft); font-weight: 600; white-space: nowrap; }
+body.quiz-page .quiz-progress-track { height: 6px; margin: 0 0 16px; border-radius: 999px; background: var(--bg-hover); overflow: hidden; }
+body.quiz-page .quiz-progress-fill { background: linear-gradient(90deg, var(--lz-green-2), var(--lz-green)); border-radius: inherit; transition: width .35s cubic-bezier(.2,.8,.2,1); }
+body.quiz-page .quiz-palette:not(.lz-nav-grid) { display: none !important; }
+body.quiz-page .quiz-question-card { margin: 0; border-radius: 16px; }
+body.quiz-page #quiz-question-text { overflow-wrap: anywhere; }
+body.quiz-page .quiz-option { min-height: 52px; border-radius: 14px; }
+
+@media (max-width: 760px) {
+  body.quiz-page .quiz-main { max-width: 100%; padding: 14px 12px calc(96px + env(safe-area-inset-bottom)); }
+  body.quiz-page .quiz-question-card { padding: 18px 14px !important; }
+  body.quiz-page #quiz-question-text { font-size: 1.14rem; line-height: 1.45; margin-bottom: 16px; }
+  body.quiz-page .quiz-options { gap: 10px; }
+  body.quiz-page .quiz-option { padding: 12px 12px; font-size: .97rem; }
+  body.quiz-page .quiz-option-key { width: 32px; height: 32px; border-radius: 10px; }
+  body.quiz-page.lz-sheet-half .quiz-main { padding-bottom: calc(52dvh + 24px); }
+}
+
+/* ------------------------------------------------------------------ PASTKI NAVIGATSIYA */
+body.quiz-page .quiz-nav-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 18px; }
+body.quiz-page .quiz-nav-row .btn-primary, body.quiz-page .quiz-nav-row .btn-secondary {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 48px; padding: 0 20px;
+  border-radius: 14px; font-weight: 700; font-size: .95rem; white-space: nowrap; margin: 0;
+}
+body.quiz-page .quiz-nav-row svg { width: 18px; height: 18px; flex: none; }
+body.quiz-page .quiz-nav-row .btn-secondary:disabled { opacity: .45; }
+body.quiz-page .quiz-next, body.quiz-page .quiz-finish { background: var(--lz-green); border-color: var(--lz-green); color: #04120b; }
+html[data-theme="light"] body.quiz-page .quiz-next, html[data-theme="light"] body.quiz-page .quiz-finish { color: #fff; background: #0f9f6e; border-color: #0f9f6e; }
+body.quiz-page .quiz-finish.is-armed, body.quiz-page .lz-nav-finish.is-armed { background: #e2a03f !important; border-color: #e2a03f !important; color: #1d1200 !important; white-space: normal; line-height: 1.2; font-size: .82rem; }
+body.quiz-page .quiz-nav-btn {
+  flex: 0 1 auto; height: 48px; padding: 0 16px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  border-radius: 14px; border: 1px solid var(--line); background: var(--bg-elevated); color: var(--ink);
+  font: 700 .95rem var(--font-body); font-variant-numeric: tabular-nums; cursor: pointer;
+}
+body.quiz-page .quiz-nav-btn svg { width: 16px; height: 16px; transition: transform .25s ease; }
+body.quiz-page .quiz-nav-btn.is-active svg { transform: rotate(180deg); }
+body.quiz-page .quiz-nav-btn.is-active { border-color: var(--lz-green); }
+body.quiz-page .quiz-nav-btn.is-static { pointer-events: none; }
+body.quiz-page .quiz-nav-btn.is-static svg { display: none; }
+
+@media (max-width: 760px) {
+  body.quiz-page .quiz-nav-row {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 110; margin: 0;
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+    background: color-mix(in srgb, var(--bg-elevated) 94%, transparent);
+    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    border-top: 1px solid var(--line); box-shadow: 0 -8px 24px rgba(0,0,0,.18);
+    justify-content: space-between !important;
+  }
+  body.quiz-page .quiz-nav-row .btn-primary, body.quiz-page .quiz-nav-row .btn-secondary { height: 46px; padding: 0 14px; flex: 1 1 0; max-width: 140px; }
+  body.quiz-page .quiz-nav-row .quiz-prev span { display: inline; }
+  body.quiz-page .quiz-nav-btn { height: 46px; flex: 0 0 auto; min-width: 92px; }
+  body.quiz-page .quiz-finish.is-armed { max-width: 190px !important; }
+}
+@media (max-width: 360px) {
+  body.quiz-page .quiz-nav-row .quiz-prev span { display: none; }
+  body.quiz-page .quiz-nav-row .quiz-prev { flex: 0 0 46px; padding: 0; }
+}
+
+/* boyqush (AI) tugmasi testda pastki panel ustida, kichikroq; panel ochilganda yashiriladi */
+@media (max-width: 760px) {
+  body.quiz-page #owl-pin-button { width: 46px !important; height: 46px !important; right: 10px !important; bottom: calc(80px + env(safe-area-inset-bottom)) !important; }
+}
+body.quiz-page.lz-sheet-open #owl-pin-button, body.quiz-page.lz-sheet-open #floating-chat-widget { display: none !important; }
+
+/* ------------------------------------------------------------------ YAGONA PANEL (LZSheet) */
+.lz-sheet {
+  position: fixed; z-index: 115; box-sizing: border-box;
+  top: var(--lz-hdr, 60px); right: 0; bottom: 0; width: min(440px, 100vw);
+  display: flex; flex-direction: column; pointer-events: none; visibility: hidden;
+  transform: translateX(104%);
+  transition: transform .34s cubic-bezier(.22,.8,.24,1), visibility 0s linear .34s;
+}
+.lz-sheet.is-open { transform: none; visibility: visible; pointer-events: auto; transition: transform .34s cubic-bezier(.22,.8,.24,1), visibility 0s; }
+.lz-sheet.lz-sheet-wide { width: min(720px, 52vw); }
+.lz-sheet.lz-sheet-wide.is-periodic { width: min(860px, 60vw); }
+.lz-sheet.lz-sheet-sm { width: min(400px, 100vw); }
+.lz-sheet-card {
+  flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden;
+  background: var(--bg-elevated); color: var(--ink); border-left: 1px solid var(--line);
+  box-shadow: -14px 0 40px rgba(0,0,0,.28);
+}
+.lz-sheet-grab { flex: none; position: relative; }
+.lz-sheet-handle { display: none; }
+.lz-sheet-head { display: flex; align-items: center; gap: 8px; padding: 12px 14px 10px 18px; border-bottom: 1px solid var(--line); }
+.lz-sheet-head h3 { margin: 0; font: 700 1.04rem/1.25 var(--font-body); color: var(--ink); flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lz-sheet-sub { font-size: .78rem; color: var(--ink-soft); margin-right: auto; white-space: nowrap; }
+.lz-sheet-head h3 + .lz-sheet-x, .lz-sheet-head h3 + button { margin-left: auto; }
+.lz-sheet-x {
+  flex: none; width: 38px; height: 38px; display: grid; place-items: center; margin-left: auto;
+  border: 0; border-radius: 12px; background: var(--bg-hover); color: var(--ink); font-size: 1.5rem; line-height: 1; cursor: pointer;
+}
+.lz-sheet-x svg { width: 18px; height: 18px; }
+.lz-sheet-sub + .lz-sheet-x { margin-left: 0; }
+.lz-sheet-scroll { flex: 1; min-height: 0; overflow: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding: 14px 16px 24px; }
+
+/* Kompyuterda panel ochilganda savol kartasi chapga siljiydi va panel uni yopib qo'ymaydi */
+@media (min-width: 900px) {
+  body.quiz-page .quiz-main {
+    --lz-free: 100vw;
+    margin-left: max(16px, calc((var(--lz-free) - var(--qs-card-w, 760px)) / 2)); margin-right: auto;
+    max-width: min(var(--qs-card-w, 760px), calc(var(--lz-free) - 32px));
+    transition: margin-left .34s cubic-bezier(.22,.8,.24,1), max-width .34s cubic-bezier(.22,.8,.24,1), padding-bottom .3s ease;
+  }
+  body.quiz-page.lz-sheet-open .quiz-main { --lz-free: calc(100vw - min(440px, 100vw)); }
+  body.quiz-page.lz-sheet-open:has(.lz-sheet-wide.is-open) .quiz-main { --lz-free: calc(100vw - min(720px, 52vw)); }
+  body.quiz-page.lz-sheet-open:has(.lz-sheet-wide.is-periodic.is-open) .quiz-main { --lz-free: calc(100vw - min(860px, 60vw)); }
+}
+@media (min-width: 761px) { body.quiz-page .quiz-meta-chip { visibility: hidden; } }
+
+/* --- TELEFON: pastdan chiqadigan to'liq panel, tutqich bilan surib kichraytiriladi --- */
+@media (max-width: 760px) {
+  .lz-sheet {
+    left: 0; right: 0; width: 100% !important; top: var(--lz-hdr, 60px); bottom: 0;
+    transform: translateY(102%);
+    transition: transform .36s cubic-bezier(.22,.8,.24,1), top .3s cubic-bezier(.22,.8,.24,1), bottom .3s ease, visibility 0s linear .36s;
+  }
+  .lz-sheet.is-open { transform: none; transition: transform .36s cubic-bezier(.22,.8,.24,1), top .3s cubic-bezier(.22,.8,.24,1), bottom .3s ease, visibility 0s; }
+  .lz-sheet.is-open.is-half { top: 50dvh; bottom: var(--lz-navbar, 0px); }
+  .lz-sheet.is-dragging { transition: none !important; }
+  .lz-sheet-card { border-left: 0; border-top: 1px solid var(--line); border-radius: 20px 20px 0 0; box-shadow: 0 -12px 34px rgba(0,0,0,.34); }
+  .lz-sheet.is-half .lz-sheet-card { border-radius: 20px 20px 0 0; }
+  .lz-sheet-grab { touch-action: none; cursor: grab; padding-top: 18px; }
+  .lz-sheet-handle { display: block; position: absolute; top: 7px; left: 50%; width: 46px; height: 5px; margin-left: -23px; border-radius: 99px; background: var(--ink-soft); opacity: .55; }
+  .lz-sheet-head { padding: 4px 12px 10px 16px; }
+  .lz-sheet-scroll { padding: 12px 12px calc(20px + env(safe-area-inset-bottom)); }
+  .lz-sheet.is-half .lz-sheet-scroll { padding-bottom: 16px; }
+  body.quiz-page.lz-sheet-full { overflow: hidden; }
+}
+@media (prefers-reduced-motion: reduce) { .lz-sheet, .lz-sheet.is-open { transition-duration: .01s !important; } }
+
+/* --- Savollar ro'yxati paneli --- */
+.lz-nav-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 0 0 12px; font-size: .78rem; color: var(--ink-soft); }
+.lz-nav-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.lz-nav-legend i { width: 14px; height: 14px; border-radius: 4px; border: 1px solid var(--line); background: var(--bg); }
+.lz-nav-legend i.lg-cur { border: 2px solid var(--lz-green, #22c58b); }
+.lz-nav-legend i.lg-ans { background: rgba(34,197,139,.25); border-color: rgba(34,197,139,.6); }
+.lz-nav-grid { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(46px, 1fr)); gap: 8px; margin: 0 !important; max-width: none !important; overflow: visible !important; }
+.lz-nav-grid button {
+  width: auto !important; height: 46px !important; border-radius: 12px !important; border: 1px solid var(--line); background: var(--bg);
+  color: var(--ink); font: 700 .95rem var(--font-body); font-variant-numeric: tabular-nums; cursor: pointer; transition: transform .12s ease;
+}
+.lz-nav-grid button:active { transform: scale(.94); }
+.lz-nav-grid button.is-answered { background: rgba(34,197,139,.18); border-color: rgba(34,197,139,.55); color: var(--ink); }
+.lz-nav-grid button.is-current { outline: none !important; border: 2px solid var(--lz-green, #22c58b); box-shadow: 0 0 0 3px rgba(34,197,139,.18); }
+.lz-nav-finish {
+  display: block; width: 100%; margin: 18px 0 4px; height: 48px; border-radius: 14px; border: 1px solid rgba(226,160,63,.6);
+  background: rgba(226,160,63,.12); color: var(--ink); font: 700 .95rem var(--font-body); cursor: pointer;
+}
+
+/* --- Shikoyat paneli ichi --- */
+.lz-report .lz-cats { grid-template-columns: 1fr; }
+.lz-report textarea { width: 100%; box-sizing: border-box; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); color: var(--ink); padding: 10px 12px; font: inherit; font-size: .92rem; resize: vertical; }
+.lz-report .lz-primary { width: 100%; height: 46px; border-radius: 12px; }
+@media (min-width: 520px) and (max-width: 760px) { .lz-report .lz-cats { grid-template-columns: 1fr 1fr; } }
+
+/* ------------------------------------------------------------------ KALKULYATOR (panel ichida) */
+.lzc-sheet .lzc-head { cursor: inherit; user-select: none; }
+.lzc-sheet .lzc-head h3 { flex: none; }
+.lzc-sheet .lzc-sub { font-size: .78rem; color: var(--ink-soft); margin-right: auto; }
+.lzc-sheet #lzc-deg { height: 32px; padding: 0 12px; border-radius: 10px; }
+.lzc-sheet .lzc-tabs {
+  flex: none; display: flex; gap: 2px; padding: 0 10px; margin: 0; overflow-x: auto; overflow-y: hidden;
+  scrollbar-width: none; border-bottom: 1px solid var(--line); min-height: 44px;
+}
+.lzc-sheet .lzc-tabs::-webkit-scrollbar { display: none; }
+.lzc-sheet .lzc-tabs button {
+  flex: none; height: 44px; padding: 0 12px; margin: 0; border: 0; border-bottom: 2.5px solid transparent; border-radius: 0;
+  background: transparent; color: var(--ink-soft); font: 600 .9rem/1 var(--font-body); white-space: nowrap; cursor: pointer;
+}
+.lzc-sheet .lzc-tabs button.on { color: var(--ink); border-bottom-color: var(--lz-green, #22c58b); }
+.lzc-sheet .lzc-body { padding: 12px 12px 20px; }
+.lzc-sheet .lzc-in { height: 48px; font-size: 1.05rem; border-radius: 12px; margin-bottom: 8px; }
+.lzc-sheet .lzc-out { min-height: 44px; display: flex; align-items: center; justify-content: flex-end; font-size: 1.35rem; border-radius: 12px; margin-bottom: 8px; }
+.lzc-sheet .lzc-row { gap: 6px; margin-bottom: 8px; }
+.lzc-sheet .lzc-row .lzc-mini { height: 36px; padding: 0 12px; border-radius: 10px; font-size: .82rem; }
+.lzc-sheet .lzc-copy { margin-left: auto; background: var(--lz-green, #22c58b); color: #04120b; border-color: transparent; }
+.lzc-chips { display: flex; gap: 6px; overflow-x: auto; padding: 2px 0 10px; margin: 0 0 4px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.lzc-chips::-webkit-scrollbar { display: none; }
+.lzc-chip {
+  flex: none; display: inline-flex; flex-direction: column; align-items: flex-start; gap: 1px; padding: 6px 10px; border-radius: 10px;
+  border: 1px solid var(--line); background: var(--bg-hover); color: var(--ink); cursor: pointer; text-align: left;
+}
+.lzc-chip b { font: 700 .85rem ui-monospace, Menlo, Consolas, monospace; }
+.lzc-chip small { font-size: .66rem; color: var(--ink-soft); white-space: nowrap; }
+.lzc-chip:active { transform: scale(.96); }
+.lzc-sheet .lzc-keys { gap: 6px; }
+.lzc-sheet .lzc-keys button { height: 46px; padding: 0; border-radius: 12px; font-size: .98rem; }
+.lzc-sheet .lzc-keys button:active { transform: scale(.95); }
+.lzc-sheet .lzc-keys button.eq { height: 48px; font-size: 1.15rem; font-weight: 800; background: var(--lz-green, #22c58b); border-color: transparent; }
+.lzc-sheet .lzc-const { grid-template-columns: 64px 1fr; padding: 10px 12px; border-radius: 12px; }
+.lzc-sheet .lzc-const em { grid-column: 2; }
+.lzc-sheet .lzc-f input { height: 44px; border-radius: 10px; font-size: 1rem; }
+.lzc-sheet .lzc-f[hidden] { display: none; }
+.lzc-sheet .lz-primary { height: 44px; border-radius: 12px; padding: 0 18px; }
+/* formula tanlash ro'yxati */
+.lzs-list { display: grid; gap: 6px; margin-top: 4px; }
+.lzs-item {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 3px; width: 100%; padding: 10px 12px; text-align: left;
+  border: 1px solid var(--line); border-radius: 12px; background: var(--bg-hover); color: var(--ink); cursor: pointer;
+}
+.lzs-item span { font-size: .84rem; color: var(--ink-soft); }
+.lzs-item code { font: 700 .98rem ui-monospace, Menlo, Consolas, monospace; color: var(--ink); background: none; padding: 0; }
+.lzs-item[hidden] { display: none; }
+.lzs-back { border: 0; background: none; color: var(--lz-green, #22c58b); font: 700 .88rem var(--font-body); padding: 4px 0 10px; cursor: pointer; }
+.lzs-title { font-size: .86rem; color: var(--ink-soft); margin-bottom: 4px; }
+.lzs-unk-lab { font-size: .8rem; color: var(--ink-soft); margin: 10px 0 6px; }
+.lzs-unk { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.lzs-unk button { display: inline-flex; flex-direction: column; align-items: flex-start; padding: 7px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
+.lzs-unk button b { font: 700 .95rem ui-monospace, monospace; }
+.lzs-unk button small { font-size: .7rem; color: var(--ink-soft); }
+.lzs-unk button.on { border-color: var(--lz-green, #22c58b); background: rgba(34,197,139,.14); }
+
+/* ------------------------------------------------------------------ FORMULALAR PANELI ICHI */
+.lz-sheet.fs-drawer .formula-sheet-body { display: grid; gap: 12px; }
+.lz-sheet.fs-drawer .fs-search-row { position: sticky; top: -14px; z-index: 2; padding: 2px 0 10px; background: var(--bg-elevated); margin-top: -2px; }
+.lz-sheet.fs-drawer .fs-search { width: 100%; box-sizing: border-box; height: 46px; border-radius: 12px; }
+@media (max-width: 760px) {
+  .lz-sheet.fs-drawer .formula-table { font-size: .88rem; }
+  .lz-sheet.fs-drawer .formula-table th, .lz-sheet.fs-drawer .formula-table td { padding: 8px 6px; }
+  .lz-sheet.fs-drawer .fs-search-row { top: -12px; }
+}
+/* molyar massa yig'uvchi (Mendeleyev jadvali ustida) */
+.pt-builder { display: grid; gap: 6px; padding: 10px 12px; margin: 0 0 12px; border-radius: 14px; border: 1px solid rgba(34,197,139,.35); background: rgba(34,197,139,.07); }
+.pt-b-label { font-size: .78rem; font-weight: 700; color: var(--lz-green, #22c58b); text-transform: uppercase; letter-spacing: .04em; }
+.pt-b-row { display: flex; gap: 6px; }
+.pt-b-in { flex: 1; min-width: 0; height: 42px; box-sizing: border-box; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: 600 1rem ui-monospace, Menlo, Consolas, monospace; }
+.pt-b-clr { flex: none; width: 42px; height: 42px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg-hover); color: var(--ink); font-size: 1.3rem; cursor: pointer; }
+.pt-b-out { font: 700 1.02rem ui-monospace, Menlo, Consolas, monospace; color: var(--ink); }
+.pt-b-out.err { color: #ff8a8a; font-size: .86rem; }
+.pt-add { margin-top: 10px; height: 40px; padding: 0 14px; border-radius: 10px; border: 1px solid rgba(34,197,139,.55); background: rgba(34,197,139,.12); color: var(--ink); font: 700 .86rem var(--font-body); cursor: pointer; }
+
+/* ------------------------------------------------------------------ YUKLANISH EKRANI */
+.lz-loader {
+  position: fixed; inset: 0; z-index: 6000; display: grid; place-items: center; padding: 24px;
+  background: radial-gradient(60% 45% at 50% 40%, rgba(34,197,139,.10), transparent 70%), var(--bg);
+  opacity: 1; transition: opacity .34s ease;
+}
+.lz-loader[hidden] { display: none; }
+.lz-loader.is-hiding { opacity: 0; pointer-events: none; }
+.lz-loader-box { display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 340px; animation: lzLoaderIn .45s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes lzLoaderIn { from { opacity: 0; transform: translateY(10px) scale(.98); } }
+.lz-loader-ring { position: relative; width: 132px; height: 132px; margin-bottom: 18px; }
+.lz-loader-svg { position: absolute; inset: 0; width: 100%; height: 100%; animation: lzSpin 1.15s linear infinite; }
+.lz-loader-track { fill: none; stroke: rgba(34,197,139,.14); stroke-width: 7; }
+.lz-loader-arc { fill: none; stroke: url(#lzLoadGrad); stroke-width: 7; stroke-linecap: round; stroke-dasharray: 110 230; transform-origin: 60px 60px; animation: lzArc 1.6s ease-in-out infinite; }
+@keyframes lzSpin { to { transform: rotate(360deg); } }
+@keyframes lzArc { 0% { stroke-dasharray: 30 310; } 50% { stroke-dasharray: 150 190; } 100% { stroke-dasharray: 30 310; } }
+.lz-loader-logo {
+  position: absolute; inset: 16px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--bg-elevated); border: 1px solid var(--line); box-shadow: 0 10px 30px rgba(0,0,0,.28), inset 0 0 0 4px rgba(34,197,139,.06);
+}
+.lz-loader-logo img { width: 70px; height: auto; display: block; animation: lzOwlBob 2.2s ease-in-out infinite; filter: drop-shadow(0 4px 10px rgba(40,120,255,.3)); }
+@keyframes lzOwlBob { 50% { transform: translateY(-3px); } }
+.lz-loader-check { position: absolute; inset: 16px; border-radius: 50%; display: grid; place-items: center; background: var(--lz-green, #22c58b); color: #04120b; opacity: 0; transform: scale(.6); transition: opacity .25s ease, transform .35s cubic-bezier(.3,1.6,.4,1); }
+.lz-loader-check svg { width: 46px; height: 46px; stroke-dasharray: 30; stroke-dashoffset: 30; }
+.lz-loader.is-done .lz-loader-check { opacity: 1; transform: none; }
+.lz-loader.is-done .lz-loader-check svg { animation: lzCheck .45s .12s ease forwards; }
+.lz-loader.is-done .lz-loader-svg { animation-play-state: paused; }
+.lz-loader.is-done .lz-loader-arc { stroke-dasharray: 340 0; transition: stroke-dasharray .4s ease; }
+@keyframes lzCheck { to { stroke-dashoffset: 0; } }
+.lz-loader-brand { margin: 0 0 6px; font: 800 1.05rem/1 var(--font-body); letter-spacing: -.01em; color: var(--ink); }
+.lz-loader-brand b { color: var(--lz-green, #22c58b); }
+.lz-loader-title { margin: 0; font: 800 1.45rem/1.25 var(--font-body); letter-spacing: -.015em; color: var(--ink); }
+.lz-loader-sub { margin: 8px 0 0; font-size: .95rem; color: var(--ink-soft); }
+.lz-loader-dots { display: flex; gap: 7px; margin-top: 16px; }
+.lz-loader-dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--lz-green, #22c58b); opacity: .35; animation: lzDot 1.1s ease-in-out infinite; }
+.lz-loader-dots i:nth-child(2) { animation-delay: .15s; } .lz-loader-dots i:nth-child(3) { animation-delay: .3s; }
+@keyframes lzDot { 0%, 80%, 100% { opacity: .3; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-5px); } }
+.lz-loader-note { margin: 22px 0 0; font-size: .86rem; color: var(--ink-soft); line-height: 1.5; }
+@media (prefers-reduced-motion: reduce) { .lz-loader-svg, .lz-loader-arc, .lz-loader-logo img, .lz-loader-dots i { animation-duration: 3s; } }
+
+/* ------------------------------------------------------------------ NATIJA OYNASI */
+body.quiz-page .quiz-celebrate-card { width: min(460px, calc(100vw - 24px)); box-sizing: border-box; max-height: calc(100dvh - 24px); overflow: auto; }
+body.quiz-page .quiz-celebrate-kicker { margin: 4px 0 2px; font-size: .78rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); }
+body.quiz-page .quiz-celebrate-title { font: 800 clamp(2rem, 9vw, 2.8rem)/1.1 var(--font-body); letter-spacing: -.02em; margin: 0 0 6px; color: var(--ink); }
+body.quiz-page .quiz-score-stats { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 16px; margin: 12px 0 6px; font-size: .92rem; color: var(--ink-soft); }
+body.quiz-page .quiz-score-stats[hidden] { display: none; }
+body.quiz-page .quiz-score-stats span { display: inline-flex; align-items: center; gap: 6px; }
+body.quiz-page .quiz-score-stats b { color: var(--ink); font-weight: 800; }
+body.quiz-page .quiz-score-stats i { width: 10px; height: 10px; border-radius: 50%; }
+body.quiz-page .quiz-score-stats .st-ok i { background: #22c58b; }
+body.quiz-page .quiz-score-stats .st-bad i { background: #f0524a; }
+body.quiz-page .quiz-score-stats .st-skip i { background: #8d99a8; }
+body.quiz-page .quiz-celebrate-card .quiz-result-actions { display: flex; flex-direction: column; gap: 10px; align-items: stretch; margin-top: 18px; }
+body.quiz-page .quiz-celebrate-card .quiz-result-actions .btn-primary,
+body.quiz-page .quiz-celebrate-card .quiz-result-actions .btn-secondary { height: 48px; display: inline-flex; align-items: center; justify-content: center; border-radius: 14px; font-weight: 700; }
+body.quiz-page .quiz-result-home { text-align: center; color: var(--ink-soft); font-weight: 600; font-size: .9rem; text-decoration: none; padding: 6px; }
+body.quiz-page .quiz-result-home:hover { color: var(--ink); }
+body.quiz-page #quiz-result .quiz-result-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+body.quiz-page #quiz-retry-submit { min-width: 180px; }
+
+/* Test sahifasida umumiy "main > *" ko'tarilish animatsiyasi va will-change o'chiriladi:
+   ular pastki (fixed) navigatsiya panelini sahifa ichiga "qamab" qo'yardi. */
+body.quiz-page main > *, body.quiz-page .quiz-main > * { animation: none !important; transform: none !important; }
+body.quiz-page .quiz-main { will-change: auto !important; }
+body.quiz-page #quiz-body { animation: lzFadeIn .35s ease both !important; }
+@keyframes lzFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.pt-b-pick { display: flex; align-items: center; gap: 10px; padding-top: 8px; border-top: 1px dashed rgba(34,197,139,.3); }
+.pt-b-pick[hidden] { display: none; }
+.pt-b-sym { flex: none; width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; font: 800 1.05rem var(--font-body); color: #0b1116; }
+.pt-b-name { flex: 1; min-width: 0; display: flex; flex-direction: column; font-weight: 700; font-size: .92rem; color: var(--ink); }
+.pt-b-name small { font-weight: 500; font-size: .76rem; color: var(--ink-soft); }
+.pt-add-quick { margin: 0; flex: none; }
+
+/* Sertifikat yopiq (juda tez / kam yechilgan) — sariq ogohlantirish */
+body.quiz-page .quiz-cert-lock { margin: 14px 0 0; padding: 14px 16px; border-radius: 14px; border: 1.5px solid rgba(234,179,8,.55); background: rgba(234,179,8,.10); text-align: left; }
+body.quiz-page .quiz-cert-lock[hidden] { display: none; }
+body.quiz-page .quiz-cert-lock b { display: flex; align-items: center; gap: 8px; color: #e9b308; font-size: .98rem; }
+html[data-theme="light"] body.quiz-page .quiz-cert-lock b { color: #8a5a00; }
+body.quiz-page .quiz-cert-lock b svg { width: 18px; height: 18px; flex: none; }
+body.quiz-page .quiz-cert-lock p { margin: 6px 0 0; font-size: .88rem; line-height: 1.45; color: var(--ink-soft); }
+
+/* Moslashtirish savollari qatorma-qator ko'rinsin (1. … / A) …) */
+body.quiz-page #quiz-question-text { white-space: pre-line; }

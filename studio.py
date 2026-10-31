@@ -716,7 +716,15 @@ async def apply_action(act: dict, admin: str) -> dict:
                 q.is_active = bool(f["is_active"])
             await session.commit()
         await db.log_admin_action(admin, "ai_update_question", f"#{qid}: {act.get('reason', '')[:120]}")
-        return {"ok": True}
+        # v229: to'g'ri javob yoki variantlar o'zgargan bo'lsa — shu savolni yechgan o'quvchilar qayta baholanadi
+        regr = {}
+        if any(k in f for k in ("correct_index", "options", "accept")):
+            try:
+                import reports as _rp
+                regr = await _rp.regrade_question(qid)
+            except Exception:  # noqa: BLE001
+                logger.exception("AI tuzatishidan keyin qayta baholash bajarilmadi")
+        return {"ok": True, "regrade": regr}
     if t == "delete_question":
         ok = await db.admin_delete_question(int(p.get("id")))
         await db.log_admin_action(admin, "ai_delete_question", f"#{p.get('id')}: {act.get('reason', '')[:120]}")
@@ -951,5 +959,18 @@ def register(app, prefix: str, require_admin, current_admin_username, templates,
     async def studio_assistant_apply(request: Request):
         guard(request)
         body = await request.json()
-        res = await apply_action(body.get("action") or {}, current_admin_username(request))
+        act = body.get("action") or {}
+        res = await apply_action(act, current_admin_username(request))
+        # v229: AI yordamchi nima o'zgartirganini Xotira jurnaliga yozamiz (admin keyin ko'radi)
+        try:
+            import insights as _ins
+            t = str(act.get("type") or "")
+            pl = act.get("payload") or {}
+            what = {"update_question": f"savol #{pl.get('id')} tahrirlandi", "delete_question": f"savol #{pl.get('id')} o'chirildi",
+                    "create_questions": f"{len(pl.get('questions') or [])} ta yangi savol qo'shildi ({pl.get('subject')}, {pl.get('topic') or ''})"}.get(t, t)
+            rg = res.get("regrade") or {}
+            extra = f"; qayta baholandi: {rg.get('users', 0)} o'quvchi" if rg.get("users") else ""
+            await _ins.add_memory_log(f"{what}{extra}. Sabab: {str(act.get('reason') or '')[:300]}", who="AI yordamchi")
+        except Exception:  # noqa: BLE001
+            logger.debug("xotira jurnaliga yozilmadi", exc_info=True)
         return JSONResponse(res)

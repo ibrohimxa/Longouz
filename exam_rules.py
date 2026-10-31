@@ -253,6 +253,58 @@ CERT_BENEFITS = [
     {"level": "C", "range": "46.0 — 49.9", "specialty": "Proporsional (tabaqalashtirilgan) ball"},
     {"level": "—", "range": "46.0 dan past", "specialty": "Sertifikat berilmaydi (imtiyoz yo'q)"},
 ]
+
+# ─────────────────────────────────────────────────────────
+# BIOLOGIYA va KIMYO — Milliy sertifikat (UzBMB, 2025/26 spetsifikatsiyasi):
+#   1-qism: 40 ta test topshirig'i (100 daqiqa) — №1–32 yopiq (bitta to'g'ri javob), №33–35 moslashtirish,
+#           №36–40 qisqa ochiq javob; 2-qism: 3 ta yozma masala (80 daqiqa, yechim yo'li bilan baholanadi).
+#   Daraja: A+ (70+), A (65–69,9), B+ (60–64,9), B (55–59,9), C+ (50–54,9), C (46–49,9).
+# Saytdagi mock 1-qismni (40 ta topshiriq) avtomatik baholaydi; yozma qism avtomatik tekshirilmaydi.
+# ─────────────────────────────────────────────────────────
+RAW40_POINTS = {"c": 1, "m": 2, "o": 3}
+_RAW40_CELLS = [
+    ("", 1, "c", 10), ("", 2, "c", 14), ("", 3, "c", 8),
+    ("", 2, "m", 3),
+    ("", 2, "o", 2), ("", 3, "o", 3),
+]
+
+
+def _raw40(key, name, closed_note, open_note):
+    levels = [(70.0, "A+"), (65.0, "A"), (60.0, "B+"), (55.0, "B"), (50.0, "C+"), (46.0, "C")]
+    return {
+        "key": key, "name": name, "kind": "raw68", "total": 40, "time": 100,
+        "points": RAW40_POINTS, "max_raw": 53, "max_ball": 100.0,
+        "levels": levels, "benefits": CERT_BENEFITS,
+        "cells": _RAW40_CELLS,
+        "info": {
+            "kind": key, "max_ball": 100,
+            "blocks": [
+                {"name": "Yopiq test (№1–32)", "count": 32, "max": 32, "note": closed_note},
+                {"name": "Moslashtirish (№33–35)", "count": 3, "max": 6, "note": "3 juftlikni to'liq topsangiz +2 ball"},
+                {"name": "Qisqa ochiq javob (№36–40)", "count": 5, "max": 15, "note": open_note},
+            ],
+            "ball_by_difficulty": [
+                {"name": "Yopiq testning har biri (xom ball)", "ball": 1},
+                {"name": "Moslashtirishning har biri (xom ball)", "ball": 2},
+                {"name": "Qisqa ochiq javobning har biri (xom ball)", "ball": 3},
+            ],
+            "levels": [{"level": r["level"], "range": r["range"], "benefit": r["specialty"]} for r in CERT_BENEFITS],
+            "mandatory_note": ("Haqiqiy imtihonda 40 ta test topshirig'i (100 daqiqa) va 3 ta yozma masala (80 daqiqa) bor; yozma ishda "
+                               "yechim yo'li yozilmasa to'g'ri javob ham 0 ball oladi. Bu mock test qismini avtomatik baholaydi; "
+                               "test qismi Rash modeli bilan baholanadi — bu yerdagi ball taxminiy."),
+        },
+        "desc": ("Milliy sertifikat (UzBMB, 2025/26): 40 ta test — №1–32 yopiq, №33–35 moslashtirish, №36–40 qisqa ochiq javob, "
+                 "100 daqiqa (+ haqiqiy imtihonda 3 ta yozma masala). Daraja: A+ (70+), A, B+, B, C+, C (46+)."),
+    }
+
+
+BIOLOGY_CERT = _raw40("biology_cert", "Milliy sertifikat — Biologiya",
+                      "4 ta variantli (A–D): hujayra, genetika, o'simlik va hayvonlar, odam, ekologiya",
+                      "variantsiz: son yoki atama (nukleotidlar soni, ehtimol, foiz va h.k.)")
+CHEMISTRY_CERT = _raw40("chemistry_cert", "Milliy sertifikat — Kimyo",
+                        "4 ta variantli (A–D): umumiy (13), anorganik (6), kimyoviy tahlil (3), organik (10)",
+                        "variantsiz: hisoblash natijasi (massa, hajm, foiz, oksidlanish darajasi)")
+
 CERT_MANDATORY_NOTE = (
     "Milliy sertifikatga ega abituriyentga (A+, A, B+, B, C+, C — daraja qat'iy nazar) "
     "majburiy blokdagi 10 ta tarix savoli uchun to'liq 11 ball avtomatik beriladi."
@@ -267,8 +319,12 @@ def tiered_config(subject: str, mode: str) -> dict | None:
         return HISTORY_DTM
     if subject == "biology" and mode == "dtm":
         return BIOLOGY_DTM
+    if subject == "biology" and mode == "certificate":
+        return BIOLOGY_CERT
     if subject == "chemistry" and mode == "dtm":
         return CHEMISTRY_DTM
+    if subject == "chemistry" and mode == "certificate":
+        return CHEMISTRY_CERT
     if subject == "physics":
         return PHYSICS_CERT if mode == "certificate" else (PHYSICS_DTM if mode == "dtm" else None)
     if subject == "native":

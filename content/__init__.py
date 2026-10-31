@@ -44,7 +44,7 @@ def load_packs():
         packs.append(math_fig.pack())
     except ImportError:
         pass
-    for mod in ("english", "russian"):
+    for mod in ("english", "russian", "ielts"):
         try:
             m = __import__(f"{__name__}.{mod}", fromlist=["pack"])
             packs.append(m.pack())
@@ -65,6 +65,12 @@ def load_packs():
     except Exception as e:  # pragma: no cover
         import logging
         logging.getLogger(__name__).warning("gen_v217 yuklanmadi: %s", e)
+    try:
+        from . import gen_v229
+        gen_v229.extend(packs)
+    except Exception as e:  # pragma: no cover
+        import logging
+        logging.getLogger(__name__).warning("gen_v229 yuklanmadi: %s", e)
     apply_quota_tiers(packs)
     return packs
 

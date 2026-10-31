@@ -43,4 +43,4 @@ def pack() -> dict:
     if problems:
         import logging
         logging.getLogger(__name__).warning("Ingliz tili bankida %s ta muammo: %s", len(problems), problems[:5])
-    return {"subject": "english", "modes": ["dtm"], "topics": topics, "questions": questions}
+    return {"subject": "english", "modes": ["dtm", "cefr"], "topics": topics, "questions": questions}

@@ -32,7 +32,7 @@ class SiteVisit(db.Base):
     uniq: Mapped[int] = mapped_column(Integer, default=0)
 
 
-_SKIP = ("/static", "/api", "/favicon", "/robots", "/auth/google/callback", "/sw.js")
+_SKIP = ("/static", "/api", "/favicon", "/robots", "/auth/google/callback", "/sw.js", "/news/img")
 _buf_hits: dict[tuple[date, str], int] = defaultdict(int)
 _buf_uniq: dict[tuple[date, str], set] = defaultdict(set)
 _seen_today: dict[date, set] = defaultdict(set)
@@ -214,6 +214,25 @@ async def add_memory_log(text: str, who: str = "Claude") -> None:
 
 
 def register(app, prefix: str, require_admin, templates) -> None:
+    @app.get(f"{prefix}/api/alerts")
+    async def admin_alerts(request: Request):
+        """Admin panel bildirishnomalari (har 30 s so'raladi): yangi xabarlar, shikoyatlar,
+        bugungi ro'yxatdan o'tganlar va AI yordamchi o'zgarishlari (Xotira jurnali)."""
+        if not require_admin(request):
+            raise HTTPException(status_code=401, detail="Admin sifatida kiring.")
+        m = await get_memory()
+        ai_log = [x for x in m["log"] if x.get("who") != "admin"]
+        out = {"memory_last": ai_log[-1]["t"] if ai_log else "", "memory_last_text": (ai_log[-1]["text"][:140] if ai_log else ""),
+               "memory_count": len(ai_log)}
+        try:
+            start = datetime.combine(date.today(), datetime.min.time())
+            async with db.async_session() as session:
+                out["signups_today"] = (await session.execute(
+                    select(func.count(db.WebUser.id)).where(db.WebUser.joined_at >= start))).scalar() or 0
+        except Exception:  # noqa: BLE001
+            out["signups_today"] = 0
+        return JSONResponse(out)
+
     @app.get(f"{prefix}/memory", response_class=HTMLResponse)
     async def memory_page(request: Request):
         if not require_admin(request):

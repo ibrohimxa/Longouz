@@ -2,6 +2,21 @@
 
 Har yuborilgan zip: `longouz_v<N>.zip`, versiya raqami `VERSION` faylida.
 
+## v229 — telefonda test oynasi, panellar, yuklanish ekrani, yangiliklar, yangi savollar
+- **Test sahifasi (telefon)**: sarlavha bitta qatorda (360 px ham sig'adi), savol kartasi ekranni to'liq egallaydi (avval 0,75 marta kichraytirilgan edi); savol raqamlari qatori olib tashlandi — pastdagi «1 / 30 ▴» tugmasi bosilganda savollar ro'yxati ochiladi (javob berilgan/javobsiz ko'rinadi); «Oldingi / Keyingi» tugmalari pastda doim ko'rinadi; savol tepasidagi bo'sh katakcha olib tashlandi.
+- **Yagona panel tizimi**: formulalar, kalkulyator, shikoyat va savollar ro'yxati — telefonda sarlavha ostidan to'liq ekran ochiladi, tutqichni pastga sursangiz yarim ekranga kichrayadi, yana sursangiz yopiladi; bittasi ochilsa, boshqasi o'zi yopiladi; orqadagi sahifa o'zgarmaydi. Kompyuterda o'ng tomondagi panel savolni yopmaydi.
+- **Kalkulyator**: tablar endi kesilmaydi; «+ doimiy» ro'yxati o'rniga doimiylar chiplari; formula tanlash — qidiruvli ro'yxat va «nimani topamiz?» tugmalari; telefonda klaviatura o'zi chiqmaydi.
+- **Mendeleyev jadvali**: elementni bosib «＋ Qo'shish» — formula yig'iladi va molyar massa darhol hisoblanadi (masalan H₂SO₄ = 98 g/mol).
+- **Yuklanish ekrani**: test tayyorlanayotganda va topshirilganda LongoUZ boyqushi atrofida yashil halqa aylanadi; natija tayyor bo'lganda ✓ belgisi.
+- **Natija oynasi**: katta ball, to'g'ri / xato / javobsiz soni rangli nuqtalar bilan; internet uzilsa javoblar yo'qolmaydi — «Qayta yuborish» tugmasi.
+- **Sertifikat (PDF)**: savollarning yarmidan kamiga javob berilsa yoki test juda tez yakunlansa berilmaydi (sabab ko'rsatiladi).
+- **Qayta baholash**: savol tuzatilganda ball yozuvi ("62,3 / 93 ball" kabi) va sertifikat ham yangilanadi; reyting avtomatik yangilanadi; o'quvchiga yangi natija bilan xabar boradi. AI yordamchi tuzatgan savollarda ham qayta baholash ishlaydi.
+- **Yangiliklar va reklama (admin)**: rasmli yangilik/e'lon/aksiya/reklama qo'shish (rasm brauzerda siqiladi), mahkamlash, yashirish; bosh sahifa, kabinet va /news sahifasida ko'rinadi; ko'rishlar va bosishlar sanaladi.
+- **Admin bildirishnomalari**: «Xotira» bo'limida AI yordamchining yangi o'zgarishlari soni, «Foydalanuvchilar» yonida bugungi yangi ro'yxatdan o'tganlar; AI o'zgarishlari Xotira jurnaliga yoziladi.
+- **Savollar bazasi**: biologiya va kimyo sertifikat rejimi haqiqiy 2025/26 formatida (40 ta test: 32 yopiq + 3 moslashtirish + 5 ochiq; A+…C darajalar); biologiya sertifikat rejimi avval umuman ishlamas edi. Kimyoga +355, biologiyaga +195 ta hisoblab tekshirilgan yangi savol (molyar massa, eritmalar, reaksiya bo'yicha hisob, termokimyo, pH, oksidlanish darajasi, DNK, genetika, Xardi–Vaynberg, ozuqa zanjiri, chizmalar bilan). IELTS rejimi uchun original Reading matnlari (TRUE/FALSE/NOT GIVEN, multiple choice, sentence completion) va akademik lug'at; CEFR rejimi endi bazadan ishlaydi (avval «savollar topilmadi» chiqardi).
+- **Ochiq javob tekshiruvi**: butun sonli javoblar (masalan nukleotidlar soni) endi faqat aniq teng bo'lsa qabul qilinadi.
+- **Bosh sahifa / kirish**: telefonda logotip yozuvi tugmalarga tegmaydi; kirish sahifalarida sarlavha shaffof emas; Cloudflare tekshiruvi ishlamasa foydalanuvchiga xato oynasi ko'rsatilmaydi; «15 000+ savol» o'rniga bazadagi haqiqiy son.
+
 ## v222 — xavfsizlik: koddagi admin paroli olib tashlandi
 - `admin_auth.py`: ADMIN_PASSWORD berilmasa endi admin panel yopiq (avval ochiq GitHub reposida ko'rinadigan standart parol ishlardi).
 - Vercel Environment Variables'ga kalitlar qo'shildi (WEB_SECRET_KEY, Google, Turnstile, WEB_COOKIE_SECURE, yangi ADMIN_PASSWORD).

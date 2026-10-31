@@ -8,10 +8,11 @@
   <link rel="icon" type="image/png" href="/static/logo-owl.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=Caveat:wght@600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/style.css?v=229">
   <link rel="stylesheet" href="/static/home.css">
+  <link rel="stylesheet" href="/static/news.css?v=229">
   <link rel="stylesheet" href="/static/purchase.css">
-  <script src="/static/theme-init.js"></script>
+  <script src="/static/theme-init.js?v=229"></script>
 </head>
 <body class="home" data-logged-in="false">
   </div>
@@ -59,7 +60,7 @@
           </div>
           <div class="hm-proof" data-reveal data-reveal-delay="4">
             <div class="hm-faces"><span class="hf"><img src="/static/people/face1.jpg" alt="" loading="lazy" onerror="this.remove()"><svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" fill="#bfe9d8"/><path d="M6 40c1-9 7-12 14-12s13 3 14 12z" fill="#2b4a5a"/><circle cx="20" cy="18" r="8" fill="#f1c9a5"/><path d="M9 22c-1-10 4-16 11-16s12 6 11 16c-1-6-4-9-11-9s-10 3-11 9z" fill="#2a1a12"/></svg></span><span class="hf"><img src="/static/people/face2.jpg" alt="" loading="lazy" onerror="this.remove()"><svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" fill="#cfe1ff"/><path d="M6 40c1-9 7-12 14-12s13 3 14 12z" fill="#2b4a5a"/><circle cx="20" cy="18" r="8" fill="#d9a077"/><path d="M10 17c0-7 4-11 10-11s10 4 10 11c-3-3-6-4-10-4s-7 1-10 4z" fill="#14100e"/></svg></span><span class="hf"><img src="/static/people/face3.jpg" alt="" loading="lazy" onerror="this.remove()"><svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" fill="#ffe3c2"/><path d="M6 40c1-9 7-12 14-12s13 3 14 12z" fill="#2b4a5a"/><circle cx="20" cy="18" r="8" fill="#f4d3b4"/><path d="M9 22c-1-10 4-16 11-16s12 6 11 16c-1-6-4-9-11-9s-10 3-11 9z" fill="#6b3e1e"/></svg></span><span class="hf"><img src="/static/people/face4.jpg" alt="" loading="lazy" onerror="this.remove()"><svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" fill="#e3d6ff"/><path d="M6 40c1-9 7-12 14-12s13 3 14 12z" fill="#2b4a5a"/><circle cx="20" cy="18" r="8" fill="#c58a62"/><path d="M10 17c0-7 4-11 10-11s10 4 10 11c-3-3-6-4-10-4s-7 1-10 4z" fill="#1a1210"/></svg></span></div>
-            <div><b>15 000+ savol</b><small>8 ta fan bo'yicha bazada tayyor</small></div>
+            <div><b>{{ q_total_label or "Minglab" }} savol</b><small>8 ta fan bo'yicha bazada tayyor</small></div>
           </div>
         </div>
 
@@ -67,7 +68,7 @@
           <div class="lap-wrap">
           <div class="hm-float hm-float-top"><div class="hm-fin"><span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4M9 13h.01M15 13h.01M9 17h6"/></svg></span><span><b>AI yordamchi</b>Savolga javob beradi</span></div></div>
           <div class="hm-float hm-float-right"><div class="hm-fin"><span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 3v2M21 12h-2"/></svg></span><span><b>Shaxsiy o'quv rejasi</b>Maqsadingizga mos</span></div></div>
-          <div class="hm-float hm-float-left"><div class="hm-fin"><span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 012-2h12v16H6a2 2 0 00-2 2z"/><path d="M8 7h6M8 11h6"/></svg></span><span><b>15 000+ savol</b>8 ta fan bazasi</span></div></div>
+          <div class="hm-float hm-float-left"><div class="hm-fin"><span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 012-2h12v16H6a2 2 0 00-2 2z"/><path d="M8 7h6M8 11h6"/></svg></span><span><b>{{ q_total_label or "Minglab" }} savol</b>8 ta fan bazasi</span></div></div>
           <div class="hm-float hm-float-bottom"><div class="hm-fin"><span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="6"/><path d="M8.5 14L7 22l5-3 5 3-1.5-8"/></svg></span><span><b>Rasmiy sertifikat</b>QR kodli PDF</span></div></div>
           <div class="lap">
             <div class="lap-lid"><i class="lap-cam"></i><div class="lap-scr" data-scr></div></div>
@@ -292,6 +293,8 @@
 
 
     <!-- ===================== SAVOL-JAVOB (v225) ===================== -->
+    <section class="hm-sec nz-strip nz-home" id="news" data-news-strip data-wrap="hm-wrap" data-title="Yangiliklar va e'lonlar" data-limit="6" hidden></section>
+
     <section class="hm-sec alt" id="faq">
       <div class="hm-wrap faq-wrap">
         <div class="ft-head" data-reveal>
@@ -348,6 +351,7 @@
   <script src="/static/app.js"></script>
   <script src="/static/owl-chat.js"></script>
   <script src="/static/home-showcase.js"></script>
+  <script src="/static/news-strip.js?v=229" defer></script>
   <script>
     (function () {
       var toggleBtns = document.querySelectorAll(".billing-toggle-btn");
@@ -395,7 +399,7 @@
   </script>
   <script src="/static/purchase.js"></script>
   {% if turnstile_active(request) %}
-  <script src="/static/turnstile-helper.js"></script>
+  <script src="/static/turnstile-helper.js?v=229"></script>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=lgTurnstileReady" async defer onerror="window.lgTurnstileFailed&&window.lgTurnstileFailed()"></script>
   {% endif %}
 </body>

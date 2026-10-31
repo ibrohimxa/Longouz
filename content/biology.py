@@ -76,4 +76,4 @@ def pack() -> dict:
     if problems:
         import logging
         logging.getLogger(__name__).warning("Biologiya bankida %s ta muammo: %s", len(problems), problems[:5])
-    return {"subject": "biology", "modes": ["dtm"], "topics": topics, "questions": questions}
+    return {"subject": "biology", "modes": ["dtm", "certificate"], "topics": topics, "questions": questions}

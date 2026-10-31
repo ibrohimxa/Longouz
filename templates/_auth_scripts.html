@@ -1,5 +1,5 @@
 {% if turnstile_active(request) %}
-<script src="/static/turnstile-helper.js"></script>
+<script src="/static/turnstile-helper.js?v=229"></script>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=lgTurnstileReady" async defer onerror="window.lgTurnstileFailed&&window.lgTurnstileFailed()"></script>
 {% endif %}
 <script src="/static/devtools-guard.js"></script>

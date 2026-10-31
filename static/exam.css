@@ -99,3 +99,5 @@ button.topic-row { font: inherit; text-align: left; width: 100%; color: inherit;
 .review-open-answer.bad { background: rgba(248,81,73,.1); border-color: var(--error); }
 .review-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
 .review-meta span { font-size: .7rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--bg-hover, rgba(128,128,128,.16)); color: var(--ink-soft); }
+/* v229: moslashtirish savollari (1. … / A) …) qatorma-qator ko'rinadi */
+.rv-qtext, .quiz-question-card h2 { white-space: pre-line; }

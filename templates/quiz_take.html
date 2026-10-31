@@ -2,19 +2,23 @@
 <html lang="uz">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description" content="LongoUZ — test yechish.">
+  <meta name="theme-color" content="#0b1116">
   <title>Test — LongoUZ</title>
   <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preload" as="image" href="/static/logo-owl3d-sm.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/style.css?v=229">
   <link rel="stylesheet" href="/static/figure.css">
-  <link rel="stylesheet" href="/static/exam.css">
+  <link rel="stylesheet" href="/static/exam.css?v=229">
   <link rel="stylesheet" href="/static/quiz-tools.css">
-  <script src="/static/theme-init.js"></script>
+  <link rel="stylesheet" href="/static/quiz-v229.css?v=229">
+  <script src="/static/theme-init.js?v=229"></script>
 </head>
-<body data-logged-in="true"
+<body class="quiz-page is-loading"
+      data-logged-in="true"
       data-subject="{{ subject }}"
       data-level="{{ level }}"
       data-mode="{{ mode }}"
@@ -30,14 +34,44 @@
       data-adaptive="{{ 'true' if adaptive else 'false' }}"
       data-attempt-token="{{ attempt_token }}">
 
+  <!-- Yuklanish ekrani: LongoUZ boyqushi atrofida yashil halqa aylanadi.
+       Test tayyorlanayotganda ham, topshirilganda (natija hisoblanayotganda) ham shu ekran. -->
+  <div id="lz-loader" class="lz-loader" role="status" aria-live="polite">
+    <div class="lz-loader-box">
+      <div class="lz-loader-ring">
+        <svg class="lz-loader-svg" viewBox="0 0 120 120" aria-hidden="true">
+          <defs>
+            <linearGradient id="lzLoadGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#3ee6a8"/>
+              <stop offset="1" stop-color="#10a874"/>
+            </linearGradient>
+          </defs>
+          <circle class="lz-loader-track" cx="60" cy="60" r="54"/>
+          <circle class="lz-loader-arc" cx="60" cy="60" r="54"/>
+        </svg>
+        <div class="lz-loader-logo">
+          <img src="/static/logo-owl3d-sm.png" srcset="/static/logo-owl3d-sm.png 1x, /static/logo-owl3d.png 3x" alt="LongoUZ" width="78" height="60">
+        </div>
+        <div class="lz-loader-check" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+        </div>
+      </div>
+      <p class="lz-loader-brand">Longo<b>UZ</b></p>
+      <h2 class="lz-loader-title" id="lz-loader-title">Test tayyorlanmoqda</h2>
+      <p class="lz-loader-sub" id="lz-loader-sub">Savollar va imtihon sessiyasi yuklanmoqda…</p>
+      <div class="lz-loader-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+      <p class="lz-loader-note" id="lz-loader-note" hidden>Iltimos, oynani yopmang va sahifani yangilamang. Bu bir necha soniya oladi.</p>
+    </div>
+  </div>
+
   <header class="site-header quiz-header">
-    <a href="/dashboard" class="brand">
+    <a href="/dashboard" class="brand quiz-brand" aria-label="LongoUZ — kabinet">
       {% include "_brandmark.html" %}
     </a>
     <div class="quiz-header-meta">
       <span class="quiz-mode-badge quiz-mode-badge-{{ mode }}">{{ mode_info.name }}</span>
       <span class="quiz-subject-label">{{ subject_name }}</span>
-      <span id="quiz-timer" class="quiz-timer">--:--</span>
+      <span id="quiz-timer" class="quiz-timer" aria-label="Qolgan vaqt">--:--</span>
       <button class="theme-toggle" aria-label="Rejimni almashtirish" title="Kunduzgi/tungi rejim">
         <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
@@ -47,7 +81,7 @@
 
   <main class="quiz-main">
 
-    <div id="quiz-loading" class="quiz-status-card">
+    <div id="quiz-loading" class="quiz-status-card quiz-loading-inline" aria-hidden="true">
       <p>Savollar tayyorlanmoqda...</p>
     </div>
 
@@ -57,12 +91,14 @@
     </div>
 
     <div id="quiz-body" style="display:none;">
+      <div class="quiz-topline">
+        <span class="quiz-meta-chip"><b>{{ mode_info.name }}</b><span>{{ subject_name }}</span></span>
+        <p id="quiz-progress-label" class="quiz-progress-label"></p>
+      </div>
       <div class="quiz-progress-track">
         <div id="quiz-progress-fill" class="quiz-progress-fill"></div>
       </div>
-      <p id="quiz-progress-label" class="quiz-progress-label"></p>
 
-      <div id="quiz-palette" class="quiz-palette"></div>
       <div class="quiz-question-card">
         <span id="quiz-section-label" class="quiz-section-label" hidden></span>
         <h2 id="quiz-question-text"></h2>
@@ -71,9 +107,17 @@
       </div>
 
       <div class="quiz-nav-row">
-        <button type="button" id="quiz-prev-btn" class="btn-secondary">Oldingi</button>
-        <button type="button" id="quiz-next-btn" class="btn-primary">Keyingi</button>
-        <button type="button" id="quiz-finish-btn" class="btn-primary" style="display:none;">Yakunlash</button>
+        <button type="button" id="quiz-prev-btn" class="btn-secondary quiz-prev">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>Oldingi</span>
+        </button>
+        <button type="button" id="quiz-nav-btn" class="quiz-nav-btn" aria-haspopup="dialog" title="Barcha savollar">
+          <span id="quiz-nav-pos">1 / 1</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>
+        </button>
+        <button type="button" id="quiz-next-btn" class="btn-primary quiz-next">
+          <span>Keyingi</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+        <button type="button" id="quiz-finish-btn" class="btn-primary quiz-finish" style="display:none;">Yakunlash</button>
       </div>
     </div>
 
@@ -96,11 +140,32 @@
 
   </main>
 
+  <!-- Barcha savollar ro'yxati (raqamlar) — faqat "1 / 30" tugmasi bosilganda ochiladi -->
+  <aside id="lz-nav-sheet" class="lz-sheet lz-sheet-sm" aria-label="Savollar ro'yxati">
+    <div class="lz-sheet-card">
+      <div class="lz-sheet-grab">
+        <span class="lz-sheet-handle" aria-hidden="true"></span>
+        <div class="lz-sheet-head">
+          <h3>Savollar</h3>
+          <span class="lz-sheet-sub" id="lz-nav-count"></span>
+          <button type="button" class="lz-sheet-x" data-sheet-close aria-label="Yopish">&times;</button>
+        </div>
+      </div>
+      <div class="lz-sheet-scroll">
+        <div class="lz-nav-legend">
+          <span><i class="lg-cur"></i>Hozirgi</span>
+          <span><i class="lg-ans"></i>Javob berilgan</span>
+          <span><i class="lg-emp"></i>Javobsiz</span>
+        </div>
+        <div id="quiz-palette" class="quiz-palette lz-nav-grid"></div>
+        <button type="button" class="lz-nav-finish" id="lz-nav-finish">Testni yakunlash</button>
+      </div>
+    </div>
+  </aside>
+
   <!-- ==========================================================================
-       NATIJA TABRIKLASH OYNASI — test tugagach ekran o'rtasida ochiladi:
-       kubok (natijaga qarab harakati/rangi o'zgaradi) + ikki chetdan
-       otiladigan konfetti. "Natijalarim" bosilganda xato/to'g'ri javoblar
-       sahifasiga (avvalgidek) o'tadi.
+       NATIJA OYNASI — test tugagach ekran o'rtasida ochiladi:
+       katta ball, to'g'ri / xato / javobsiz soni, kubok va konfetti.
        ========================================================================== -->
   <div id="quiz-celebrate-overlay" class="quiz-celebrate-overlay" hidden>
     <div class="quiz-confetti-field" id="quiz-confetti-field" aria-hidden="true"></div>
@@ -115,9 +180,19 @@
           <rect x="16" y="50" width="32" height="5" rx="2" fill="currentColor"/>
         </svg>
       </div>
+      <p class="quiz-celebrate-kicker" id="quiz-celebrate-kicker">Natija</p>
       <h2 id="quiz-celebrate-title" class="quiz-celebrate-title"></h2>
       <p id="quiz-celebrate-detail" class="quiz-celebrate-detail"></p>
+      <div class="quiz-score-stats" id="quiz-score-stats" hidden>
+        <span class="st-ok"><i></i><b id="qs-ok">0</b> to'g'ri</span>
+        <span class="st-bad"><i></i><b id="qs-bad">0</b> xato</span>
+        <span class="st-skip"><i></i><b id="qs-skip">0</b> javobsiz</span>
+      </div>
       <div id="quiz-celebrate-breakdown" class="result-breakdown"></div>
+      <div id="quiz-cert-lock" class="quiz-cert-lock" hidden>
+        <b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>Sertifikat (PDF) hozircha yopiq</b>
+        <p></p>
+      </div>
       <div id="quiz-celebrate-cert" style="display:none;" class="quiz-cert-box">
         <p>Tabriklaymiz — rasmiy sertifikat generatsiya qilindi!</p>
         <div class="quiz-cert-actions">
@@ -126,8 +201,9 @@
         </div>
       </div>
       <div class="quiz-result-actions">
+        <a id="quiz-celebrate-results-btn" href="#" class="btn-primary">Javoblarni ko'rish</a>
         <a href="/quiz" class="btn-secondary">Yana bir test</a>
-        <a id="quiz-celebrate-results-btn" href="#" class="btn-primary">Natijalarim</a>
+        <a href="/dashboard" class="quiz-result-home">Kabinetga qaytish</a>
       </div>
     </div>
   </div>
@@ -137,11 +213,12 @@
   <script src="/static/devtools-guard.js"></script>
   <script src="/static/app.js"></script>
   <script src="/static/owl-chat.js"></script>
+  <script src="/static/lz-sheet.js?v=229"></script>
   <script src="/static/quiz-style.js"></script>
   <script src="/static/figure.js"></script>
-  <script src="/static/quiz.js"></script>
-  <script src="/static/formula-sheet.js"></script>
+  <script src="/static/quiz.js?v=229"></script>
+  <script src="/static/formula-sheet.js?v=229"></script>
   <script src="/static/calc-engine.js"></script>
-  <script src="/static/quiz-tools.js"></script>
+  <script src="/static/quiz-tools.js?v=229"></script>
 </body>
 </html>

@@ -313,18 +313,66 @@ async def regrade_question(qid: int) -> dict:
                     it["regraded"] = True
                     gained += 1
             if gained:
+                old_label = log.score_label or ""
+                old_items = json.loads(log.questions_json or "[]")
                 log.correct_count = min(log.total_count or 0, (log.correct_count or 0) + gained) or (log.correct_count or 0) + gained
                 log.questions_json = json.dumps(items, ensure_ascii=False)
+                new_label = _relabel(log, old_items, items, old_label)
+                if new_label:
+                    log.score_label = new_label
+                # shu natija bo'yicha berilgan sertifikat ham yangilanadi (QR tekshiruv sahifasida yangi ball chiqadi)
+                try:
+                    certs = (await session.execute(select(db.UserCertificate).where(db.UserCertificate.quiz_log_id == log.id))).scalars().all()
+                    for c in certs:
+                        c.correct_count = log.correct_count
+                        c.percent = round(100 * log.correct_count / log.total_count) if log.total_count else c.percent
+                        if new_label:
+                            c.score_label = new_label[:40]
+                except Exception:  # noqa: BLE001
+                    logger.debug("sertifikat yangilanmadi", exc_info=True)
                 n_logs += 1
-                changed_users[log.user_id] = changed_users.get(log.user_id, 0) + gained
+                prev = changed_users.get(log.user_id, (0, ""))
+                changed_users[log.user_id] = (prev[0] + gained, new_label or prev[1])
         await session.commit()
-    for uid, g in changed_users.items():
+    for uid, (g, lbl) in changed_users.items():
         try:
-            await db.create_notification(uid, "report", title="Natijangiz qayta hisoblandi",
-                                         body=f"Testdagi bir savol tekshirilib tuzatildi. Sizning javobingiz to'g'ri deb qabul qilindi: natijangizga +{g} ta to'g'ri javob qo'shildi.")
+            extra = f" Yangi natija: {lbl}." if lbl else ""
+            await db.create_notification(uid, "report", title="Natijangiz qayta hisoblandi — ball oshdi",
+                                         body=f"Testdagi bir savol tekshirilib tuzatildi. Sizning javobingiz to'g'ri deb qabul qilindi: natijangizga +{g} ta to'g'ri javob qo'shildi.{extra} Reytingdagi o'rningiz ham yangilandi.")
         except Exception:  # noqa: BLE001
             logger.debug("bildirishnoma yuborilmadi", exc_info=True)
     return {"logs": n_logs, "users": len(changed_users)}
+
+
+def _graded_from(items: list) -> list[dict]:
+    return [{"is_correct": bool(it.get("is_correct")), "difficulty": it.get("difficulty"), "block": it.get("block"),
+             "section": it.get("section"), "qtype": it.get("qtype") or "closed", "subject": it.get("_subject"),
+             "coef": it.get("_coef"), "role": it.get("_role")} for it in items if isinstance(it, dict)]
+
+
+def _relabel(log, old_items: list, new_items: list, old_label: str) -> str:
+    """Qayta baholangandan keyingi natija yozuvi (masalan "62.3 / 93.0 ball" yoki "B2").
+    Rasmiy tuzilmali (tiered) testlarda qaysi hisoblash usuli ishlatilganini eski yozuvni qayta hosil qilib aniqlaymiz;
+    aniqlab bo'lmasa — yozuv o'zgartirilmaydi (noto'g'ri ball ko'rsatgandan ko'ra, eskisini qoldirish xavfsizroq)."""
+    import scoring
+    import exam_rules
+    try:
+        if exam_rules.is_tiered(log.subject, log.mode):
+            for meta in ({"full_mock": False}, {"full_mock": True}, {"full_mock": True, "variant": "second"}):
+                before = scoring.score_session(log.subject, log.mode, _graded_from(old_items), meta)
+                if before and before.get("label") == old_label:
+                    after = scoring.score_session(log.subject, log.mode, _graded_from(new_items), meta)
+                    return (after or {}).get("label", "") or ""
+            return ""
+        old_correct = sum(1 for it in old_items if isinstance(it, dict) and it.get("is_correct"))
+        before = scoring.score_result(log.mode, old_correct, log.total_count or 0)
+        if before and before.get("label") == old_label:
+            after = scoring.score_result(log.mode, log.correct_count or 0, log.total_count or 0)
+            return (after or {}).get("label", "") or ""
+        return ""
+    except Exception:  # noqa: BLE001
+        logger.debug("natija yozuvi qayta hisoblanmadi", exc_info=True)
+        return ""
 
 
 async def dismiss(report_id: int, note: str, admin: str) -> None:

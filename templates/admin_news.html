@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Yangiliklar va reklama — Admin — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css?v=229">
+  <link rel="stylesheet" href="/static/admin-dash.css">
+  <link rel="stylesheet" href="/static/admin.css">
+  <script src="/static/theme-init.js?v=229"></script>
+  <style>
+    .nw-grid{display:grid;grid-template-columns:minmax(0,460px) minmax(0,1fr);gap:18px;align-items:start}
+    @media(max-width:1000px){.nw-grid{grid-template-columns:1fr}}
+    .nw-card{padding:18px;border-radius:16px;background:var(--bg-elevated);border:1px solid var(--line)}
+    .nw-card h3{margin:0 0 12px;font-size:1.05rem}
+    .nw-f{display:block;margin:0 0 12px}
+    .nw-f span{display:block;font-size:.82rem;font-weight:600;margin:0 0 5px;color:var(--ink-soft)}
+    .nw-f input[type=text],.nw-f input[type=url],.nw-f textarea,.nw-f select{width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit}
+    .nw-f textarea{min-height:110px;resize:vertical;line-height:1.5}
+    .nw-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .nw-drop{position:relative;display:grid;place-items:center;min-height:150px;border:2px dashed var(--line);border-radius:14px;background:var(--bg);cursor:pointer;overflow:hidden;text-align:center;color:var(--ink-soft);font-size:.88rem;padding:10px}
+    .nw-drop.drag{border-color:#22c58b;background:rgba(34,197,139,.08)}
+    .nw-drop img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .nw-drop input{position:absolute;inset:0;opacity:0;cursor:pointer}
+    .nw-drop .nw-x{position:absolute;top:8px;right:8px;z-index:2;width:32px;height:32px;border-radius:10px;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:1.1rem;cursor:pointer}
+    .nw-chk{display:flex;gap:16px;flex-wrap:wrap;margin:4px 0 14px;font-size:.9rem}
+    .nw-chk label{display:flex;align-items:center;gap:6px;cursor:pointer}
+    .nw-btn{height:44px;padding:0 18px;border-radius:12px;border:0;background:#22c58b;color:#04120b;font:700 .95rem inherit;font-family:inherit;cursor:pointer}
+    .nw-btn.sec{background:var(--bg-hover);color:var(--ink);border:1px solid var(--line)}
+    .nw-btn:disabled{opacity:.6}
+    .nw-msg{margin:10px 0 0;font-size:.88rem}.nw-msg.err{color:#ff7b72}.nw-msg.ok{color:#22c58b}
+    .nw-list{display:grid;gap:12px}
+    .nw-item{display:grid;grid-template-columns:120px minmax(0,1fr);gap:14px;padding:12px;border-radius:14px;border:1px solid var(--line);background:var(--bg-elevated)}
+    .nw-item.off{opacity:.55}
+    .nw-thumb{width:120px;height:80px;border-radius:10px;background:var(--bg-hover);overflow:hidden;display:grid;place-items:center;color:var(--ink-soft);font-size:.75rem}
+    .nw-thumb img{width:100%;height:100%;object-fit:cover}
+    .nw-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:4px;font-size:.75rem;color:var(--ink-soft)}
+    .nw-tag{padding:2px 8px;border-radius:999px;background:rgba(34,197,139,.14);color:#22c58b;font-weight:700}
+    .nw-tag.ad{background:rgba(255,167,38,.16);color:#ffa726}.nw-tag.pin{background:rgba(74,158,255,.16);color:#4a9eff}
+    .nw-item h4{margin:0 0 4px;font-size:.98rem}
+    .nw-item p{margin:0;font-size:.85rem;color:var(--ink-soft);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .nw-acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+    .nw-acts button{height:32px;padding:0 10px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:600 .78rem inherit;font-family:inherit;cursor:pointer}
+    .nw-acts button.del{color:#ff7b72}
+    .nw-prev{margin-top:14px}
+    @media(max-width:560px){.nw-item{grid-template-columns:1fr}.nw-thumb{width:100%;height:140px}.nw-row{grid-template-columns:1fr}}
+  </style>
+</head>
+<body data-logged-in="true" data-admin-prefix="{{ admin_prefix }}">
+  <div class="app-shell">
+    {% include "_admin_sidebar.html" %}
+    <div class="app-content">
+      <div class="app-topbar"><div>
+        <h1>Yangiliklar va reklama</h1>
+        <p>Rasmli yangilik, e'lon, aksiya yoki reklama banneri qo'shing — u darhol bosh sahifada, o'quvchi kabinetida va <a href="/news" target="_blank">/news</a> sahifasida ko'rinadi. Ko'rishlar va bosishlar soni sanaladi.</p>
+      </div></div>
+
+      <div class="nw-grid">
+        <section class="nw-card" id="nw-form-card">
+          <h3 id="nw-form-title">Yangi yozuv</h3>
+          <input type="hidden" id="nw-id" value="">
+          <div class="nw-row">
+            <label class="nw-f"><span>Turi</span>
+              <select id="nw-kind">{% for k, v in kinds.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select>
+            </label>
+            <label class="nw-f"><span>Tugma matni (ixtiyoriy)</span><input type="text" id="nw-link-label" maxlength="60" placeholder="masalan: Batafsil"></label>
+          </div>
+          <label class="nw-f"><span>Sarlavha</span><input type="text" id="nw-title" maxlength="200" placeholder="masalan: Fizikadan 300 ta yangi rasmli savol qo'shildi"></label>
+          <label class="nw-f"><span>Matn</span><textarea id="nw-body" maxlength="4000" placeholder="Qisqa va aniq yozing…"></textarea></label>
+          <label class="nw-f"><span>Havola (ixtiyoriy) — /upgrade, /quiz yoki https://…</span><input type="text" id="nw-link" maxlength="500" placeholder="/upgrade"></label>
+          <div class="nw-f"><span>Rasm (ixtiyoriy) — bosing yoki faylni shu yerga tashlang</span>
+            <div class="nw-drop" id="nw-drop">
+              <div id="nw-drop-txt">📷 JPG, PNG yoki WebP<br><small>Rasm avtomatik siqiladi (≤1280 px)</small></div>
+              <input type="file" id="nw-file" accept="image/jpeg,image/png,image/webp,image/gif">
+            </div>
+          </div>
+          <div class="nw-chk">
+            <label><input type="checkbox" id="nw-active" checked> Saytda ko'rinsin</label>
+            <label><input type="checkbox" id="nw-pinned"> Tepaga mahkamlash</label>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button type="button" class="nw-btn" id="nw-save">Saqlash va chop etish</button>
+            <button type="button" class="nw-btn sec" id="nw-reset">Tozalash</button>
+          </div>
+          <p class="nw-msg" id="nw-msg" hidden></p>
+        </section>
+
+        <section>
+          <div class="nw-list" id="nw-list">
+            {% for it in items %}
+            <article class="nw-item{{ '' if it.is_active else ' off' }}" data-item='{{ it | tojson | forceescape }}'>
+              <div class="nw-thumb">{% if it.image %}<img src="{{ it.image }}" alt="" loading="lazy">{% else %}rasm yo'q{% endif %}</div>
+              <div>
+                <div class="nw-meta">
+                  <span class="nw-tag{{ ' ad' if it.kind in ('ad', 'promo') else '' }}">{{ it.kind_name }}</span>
+                  {% if it.pinned %}<span class="nw-tag pin">Mahkamlangan</span>{% endif %}
+                  {% if not it.is_active %}<span class="nw-tag" style="background:rgba(127,127,127,.2);color:inherit">Yashirilgan</span>{% endif %}
+                  <span>{{ it.date }}</span><span>👁 {{ it.views }}</span><span>👆 {{ it.clicks }}</span>
+                </div>
+                <h4>{{ it.title or '(sarlavhasiz)' }}</h4>
+                <p>{{ it.body }}</p>
+                <div class="nw-acts">
+                  <button type="button" data-act="edit">Tahrirlash</button>
+                  <button type="button" data-act="toggle">{{ 'Yashirish' if it.is_active else "Ko'rsatish" }}</button>
+                  <button type="button" data-act="pin">{{ 'Mahkamlashni olish' if it.pinned else 'Mahkamlash' }}</button>
+                  <button type="button" data-act="delete" class="del">O'chirish</button>
+                </div>
+              </div>
+            </article>
+            {% else %}
+            <div class="nw-card"><p style="margin:0;color:var(--ink-soft)">Hali yozuv yo'q. Chap tomondagi forma orqali birinchi yangilik yoki reklamani qo'shing.</p></div>
+            {% endfor %}
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    "use strict";
+    var P = document.body.dataset.adminPrefix;
+    var $ = function (id) { return document.getElementById(id); };
+    var imageData = "", removeImage = false;
+
+    function msg(t, ok) { var m = $("nw-msg"); m.hidden = !t; m.textContent = t || ""; m.className = "nw-msg " + (ok ? "ok" : "err"); }
+    function api(url, body) {
+      return fetch(url, { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json", "X-Requested-With": "fetch" }, body: JSON.stringify(body || {}) })
+        .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.detail || "Xatolik"); return j; }); });
+    }
+    function showImage(src) {
+      var d = $("nw-drop"), old = d.querySelector("img"), x = d.querySelector(".nw-x");
+      if (old) old.remove(); if (x) x.remove();
+      if (!src) { $("nw-drop-txt").hidden = false; return; }
+      $("nw-drop-txt").hidden = true;
+      var img = document.createElement("img"); img.src = src; d.insertBefore(img, d.firstChild);
+      var b = document.createElement("button"); b.type = "button"; b.className = "nw-x"; b.textContent = "×"; b.title = "Rasmni olib tashlash";
+      b.addEventListener("click", function (e) { e.preventDefault(); e.stopPropagation(); imageData = ""; removeImage = true; $("nw-file").value = ""; showImage(""); });
+      d.appendChild(b);
+    }
+    // Rasmni brauzerda kichraytirish va siqish (≤1280px, WebP yoki JPEG) — bazaga yengil yoziladi
+    function compress(file) {
+      return new Promise(function (resolve, reject) {
+        if (!/^image\//.test(file.type)) { reject(new Error("Faqat rasm fayli")); return; }
+        if (file.type === "image/gif" && file.size < 800000) { var fr = new FileReader(); fr.onload = function () { resolve(fr.result); }; fr.onerror = reject; fr.readAsDataURL(file); return; }
+        // (CSP blob: manzillarni taqiqlaydi — shuning uchun rasm data: URL orqali o'qiladi)
+        var img = new Image(), rd = new FileReader();
+        rd.onload = function () { img.src = rd.result; };
+        rd.onerror = function () { reject(new Error("Faylni o'qib bo'lmadi")); };
+        img.onload = function () {
+          var max = 1280, w = img.naturalWidth, h = img.naturalHeight, k = Math.min(1, max / Math.max(w, h));
+          var c = document.createElement("canvas"); c.width = Math.round(w * k); c.height = Math.round(h * k);
+          var g = c.getContext("2d"); g.imageSmoothingQuality = "high"; g.drawImage(img, 0, 0, c.width, c.height);
+          var out = c.toDataURL("image/webp", 0.85);
+          if (out.indexOf("data:image/webp") !== 0) out = c.toDataURL("image/jpeg", 0.86);
+          if (out.length > 1150000) out = c.toDataURL("image/jpeg", 0.7);
+          resolve(out);
+        };
+        img.onerror = function () { reject(new Error("Rasmni o'qib bo'lmadi")); };
+        rd.readAsDataURL(file);
+      });
+    }
+    function takeFile(f) {
+      if (!f) return;
+      msg("Rasm tayyorlanmoqda…", true);
+      compress(f).then(function (d) { imageData = d; removeImage = false; showImage(d); msg("Rasm tayyor (" + Math.round(d.length * 0.75 / 1024) + " KB).", true); })
+        .catch(function (e) { msg(e.message, false); });
+    }
+    $("nw-file").addEventListener("change", function () { takeFile(this.files && this.files[0]); });
+    var drop = $("nw-drop");
+    ["dragenter", "dragover"].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add("drag"); }); });
+    ["dragleave", "drop"].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove("drag"); }); });
+    drop.addEventListener("drop", function (e) { takeFile(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]); });
+
+    function resetForm() {
+      $("nw-id").value = ""; $("nw-title").value = ""; $("nw-body").value = ""; $("nw-link").value = ""; $("nw-link-label").value = "";
+      $("nw-kind").value = "news"; $("nw-active").checked = true; $("nw-pinned").checked = false; imageData = ""; removeImage = false; $("nw-file").value = "";
+      showImage(""); $("nw-form-title").textContent = "Yangi yozuv"; msg("");
+    }
+    $("nw-reset").addEventListener("click", resetForm);
+    $("nw-save").addEventListener("click", function () {
+      var btn = this; btn.disabled = true; msg("Saqlanmoqda…", true);
+      api(P + "/api/news", {
+        id: $("nw-id").value || 0, kind: $("nw-kind").value, title: $("nw-title").value, body: $("nw-body").value,
+        link_url: $("nw-link").value, link_label: $("nw-link-label").value, is_active: $("nw-active").checked, pinned: $("nw-pinned").checked,
+        image: imageData, remove_image: removeImage
+      }).then(function () { msg("Saqlandi! Sahifa yangilanmoqda…", true); setTimeout(function () { location.reload(); }, 600); })
+        .catch(function (e) { msg(e.message, false); btn.disabled = false; });
+    });
+
+    document.querySelectorAll(".nw-item").forEach(function (card) {
+      var it = JSON.parse(card.getAttribute("data-item"));
+      card.addEventListener("click", function (e) {
+        var b = e.target.closest("button[data-act]"); if (!b) return;
+        var act = b.dataset.act;
+        if (act === "edit") {
+          $("nw-id").value = it.id; $("nw-title").value = it.title || ""; $("nw-body").value = it.body || ""; $("nw-link").value = it.link_url || "";
+          $("nw-link-label").value = it.link_label || ""; $("nw-kind").value = it.kind; $("nw-active").checked = !!it.is_active; $("nw-pinned").checked = !!it.pinned;
+          imageData = ""; removeImage = false; showImage(it.image || ""); $("nw-form-title").textContent = "Tahrirlash #" + it.id; msg("");
+          $("nw-form-card").scrollIntoView({ behavior: "smooth", block: "start" });
+          return;
+        }
+        if (act === "delete" && !confirm("Bu yozuvni butunlay o'chirasizmi?")) return;
+        var url = P + "/api/news/" + it.id + (act === "delete" ? "/delete" : "/toggle");
+        api(url, act === "pin" ? { field: "pinned" } : {}).then(function () { location.reload(); }).catch(function (e) { alert(e.message); });
+      });
+    });
+  })();
+  </script>
+</body>
+</html>

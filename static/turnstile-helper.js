@@ -33,11 +33,24 @@
     if (!i) { i = document.createElement("input"); i.type = "hidden"; i.name = "cf-turnstile-fallback"; form.appendChild(i); }
     return i;
   }
+  // v229: vidjet ishlamasa (masalan domen Cloudflare'da hali qo'shilmagan bo'lsa) foydalanuvchiga
+  // qo'rqituvchi "Unable to connect" oynasi va admin uchun yozilgan matn KO'RSATILMAYDI — vidjet
+  // butunlay yashiriladi, forma odatdagidek yuboriladi (server IP bo'yicha cheklovni qo'llaydi).
+  // Sabab faqat brauzer konsolida yoziladi (admin uchun).
+  function hideWidget(slot, why) {
+    var box = slot.closest(".au-cf") || slot.parentNode;
+    if (box) box.style.display = "none";
+    var f = slot.closest("form");
+    var note = f ? f.querySelector(".au-cfnote") : null;
+    if (note) note.style.display = "none";
+    if (why) { try { console.warn("[Turnstile] " + why); } catch (e) {} }
+  }
   function enableFallback(slot, why) {
     var form = slot.closest("form"); if (!form || tokenOf(form)) return;
     if (fallbackInput(form).value === "1") return;
     fallbackInput(form).value = "1";
-    say(slot, (why ? why + " " : "") + "Tekshiruvsiz davom etishingiz mumkin — tugmani bosing.");
+    say(slot, "");
+    hideWidget(slot, why);
     if (form.__lgPending) { form.__lgPending = false; submitAgain(form); }
   }
   function submitAgain(form) {

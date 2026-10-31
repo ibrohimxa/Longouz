@@ -4265,3 +4265,15 @@ html.owl-scrolling #owl-pin-button { opacity: 1 !important; transform: none !imp
 #owl-pin-button { opacity: 1 !important; background: radial-gradient(circle at 50% 40%, #1d3b34, #0d1d19); border: 2px solid rgba(47,191,131,.55); box-shadow: 0 8px 22px rgba(0,0,0,.35), 0 0 0 4px rgba(47,191,131,.12); }
 [data-theme="light"] #owl-pin-button { background: radial-gradient(circle at 50% 40%, #ffffff, #e8f6ef); border-color: rgba(31,95,216,.35); }
 @media (max-width: 900px) { #owl-pin-button { width: 54px; height: 54px; } }
+
+
+/* ===== v229: telefon sarlavhalari — logotip yozuvi tugmalarga tegib qolmasin ===== */
+@media (max-width: 420px) {
+  body.home .site-header .brand .lg-word, body.auth-page .site-header .brand .lg-word { display: none !important; }
+  body.home .site-header .brand .lg-owl, body.auth-page .site-header .brand .lg-owl { height: 34px !important; }
+}
+/* Kirish / ro'yxatdan o'tish: sarlavha shaffof emas — sahifa aylantirilganda matn ostidan ko'rinmaydi */
+body.auth-page .site-header { background: rgba(4, 19, 26, .97) !important; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); position: sticky; top: 0; z-index: 100; }
+html[data-theme="light"] body.auth-page .site-header { background: rgba(243, 250, 248, .97) !important; }
+/* logotip rasmi: brauzerning sifatli kichraytirishi (qirrali/xira ko'rinmasin) */
+.lg-owl, .living-owl-img { image-rendering: auto !important; }

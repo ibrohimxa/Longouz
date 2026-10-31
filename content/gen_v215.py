@@ -437,7 +437,7 @@ def chem_items():
     L = D.setdefault("K10.3", [])
     for n in range(1, 9):
         M = 12 * n + 2 * n + 2
-        _add(L, Q_(1, f"C{str(n).translate(SUB)}H{str(2 * n + 2).translate(SUB)} alkanning molyar massasi (g/mol)?", M, [M - 2, M + 2, 14 * n], "g/mol", f"M = 12·{n} + {2 * n + 2} = {M}."))
+        _add(L, Q_(1, f"C{(str(n) if n > 1 else '').translate(SUB)}H{str(2 * n + 2).translate(SUB)} alkanning molyar massasi (g/mol)?", M, [M - 2, M + 2, 14 * n], "g/mol", f"M = 12·{n} + {2 * n + 2} = {M}."))
     for M in (30, 44, 58, 72, 86, 16, 100):
         n = (M - 2) / 14
         _add(L, Q_(2, f"Molyar massasi {M} g/mol bo'lgan alkan molekulasida nechta uglerod atomi bor?", n, [n + 1, n - 1 if n > 1 else 3, M / 12], "", f"CₙH₂ₙ₊₂: 14n + 2 = {M} → n = {fmt(n)}."))

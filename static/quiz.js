@@ -50,10 +50,62 @@
   let remainingSeconds = timeLimitMinutes * 60;
   const paletteEl = document.getElementById("quiz-palette");
   const sectionEl = document.getElementById("quiz-section-label");
+  const navBtn = document.getElementById("quiz-nav-btn");
+  const navPosEl = document.getElementById("quiz-nav-pos");
+  const navCountEl = document.getElementById("lz-nav-count");
+  const navSheet = document.getElementById("lz-nav-sheet");
+  const navFinishBtn = document.getElementById("lz-nav-finish");
   let timerHandle = null;
   let autosaveHandle = null;
   let startedAt = Date.now();
   let submitted = false;
+
+  // ---------- v229: yuklanish ekrani (boyqush + yashil aylanuvchi halqa) ----------
+  const loaderEl = document.getElementById("lz-loader");
+  const loaderShownAt = Date.now();
+  const Loader = {
+    set(title, sub, note) {
+      if (!loaderEl) return;
+      const t = document.getElementById("lz-loader-title");
+      const s = document.getElementById("lz-loader-sub");
+      const n = document.getElementById("lz-loader-note");
+      if (t) t.textContent = title;
+      if (s) s.textContent = sub;
+      if (n) n.hidden = !note;
+    },
+    show(kind) {
+      if (!loaderEl) return;
+      if (kind === "submit") {
+        Loader.set("Natijalar hisoblanmoqda va yuborilmoqda…", "Javoblaringiz tahlil qilinmoqda…", true);
+      }
+      loaderEl.classList.remove("is-done", "is-hiding");
+      loaderEl.hidden = false;
+      document.body.classList.add("is-loading");
+      Loader.since = Date.now();
+    },
+    hide(minMs) {
+      return new Promise((resolve) => {
+        if (!loaderEl) { resolve(); return; }
+        const since = Loader.since || loaderShownAt;
+        const wait = Math.max(0, (minMs || 0) - (Date.now() - since));
+        setTimeout(() => {
+          loaderEl.classList.add("is-hiding");
+          document.body.classList.remove("is-loading");
+          setTimeout(() => { loaderEl.hidden = true; loaderEl.classList.remove("is-hiding"); resolve(); }, 360);
+        }, wait);
+      });
+    },
+    done() {
+      if (loaderEl) loaderEl.classList.add("is-done");
+      return new Promise((r) => setTimeout(r, 620));
+    },
+  };
+
+  function answeredCount() {
+    let n = 0;
+    Object.keys(answers).forEach((k) => { const v = answers[k]; if (v !== undefined && v !== "") n++; });
+    return n;
+  }
 
   function formatTime(totalSeconds) {
     const m = Math.max(0, Math.floor(totalSeconds / 60));
@@ -143,7 +195,7 @@
       inp.autocomplete = "off";
       inp.spellcheck = false;
       const _ph = { math: "Masalan: 12 yoki 3/4 yoki √2", physics: "Masalan: 2,5 yoki 3·10⁸", chemistry: "Masalan: 22,4 yoki H₂SO₄", biology: "Masalan: 25 yoki Aa" };
-      inp.placeholder = _ph[subject] || "Masalan: 1370 yoki Amir Temur";
+      inp.placeholder = mode === "ielts" ? "TRUE / FALSE / NOT GIVEN yoki 1–2 so'z" : (_ph[subject] || "Masalan: 1370 yoki Amir Temur");
       inp.value = typeof answers[currentIndex] === "string" ? answers[currentIndex] : "";
       inp.addEventListener("input", () => {
         const v = inp.value.trim();
@@ -156,11 +208,12 @@
       const hint = document.createElement("span");
       hint.className = "quiz-open-hint";
       const _hint = { math: "Faqat javobni yozing (son, kasr yoki ifoda). Vergul va nuqta farqi yo'q.", physics: "Sonni yozing; 10ⁿ uchun belgilar tugmalaridan foydalaning. Birlik shart emas.", chemistry: "Son yoki formulani yozing; indeks va zaryad uchun belgilar tugmalari bor.", biology: "Son, genotip yoki atamani qisqa yozing." };
-      hint.textContent = _hint[subject] || "Yil, nom yoki atamani qisqa yozing. Katta-kichik harf va apostrof farqi hisobga olinmaydi.";
+      hint.textContent = mode === "ielts" ? "IELTS: TRUE / FALSE / NOT GIVEN yoki matndagi so'z(lar)ni yozing. Katta-kichik harf farqi yo'q." : (_hint[subject] || "Yil, nom yoki atamani qisqa yozing. Katta-kichik harf va apostrof farqi hisobga olinmaydi.");
       wrap.append(lab, inp, hint);
       optionsEl.appendChild(wrap);
       if (window.LZTools) { try { window.LZTools.decorateOpenInput(wrap, inp); } catch (e) {} }
-      setTimeout(() => { try { inp.focus(); } catch (e) {} }, 30);
+      // Telefonda klaviatura o'zi ochilib, ekranni yopmasin — faqat kompyuterda avtomatik fokus
+      if (!(window.matchMedia && matchMedia("(pointer: coarse)").matches)) setTimeout(() => { try { inp.focus(); } catch (e) {} }, 30);
     }
 
     (q.type === "open" ? [] : q.options).forEach((optionText, idx) => {
@@ -193,24 +246,42 @@
     const shownTotal = adaptiveMode ? adaptiveTotal : questions.length;
     progressFill.style.width = `${((currentIndex + 1) / shownTotal) * 100}%`;
     progressLabel.textContent = `${currentIndex + 1} / ${shownTotal} savol` + (adaptiveMode ? " · AI qiyinlikni moslaydi" : "");
+    if (navPosEl) navPosEl.textContent = `${currentIndex + 1} / ${shownTotal}`;
 
     prevBtn.disabled = currentIndex === 0;
     if (adaptiveMode) prevBtn.style.display = "none";
     const isLast = adaptiveMode ? currentIndex + 1 >= adaptiveTotal : currentIndex === questions.length - 1;
     nextBtn.style.display = isLast ? "none" : "inline-flex";
     finishBtn.style.display = isLast ? "inline-flex" : "none";
+    resetFinishConfirm();
+    if (!adaptiveMode && window.innerWidth <= 760 && renderedScroll !== currentIndex) {
+      renderedScroll = currentIndex;
+      const card = document.querySelector(".quiz-question-card");
+      if (card && card.getBoundingClientRect().top < 0) window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   }
+  let renderedScroll = 0;
 
+  // Savollar ro'yxati endi doim ko'rinib turmaydi: pastdagi "1 / 30" tugmasi bosilganda
+  // panel ochiladi (raqamni bossangiz — o'sha savolga o'tadi va panel yopiladi).
   function renderPalette() {
     if (!paletteEl) return;
-    if (adaptiveMode || questions.length < 2) { paletteEl.innerHTML = ""; return; }
+    if (adaptiveMode || questions.length < 2) {
+      paletteEl.innerHTML = "";
+      if (navBtn) navBtn.classList.add("is-static");
+      return;
+    }
     if (paletteEl.childElementCount !== questions.length) {
       paletteEl.innerHTML = "";
       questions.forEach((_, i) => {
         const b = document.createElement("button");
         b.type = "button";
         b.textContent = String(i + 1);
-        b.addEventListener("click", () => { currentIndex = i; renderQuestion(); });
+        b.setAttribute("aria-label", `${i + 1}-savol`);
+        b.addEventListener("click", () => {
+          currentIndex = i; renderQuestion();
+          if (window.LZSheet) window.LZSheet.close("nav");
+        });
         paletteEl.appendChild(b);
       });
     }
@@ -223,7 +294,35 @@
       b.classList.toggle("is-answered", answers[i] !== undefined && answers[i] !== "");
       b.classList.toggle("is-current", i === currentIndex);
     });
+    if (navCountEl) navCountEl.textContent = `Javob berilgan: ${answeredCount()} / ${questions.length}`;
   }
+
+  // Yakunlash: javobsiz savollar bo'lsa — bir marta ogohlantiramiz (tasodifiy bosishdan himoya)
+  let finishArmed = 0;
+  function resetFinishConfirm() {
+    finishArmed = 0;
+    finishBtn.classList.remove("is-armed");
+    finishBtn.textContent = "Yakunlash";
+    if (navFinishBtn) { navFinishBtn.classList.remove("is-armed"); navFinishBtn.textContent = "Testni yakunlash"; }
+  }
+  function requestFinish(btn) {
+    const total = adaptiveMode ? adaptiveTotal : questions.length;
+    const empty = Math.max(0, total - answeredCount());
+    if (empty > 0 && !adaptiveMode && Date.now() - finishArmed > 4000) {
+      finishArmed = Date.now();
+      btn.classList.add("is-armed");
+      btn.textContent = `${empty} ta savol javobsiz — yakunlash uchun yana bosing`;
+      setTimeout(() => { if (Date.now() - finishArmed >= 3900) resetFinishConfirm(); }, 4000);
+      return;
+    }
+    if (window.LZSheet) window.LZSheet.closeAll();
+    finishQuiz();
+  }
+
+  if (navSheet && window.LZSheet) {
+    window.LZSheet.register("nav", navSheet, { button: navBtn, half: true, onOpen: () => { renderPalette(); resetFinishConfirm(); } });
+  }
+  if (navFinishBtn) navFinishBtn.addEventListener("click", () => requestFinish(navFinishBtn));
 
   prevBtn.addEventListener("click", () => {
     if (currentIndex > 0) {
@@ -257,7 +356,7 @@
     }
   });
 
-  finishBtn.addEventListener("click", finishQuiz);
+  finishBtn.addEventListener("click", () => requestFinish(finishBtn));
 
   function finishQuiz() {
     if (submitted) return;
@@ -266,53 +365,91 @@
     clearInterval(timerHandle);
     clearInterval(autosaveHandle);
     _clearAttemptRef(); // test yakunlandi — active attempt tozalanadi
+    if (window.LZSheet) window.LZSheet.closeAll();
 
     const timeSpentSeconds = Math.round((Date.now() - startedAt) / 1000);
 
     // XAVFSIZLIK: bu yerda ENDI "necha ta to'g'ri" hisoblanmaydi va
     // serverga yuborilmaydi — faqat foydalanuvchi TANLAGAN variantlar
     // (answers) yuboriladi. Nechta to'g'ri ekanini SERVER o'zi, o'zida
-    // saqlangan asl javoblar bilan solishtirib hisoblaydi. Shu tufayli
-    // brauzer konsolidan "correct_count" ni o'zgartirib, soxta natija
-    // olish imkonsiz.
+    // saqlangan asl javoblar bilan solishtirib hisoblaydi.
+    lastPayload = {
+      topic: topic,
+      attempt_token: attemptToken,
+      answers: answers,
+      time_spent_seconds: timeSpentSeconds,
+    };
+    sendResult();
+  }
+
+  // v229: natija yuborilmasa (internet uzilsa) javoblar YO'QOLMAYDI — "Qayta yuborish" tugmasi chiqadi
+  let lastPayload = null;
+  function sendResult() {
+    if (!lastPayload) return;
+    Loader.show("submit");
+    resultEl.style.display = "none";
+    try { localStorage.setItem("lz_pending_submit", JSON.stringify({ p: lastPayload, ts: Date.now() })); } catch (e) {}
     fetch("/api/quiz/submit", {
       method: "POST",
+      credentials: "same-origin",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        topic: topic,
-        attempt_token: attemptToken,
-        answers: answers,
-        time_spent_seconds: timeSpentSeconds,
-      }),
+      body: JSON.stringify(lastPayload),
     })
       .then(async (res) => {
         if (!res.ok) {
           const err = await res.json().catch(() => ({}));
-          throw new Error(err.detail || "Natijani saqlab bo'lmadi.");
+          const e = new Error(err.detail || "Natijani saqlab bo'lmadi.");
+          e.status = res.status;
+          throw e;
         }
         return res.json();
       })
-      .then((data) => {
-        // YANGI XULQ: test tugagach avval ekran o'rtasida kubok + konfetti
-        // bilan tabriklash oynasi ochiladi (natijaga qarab kubok harakati/
-        // rangi o'zgaradi) — "Natijalarim" bosilgandagina avvalgi
-        // xato/to'g'ri javoblar (review) sahifasiga o'tadi.
+      .then(async (data) => {
+        try { localStorage.removeItem("lz_pending_submit"); } catch (e) {}
+        // Avval yuklanish ekranida "✓" ko'rinadi, so'ng natija oynasi (ball, to'g'ri/xato/javobsiz) ochiladi.
+        const wait = Math.max(0, 1100 - (Date.now() - (Loader.since || Date.now())));
+        await new Promise((r) => setTimeout(r, wait));
+        await Loader.done();
         showCelebration(data);
+        await Loader.hide(0);
       })
-      .catch((err) => {
-        // Tarmoq/server xatosi — endi soxta ball ko'rsatmaymiz, chunki
-        // haqiqiy natijani FAQAT server biladi.
-        showSubmitError(err.message);
+      .catch(async (err) => {
+        // Tarmoq/server xatosi — soxta ball ko'rsatmaymiz, chunki haqiqiy natijani FAQAT server biladi.
+        await Loader.hide(400);
+        if (err && err.status === 409) {
+          try { localStorage.removeItem("lz_pending_submit"); } catch (e) {}
+          showSubmitError("Bu test natijasi allaqachon saqlangan bo'lishi mumkin. Kabinetdagi natijalar tarixidan tekshiring.", false);
+        } else {
+          showSubmitError((err && err.message && err.message !== "Failed to fetch") ? err.message : "Internet aloqasi uzildi. Javoblaringiz saqlanib turibdi — internet tiklangach «Qayta yuborish» tugmasini bosing.", true);
+        }
       });
   }
 
-  function showSubmitError(message) {
+  function showSubmitError(message, canRetry) {
     bodyEl.style.display = "none";
     resultEl.style.display = "block";
     document.getElementById("quiz-result-title").textContent = "Natijani saqlashda xatolik";
     document.getElementById("quiz-result-detail").textContent =
-      message || "Internet aloqasida muammo bo'ldi. Sahifani yangilab, qayta urinib ko'ring.";
-    document.getElementById("quiz-review-link").style.display = "none";
+      message || "Internet aloqasida muammo bo'ldi. Qayta urinib ko'ring.";
+    const review = document.getElementById("quiz-review-link");
+    let retry = document.getElementById("quiz-retry-submit");
+    if (canRetry) {
+      if (!retry) {
+        retry = document.createElement("button");
+        retry.type = "button";
+        retry.id = "quiz-retry-submit";
+        retry.className = "btn-primary";
+        retry.textContent = "Qayta yuborish";
+        retry.addEventListener("click", sendResult);
+        review.parentNode.insertBefore(retry, review);
+      }
+      retry.style.display = "";
+    } else if (retry) {
+      retry.style.display = "none";
+    }
+    review.href = "/dashboard";
+    review.textContent = "Kabinetga qaytish";
+    review.style.display = canRetry ? "none" : "";
   }
 
   // ==========================================================================
@@ -342,6 +479,21 @@
     stage.className = "quiz-trophy-stage quiz-trophy-" + tier;
 
     titleEl.textContent = result.label || `${correctCount} / ${total}`;
+    // v229: to'g'ri / xato / javobsiz — rangli nuqtalar bilan (aniq raqamlar)
+    try {
+      const answered = typeof result.answered === "number" ? result.answered : answeredCount();
+      const wrong = typeof result.wrong === "number" ? result.wrong : Math.max(0, answered - (correctCount || 0));
+      const skipped = typeof result.skipped === "number" ? result.skipped : Math.max(0, (total || 0) - answered);
+      const st = document.getElementById("quiz-score-stats");
+      if (st && typeof correctCount === "number") {
+        document.getElementById("qs-ok").textContent = correctCount;
+        document.getElementById("qs-bad").textContent = wrong;
+        document.getElementById("qs-skip").textContent = skipped;
+        st.hidden = false;
+      }
+      const kicker = document.getElementById("quiz-celebrate-kicker");
+      if (kicker) kicker.textContent = percent >= 85 ? "Ajoyib natija!" : percent >= 60 ? "Yaxshi natija" : "Natija";
+    } catch (e) {}
     if (result.mode === "certificate" || result.mode === "cefr") {
       detailEl.textContent = `${correctCount} / ${total} to'g'ri javob (${percent}%) — erishilgan daraja: ${result.band}`;
     } else if (result.mode === "ielts") {
@@ -354,11 +506,13 @@
       const extra = result.full_mock ? "" : " (mashq — to'liq imtihon emas, ball 100/93 ga nisbatan hisoblangan)";
       detailEl.textContent = `${correctCount} / ${total} to'g'ri javob (${percent}%) · ${result.label || ""}${extra}`;
     }
-    if (typeof result.answered === "number") {
-      detailEl.textContent += ` · yechildi: ${result.answered}, xato: ${result.wrong}, o'tkazib yuborilgan: ${result.skipped}`;
-    }
+
     renderBreakdown(document.getElementById("quiz-celebrate-breakdown"), result);
 
+    if (!(data.certificate && data.certificate.verification_id) && result.certificate_note) {
+      const lock = document.getElementById("quiz-cert-lock");
+      if (lock) { lock.querySelector("p").textContent = result.certificate_note; lock.hidden = false; }
+    }
     if (data.certificate && data.certificate.verification_id) {
       const certBox = document.getElementById("quiz-celebrate-cert");
       certBox.style.display = "block";
@@ -460,13 +614,19 @@
       bodyEl.style.display = "block";
       if (window.LZQuizStyle) window.LZQuizStyle.applyLayout(document, data.layout);
       renderQuestion();
-      startTimer();
+      // Yuklanish ekrani kamida ~0.9 s ko'rinadi (ko'z o'ngida "miltillab" qolmasin), so'ng test ochiladi
+      Loader.hide(900).then(() => {
+        startTimer();
+        try { window.dispatchEvent(new CustomEvent("lz:ready")); } catch (e) {}
+        if (window.LZSheet) window.LZSheet.sync();
+      });
       startAutosave();
-      try { window.dispatchEvent(new CustomEvent("lz:ready")); } catch (e) {}
     })
     .catch((err) => {
       loadingEl.style.display = "none";
-      errorEl.style.display = "block";
-      errorTextEl.textContent = err.message || "Test hozircha ishlamayapti. Birozdan so'ng qayta urinib ko'ring.";
+      Loader.hide(500).then(() => {
+        errorEl.style.display = "block";
+        errorTextEl.textContent = err.message || "Test hozircha ishlamayapti. Birozdan so'ng qayta urinib ko'ring.";
+      });
     });
 })();
