@@ -8,10 +8,10 @@
   <link rel="icon" type="image/png" href="/static/logo-owl.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css?v=231">
-  <link rel="stylesheet" href="/static/dashboard.css">
-  <link rel="stylesheet" href="/static/news.css?v=231">
-  <script src="/static/theme-init.js?v=231"></script>
+  <link rel="stylesheet" href="/static/style.css?v=234">
+  <link rel="stylesheet" href="/static/dashboard.css?v=234">
+  <link rel="stylesheet" href="/static/news.css?v=234">
+  <script src="/static/theme-init.js?v=234"></script>
 </head>
 <body data-logged-in="true">
   <div class="app-shell">
@@ -19,20 +19,20 @@
     <div class="app-content dash">
 
       <!-- Test davom ettirish banneri — localStorage da active attempt bo'lsa ko'rinadi -->
-      <div id="lz-resume-banner" style="display:none; background:var(--accent-green); color:#0a1f14;
+      <div id="lz-resume-banner" style="display:none; background:var(--accent-green); color:#0a1f12;
            padding:12px 20px; border-radius:10px; margin-bottom:14px; display:none;
            align-items:center; gap:12px; font-weight:600; font-size:0.93rem;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
              style="width:18px;height:18px;flex-shrink:0"><polygon points="5 3 19 12 5 21 5 3"/></svg>
         <span id="lz-resume-text">Tugallanmagan testingiz bor — davom ettirasizmi?</span>
         <a id="lz-resume-btn" href="#"
-           style="margin-left:auto;background:#0a1f14;color:var(--accent-green);
+           style="margin-left:auto;background:#0a1f12;color:var(--accent-green);
                   padding:6px 16px;border-radius:6px;text-decoration:none;font-size:0.85rem;">
           Davom ettirish
         </a>
         <button onclick="document.getElementById('lz-resume-banner').style.display='none';
                          try{localStorage.removeItem('lz_active_attempt')}catch(e){}"
-                style="background:none;border:none;cursor:pointer;color:#0a1f14;opacity:0.7;
+                style="background:none;border:none;cursor:pointer;color:#0a1f12;opacity:0.7;
                        font-size:1.3rem;line-height:1;padding:0 4px;" title="Yopish">×</button>
       </div>
       <script>
@@ -88,7 +88,7 @@
             <linearGradient id="hs-mid" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b3175"/><stop offset="1" stop-color="#12163f"/></linearGradient>
             <linearGradient id="hs-main" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#49529f"/><stop offset=".55" stop-color="#262c6b"/><stop offset="1" stop-color="#0f1238"/></linearGradient>
             <linearGradient id="hs-snow" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#c9d4ff"/></linearGradient>
-            <linearGradient id="hs-path" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ffe9b0"/><stop offset=".5" stop-color="#ffc258"/><stop offset="1" stop-color="#2fbf83"/></linearGradient>
+            <linearGradient id="hs-path" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ffe9b0"/><stop offset=".5" stop-color="#ffc258"/><stop offset="1" stop-color="#22cc60"/></linearGradient>
             <radialGradient id="hs-glow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ffd9a0" stop-opacity=".85"/><stop offset="1" stop-color="#ffd9a0" stop-opacity="0"/></radialGradient>
             <radialGradient id="hs-sunglow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff2a8" stop-opacity=".95"/><stop offset=".45" stop-color="#ffd24a" stop-opacity=".35"/><stop offset="1" stop-color="#ffd24a" stop-opacity="0"/></radialGradient>
             <radialGradient id="hs-sunface" cx=".4" cy=".4" r=".7"><stop offset="0" stop-color="#fffbe0"/><stop offset="1" stop-color="#ffc83a"/></radialGradient>
@@ -108,7 +108,7 @@
           <path d="M388 58 L352 124 L371 113 L384 134 L398 112 L412 130 L425 108 L444 140 L462 188 L430 150 L408 160 L388 58Z" fill="url(#hs-snow)" opacity=".95"/>
           <path d="M388 58 L462 188 L486 176 L440 100Z" fill="#000" opacity=".16"/>
           <g id="hs-horizon" style="opacity:0;mix-blend-mode:screen;pointer-events:none"><ellipse class="hs-hglow" cx="0" cy="0" rx="210" ry="95" fill="url(#hs-hglow)"/><g class="hs-rays" stroke="#ffd9a0" stroke-linecap="round" opacity=".55"><line x1="0" y1="0" x2="-170" y2="-70" stroke-width="3"/><line x1="0" y1="0" x2="-120" y2="-120" stroke-width="2.4"/><line x1="0" y1="0" x2="0" y2="-150" stroke-width="3"/><line x1="0" y1="0" x2="120" y2="-120" stroke-width="2.4"/><line x1="0" y1="0" x2="170" y2="-70" stroke-width="3"/></g></g>
-          <line x1="388" y1="58" x2="388" y2="26" stroke="#fff" stroke-width="2.2"/><path class="hs-flag" d="M388 26 L414 34 L388 44Z" fill="#2fbf83"/>
+          <line x1="388" y1="58" x2="388" y2="26" stroke="#fff" stroke-width="2.2"/><path class="hs-flag" d="M388 26 L414 34 L388 44Z" fill="#22cc60"/>
           <text class="hs-word" x="388" y="96" text-anchor="middle" font-family="Fraunces,serif" font-weight="700" font-size="21" fill="#0f1238" opacity=".85">LONGO</text>
           <path class="hs-path hs-path-glow" d="M330 300 C380 282 262 262 322 238 C382 214 282 196 346 176 C396 160 352 138 388 112" fill="none" stroke="#ffc258" stroke-width="12" stroke-linecap="round" opacity=".35" filter="url(#hs-blur)"/>
           <path class="hs-path" d="M330 300 C380 282 262 262 322 238 C382 214 282 196 346 176 C396 160 352 138 388 112" fill="none" stroke="url(#hs-path)" stroke-width="5.5" stroke-linecap="round"/>
@@ -263,12 +263,12 @@
   </div>
 
   {% include "_owl_widget.html" %}
-  <script src="/static/devtools-guard.js"></script>
-  <script src="/static/app.js?v=231"></script>
-  <script src="/static/owl-chat.js"></script>
+  <script src="/static/devtools-guard.js?v=234"></script>
+  <script src="/static/app.js?v=234"></script>
+  <script src="/static/owl-chat.js?v=234"></script>
   <script id="dash-data" type="application/json">{{ (d.history if d else [])|tojson }}</script>
-  <script src="/static/dashboard.js"></script>
-  <script src="/static/dashboard-sky.js"></script>
-  <script src="/static/news-strip.js?v=231" defer></script>
+  <script src="/static/dashboard.js?v=234"></script>
+  <script src="/static/dashboard-sky.js?v=234"></script>
+  <script src="/static/news-strip.js?v=234" defer></script>
 </body>
 </html>

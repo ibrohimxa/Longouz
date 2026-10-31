@@ -7,10 +7,10 @@
   <link rel="icon" type="image/png" href="/static/logo-owl.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css?v=231">
-  <link rel="stylesheet" href="/static/figure.css">
-  <link rel="stylesheet" href="/static/exam.css?v=231">
-  <script src="/static/theme-init.js?v=231"></script>
+  <link rel="stylesheet" href="/static/style.css?v=234">
+  <link rel="stylesheet" href="/static/figure.css?v=234">
+  <link rel="stylesheet" href="/static/exam.css?v=234">
+  <script src="/static/theme-init.js?v=234"></script>
 </head>
 <body data-logged-in="true">
 
@@ -75,7 +75,7 @@
           <div style="display:flex; flex-direction:column; gap:8px; margin-top:14px;">
             {% for opt in (q.options if not is_open else []) %}
             <div style="padding:12px 16px; border-radius:8px; border:1px solid var(--line); color: var(--ink);
-                        {% if loop.index0 == q.correct_index %}background:rgba(47,191,131,0.1); border-color:var(--accent-green);
+                        {% if loop.index0 == q.correct_index %}background:rgba(34, 204, 96,0.1); border-color:var(--accent-green);
                         {% elif user_idx is not none and loop.index0 == user_idx %}background:rgba(248,81,73,0.1); border-color:var(--error);{% endif %}">
               {{ opt }}
               {% if q.figure and q.figure.o and q.figure.o[loop.index0] %}<div class="quiz-optfig" data-fig='{{ q.figure.o[loop.index0]|tojson|forceescape }}'></div>{% endif %}
@@ -103,10 +103,10 @@
 
   {% include "_owl_widget.html" %}
 
-  <script src="/static/devtools-guard.js"></script>
-  <script src="/static/app.js?v=231"></script>
-  <script src="/static/owl-chat.js"></script>
-  <script src="/static/figure.js"></script>
+  <script src="/static/devtools-guard.js?v=234"></script>
+  <script src="/static/app.js?v=234"></script>
+  <script src="/static/owl-chat.js?v=234"></script>
+  <script src="/static/figure.js?v=234"></script>
   <script>
     // ---------- Test yaxshi natija bilan tugaganda kichik bayram animatsiyasi ----------
     (function () {
@@ -123,7 +123,7 @@
       trophy.textContent = percent === 100 ? "🏆" : "🎉"; // 🏆 yoki 🎉
       overlay.appendChild(trophy);
 
-      var colors = ["#2fbf83", "#ffb347", "#4dabf7", "#f85149", "#a78bfa"];
+      var colors = ["#22cc60", "#ffb347", "#4dabf7", "#f85149", "#a78bfa"];
       for (var i = 0; i < 28; i++) {
         var piece = document.createElement("span");
         piece.className = "review-party-piece";

@@ -552,7 +552,7 @@
   }
 
   function spawnConfetti(field, count) {
-    const colors = ["#2FBF83", "#FFA726", "#4A9EFF", "#F85149", "#E6EDF3"];
+    const colors = ["#22CC60", "#FFA726", "#4A9EFF", "#F85149", "#E6EDF3"];
     field.innerHTML = "";
     for (let i = 0; i < count; i++) {
       const piece = document.createElement("span");

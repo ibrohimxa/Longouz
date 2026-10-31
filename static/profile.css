@@ -5,7 +5,7 @@
 .pf-card-head h3 { margin: 0; font-size: 1.02rem; }
 .pf-msg { font-size: .8rem; color: var(--accent-green); } .pf-msg.is-err { color: var(--error); }
 .pf-me { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
-.pf-avatar { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; font: 700 1.6rem var(--font-display); color: #07130d; flex: 0 0 auto; }
+.pf-avatar { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; font: 700 1.6rem var(--font-display); color: #07130b; flex: 0 0 auto; }
 .pf-me-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .pf-me-info span, .pf-me-info small { color: var(--ink-soft); overflow-wrap: anywhere; }
 .pf-colors { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }

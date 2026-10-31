@@ -6,7 +6,7 @@
 .nz-strip { margin: 0 0 18px; }
 .nz-strip-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 0 0 10px; }
 .nz-strip-head h3 { margin: 0; font: 800 1.05rem Inter, system-ui, sans-serif; color: var(--ink, #eef4f8); }
-.nz-strip-head a { font-size: .86rem; font-weight: 700; color: #22c58b; text-decoration: none; }
+.nz-strip-head a { font-size: .86rem; font-weight: 700; color: #14d35a; text-decoration: none; }
 .nz-row { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 2px 2px 8px; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
 .nz-row .nz-card { flex: 0 0 min(320px, 82vw); scroll-snap-align: start; }
 .nz-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
@@ -21,16 +21,16 @@
 .nz-img img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .nz-body { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px 16px; flex: 1; }
 .nz-meta { display: flex; align-items: center; gap: 8px; font-size: .74rem; color: var(--ink-soft, #9fb0bf); }
-.nz-tag { padding: 2px 9px; border-radius: 999px; font-weight: 800; letter-spacing: .02em; background: rgba(34,197,139,.15); color: #22c58b; }
+.nz-tag { padding: 2px 9px; border-radius: 999px; font-weight: 800; letter-spacing: .02em; background: rgba(20, 211, 90,.15); color: #14d35a; }
 .nz-ad .nz-tag { background: rgba(255,167,38,.16); color: #ffa726; }
 .nz-card h2, .nz-card h4 { margin: 0; font: 800 1.02rem/1.3 Inter, system-ui, sans-serif; color: var(--ink, #eef4f8); }
 .nz-text { margin: 0; font-size: .9rem; line-height: 1.55; color: var(--ink-soft, #9fb0bf); white-space: pre-line; }
 .nz-row .nz-text { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-.nz-link { margin-top: auto; padding-top: 6px; font-weight: 800; font-size: .9rem; color: #22c58b; text-decoration: none; }
+.nz-link { margin-top: auto; padding-top: 6px; font-weight: 800; font-size: .9rem; color: #14d35a; text-decoration: none; }
 .nz-link:hover { text-decoration: underline; }
-html[data-theme="light"] .nz-card { background: #fff; box-shadow: 0 10px 26px rgba(10,60,50,.10); }
-html[data-theme="light"] .nz-tag { color: #0b8a62; }
-html[data-theme="light"] .nz-link, html[data-theme="light"] .nz-strip-head a { color: #0b8a62; }
+html[data-theme="light"] .nz-card { background: #fff; box-shadow: 0 10px 26px rgba(6, 64, 27,.10); }
+html[data-theme="light"] .nz-tag { color: #009537; }
+html[data-theme="light"] .nz-link, html[data-theme="light"] .nz-strip-head a { color: #009537; }
 @media (max-width: 560px) { .nz-page { padding: 22px 12px 48px; } .nz-grid { grid-template-columns: 1fr; } }
 [data-news-strip][hidden] { display: none !important; }
 .nz-row { align-items: flex-start; }

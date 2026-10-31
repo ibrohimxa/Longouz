@@ -3,7 +3,7 @@
 (function (global) {
   "use strict";
   var NS = "http://www.w3.org/2000/svg";
-  var COLORS = ["#4A9EFF", "#FFA726", "#2FBF83", "#F85149", "#B388FF", "#26C6DA"];
+  var COLORS = ["#4A9EFF", "#FFA726", "#22CC60", "#F85149", "#B388FF", "#26C6DA"];
 
   function el(name, attrs, parent) {
     var n = document.createElementNS(NS, name);

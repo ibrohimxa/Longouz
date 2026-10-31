@@ -22,7 +22,7 @@
   function statusOf(slot) { var f = slot.closest("form"); return f ? f.querySelector("[data-turnstile-status]") : null; }
   function say(slot, txt, ok) {
     var st = statusOf(slot); if (!st) return;
-    st.textContent = txt || ""; st.style.color = ok ? "#10b981" : "";
+    st.textContent = txt || ""; st.style.color = ok ? "#02c74a" : "";
   }
   function tokenOf(form) {
     var i = form.querySelector('input[name="cf-turnstile-response"]');

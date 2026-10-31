@@ -4,19 +4,19 @@
    ========================================================================== */
 
 :root {
-  --bg: #0D1117;            /* asosiy sayt foni — deyarli qora */
-  --bg-elevated: #161B22;   /* kartalar, sidebar foni */
-  --bg-hover: #1D2530;      /* hover holati */
+  --bg: #050F09;            /* asosiy sayt foni — deyarli qora */
+  --bg-elevated: #0B1A11;   /* kartalar, sidebar foni */
+  --bg-hover: #112619;      /* hover holati */
   --ink: #E6EDF3;           /* asosiy matn — deyarli oq */
-  --ink-soft: #8B949E;      /* ikkinchi darajali matn — kulrang */
-  --card: #161B22;
-  --accent-green: #2FBF83;  /* asosiy urg'u rangi (dark mode) */
-  --accent-green-dark: #24A06C;
+  --ink-soft: #93A89A;      /* ikkinchi darajali matn — kulrang */
+  --card: #0B1A11;
+  --accent-green: #22CC60;  /* asosiy urg'u rangi (dark mode) */
+  --accent-green-dark: #19AB4E;
   --accent-blue: #4A9EFF;
   --accent-gold: #FFA726;
-  --line: #262D38;
+  --line: #1A3324;
   --error: #F85149;
-  --success: #2FBF83;
+  --success: #22CC60;
 
   --font-display: "Fraunces", "Times New Roman", Times, serif;
   --font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
@@ -33,19 +33,19 @@
    LIGHT MODE — kunduzgi rejim, ko'k urg'u rangi
    ========================================================================== */
 [data-theme="light"] {
-  --bg: #F4F7FC;
+  --bg: #F2FAF4;
   --bg-elevated: #FFFFFF;
-  --bg-hover: #EEF3FB;
-  --ink: #10233F;
-  --ink-soft: #5B6B85;
+  --bg-hover: #E8F6EC;
+  --ink: #0E2A18;
+  --ink-soft: #4F6B58;
   --card: #FFFFFF;
-  --accent-green: #2B6FF0;       /* kunduzi urg'u rangi ko'kka aylanadi */
-  --accent-green-dark: #184FC2;
+  --accent-green: #16A34A;       /* v234: kunduzi ham yashil */
+  --accent-green-dark: #15803D;
   --accent-blue: #2B6FF0;
   --accent-gold: #F5A623;
-  --line: #DCE4F2;
+  --line: #D3EBDB;
   --error: #E0562B;
-  --success: #2B6FF0;
+  --success: #16A34A;
   --shadow: 0 8px 24px rgba(16, 35, 63, 0.08);
 }
 
@@ -93,7 +93,7 @@ h1, h2, h3 {
 
 svg { display: block; }
 
-::selection { background: var(--accent-green); color: #05140D; }
+::selection { background: var(--accent-green); color: #05140A; }
 
 /* ---------- Public Header (bosh sahifa, login, register) ---------- */
 
@@ -133,7 +133,7 @@ svg { display: block; }
 
 .nav-cta {
   background: var(--accent-green);
-  color: #05140D !important;
+  color: #05140A !important;
   padding: 9px 20px;
   border-radius: 999px;
   font-weight: 600;
@@ -229,12 +229,12 @@ svg { display: block; }
 .owl-voice-orb {
   width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  background: radial-gradient(circle, rgba(47,191,131,0.35), rgba(47,191,131,0.05));
+  background: radial-gradient(circle, rgba(34, 204, 96,0.35), rgba(34, 204, 96,0.05));
   animation: owl-orb-idle 2.6s ease-in-out infinite;
 }
 .owl-voice-orb-core {
   width: 12px; height: 12px; border-radius: 50%; background: var(--accent-green);
-  box-shadow: 0 0 8px rgba(47,191,131,0.7);
+  box-shadow: 0 0 8px rgba(34, 204, 96,0.7);
 }
 .owl-voice-orb.is-speaking { animation: owl-orb-speak 0.55s ease-in-out infinite; }
 .owl-voice-orb.is-listening { background: radial-gradient(circle, rgba(74,158,255,0.4), rgba(74,158,255,0.05)); animation: owl-orb-speak 0.7s ease-in-out infinite; }
@@ -267,7 +267,7 @@ svg { display: block; }
   position: absolute;
   top: 0; left: 50%; transform: translateX(-50%);
   width: min(560px, 100%); height: 320px;
-  background: radial-gradient(ellipse at center, rgba(47,191,131,0.14), transparent 70%);
+  background: radial-gradient(ellipse at center, rgba(34, 204, 96,0.14), transparent 70%);
   pointer-events: none;
   z-index: 0;
 }
@@ -281,8 +281,8 @@ svg { display: block; }
 .repetitor-orb-core {
   position: absolute; inset: 30px; border-radius: 50%;
   background:
-    radial-gradient(circle at 32% 28%, rgba(200,255,225,0.95), rgba(47,191,131,0.55) 42%, rgba(8,20,15,0.92) 78%);
-  box-shadow: 0 0 70px 14px rgba(47,191,131,0.28), inset 0 0 34px rgba(0,0,0,0.45);
+    radial-gradient(circle at 32% 28%, rgba(200, 255, 220,0.95), rgba(34, 204, 96,0.55) 42%, rgba(8, 20, 12,0.92) 78%);
+  box-shadow: 0 0 70px 14px rgba(34, 204, 96,0.28), inset 0 0 34px rgba(0,0,0,0.45);
   animation: repetitor-core-breathe 3.4s ease-in-out infinite;
 }
 
@@ -291,14 +291,14 @@ svg { display: block; }
    Faqat vizual — asosiy .repetitor-orb-core mantig'iga tegmaydi. */
 .repetitor-orb-core-2 {
   position: absolute; inset: 12px; border-radius: 50%; z-index: -1;
-  background: radial-gradient(circle at 65% 70%, rgba(47,191,131,0.5), transparent 65%);
+  background: radial-gradient(circle at 65% 70%, rgba(34, 204, 96,0.5), transparent 65%);
   filter: blur(18px);
   animation: repetitor-blob-drift-1 6.5s ease-in-out infinite;
   opacity: 0.8;
 }
 .repetitor-orb-core-3 {
   position: absolute; inset: 4px; border-radius: 50%; z-index: -2;
-  background: radial-gradient(circle at 30% 65%, rgba(120,255,190,0.4), transparent 60%);
+  background: radial-gradient(circle at 30% 65%, rgba(120, 255, 170,0.4), transparent 60%);
   filter: blur(24px);
   animation: repetitor-blob-drift-2 8s ease-in-out infinite;
   opacity: 0.7;
@@ -332,7 +332,7 @@ svg { display: block; }
 
 .repetitor-orb.is-speaking .repetitor-orb-core {
   animation: repetitor-core-speak 0.7s ease-in-out infinite;
-  box-shadow: 0 0 95px 20px rgba(47,191,131,0.45), inset 0 0 34px rgba(0,0,0,0.4);
+  box-shadow: 0 0 95px 20px rgba(34, 204, 96,0.45), inset 0 0 34px rgba(0,0,0,0.4);
 }
 .repetitor-orb.is-speaking .repetitor-orb-flares { animation-duration: 2.4s; }
 .repetitor-orb.is-speaking .repetitor-orb-flares span {
@@ -375,14 +375,14 @@ svg { display: block; }
 .repetitor-orb-label::before {
   content: "";
   width: 7px; height: 7px; border-radius: 50%;
-  background: var(--accent-green, #2fbf83);
-  box-shadow: 0 0 0 0 rgba(47,191,131,0.55);
+  background: var(--accent-green, #22cc60);
+  box-shadow: 0 0 0 0 rgba(34, 204, 96,0.55);
   animation: repetitor-status-pulse 2.2s ease-in-out infinite;
   flex-shrink: 0;
 }
 @keyframes repetitor-status-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(47,191,131,0.45); }
-  50% { box-shadow: 0 0 0 6px rgba(47,191,131,0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34, 204, 96,0.45); }
+  50% { box-shadow: 0 0 0 6px rgba(34, 204, 96,0); }
 }
 
 .repetitor-controls {
@@ -394,7 +394,7 @@ svg { display: block; }
   width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
   background: var(--accent-green); color: var(--bg); border: none; cursor: pointer;
-  box-shadow: 0 4px 16px rgba(47,191,131,0.35);
+  box-shadow: 0 4px 16px rgba(34, 204, 96,0.35);
   transition: transform 0.15s ease;
 }
 .repetitor-mic-btn:hover { transform: translateY(-1px) scale(1.03); }
@@ -702,7 +702,7 @@ svg { display: block; }
 .sidebar-link:hover { background: var(--bg-hover); color: var(--ink); }
 
 .sidebar-link.active {
-  background: rgba(47, 191, 131, 0.12);
+  background: rgba(34, 204, 96, 0.12);
   color: var(--accent-green);
   font-weight: 600;
 }
@@ -720,7 +720,7 @@ svg { display: block; }
   display: flex;
   align-items: center;
   gap: 10px;
-  background: linear-gradient(135deg, rgba(255,167,38,0.14), rgba(47,191,131,0.10));
+  background: linear-gradient(135deg, rgba(255,167,38,0.14), rgba(34, 204, 96,0.10));
   border: 1px solid var(--accent-gold);
   border-radius: var(--radius);
   padding: 12px 14px;
@@ -947,7 +947,7 @@ svg { display: block; }
   height: 4px;
   border-radius: 999px;
   background: var(--accent-green);
-  box-shadow: 0 0 12px rgba(47, 191, 131, 0.55);
+  box-shadow: 0 0 12px rgba(34, 204, 96, 0.55);
   z-index: 2;
 }
 
@@ -1036,7 +1036,7 @@ svg { display: block; }
   border: none;
   border-radius: 10px;
   background: var(--accent-green);
-  color: #05140D;
+  color: #05140A;
   font-family: var(--font-body);
   font-weight: 700;
   font-size: 1rem;
@@ -1065,9 +1065,9 @@ svg { display: block; }
 
 .plan-selected-badge {
   display: inline-block;
-  background: rgba(47, 191, 131, 0.12);
+  background: rgba(34, 204, 96, 0.12);
   color: var(--accent-green);
-  border: 1px solid rgba(47, 191, 131, 0.3);
+  border: 1px solid rgba(34, 204, 96, 0.3);
   padding: 6px 14px;
   border-radius: 999px;
   font-size: 0.78rem;
@@ -1098,7 +1098,7 @@ svg { display: block; }
   align-items: center;
   gap: 8px;
   background: var(--accent-green);
-  color: #05140D;
+  color: #05140A;
   padding: 14px 32px;
   border-radius: 999px;
   font-weight: 700;
@@ -1173,7 +1173,7 @@ svg { display: block; }
 
 .step-icon {
   width: 42px; height: 42px; border-radius: 10px;
-  background: rgba(47, 191, 131, 0.12);
+  background: rgba(34, 204, 96, 0.12);
   display: flex; align-items: center; justify-content: center;
   margin-bottom: 14px;
 }
@@ -1213,7 +1213,7 @@ svg { display: block; }
   border-radius: var(--radius); padding: 22px; position: relative;
 }
 
-.subject-icon { width: 38px; height: 38px; border-radius: 9px; background: rgba(47, 191, 131, 0.12); display: flex; align-items: center; justify-content: center; }
+.subject-icon { width: 38px; height: 38px; border-radius: 9px; background: rgba(34, 204, 96, 0.12); display: flex; align-items: center; justify-content: center; }
 .subject-icon svg { width: 19px; height: 19px; stroke: var(--accent-green); }
 .subject-card h3 { font-size: 1.05rem; margin-top: 14px; }
 
@@ -1407,7 +1407,7 @@ svg { display: block; }
 .quick-tile-icon {
   width: 38px; height: 38px;
   border-radius: 10px;
-  background: var(--bg-hover, rgba(47,191,131,0.12));
+  background: var(--bg-hover, rgba(34, 204, 96,0.12));
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
@@ -1459,7 +1459,7 @@ svg { display: block; }
 .checkout-side { padding: 36px 32px; box-sizing: border-box; }
 .checkout-side-brand {
   flex: 1 1 260px;
-  background: linear-gradient(160deg, rgba(47,191,131,0.14), transparent 60%);
+  background: linear-gradient(160deg, rgba(34, 204, 96,0.14), transparent 60%);
   border-radius: 20px 0 0 20px;
   display: flex; flex-direction: column;
 }
@@ -1493,7 +1493,7 @@ svg { display: block; }
   border-radius: 16px;
   padding: 20px 22px;
   color: #fff;
-  background: linear-gradient(135deg, #1a2e24 0%, #14251d 45%, #0d1911 100%);
+  background: linear-gradient(135deg, #173121 0%, #14251a 45%, #0d1911 100%);
   box-shadow: 0 14px 34px rgba(0,0,0,0.3);
   display: flex; flex-direction: column; justify-content: space-between;
   min-height: 150px;
@@ -1504,7 +1504,7 @@ svg { display: block; }
   content: "";
   position: absolute; top: -40%; right: -20%;
   width: 220px; height: 220px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(47,191,131,0.35), transparent 70%);
+  background: radial-gradient(circle, rgba(34, 204, 96,0.35), transparent 70%);
 }
 .checkout-card-face-top { display: flex; align-items: center; justify-content: space-between; }
 .checkout-card-chip {
@@ -1534,18 +1534,18 @@ svg { display: block; }
 .checkout-card-type-btn:hover { color: var(--ink); }
 .checkout-card-type-btn.active {
   border-color: var(--accent-green); color: var(--ink);
-  background: rgba(47,191,131,0.1);
+  background: rgba(34, 204, 96,0.1);
 }
 .checkout-card-type-swatch {
   width: 16px; height: 11px; border-radius: 3px; display: inline-block; flex: none;
 }
-.checkout-card-type-swatch-uzcard { background: linear-gradient(135deg, #1e9e5a, #0f6e3c); }
+.checkout-card-type-swatch-uzcard { background: linear-gradient(135deg, #13a94a, #077630); }
 .checkout-card-type-swatch-humo { background: linear-gradient(135deg, #f7931e, #c2570a); }
 .checkout-card-type-swatch-visa { background: linear-gradient(135deg, #2566ea, #1a3f8f); }
 .checkout-card-type-swatch-mastercard { background: linear-gradient(135deg, #eb5b2e 45%, #f2a90f 55%); }
 
 /* Karta yuzi tanlangan karta turiga qarab rangi o'zgaradi (faqat vizual) */
-.checkout-card-face[data-card-type="uzcard"] { background: linear-gradient(135deg, #1a2e24 0%, #14251d 45%, #0d1911 100%); }
+.checkout-card-face[data-card-type="uzcard"] { background: linear-gradient(135deg, #173121 0%, #14251a 45%, #0d1911 100%); }
 .checkout-card-face[data-card-type="humo"] { background: linear-gradient(135deg, #3a2410 0%, #2b1b0c 45%, #1a1006 100%); }
 .checkout-card-face[data-card-type="visa"] { background: linear-gradient(135deg, #142236 0%, #101b2c 45%, #0a121e 100%); }
 .checkout-card-face[data-card-type="mastercard"] { background: linear-gradient(135deg, #2c1810 0%, #241209 45%, #170b05 100%); }
@@ -1679,7 +1679,7 @@ svg { display: block; }
   margin-left: 8px;
 }
 .plan-badge-free { background: var(--bg-hover, rgba(120,120,120,0.15)); color: var(--ink-soft); }
-.plan-badge-pro { background: linear-gradient(135deg, #2fbf83, #1f9d6b); color: #fff; }
+.plan-badge-pro { background: linear-gradient(135deg, #22cc60, #14a84a); color: #fff; }
 .plan-badge-ultra { background: linear-gradient(135deg, #ffb347, #d98c1f); color: #3a2600; }
 
 /* ---------- Profil/Sozlamalar: AI limit ko'rsatkichi ---------- */
@@ -1690,7 +1690,7 @@ svg { display: block; }
 }
 .settings-usage-bar-fill {
   display: block; height: 100%; border-radius: 999px;
-  background: var(--accent-green, #2fbf83); transition: width 0.3s ease;
+  background: var(--accent-green, #22cc60); transition: width 0.3s ease;
 }
 .settings-usage-bar-fill.is-warning { background: #f0a83c; }
 .settings-usage-bar-fill.is-danger { background: #f85149; }
@@ -1721,7 +1721,7 @@ svg { display: block; }
   background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius);
   padding: 18px; display: flex; flex-direction: column;
 }
-.plan-compare-card.is-current { border-color: var(--accent-green); box-shadow: 0 0 0 2px rgba(47,191,131,0.18); }
+.plan-compare-card.is-current { border-color: var(--accent-green); box-shadow: 0 0 0 2px rgba(34, 204, 96,0.18); }
 .plan-compare-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 .plan-compare-head .plan-badge { margin-left: 0; }
 .plan-current-tag { font-size: 0.68rem; color: var(--accent-green); font-weight: 700; }
@@ -1761,7 +1761,7 @@ svg { display: block; }
   background: var(--accent-green); display: flex; align-items: center; justify-content: center;
 }
 
-.chat-header-icon svg { width: 17px; height: 17px; stroke: #05140D; }
+.chat-header-icon svg { width: 17px; height: 17px; stroke: #05140A; }
 .chat-header h3 { font-size: 1rem; margin: 0; }
 .chat-header p { font-size: 0.78rem; color: var(--ink-soft); margin: 2px 0 0; }
 
@@ -1773,7 +1773,7 @@ svg { display: block; }
 
 .chat-msg { max-width: 80%; padding: 11px 15px; border-radius: 12px; font-size: 0.92rem; line-height: 1.5; }
 
-.chat-msg-user { align-self: flex-end; background: var(--accent-green); color: #05140D; border-bottom-right-radius: 4px; font-weight: 500; }
+.chat-msg-user { align-self: flex-end; background: var(--accent-green); color: #05140A; border-bottom-right-radius: 4px; font-weight: 500; }
 
 .chat-msg-ai {
   align-self: flex-start; background: var(--bg-elevated); color: var(--ink);
@@ -1793,7 +1793,7 @@ svg { display: block; }
 
 .chat-send-btn {
   width: 42px; height: 42px; border-radius: 50%; border: none;
-  background: var(--accent-green); color: #05140D;
+  background: var(--accent-green); color: #05140A;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; flex-shrink: 0; transition: background 0.15s;
 }
@@ -1828,7 +1828,7 @@ svg { display: block; }
 
 .ob-step-num {
   width: 25px; height: 25px; border-radius: 50%; background: var(--accent-green);
-  color: #05140D; display: flex; align-items: center; justify-content: center; font-size: 0.82rem; flex-shrink: 0;
+  color: #05140A; display: flex; align-items: center; justify-content: center; font-size: 0.82rem; flex-shrink: 0;
 }
 
 .ob-options { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
@@ -1842,7 +1842,7 @@ svg { display: block; }
 }
 
 .ob-card input:checked + .ob-card-title {
-  border-color: var(--accent-green); background: rgba(47, 191, 131, 0.1);
+  border-color: var(--accent-green); background: rgba(34, 204, 96, 0.1);
   color: var(--accent-green); font-weight: 700;
 }
 
@@ -1857,7 +1857,7 @@ svg { display: block; }
 }
 
 .subject-select-card:hover { border-color: var(--accent-green); transform: translateY(-2px); }
-.subject-select-card.selected { border-color: var(--accent-green); background: rgba(47, 191, 131, 0.1); }
+.subject-select-card.selected { border-color: var(--accent-green); background: rgba(34, 204, 96, 0.1); }
 .subject-select-card h3 { font-size: 0.95rem; margin-top: 10px; }
 
 #level-section {
@@ -2084,7 +2084,7 @@ body.intro-active { overflow: hidden; }
 }
 .topic-ring-fill {
   fill: none;
-  stroke: var(--accent-green, #2fbf83);
+  stroke: var(--accent-green, #22cc60);
   stroke-width: 4;
   stroke-linecap: round;
   transition: stroke-dashoffset 0.4s ease;
@@ -2097,15 +2097,15 @@ body.intro-active { overflow: hidden; }
   font-weight: 700;
   fill: var(--ink, #111);
 }
-.topic-row-done .topic-ring-fill { stroke: var(--accent-green, #2fbf83); }
+.topic-row-done .topic-ring-fill { stroke: var(--accent-green, #22cc60); }
 
 /* --- 5-mavzulik aralash amaliy sinov kartasi --- */
 .topic-row-practice {
-  background: linear-gradient(90deg, rgba(47,191,131,0.08), transparent);
+  background: linear-gradient(90deg, rgba(34, 204, 96,0.08), transparent);
   border-style: dashed;
 }
 .topic-row-practice .topic-row-order {
-  background: var(--accent-green, #2fbf83);
+  background: var(--accent-green, #22cc60);
   color: #fff;
 }
 .topic-row-done .topic-row-meta { color: var(--accent-green); font-weight: 600; }
@@ -2247,7 +2247,7 @@ body.intro-active { overflow: hidden; }
   animation: quiz-trophy-spin-bounce 1.8s ease-in-out infinite;
 }
 .quiz-trophy-mid {
-  background: radial-gradient(circle, rgba(47,191,131,0.2), transparent 70%);
+  background: radial-gradient(circle, rgba(34, 204, 96,0.2), transparent 70%);
   color: var(--accent-green);
   animation: quiz-trophy-breathe 2.6s ease-in-out infinite;
 }
@@ -2378,7 +2378,7 @@ body.intro-active { overflow: hidden; }
   font-size: 0.8rem;
   font-family: var(--font-body);
 }
-.cert-sheet-answer-grid-list .is-correct { color: #1E8E5A; }
+.cert-sheet-answer-grid-list .is-correct { color: #149844; }
 .cert-sheet-answer-grid-list .is-wrong { color: #C0392B; }
 
 @media (max-width: 640px) {
@@ -2616,7 +2616,7 @@ body.intro-active { overflow: hidden; }
   display: flex; align-items: center; justify-content: space-between;
 }
 .hero-mock-option-correct {
-  border-color: var(--accent-green); background: rgba(47,191,131,0.1); color: var(--ink); font-weight: 600;
+  border-color: var(--accent-green); background: rgba(34, 204, 96,0.1); color: var(--ink); font-weight: 600;
 }
 .hero-mock-option-correct span { color: var(--accent-green); }
 
@@ -2731,7 +2731,7 @@ body.intro-active { overflow: hidden; }
   position: absolute;
   inset: 0;
   border: 1px solid var(--accent-green);
-  background: rgba(47, 191, 131, 0.05);
+  background: rgba(34, 204, 96, 0.05);
 }
 .hero-cube-wrap.hero-cube-b .cube-face { border-color: var(--accent-blue); background: rgba(74, 158, 255, 0.06); }
 
@@ -2820,13 +2820,13 @@ body.intro-active { overflow: hidden; }
 .admin-login-badge svg { width: 15px; height: 15px; }
 
 .form-success {
-  background: rgba(47, 191, 131, 0.12);
+  background: rgba(34, 204, 96, 0.12);
   color: var(--accent-green);
   padding: 10px 14px;
   border-radius: 8px;
   font-size: 0.9rem;
   margin-bottom: 18px;
-  border: 1px solid rgba(47, 191, 131, 0.3);
+  border: 1px solid rgba(34, 204, 96, 0.3);
 }
 
 .ielts-tabs {
@@ -2855,7 +2855,7 @@ body.intro-active { overflow: hidden; }
 
 .ielts-tab.is-active {
   opacity: 1;
-  background: var(--accent-green, #2fbf83);
+  background: var(--accent-green, #22cc60);
   border-color: transparent;
   color: #fff;
 }
@@ -3107,7 +3107,7 @@ body.intro-active { overflow: hidden; }
 
 /* ---------- AI repetitor: kunlik limit tugaganda chiqadigan karta ---------- */
 .owl-limit-card {
-  background: linear-gradient(135deg, rgba(255,167,38,0.12), rgba(47,191,131,0.08));
+  background: linear-gradient(135deg, rgba(255,167,38,0.12), rgba(34, 204, 96,0.08));
   border: 1px solid var(--accent-gold);
   border-radius: var(--radius);
   padding: 16px;
@@ -3137,7 +3137,7 @@ body.intro-active { overflow: hidden; }
   display: block;
   height: 100%;
   border-radius: 999px;
-  background: var(--accent-green, #2fbf83);
+  background: var(--accent-green, #22cc60);
   transition: width 0.3s ease, background 0.3s ease;
 }
 .owl-usage-bar-fill.is-warning { background: #f0a83c; }
@@ -3272,7 +3272,7 @@ body.intro-active { overflow: hidden; }
   margin: 0 0 20px;
   padding: 10px 14px;
   border-radius: 10px;
-  background: var(--bg-soft, rgba(47, 191, 131, 0.08));
+  background: var(--bg-soft, rgba(34, 204, 96, 0.08));
 }
 .owl-limit-countdown-num {
   font-variant-numeric: tabular-nums;
@@ -3374,7 +3374,7 @@ body.intro-active { overflow: hidden; }
 .formula-group h4 {
   margin: 0 0 8px;
   font-size: 0.85rem;
-  color: var(--accent-green, #2fbf83);
+  color: var(--accent-green, #22cc60);
 }
 .formula-group ul {
   margin: 0;
@@ -3428,7 +3428,7 @@ body.intro-active { overflow: hidden; }
 .pt-cat-alkaline { background: #f7c99e; }
 .pt-cat-transition { background: #f7e08e; }
 .pt-cat-post-transition { background: #bcd9a0; }
-.pt-cat-metalloid { background: #9fd9c8; }
+.pt-cat-metalloid { background: #99dfb3; }
 .pt-cat-nonmetal { background: #9fc9e8; }
 .pt-cat-halogen { background: #b9a8e8; }
 .pt-cat-noble { background: #e0a8d8; }
@@ -3495,7 +3495,7 @@ body.intro-active { overflow: hidden; }
   border-radius: var(--radius);
   padding: 28px 26px;
   margin-top: 20px;
-  color: #05140D;
+  color: #05140A;
 }
 .balance-hero-label { font-size: 0.85rem; font-weight: 600; opacity: 0.85; }
 .balance-hero-amount { font-family: var(--font-display); font-size: 2.4rem; font-weight: 700; margin-top: 4px; }
@@ -3522,7 +3522,7 @@ body.intro-active { overflow: hidden; }
   cursor: pointer; transition: border-color 0.15s ease, background 0.15s ease;
 }
 .balance-amount-btn:hover { border-color: var(--accent-green); }
-.balance-amount-btn.active { border-color: var(--accent-green); background: rgba(47, 191, 131, 0.1); color: var(--accent-green); }
+.balance-amount-btn.active { border-color: var(--accent-green); background: rgba(34, 204, 96, 0.1); color: var(--accent-green); }
 
 .balance-pay-btn {
   display: flex; align-items: center; justify-content: center; gap: 8px;
@@ -3567,14 +3567,14 @@ body.intro-active { overflow: hidden; }
    Oyna ochilganda orqadagi test xiralashadi (backdrop blur).
    ========================================================================== */
 .formula-sheet-toggle {
-  background: linear-gradient(135deg, rgba(47,191,131,0.18), rgba(74,158,255,0.14));
-  border: 1px solid rgba(47,191,131,0.45);
+  background: linear-gradient(135deg, rgba(34, 204, 96,0.18), rgba(74,158,255,0.14));
+  border: 1px solid rgba(34, 204, 96,0.45);
   color: var(--ink);
   padding: 7px 14px 7px 10px;
-  box-shadow: 0 2px 10px rgba(47,191,131,0.12);
+  box-shadow: 0 2px 10px rgba(34, 204, 96,0.12);
 }
 .formula-sheet-toggle svg { color: var(--accent-green); width: 18px; height: 18px; }
-.formula-sheet-toggle:hover { border-color: var(--accent-green); box-shadow: 0 4px 16px rgba(47,191,131,0.28); }
+.formula-sheet-toggle:hover { border-color: var(--accent-green); box-shadow: 0 4px 16px rgba(34, 204, 96,0.28); }
 .formula-sheet-toggle span { color: var(--ink); }
 
 .formula-sheet-overlay {
@@ -3602,7 +3602,7 @@ body.fs-open { overflow: hidden; }
   padding: 9px 14px; border-radius: 10px; border: 1px solid var(--line);
   background: var(--bg); color: var(--ink); font: inherit; font-size: 0.88rem;
 }
-.fs-search:focus { outline: none; border-color: var(--accent-green); box-shadow: 0 0 0 3px rgba(47,191,131,0.18); }
+.fs-search:focus { outline: none; border-color: var(--accent-green); box-shadow: 0 0 0 3px rgba(34, 204, 96,0.18); }
 .pt-hint { color: var(--ink-soft); font-size: 0.78rem; }
 
 .formula-sheet-body {
@@ -3650,7 +3650,7 @@ body.fs-open { overflow: hidden; }
 .pt-cat-alkaline { background: #ffb870; }
 .pt-cat-transition { background: #ffe082; }
 .pt-cat-post-transition { background: #b5d99c; }
-.pt-cat-metalloid { background: #7fd8bf; }
+.pt-cat-metalloid { background: #76e19d; }
 .pt-cat-nonmetal { background: #81c7f5; }
 .pt-cat-halogen { background: #b39ddb; }
 .pt-cat-noble { background: #e6a1d9; }
@@ -3717,15 +3717,15 @@ body.fs-open { overflow: hidden; }
   width: 34px; height: 34px; border-radius: 10px; font-weight: 700; font-size: 0.9rem;
   background: rgba(79, 124, 255, 0.16); color: #8fb0ff; display: inline-flex; align-items: center; justify-content: center;
 }
-.topic-row-done { border-color: rgba(47, 191, 131, 0.55); background: linear-gradient(160deg, #0f2430 0%, #0d1a26 100%); }
-.topic-row-done .topic-row-order { background: var(--accent-green); color: #04140d; }
+.topic-row-done { border-color: rgba(34, 204, 96, 0.55); background: linear-gradient(160deg, #0f2430 0%, #0d1a26 100%); }
+.topic-row-done .topic-row-order { background: var(--accent-green); color: #04140a; }
 .topic-chip {
   display: inline-block; align-self: flex-start; margin-bottom: 8px; padding: 2px 10px; border-radius: 999px;
   font-size: 0.68rem; font-weight: 700; letter-spacing: 0.02em;
   background: rgba(125, 91, 255, 0.18); color: #b9a7ff; border: 1px solid rgba(125, 91, 255, 0.35);
 }
 .topic-chip-progress { background: rgba(255, 167, 38, 0.14); color: #ffc46b; border-color: rgba(255, 167, 38, 0.35); }
-.topic-chip-done { background: rgba(47, 191, 131, 0.16); color: #5fe0aa; border-color: rgba(47, 191, 131, 0.4); }
+.topic-chip-done { background: rgba(34, 204, 96, 0.16); color: #53ec8b; border-color: rgba(34, 204, 96, 0.4); }
 .topic-row-title { font-size: 1rem; line-height: 1.3; margin-bottom: 4px; }
 .topic-row-body { display: flex; flex-direction: column; }
 .topic-row-cta {
@@ -3741,10 +3741,10 @@ body.fs-open { overflow: hidden; }
 .topic-row-locked { background: #0e1220; border-style: dashed; }
 [data-theme="light"] .topic-row { background: #ffffff; border-color: #d5def2; }
 [data-theme="light"] .topic-row:hover { box-shadow: 0 10px 24px rgba(43, 111, 240, 0.18); }
-[data-theme="light"] .topic-row-done { background: #effaf5; }
+[data-theme="light"] .topic-row-done { background: #eefbf3; }
 [data-theme="light"] .topic-row-practice { background: #fff7ea; }
 [data-theme="light"] .topic-row-locked { background: #f1f4fa; }
-[data-theme="light"] .topic-row-order { color: #2b6ff0; }
+[data-theme="light"] .topic-row-order { color: #15803d; }
 
 /* ===== Admin import ===== */
 .import-card { border:1px solid var(--border, rgba(255,255,255,.12)); border-radius:14px; padding:14px; margin:12px 0; background:var(--bg-elevated, rgba(255,255,255,.03)); display:grid; gap:8px; }
@@ -3864,7 +3864,7 @@ table tbody tr { transition: background-color .15s ease; }
 .repetitor-live-row { display: flex; gap: 10px; justify-content: center; align-items: center; flex-wrap: wrap; margin-top: 14px; padding: 0 16px; }
 .repetitor-live-btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px; border-radius: 999px; border: 1px solid var(--accent-green); background: transparent; color: var(--accent-green); font: inherit; font-weight: 600; cursor: pointer; transition: background .15s, color .15s, transform .12s; }
 .repetitor-live-btn svg { width: 18px; height: 18px; }
-.repetitor-live-btn:hover { background: rgba(47,191,131,.12); }
+.repetitor-live-btn:hover { background: rgba(34, 204, 96,.12); }
 .repetitor-live-btn:active { transform: scale(.97); }
 .repetitor-live-btn.is-live { background: var(--accent-green); color: var(--bg); }
 .repetitor-stop-speak { padding: 10px 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg-hover); color: var(--ink); font: inherit; cursor: pointer; }
@@ -3991,8 +3991,8 @@ body.fs-open .quiz-main {
   border-right: 0; animation: none; box-shadow: -12px 0 40px rgba(0,0,0,.28);
 }
 .fs-drawer .formula-sheet-scroll { flex: 1; min-height: 0; overflow: auto; -webkit-overflow-scrolling: touch; }
-.formula-sheet-toggle.is-active { background: var(--accent-green); color: #04120b; border-color: var(--accent-green); }
-.formula-sheet-toggle.is-active span, .formula-sheet-toggle.is-active svg { color: #04120b; }
+.formula-sheet-toggle.is-active { background: var(--accent-green); color: #041209; border-color: var(--accent-green); }
+.formula-sheet-toggle.is-active span, .formula-sheet-toggle.is-active svg { color: #041209; }
 .periodic-table-wrap { overflow-x: auto; }
 .pt-element { transition: transform .18s cubic-bezier(.2,.9,.3,1.4), box-shadow .18s ease, opacity .2s; }
 .pt-element:hover, .pt-element:focus-visible { transform: translateY(-3px) scale(1.1); z-index: 5; box-shadow: 0 8px 18px rgba(0,0,0,.4); }
@@ -4039,8 +4039,8 @@ body.fs-open .quiz-main { max-width: min(var(--qs-card-w, 720px), calc(100vw - v
 .quiz-option-key { flex: 0 0 auto; width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; font-weight: 700; font-size: .82rem; background: var(--bg-hover); color: var(--ink-soft); border: 1px solid var(--line); transition: background .15s, color .15s, border-color .15s; }
 .quiz-option-text { flex: 1; min-width: 0; overflow-wrap: anywhere; line-height: 1.45; }
 .quiz-option:hover .quiz-option-key { border-color: var(--accent-green); color: var(--accent-green); }
-.quiz-option.selected .quiz-option-key { background: var(--accent-green); border-color: var(--accent-green); color: #04120b; }
-.quiz-option.selected { box-shadow: 0 0 0 2px rgba(47,191,131,.25); }
+.quiz-option.selected .quiz-option-key { background: var(--accent-green); border-color: var(--accent-green); color: #041209; }
+.quiz-option.selected { box-shadow: 0 0 0 2px rgba(34, 204, 96,.25); }
 .quiz-option:active { transform: scale(.99); }
 .quiz-question-card.qz-swap { animation: qz-swap .38s cubic-bezier(.2,.8,.2,1); }
 @keyframes qz-swap { from { opacity: 0; translate: 18px 0; } to { opacity: 1; translate: 0 0; } }
@@ -4133,17 +4133,17 @@ img[src*="logo-owl"] { object-fit: contain; }
    v130: kontrast tuzatishlari (matn va fon aniq ajralib tursin)
    ========================================================================== */
 [data-theme="light"] {
-  --ink: #0b1c33; --ink-soft: #435571; --accent-green: #1f5fd8; --accent-green-dark: #1448a8; --accent-blue: #1f5fd8;
-  --error: #c23b14; --success: #1f5fd8; --line: #cfd9ec;
+  --ink: #0b1c33; --ink-soft: #435571; --accent-green: #15803D; --accent-green-dark: #166534; --accent-blue: #1f5fd8;
+  --error: #c23b14; --success: #15803D; --line: #cde6d5;
 }
 [data-theme="light"] .btn-primary, [data-theme="light"] .nav-cta, [data-theme="light"] .plan-btn-primary,
 [data-theme="light"] .billing-toggle-save, [data-theme="light"] .plan-badge-popular, [data-theme="light"] .app-header-avatar { color: #fff; }
 [data-theme="light"] .sidebar-link.active, [data-theme="light"] .subject-tab.is-active, [data-theme="light"] .plan-current-tag,
-[data-theme="light"] .balance-amount-btn.active, [data-theme="light"] .topic-row-order, [data-theme="light"] .quiz-mode-badge-dtm { color: #1448a8; }
+[data-theme="light"] .balance-amount-btn.active, [data-theme="light"] .topic-row-order, [data-theme="light"] .quiz-mode-badge-dtm { color: #166534; }
 .notif-bell-badge, .btn-danger { background: #cf3a32; color: #fff; }
 [data-theme="light"] .notif-bell-badge, [data-theme="light"] .btn-danger { background: #c23b14; }
 [data-theme="light"] summary { color: #a8330f; }
-.qs-step-active, .ielts-tab.is-active { color: #04120b; }
+.qs-step-active, .ielts-tab.is-active { color: #041209; }
 [data-theme="light"] .qs-step-active, [data-theme="light"] .ielts-tab.is-active { color: #fff; }
 .balance-pay-btn-primary { background: #2a6fd6; color: #fff; }
 [data-theme="light"] .dash-goal-chip, [data-theme="light"] .dash-streak { color: #9a4f00; }
@@ -4158,7 +4158,7 @@ img[src*="logo-owl"] { object-fit: contain; }
 /* ===== Yagona LongoUZ belgisi (3D boyqush + "Longo" + "UZ") — hamma joyda bir xil ===== */
 .lg-owl{display:block;flex:none;width:auto;height:1.9em;aspect-ratio:482/369;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(40,120,255,.35))}
 .lg-word{font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;font-weight:800;letter-spacing:-.02em;color:var(--ink);line-height:1;white-space:nowrap}
-.lg-word b{font-weight:800;color:var(--lg-uz,#2f7bff)}
+.lg-word b{font-weight:800;color:var(--lg-uz,var(--accent-green,#22CC60))}
 html[data-theme="dark"] .lg-word{color:#fff}
 .brand,.sidebar-brand{display:flex;align-items:center;gap:10px;font-size:1.3rem;text-decoration:none}
 .brand .lg-owl{height:2.05rem}
@@ -4232,7 +4232,7 @@ html.owl-scrolling #owl-pin-button { opacity: .25; }
 .site-nav .nav-sm { padding: 7px 14px !important; font-size: .82rem !important; line-height: 1.2; border-radius: 999px; font-weight: 600; white-space: nowrap; box-shadow: none !important; }
 .site-nav .nav-ghost { border: 1.5px solid currentColor; color: inherit; text-decoration: none; opacity: .9; }
 .site-nav .nav-ghost:hover { opacity: 1; }
-.site-nav .nav-ghost.is-current, .site-nav .nav-cta.is-current { outline: 2px solid rgba(47,191,131,.45); outline-offset: 2px; }
+.site-nav .nav-ghost.is-current, .site-nav .nav-cta.is-current { outline: 2px solid rgba(34, 204, 96,.45); outline-offset: 2px; }
 @media (max-width: 560px) {
   .site-nav .nav-sm { padding: 6px 10px !important; font-size: .74rem !important; }
   body.home .site-header .site-nav a.nav-ghost { display: inline-flex !important; }
@@ -4262,8 +4262,8 @@ img { image-rendering: auto; }
 @media (max-width: 560px) { .site-header { min-height: 64px; padding-top: 12px !important; padding-bottom: 12px !important; } }
 /* v228: boyqush (AI chat) tugmasi avvalgidek — doim to'liq ko'rinadi, aylantirganda xiralashmaydi */
 html.owl-scrolling #owl-pin-button { opacity: 1 !important; transform: none !important; pointer-events: auto !important; }
-#owl-pin-button { opacity: 1 !important; background: radial-gradient(circle at 50% 40%, #1d3b34, #0d1d19); border: 2px solid rgba(47,191,131,.55); box-shadow: 0 8px 22px rgba(0,0,0,.35), 0 0 0 4px rgba(47,191,131,.12); }
-[data-theme="light"] #owl-pin-button { background: radial-gradient(circle at 50% 40%, #ffffff, #e8f6ef); border-color: rgba(31,95,216,.35); }
+#owl-pin-button { opacity: 1 !important; background: radial-gradient(circle at 50% 40%, #193f27, #0d1d13); border: 2px solid rgba(34, 204, 96,.55); box-shadow: 0 8px 22px rgba(0,0,0,.35), 0 0 0 4px rgba(34, 204, 96,.12); }
+[data-theme="light"] #owl-pin-button { background: radial-gradient(circle at 50% 40%, #ffffff, #e7f7ed); border-color: rgba(31,95,216,.35); }
 @media (max-width: 900px) { #owl-pin-button { width: 54px; height: 54px; } }
 
 
@@ -4274,7 +4274,7 @@ html.owl-scrolling #owl-pin-button { opacity: 1 !important; transform: none !imp
 }
 /* Kirish / ro'yxatdan o'tish: sarlavha shaffof emas — sahifa aylantirilganda matn ostidan ko'rinmaydi */
 body.auth-page .site-header { background: rgba(4, 19, 26, .97) !important; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); position: sticky; top: 0; z-index: 100; }
-html[data-theme="light"] body.auth-page .site-header { background: rgba(243, 250, 248, .97) !important; }
+html[data-theme="light"] body.auth-page .site-header { background: rgba(242, 251, 245, .97) !important; }
 /* logotip rasmi: brauzerning sifatli kichraytirishi (qirrali/xira ko'rinmasin) */
 .lg-owl, .living-owl-img { image-rendering: auto !important; }
 
@@ -4304,13 +4304,13 @@ html[data-theme="light"] body.auth-page .site-header { background: rgba(243, 250
 
 /* 3) Bosh sahifa sarlavhasi shaffof emas — pastdagi matn ostidan ko'rinmaydi */
 body.home .site-header { position: sticky; top: 0; z-index: 100; background: rgba(4, 19, 26, .96) !important; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(255,255,255,.06); }
-html[data-theme="light"] body.home .site-header { background: rgba(243, 250, 248, .97) !important; border-bottom-color: rgba(10,70,60,.1); }
+html[data-theme="light"] body.home .site-header { background: rgba(242, 251, 245, .97) !important; border-bottom-color: rgba(5, 75, 31,.1); }
 
 /* 4) Admin: aniqlanmagan --border oq chiziq berardi; kartalar sayt uslubida */
 :root { --border: var(--line); }
 .rp-stat, .rp-card, .st-card { background: var(--card); border-color: var(--line) !important; }
 .rp-stat { flex: 1 1 120px; }
-.rp-stat b { color: var(--accent-green, #2fbf83); }
+.rp-stat b { color: var(--accent-green, #22cc60); }
 .rp-ai { border-color: var(--line) !important; }
 .admin-bank-wrap, .bank-card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; }
 details.bank-subj, .bank-subj { background: var(--card); border: 1px solid var(--line) !important; }

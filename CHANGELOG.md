@@ -2,6 +2,12 @@
 
 Har yuborilgan zip: `longouz_v<N>.zip`, versiya raqami `VERSION` faylida.
 
+## v234 — tiniq tabiiy yashil rang
+- Saytdagi barcha yashil ranglar (450 ga yaqin joy: tugmalar, urg'ular, belgilar, chiziqlar, soyalar) moviy-yashildan tiniq, yorqin tabiiy yashilga (#22CC60 atrofida) o'tkazildi.
+- Tungi fon qoramtir to'q yashil (#050F09), kartalar va chiziqlar ham yashil tusda; kirish/ro'yxatdan o'tish sahifalari foni moviy-qoradan qora-yashilga o'zgardi.
+- Kunduzgi rejimda ham urg'u rangi ko'k emas, yashil; logotipdagi «UZ» hamma sahifada yashil.
+- Barcha CSS/JS fayllar yangi versiya belgisi bilan — brauzer eski ranglarni keshdan ko'rsatmaydi.
+
 ## v233 — barcha AI Gemini'da, eng yangi model
 - Barcha AI (repetitor, suzuvchi chat, ochiq javob tekshiruvi, Speaking/Writing baholash, admin Studio, AI yordamchi, shikoyat tahlili, PDF/rasm importi) endi faqat Gemini orqali ishlaydi — Claude kreditsiz bo'lgani uchun o'chirildi (kalit saqlanadi; qaytarish: `AI_PROVIDER=claude`).
 - Asosiy model: `gemini-3.8-flash` (2026-yil sentabr, bepul tarifdagi eng yangi). Band bo'lsa navbat bilan: gemini-3.6-flash → gemini-flash-latest → gemini-3.5-flash-lite → gemini-2.5-flash.
