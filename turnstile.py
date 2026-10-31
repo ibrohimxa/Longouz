@@ -36,6 +36,10 @@ def mode() -> str:
 
 
 def is_enabled() -> bool:
+    # v232: egasining talabi bilan Cloudflare Turnstile saytdan olib tashlandi (kalitlar o'chirilmadi).
+    # Qayta yoqish kerak bo'lsa: Vercel'da TURNSTILE_ENABLE=true qo'shiladi.
+    if os.getenv("TURNSTILE_ENABLE", "").strip().lower() != "true":
+        return False
     return mode() != "off" and bool(site_key() and secret_key())
 
 

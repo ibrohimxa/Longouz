@@ -2,6 +2,9 @@
 
 Har yuborilgan zip: `longouz_v<N>.zip`, versiya raqami `VERSION` faylida.
 
+## v232 — Cloudflare Turnstile olib tashlandi
+- Kirish, ro'yxatdan o'tish va tarif oynasidan Cloudflare vidjeti, «Cloudflare Turnstile bilan himoyalangan» yozuvi va skripti butunlay olib tashlandi; server tekshiruvi ham o'chirildi. Botlardan himoya sifatida bir IP'dan daqiqasiga 10 ta urinish cheklovi qoladi. Kalitlar o'chirilmadi — kerak bo'lsa Vercel'da `TURNSTILE_ENABLE=true` bilan qaytariladi.
+
 ## v231 — kirish, ro'yxatdan o'tish va tarif sotib olish oqimi
 - **Tarif sotib olgandan keyin qayta ro'yxatdan o'tish so'ralardi** — sababi: Cloudflare tekshiruvi (domen Cloudflare'da ruxsat etilmagan / vidjet yuklanmagan / forma qayta yuborilgan) o'tmasa, tarif oynasidagi forma ro'yxatdan o'tish sahifasiga «Bot ekanligingiz aniqlandi» xatosi bilan qaytarardi. Endi tekshiruv o'tmasa ham haqiqiy o'quvchi bloklanmaydi (IP bo'yicha cheklov qoladi) — hisob ochiladi, tarif faollashadi, fan tanlanadi va kabinetga o'tadi.
 - **Email tekshiruvi**: email yozilganda darhol tekshiriladi — xato yozilgan domen («gmial.com» → «gmail.com ni nazarda tutdingizmi?» tugmasi bilan), bunday hisob bor-yo'qligi (ro'yxatdan o'tishda: «hisob allaqachon bor — Kirish», kirishda: «hisob topilmadi — Ro'yxatdan o'tish»). Tarif oynasida ham.
