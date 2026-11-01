@@ -1,3 +1,6 @@
+## v239
+- Neon yashil v235 darajasiga qaytarildi.
+
 ## v238
 - Neon o'rtacha darajaga qaytarildi: yorqin yashil, lekin qamashtirmaydi.
 
