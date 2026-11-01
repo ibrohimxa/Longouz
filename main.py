@@ -123,7 +123,7 @@ _CSP_POLICY = (
 
 # v219: HTML/JSON javoblar siqiladi (sekin mobil internetda sahifa ancha tez ochiladi)
 from starlette.middleware.gzip import GZipMiddleware as _GZip
-app.add_middleware(_GZip, minimum_size=1200, compresslevel=5)
+# GZip eng tashqi qatlam bo'lishi uchun fayl oxirida qo'shiladi (inject_fx_middleware siqilmagan HTML ko'radi)
 
 # v223: yagona manzil — eski *.vercel.app manzillari (longouz-v1xf..., longo-uz) asosiy manzilga yo'naltiriladi.
 # Asosiy manzil SITE_BASE_URL dan olinadi (masalan https://longouz.vercel.app). Faqat production'da ishlaydi.
@@ -144,6 +144,44 @@ async def canonical_host_middleware(request: Request, call_next):
                 target += "?" + request.url.query
             return RedirectResponse(target, status_code=308)
     return await call_next(request)
+
+
+try:
+    VERSION_STR = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "VERSION")).read().strip() or "1"
+except Exception:  # noqa: BLE001
+    VERSION_STR = "1"
+
+
+@app.middleware("http")
+async def inject_fx_middleware(request: Request, call_next):
+    """Barcha ommaviy HTML sahifalarga ochilish ekrani va tugma animatsiyasini qo'shadi (admin panel — yo'q)."""
+    response = await call_next(request)
+    try:
+        path = request.url.path
+        if (request.method != "GET" or response.status_code != 200
+                or "text/html" not in response.headers.get("content-type", "")
+                or path.startswith(("/static/", "/api/")) or path.startswith(ADMIN_PREFIX)):
+            return response
+        chunks = [c async for c in response.body_iterator]
+        body = b"".join(c if isinstance(c, bytes) else c.encode() for c in chunks)
+    except Exception:  # noqa: BLE001
+        logger.exception("FX: javob tanasini o'qib bo'lmadi")
+        return response
+    try:
+        v = VERSION_STR
+        i = body.find(b"<head")
+        j = body.find(b">", i) + 1 if i >= 0 else -1
+        k = body.rfind(b"</head>")
+        if j > 0 and k > j:
+            pre = f'<script src="/static/splash.js?v={v}"></script>'.encode()
+            post = (f'<link rel="stylesheet" href="/static/fx.css?v={v}">'
+                    f'<script src="/static/fx.js?v={v}" defer></script>').encode()
+            body = body[:j] + pre + body[j:k] + post + body[k:]
+    except Exception:  # noqa: BLE001
+        logger.exception("FX qo'shishda xato")
+    new = Response(content=body, status_code=200, media_type="text/html")
+    new.raw_headers = [(a, b) for a, b in response.raw_headers if a.lower() != b"content-length"] + [(b"content-length", str(len(body)).encode())]
+    return new
 
 
 @app.middleware("http")
@@ -4154,6 +4192,8 @@ async def admin_bank_page(request: Request):
 
 
 
+app.add_middleware(_GZip, minimum_size=1200, compresslevel=5)
+
 if __name__ == "__main__":
     import asyncio
     import re as _re
@@ -4250,4 +4290,5 @@ if __name__ == "__main__":
         asyncio.run(_serve_all())
     except KeyboardInterrupt:
         pass
+
 

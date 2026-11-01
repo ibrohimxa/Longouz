@@ -1,3 +1,8 @@
+## v241
+- Ochilish ekrani: logotip, aylanuvchi chiziq, 0-100% ko'rsatkich, 3 soniya, yashil to'lish.
+- Tugmalar atrofida suvdek aylanuvchi chegara (admin panelda yo'q).
+- Tarif oynasi: karta bo'limi qoramtil yashil, to'lqinli fon. "Hozircha bepul/to'lov talab qilinmaydi" yozuvlari olib tashlandi.
+
 ## v240
 - Tarif oynasi: tabiiy neon yashil (qoramtil emas), tun va kun uyg'un; barglar va tugma yashil.
 

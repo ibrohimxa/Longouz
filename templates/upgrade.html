@@ -8,9 +8,9 @@
   <link rel="icon" type="image/png" href="/static/logo-owl.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=Caveat:wght@600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css?v=240">
-  <link rel="stylesheet" href="/static/purchase.css?v=240">
-  <script src="/static/theme-init.js?v=240"></script>
+  <link rel="stylesheet" href="/static/style.css?v=241">
+  <link rel="stylesheet" href="/static/purchase.css?v=241">
+  <script src="/static/theme-init.js?v=241"></script>
 </head>
 <body data-logged-in="true">
 
@@ -23,7 +23,7 @@
       <div class="app-topbar">
         <div>
           <h1>Tarifni tanlang</h1>
-          <p>Joriy tarifingiz: <strong>{{ user.plan|upper }}</strong>. Hozircha to'lov talab qilinmaydi — tarifni bir tugma bilan darhol almashtirishingiz mumkin.</p>
+          <p>Joriy tarifingiz: <strong>{{ user.plan|upper }}</strong>.</p>
         </div>
       </div>
 
@@ -63,7 +63,7 @@
         <div class="plan-card plan-card-popular {{ 'plan-card-current' if user.plan == 'pro' else '' }}">
           <div class="plan-badge-popular">Mashhur</div>
           <div class="plan-name">Pro</div>
-          <div class="plan-price" data-monthly-label="99 000 so'm/oy (hozircha bepul)" data-yearly-label="990 000 so'm/yil (hozircha bepul)">99 000 <span>so'm/oy (hozircha bepul)</span></div>
+          <div class="plan-price" data-monthly-label="99 000 so'm/oy" data-yearly-label="990 000 so'm/yil">99 000 <span>so'm/oy</span></div>
           <ul class="plan-features">
             <li>Tarix va biologiya: <b>85 ta mavzu</b>, qiyin savollar ochiladi</li>
             <li>Mavzuda {{ plan_limits.pro.topic_question_count }} tagacha savol, ochiq (yozma javobli) savollar</li>
@@ -82,7 +82,7 @@
 
         <div class="plan-card {{ 'plan-card-current' if user.plan == 'ultra' else '' }}">
           <div class="plan-name">Ultra</div>
-          <div class="plan-price" data-monthly-label="199 000 so'm/oy (hozircha bepul)" data-yearly-label="1 990 000 so'm/yil (hozircha bepul)">199 000 <span>so'm/oy (hozircha bepul)</span></div>
+          <div class="plan-price" data-monthly-label="199 000 so'm/oy" data-yearly-label="1 990 000 so'm/yil">199 000 <span>so'm/oy</span></div>
           <ul class="plan-features">
             <li>Tarix va biologiya: <b>150 ta mavzu</b> — barcha sinflar to'liq</li>
             <li>Mavzuda {{ plan_limits.ultra.topic_question_count }} tagacha savol: eng qiyin va qo'shimcha savollar</li>
@@ -105,11 +105,11 @@
   {% with pm_member=True %}{% include "_purchase_modal.html" %}{% endwith %}
 
   {% include "_owl_widget.html" %}
-  <script src="/static/devtools-guard.js?v=240"></script>
-  <script src="/static/app.js?v=240"></script>
-  <script src="/static/purchase.js?v=240"></script>
+  <script src="/static/devtools-guard.js?v=241"></script>
+  <script src="/static/app.js?v=241"></script>
+  <script src="/static/purchase.js?v=241"></script>
   {% if turnstile_active(request) %}
-  <script src="/static/turnstile-helper.js?v=240"></script>
+  <script src="/static/turnstile-helper.js?v=241"></script>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=lgTurnstileReady" async defer onerror="window.lgTurnstileFailed&&window.lgTurnstileFailed()"></script>
   {% endif %}
   <script>

@@ -1,0 +1,19 @@
+/* LongoUZ — tugma atrofida suvdek aylanuvchi chegara (admin panelda ulanmaydi) */
+@property --lz-a{syntax:"<angle>";inherits:false;initial-value:0deg}
+.lz-ring{position:absolute;inset:0;border-radius:inherit;pointer-events:none;padding:2px;z-index:2;
+  background:conic-gradient(from var(--lz-a),transparent 0deg,transparent 200deg,rgba(61,255,126,.15) 245deg,rgba(61,255,126,.85) 310deg,#d8ffe6 345deg,transparent 360deg);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);
+  animation:lz-ring-spin 3.6s linear infinite;filter:drop-shadow(0 0 3px rgba(61,255,126,.55))}
+@keyframes lz-ring-spin{to{--lz-a:360deg}}
+html[data-theme="light"] .lz-ring{background:conic-gradient(from var(--lz-a),transparent 0deg,transparent 200deg,rgba(14,160,70,.15) 245deg,rgba(14,160,70,.8) 310deg,#0b8a3c 345deg,transparent 360deg);filter:drop-shadow(0 0 2px rgba(14,160,70,.4))}
+@media (prefers-reduced-motion:reduce){.lz-ring{animation:none}}
+
+/* tarif oynasi: karta bo'limi — qoramtil yashil fon, to'lqinli yashil naqsh, ochiq qismlar yashil */
+.pm-right{background:
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320' preserveAspectRatio='none'%3E%3Cpath fill='%2300c94a' fill-opacity='.16' d='M0 190C140 110 300 120 440 190S720 300 900 240 1240 90 1440 150V320H0z'/%3E%3Cpath fill='%2314a8a0' fill-opacity='.13' d='M0 250C180 200 320 230 520 270S900 300 1100 230 1340 170 1440 200V320H0z'/%3E%3C/svg%3E") left bottom/100% 46% no-repeat,
+  linear-gradient(180deg,#07240f 0%,#0a3217 100%)}
+.pm-right .pm-input{--pm-inbg:rgba(61,255,126,.14)}
+html[data-theme="light"] .pm-right{background:
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320' preserveAspectRatio='none'%3E%3Cpath fill='%2300d34d' fill-opacity='.2' d='M0 190C140 110 300 120 440 190S720 300 900 240 1240 90 1440 150V320H0z'/%3E%3Cpath fill='%2314a8a0' fill-opacity='.14' d='M0 250C180 200 320 230 520 270S900 300 1100 230 1340 170 1440 200V320H0z'/%3E%3C/svg%3E") left bottom/100% 46% no-repeat,
+  linear-gradient(180deg,rgba(255,255,255,.35),rgba(255,255,255,.1))}
+html[data-theme="light"] .pm-right .pm-input{--pm-inbg:#fff}
