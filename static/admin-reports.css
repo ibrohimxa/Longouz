@@ -11,7 +11,7 @@
 .rp-badge.err{background:#fee2e2;color:#991b1b}.rp-badge.ok{background:#d9ffe7;color:#0f6c31}.rp-badge.unc{background:#fef3c7;color:#92400e}
 .rp-q{font-weight:600;margin:6px 0;white-space:pre-wrap}
 .rp-opts{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;font-size:14px;margin:6px 0}
-.rp-opts .c{color:#0aaf46;font-weight:700}
+.rp-opts .c{color:#00d84e;font-weight:700}
 .rp-msg{border-left:3px solid #f59e0b;padding:6px 10px;margin:8px 0;background:rgba(245,158,11,.08);border-radius:0 8px 8px 0;font-size:14px;white-space:pre-wrap}
 .rp-ai{border:1px dashed var(--border,#aaa);border-radius:10px;padding:10px;margin:8px 0;font-size:14px}
 .rp-ai pre{white-space:pre-wrap;font:inherit;margin:4px 0}

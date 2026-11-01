@@ -2,6 +2,17 @@
 
 Har yuborilgan zip: `longouz_v<N>.zip`, versiya raqami `VERSION` faylida.
 
+## v235 — tezroq AI, tabiiy ovoz, kichik ekranlar, jonli ko'rsatkichlar, neon dizayn
+- **AI repetitor «kalit sozlanmagan / javob bermadi»**: admin panelda saqlangan ESKI Gemini kaliti yangisini bosib turardi — tozalandi, endi Vercel'dagi yangi kalit ishlaydi.
+- **Gemini tezligi**: o'lchov — gemini-3.8-flash 20 s+ (band), gemini-3.6-flash ~1,3 s, 3.5-flash-lite ~0,5 s. Asosiy model 3.6-flash; oddiy savolga deyarli o'ylamasdan (minimal), hisob-kitobga qisqa o'ylab javob; har model uchun 12 s chegara, keyin keyingisiga o'tadi; eskirgan gemini-2.5-flash olib tashlandi. Repetitor javobi 25 s o'rniga bir necha soniyada.
+- **Admin AI (Studio, yordamchi, shikoyat tahlili)**: Gemini JSON rejimi va yetarli token — «javob bera olmadi» xatosi tuzatildi.
+- **Repetitor ovozi**: robot ovoz o'rniga Gemini'ning jonli inson ovozi — erkak «Charon» (chuqur, xotirjam), ayol «Sulafat» (iliq, tabiiy). Gemini ishlamasa Microsoft neyron ovozi zaxira.
+- **Kabinet va admin**: 5 ta jonli karta — necha marta ko'rilgan (bugun ham), necha kishi kirgan, o'quvchilar, yechilgan testlar, o'rtacha to'g'ri javob %; raqamlar sanab chiqadi, har 30 soniyada yangilanadi; neon ramka, sichqoncha bilan 3D egilish, kattalashish va yashil/ko'k yog'du.
+- **Admin «AI holati» bloki**: bir bosishda har bir Gemini modeli tezligi, repetitor javobi va ovozni tekshirish.
+- **Kichik telefonlar (320–360 px: Galaxy J1 mini, J2)**: sarlavha, tugmalar, pastki menyu, test variantlari, boyqush tugmasi, kabinet kartalari ixchamlashdi; kiritish maydonlarida ekran kattalashib ketmaydi.
+- **Neon dizayn**: yashillar yanada to'yingan neon-tabiiy (tunda #1DEF6A, kunduzi #08D052); asosiy tugmalar va kartalar atrofida yashil yog'du; ma'lumot elementlarida neon ko'k.
+- Kabinetda fan tanlanmagan bo'lsa «NONE» o'rniga «Fan».
+
 ## v234 — tiniq tabiiy yashil rang
 - Saytdagi barcha yashil ranglar (450 ga yaqin joy: tugmalar, urg'ular, belgilar, chiziqlar, soyalar) moviy-yashildan tiniq, yorqin tabiiy yashilga (#22CC60 atrofida) o'tkazildi.
 - Tungi fon qoramtir to'q yashil (#050F09), kartalar va chiziqlar ham yashil tusda; kirish/ro'yxatdan o'tish sahifalari foni moviy-qoradan qora-yashilga o'zgardi.

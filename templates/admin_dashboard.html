@@ -8,9 +8,10 @@
   <link rel="icon" type="image/png" href="/static/logo-owl.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css?v=234">
-  <link rel="stylesheet" href="/static/admin-dash.css?v=234">
-  <script src="/static/theme-init.js?v=234"></script>
+  <link rel="stylesheet" href="/static/style.css?v=235">
+  <link rel="stylesheet" href="/static/admin-dash.css?v=235">
+  <script src="/static/theme-init.js?v=235"></script>
+  <link rel="stylesheet" href="/static/site-stats.css?v=235">
 </head>
 <body data-logged-in="true">
 
@@ -25,6 +26,21 @@
           <p>LongoUZ platformasining joriy ko'rsatkichlari</p>
         </div>
       </div>
+
+      <section class="lz-site-stats" id="lz-site-stats" aria-label="Sayt ko'rsatkichlari (jonli)">
+        <article class="lz-ss-card" data-k="views"><span class="lz-ss-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg></span><b class="lz-ss-num" data-v="0">0</b><span class="lz-ss-lbl">marta ko'rilgan</span><small class="lz-ss-sub" data-sub="today_views">bugun —</small></article>
+        <article class="lz-ss-card" data-k="visitors"><span class="lz-ss-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0113 0"/><circle cx="17.5" cy="9" r="2.6"/><path d="M16 14.2a5 5 0 016 4.8"/></svg></span><b class="lz-ss-num" data-v="0">0</b><span class="lz-ss-lbl">kishi kirib ko'rgan</span><small class="lz-ss-sub">kunlik tashriflar</small></article>
+        <article class="lz-ss-card" data-k="users"><span class="lz-ss-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 4.5-9 4.5-9-4.5z"/><path d="M6 10v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/></svg></span><b class="lz-ss-num" data-v="0">0</b><span class="lz-ss-lbl">o'quvchi</span><small class="lz-ss-sub">ro'yxatdan o'tgan</small></article>
+        <article class="lz-ss-card" data-k="tests"><span class="lz-ss-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2.5"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg></span><b class="lz-ss-num" data-v="0">0</b><span class="lz-ss-lbl">test yechilgan</span><small class="lz-ss-sub" data-sub="questions">savollar bazasi —</small></article>
+        <article class="lz-ss-card" data-k="accuracy" data-suffix="%"><span class="lz-ss-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg></span><b class="lz-ss-num" data-v="0">0%</b><span class="lz-ss-lbl">o'rtacha to'g'ri javob</span><small class="lz-ss-sub">barcha o'quvchilar</small></article>
+      </section>
+
+      <section class="dash-panel lz-aicheck" id="lz-aicheck">
+        <div class="lz-aicheck-head"><h3>AI holati (Gemini)</h3>
+          <div><button type="button" class="btn-primary" id="lz-aicheck-btn">AI'ni tekshirish</button> <button type="button" class="lz-ghost" id="lz-aicheck-tts">Ovozni ham</button></div></div>
+        <p class="lz-aicheck-note">Har bir Gemini modeli necha soniyada javob berishi, repetitor javobi va ovoz (Charon / Sulafat) tekshiriladi.</p>
+        <div id="lz-aicheck-out" class="lz-aicheck-out"></div>
+      </section>
 
       <div class="admin-stat-grid">
         <div class="admin-stat-card"><span class="admin-stat-value">{{ stats.total_users }}</span><span class="admin-stat-label">Jami foydalanuvchilar</span><small class="ad-delta">+{{ stats.signups_today }} bugun</small></div>
@@ -141,9 +157,21 @@
     </div>
   </div>
 
-  <script src="/static/devtools-guard.js?v=234"></script>
-  <script src="/static/app.js?v=234"></script>
+  <script src="/static/devtools-guard.js?v=235"></script>
+  <script src="/static/app.js?v=235"></script>
   <script id="ad-data" type="application/json">{{ {"days": ov.days, "quizzes": ov.quizzes, "signups": ov.signups}|tojson }}</script>
-  <script src="/static/admin-dash.js?v=234"></script>
+  <script src="/static/admin-dash.js?v=235"></script>
+<script src="/static/site-stats.js?v=235" defer></script>
+<script>
+(function(){var out=document.getElementById("lz-aicheck-out");
+function run(tts){out.innerHTML='<p class="lz-aicheck-wait">Tekshirilmoqda… (10–30 soniya)</p>';
+fetch("{{ admin_prefix }}/api/ai-check?tts="+(tts?1:0),{credentials:"same-origin"}).then(function(r){return r.json()}).then(function(d){
+var h='<ul class="lz-aicheck-list">';h+='<li class="'+(d.configured?'ok':'bad')+'">Kalit: '+(d.configured?'sozlangan':'YO\'Q')+' · asosiy model: <b>'+d.default_model+'</b></li>';
+Object.keys(d.models||{}).forEach(function(m){var x=d.models[m];h+='<li class="'+(x.ok?'ok':'bad')+'">'+m+': '+(x.ok?(x.ms/1000).toFixed(1)+' s':'ishlamadi'+(x.err?' — '+x.err.replace(/[<>]/g,'').slice(0,90):''))+'</li>'});
+if(d.tutor)h+='<li class="'+(d.tutor.provider==='gemini'?'ok':'bad')+'">Repetitor javobi: '+(d.tutor.ms/1000).toFixed(1)+' s ('+d.tutor.provider+')</li>';
+['male','female'].forEach(function(g){var t=d['tts_'+g];if(t)h+='<li class="'+(t.bytes?'ok':'bad')+'">Ovoz ('+(g==='male'?'Charon, erkak':'Sulafat, ayol')+'): '+(t.bytes?(t.ms/1000).toFixed(1)+' s':'ishlamadi')+'</li>'});
+out.innerHTML=h+'</ul>'}).catch(function(){out.innerHTML='<p class="lz-aicheck-wait">Tekshiruv bajarilmadi (tarmoq).</p>'})}
+document.getElementById("lz-aicheck-btn").onclick=function(){run(false)};document.getElementById("lz-aicheck-tts").onclick=function(){run(true)};})();
+</script>
 </body>
 </html>

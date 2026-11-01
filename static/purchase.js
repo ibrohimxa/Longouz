@@ -91,7 +91,7 @@
       if (!d || !d.valid) { hint.hidden = !d; if (d) { hint.textContent = "Email to'liq emas (masalan: ism@gmail.com)"; hint.style.color = "#f5b84a"; } return; }
       if (d.suggest) { hint.textContent = d.suggest + " ni nazarda tutdingizmi?"; hint.style.color = "#f5b84a"; hint.hidden = false; return; }
       if (d.exists) { hint.textContent = "Bu email bilan hisob bor — o'sha hisob parolini kiriting, tarif shu hisobga qo'shiladi."; hint.style.color = "#f5b84a"; hint.hidden = false; }
-      else if (d.exists === false) { hint.textContent = "✓ Yangi hisob ochiladi"; hint.style.color = "#20e267"; hint.hidden = false; }
+      else if (d.exists === false) { hint.textContent = "✓ Yangi hisob ochiladi"; hint.style.color = "#29f875"; hint.hidden = false; }
     }).catch(function () {});
   }
   inp.addEventListener("blur", check);

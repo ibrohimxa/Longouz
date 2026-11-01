@@ -1,0 +1,42 @@
+/* v235: SAYT KO'RSATKICHLARI — 5 ta neon ramkali karta, 3D hover */
+.lz-site-stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;margin:0 0 18px}
+.lz-ss-card{--mx:50%;--my:50%;position:relative;display:flex;flex-direction:column;gap:4px;padding:16px 16px 14px;border-radius:18px;
+  background:radial-gradient(160px 120px at var(--mx) var(--my),rgba(61, 255, 123,.10),transparent 70%),linear-gradient(160deg,rgba(18,40,26,.92),rgba(7,18,12,.96));
+  border:1.5px solid rgba(61, 255, 123,.55);box-shadow:0 0 0 1px rgba(61, 255, 123,.08) inset,0 0 14px rgba(61, 255, 123,.18);
+  transition:transform .25s cubic-bezier(.2,.8,.2,1),box-shadow .25s,border-color .25s;transform-style:preserve-3d;will-change:transform;cursor:default;overflow:hidden}
+.lz-ss-card::after{content:"";position:absolute;inset:-1px;border-radius:inherit;pointer-events:none;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.10) 50%,transparent 65%);transform:translateX(-120%);transition:transform .8s}
+.lz-ss-card:hover{border-color:#3dff7b;box-shadow:0 0 0 1px rgba(61, 255, 123,.25) inset,0 0 22px rgba(61, 255, 123,.55),0 18px 38px rgba(0,0,0,.45),0 0 60px rgba(61, 255, 123,.25);transform:perspective(700px) translateY(-6px) scale(1.06)}
+.lz-ss-card:hover::after{transform:translateX(120%)}
+.lz-ss-ico{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;color:#3dff7b;background:rgba(61, 255, 123,.12);border:1px solid rgba(61, 255, 123,.35);box-shadow:0 0 12px rgba(61, 255, 123,.3);transform:translateZ(24px)}
+.lz-ss-ico svg{width:20px;height:20px}
+.lz-ss-num{font-family:Inter,system-ui,sans-serif;font-size:1.65rem;font-weight:800;letter-spacing:-.02em;color:#eafff0;text-shadow:0 0 14px rgba(61, 255, 123,.45);line-height:1.15;margin-top:6px;transform:translateZ(30px);font-variant-numeric:tabular-nums}
+.lz-ss-lbl{font-size:.82rem;font-weight:600;color:#b9e9c8;transform:translateZ(18px)}
+.lz-ss-sub{font-size:.72rem;color:#7fa98d}
+.lz-ss-card.is-bump .lz-ss-num{animation:lzBump .7s ease}
+@keyframes lzBump{0%{transform:translateZ(30px) scale(1)}35%{transform:translateZ(30px) scale(1.18);color:#3dff7b}100%{transform:translateZ(30px) scale(1)}}
+.lz-ss-card[data-k="visitors"],.lz-ss-card[data-k="accuracy"]{border-color:rgba(46,196,255,.6);box-shadow:0 0 14px rgba(46,196,255,.2)}
+.lz-ss-card[data-k="visitors"] .lz-ss-ico,.lz-ss-card[data-k="accuracy"] .lz-ss-ico{color:#2ec4ff;background:rgba(46,196,255,.12);border-color:rgba(46,196,255,.4);box-shadow:0 0 12px rgba(46,196,255,.35)}
+.lz-ss-card[data-k="visitors"]:hover,.lz-ss-card[data-k="accuracy"]:hover{border-color:#2ec4ff;box-shadow:0 0 22px rgba(46,196,255,.55),0 18px 38px rgba(0,0,0,.45),0 0 60px rgba(46,196,255,.25)}
+.lz-ss-card[data-k="visitors"] .lz-ss-num,.lz-ss-card[data-k="accuracy"] .lz-ss-num{text-shadow:0 0 14px rgba(46,196,255,.5)}
+html[data-theme="light"] .lz-ss-card{background:radial-gradient(160px 120px at var(--mx) var(--my),rgba(0, 231, 96,.10),transparent 70%),#fff;border-color:rgba(0, 221, 93,.6);box-shadow:0 0 12px rgba(0, 231, 96,.18),0 6px 18px rgba(10,60,30,.08)}
+html[data-theme="light"] .lz-ss-card:hover{border-color:#00e760;box-shadow:0 0 22px rgba(0, 231, 96,.45),0 18px 34px rgba(10,60,30,.16)}
+html[data-theme="light"] .lz-ss-num{color:#063d1c;text-shadow:none}
+html[data-theme="light"] .lz-ss-lbl{color:#145c30}
+html[data-theme="light"] .lz-ss-sub{color:#4f7a5e}
+html[data-theme="light"] .lz-ss-ico{color:#00c752;background:rgba(0, 231, 96,.10)}
+html[data-theme="light"] .lz-ss-card[data-k="visitors"],html[data-theme="light"] .lz-ss-card[data-k="accuracy"]{border-color:rgba(0,150,255,.6)}
+html[data-theme="light"] .lz-ss-card[data-k="visitors"] .lz-ss-ico,html[data-theme="light"] .lz-ss-card[data-k="accuracy"] .lz-ss-ico{color:#0091ea}
+@media (max-width:1024px){.lz-site-stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:640px){.lz-site-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.lz-ss-card:last-child{grid-column:1/-1}.lz-ss-num{font-size:1.35rem}.lz-ss-card{padding:13px 12px 12px}}
+@media (max-width:360px){.lz-ss-num{font-size:1.18rem}.lz-ss-lbl{font-size:.74rem}.lz-ss-ico{width:30px;height:30px}}
+@media (hover:none){.lz-ss-card:active{transform:scale(1.03);border-color:#3dff7b;box-shadow:0 0 22px rgba(61, 255, 123,.5)}}
+.lz-aicheck{margin:0 0 18px}
+.lz-aicheck-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.lz-aicheck-head h3{margin:0}
+.lz-aicheck-note{margin:6px 0 8px;font-size:.85rem;opacity:.75}
+.lz-aicheck-list{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.lz-aicheck-list li{padding:8px 12px;border-radius:10px;font-size:.88rem;border:1px solid rgba(57,255,120,.35);background:rgba(57,255,120,.06)}
+.lz-aicheck-list li.bad{border-color:rgba(255,90,90,.45);background:rgba(255,90,90,.07)}
+.lz-aicheck-wait{opacity:.8;font-size:.9rem}
+.lz-ghost{padding:9px 14px;border-radius:10px;border:1.5px solid rgba(46,196,255,.6);background:transparent;color:var(--neon-blue,#2ec4ff);font-weight:600;cursor:pointer;box-shadow:0 0 12px rgba(46,196,255,.2)}
+.lz-ghost:hover{box-shadow:0 0 18px rgba(46,196,255,.45)}

@@ -291,3 +291,38 @@ def register(app, prefix: str, require_admin, templates) -> None:
         if not data:
             return JSONResponse({"ok": False, "detail": "AI javob bermadi. Admin → Kalitlar bo'limida Claude yoki Gemini kalitini tekshiring."}, status_code=200)
         return JSONResponse({"ok": True, "result": data})
+
+
+# v235: ochiq statistika (kabinetdagi "sayt ko'rsatkichlari" kartalari uchun) — 30 soniya keshlanadi.
+_PUB_CACHE = {"t": 0.0, "d": None}
+
+
+async def public_stats() -> dict:
+    now = time.monotonic()
+    if _PUB_CACHE["d"] and now - _PUB_CACHE["t"] < 30:
+        base = dict(_PUB_CACHE["d"])
+    else:
+        from sqlalchemy import func as _f
+        base = {"views": 0, "visitors": 0, "users": 0, "tests": 0, "accuracy": 0, "today_views": 0}
+        try:
+            async with db.async_session() as session:
+                v = (await session.execute(select(_f.coalesce(_f.sum(SiteVisit.hits), 0), _f.coalesce(_f.sum(SiteVisit.uniq), 0))
+                                           .where(SiteVisit.path == "__all__"))).one()
+                base["views"], base["visitors"] = int(v[0] or 0), int(v[1] or 0)
+                tv = (await session.execute(select(_f.coalesce(_f.sum(SiteVisit.hits), 0))
+                                            .where(SiteVisit.path == "__all__", SiteVisit.day == date.today()))).scalar()
+                base["today_views"] = int(tv or 0)
+                base["users"] = int((await session.execute(select(_f.count(db.WebUser.id)))).scalar() or 0)
+                q = (await session.execute(select(_f.count(db.WebQuizLog.id), _f.coalesce(_f.sum(db.WebQuizLog.correct_count), 0),
+                                                  _f.coalesce(_f.sum(db.WebQuizLog.total_count), 0)))).one()
+                base["tests"] = int(q[0] or 0)
+                base["accuracy"] = round(100 * int(q[1] or 0) / int(q[2])) if q[2] else 0
+        except Exception:  # noqa: BLE001
+            logger.debug("public_stats", exc_info=True)
+        _PUB_CACHE.update(t=now, d=dict(base))
+    # bu instansdagi hali bazaga yozilmagan tashriflar ham qo'shiladi — raqam "jonli" o'sadi
+    today = date.today()
+    base["views"] += _buf_hits.get((today, "__all__"), 0)
+    base["today_views"] += _buf_hits.get((today, "__all__"), 0)
+    base["visitors"] += len(_buf_uniq.get((today, "__all__"), ()))
+    return base

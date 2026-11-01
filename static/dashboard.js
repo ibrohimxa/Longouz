@@ -61,7 +61,7 @@
     var pts = data.map(function (d, i) { return [X(i), Y(d.percent)]; });
     var path = pts.map(function (p, i) { return (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1); }).join(" ");
     var len = 0; for (var i = 1; i < pts.length; i++) len += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
-    var svg = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Natijalar tarixi grafigi"><defs><linearGradient id="dz-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22cc60" stop-opacity=".5"/><stop offset="1" stop-color="#22cc60" stop-opacity="0"/></linearGradient></defs>';
+    var svg = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Natijalar tarixi grafigi"><defs><linearGradient id="dz-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1def6a" stop-opacity=".5"/><stop offset="1" stop-color="#1def6a" stop-opacity="0"/></linearGradient></defs>';
     [0, 25, 50, 75, 100].forEach(function (g) {
       svg += '<line class="grid-line" x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(g) + '" y2="' + Y(g) + '"/><text class="axis-text" x="' + (L - 6) + '" y="' + (Y(g) + 4) + '" text-anchor="end">' + g + "</text>";
     });

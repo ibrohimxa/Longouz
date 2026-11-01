@@ -61,9 +61,9 @@ def is_gemini_configured() -> bool:
 _RETRY_DELAYS_SECONDS = [0.8]
 # v229: model "band" bo'lsa (503 high demand / 429) — boshqa Gemini modeliga o'tamiz (avval faqat qayta urinib,
 # keyin taslim bo'lardi va AI repetitor/hakamlik "javob bermadi" bo'lib qolardi).
-_FAILOVER_MODELS = ("gemini-3.8-flash", "gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-flash-latest")
+_FAILOVER_MODELS = ("gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.8-flash")
 _BUSY_UNTIL: dict = {}
-_CALL_TIMEOUT = 14
+_CALL_TIMEOUT = 12
 _MIN_UNSUPPORTED: dict = {"gemini-3.8-flash": True, "gemini-flash-latest": True}
 
 
@@ -186,7 +186,7 @@ def _build_system_prompt(subject: str, effort: str = "normal") -> str:
     return persona + "\n\n" + BASE_PERSONA_RULES + "\n\n" + effort_note
 
 
-_FALLBACK_MODELS = ("gemini-3.6-flash", "gemini-3.5-flash-lite")
+_FALLBACK_MODELS = ("gemini-3.5-flash-lite",)
 _GOOD_MODEL: dict = {}
 _MATHY = __import__("re").compile(r"[0-9=+*/^<>%]|masala|hisobla|yech|formula|tenglama|isbot|nechta|necha")
 

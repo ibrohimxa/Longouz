@@ -24,22 +24,22 @@
 <style>
 .plock-overlay{position:fixed;inset:0;z-index:5000;background:rgba(3, 10, 6,.62);display:grid;place-items:center;padding:16px}
 .plock-overlay[hidden]{display:none}
-.plock-box{position:relative;width:min(460px,100%);background:var(--bg-elevated,#0f1f15);color:var(--ink,#edf8f1);border:1px solid rgba(34, 204, 96,.28);border-radius:20px;padding:26px 22px 20px;box-shadow:0 24px 60px rgba(0,0,0,.45);text-align:center}
+.plock-box{position:relative;width:min(460px,100%);background:var(--bg-elevated,#0f1f15);color:var(--ink,#edf8f1);border:1px solid rgba(29, 239, 106,.28);border-radius:20px;padding:26px 22px 20px;box-shadow:0 24px 60px rgba(0,0,0,.45);text-align:center}
 .plock-x{position:absolute;right:12px;top:8px;background:none;border:0;color:inherit;font-size:1.6rem;cursor:pointer;opacity:.7}
-.plock-ic{width:52px;height:52px;margin:0 auto 10px;border-radius:16px;display:grid;place-items:center;background:rgba(34, 204, 96,.15);color:#22cc60}
+.plock-ic{width:52px;height:52px;margin:0 auto 10px;border-radius:16px;display:grid;place-items:center;background:rgba(29, 239, 106,.15);color:#1def6a}
 .plock-ic svg{width:26px;height:26px}
 .plock-box h3{margin:0 0 6px;font-size:1.12rem}
 .plock-sub{margin:0 0 16px;font-size:.88rem;opacity:.8;line-height:1.45}
 .plock-plans{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
 .plock-plan{position:relative;display:flex;flex-direction:column;gap:3px;padding:14px 10px;border-radius:14px;border:1.5px solid rgba(127,127,127,.28);text-decoration:none;color:inherit;transition:border-color .2s,transform .2s}
-.plock-plan:hover{border-color:#22cc60;transform:translateY(-2px)}
-.plock-plan b{font-size:1.05rem}.plock-plan span{font-weight:700;color:#22cc60;font-size:.9rem}.plock-plan small{font-size:.74rem;opacity:.75;line-height:1.35}
-.plock-plan.best{border-color:#22cc60;background:rgba(34, 204, 96,.08)}
-.plock-plan em{position:absolute;top:-9px;left:50%;transform:translateX(-50%);font-style:normal;font-size:.62rem;font-weight:700;background:#22cc60;color:#041209;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.plock-plan:hover{border-color:#1def6a;transform:translateY(-2px)}
+.plock-plan b{font-size:1.05rem}.plock-plan span{font-weight:700;color:#1def6a;font-size:.9rem}.plock-plan small{font-size:.74rem;opacity:.75;line-height:1.35}
+.plock-plan.best{border-color:#1def6a;background:rgba(29, 239, 106,.08)}
+.plock-plan em{position:absolute;top:-9px;left:50%;transform:translateX(-50%);font-style:normal;font-size:.62rem;font-weight:700;background:#1def6a;color:#041209;padding:2px 8px;border-radius:999px;white-space:nowrap}
 .plock-actions{display:flex;gap:10px}
 .plock-actions>*{flex:1;padding:11px;border-radius:12px;font-weight:700;font-size:.92rem;cursor:pointer;text-decoration:none;text-align:center}
 .plock-cancel{background:transparent;border:1.5px solid rgba(127,127,127,.4);color:inherit}
-.plock-buy{background:linear-gradient(135deg,#4fef8a,#22cc60);color:#041209;border:0}
+.plock-buy{background:linear-gradient(135deg,#4fef8a,#1def6a);color:#041209;border:0}
 [data-theme="light"] .plock-box{background:#fff;color:#0d2230}
 @media (max-width:420px){.plock-plans{grid-template-columns:1fr}}
 </style>

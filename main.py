@@ -286,6 +286,15 @@ def _kick_seed(request: Request):
     _SEED_TASK = _asyncio.create_task(_run())
 
 
+@app.get("/api/site-stats")
+async def api_site_stats():
+    """Kabinetdagi sayt ko'rsatkichlari: ko'rishlar, tashrif buyuruvchilar, o'quvchilar, yechilgan testlar, o'rtacha natija."""
+    import insights as _ins
+    data = await _ins.public_stats()
+    data["questions"] = await _question_total()
+    return JSONResponse(data, headers={"Cache-Control": "no-store"})
+
+
 @app.get("/api/ai-probe")
 async def api_ai_probe(t: str = "", tts: int = 1):
     """Texnik tekshiruv (faqat AI_PROBE_TOKEN bilan): Gemini modellari tezligi va ovoz (TTS). Kalit chiqarilmaydi."""
@@ -293,6 +302,19 @@ async def api_ai_probe(t: str = "", tts: int = 1):
     token = os.getenv("AI_PROBE_TOKEN", "")
     if not token or not secrets.compare_digest(t, token):
         raise HTTPException(status_code=404)
+    return JSONResponse(await _ai_probe_data(bool(tts)))
+
+
+@app.get(f"{ADMIN_PREFIX}/api/ai-check")
+async def admin_ai_check(request: Request, tts: int = 0):
+    """Admin: AI (Gemini) va ovozni bir bosishda tekshirish — har bir model necha soniyada javob berishi."""
+    if not require_admin(request):
+        raise HTTPException(status_code=401)
+    return JSONResponse(await _ai_probe_data(bool(tts)))
+
+
+async def _ai_probe_data(tts: bool) -> dict:
+    import time as _time
     import ai_gemini
     import tts as _tts
     out = {"configured": ai_gemini.is_gemini_configured(), "key_kind": (ai_keys.get("GEMINI_API_KEY") or "")[:3],
@@ -319,7 +341,7 @@ async def api_ai_probe(t: str = "", tts: int = 1):
                 w = await _tts.synthesize_gemini("Salom! Bugun kvadrat tenglamalarni o'rganamiz.", "uz", g)
                 out["tts_" + g] = {"ms": int((_time.time() - t0) * 1000), "bytes": len(w or b"")}
             out["tts_bad"] = list(_tts._TTS_BAD_MODEL)
-    return JSONResponse(out)
+    return out
 
 
 @app.get("/api/health")
@@ -2102,7 +2124,7 @@ _ALLOWED_KEY_NAMES = set(db.ENV_OVERRIDE_NAMES)
 def _key_masks() -> dict:
     import ai_keys
     return {n: ai_keys.mask(ai_keys.get(n)) for n in ("GEMINI_API_KEY", "ANTHROPIC_API_KEY")} | {
-        "GEMINI_MODEL": ai_keys.get("GEMINI_MODEL", "gemini-3.8-flash"), "CLAUDE_MODEL": ai_keys.get("CLAUDE_MODEL", "claude-sonnet-5-5")}
+        "GEMINI_MODEL": ai_keys.get("GEMINI_MODEL", "gemini-3.6-flash"), "CLAUDE_MODEL": ai_keys.get("CLAUDE_MODEL", "claude-sonnet-5-5")}
 
 
 @app.post(f"{ADMIN_PREFIX}/api/ai/keys")

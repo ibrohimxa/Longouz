@@ -8,12 +8,12 @@
   <link rel="icon" type="image/png" href="/static/logo-owl.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css?v=234">
-  <link rel="stylesheet" href="/static/admin-dash.css?v=234">
-  <link rel="stylesheet" href="/static/admin.css?v=234">
-  <link rel="stylesheet" href="/static/admin-studio.css?v=234">
+  <link rel="stylesheet" href="/static/style.css?v=235">
+  <link rel="stylesheet" href="/static/admin-dash.css?v=235">
+  <link rel="stylesheet" href="/static/admin.css?v=235">
+  <link rel="stylesheet" href="/static/admin-studio.css?v=235">
   
-  <script src="/static/theme-init.js?v=234"></script>
+  <script src="/static/theme-init.js?v=235"></script>
 </head>
 <body data-logged-in="true" data-admin-prefix="{{ admin_prefix }}">
   <div class="app-shell">
@@ -30,7 +30,7 @@
         .ins-card{padding:18px;border-radius:16px;background:var(--bg-elevated);border:1px solid var(--border,rgba(127,127,127,.2));margin-bottom:16px}
         .ins-bars{display:flex;align-items:flex-end;gap:6px;height:150px;padding-top:10px}
         .ins-bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:.66rem;opacity:.9}
-        .ins-bar i{display:block;width:100%;border-radius:6px 6px 0 0;background:linear-gradient(180deg,#4fef8a,#22cc60);min-height:2px}
+        .ins-bar i{display:block;width:100%;border-radius:6px 6px 0 0;background:linear-gradient(180deg,#4fef8a,#1def6a);min-height:2px}
         .ins-bar u{text-decoration:none;font-weight:700}
         .ins-tbl{width:100%;border-collapse:collapse;font-size:.88rem}.ins-tbl td{padding:6px 4px;border-bottom:1px solid rgba(127,127,127,.15)}
         .ins-ai ul{margin:6px 0 12px 18px;padding:0}.ins-ai li{margin:4px 0}
@@ -64,7 +64,7 @@
           {% for u in top %}<tr><td>{{ u.name }}<br><small style="opacity:.7">{{ u.email }}</small></td><td>{{ u.plan|upper }}</td><td>{{ u.tests }}</td><td>{{ u.correct }}/{{ u.total }} ({{ u.pct }}%)</td></tr>{% else %}<tr><td colspan="4">Hali test yechilmagan</td></tr>{% endfor %}</table>
         </div>
         <div class="ins-card"><h3 style="margin:0 0 8px">AI holati</h3>
-          <table class="ins-tbl">{% for a in ai %}<tr><td>{{ a.label }}</td><td style="text-align:right;color:{{ '#22cc60' if a.ok else '#e5a03a' }}">{{ a.state }}</td></tr>{% endfor %}</table>
+          <table class="ins-tbl">{% for a in ai %}<tr><td>{{ a.label }}</td><td style="text-align:right;color:{{ '#1def6a' if a.ok else '#e5a03a' }}">{{ a.state }}</td></tr>{% endfor %}</table>
           <p style="margin:10px 0 0;font-size:.85rem;opacity:.8">Kalitlarni <a href="{{ admin_prefix }}/keys">Kalitlar</a> bo'limida boshqarasiz. Gemini bepul; Claude uchun Anthropic hisobida kredit kerak.</p>
         </div>
       </div>
@@ -94,7 +94,7 @@
       </script>
     </div>
   </div>
-  <script src="/static/devtools-guard.js?v=234"></script>
-  <script src="/static/app.js?v=234"></script>
+  <script src="/static/devtools-guard.js?v=235"></script>
+  <script src="/static/app.js?v=235"></script>
 </body>
 </html>
