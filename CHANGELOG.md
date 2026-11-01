@@ -1,3 +1,6 @@
+## v240
+- Tarif oynasi: tabiiy neon yashil (qoramtil emas), tun va kun uyg'un; barglar va tugma yashil.
+
 ## v239
 - Neon yashil v235 darajasiga qaytarildi.
 
