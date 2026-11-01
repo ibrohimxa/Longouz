@@ -40,6 +40,9 @@ from slowapi.errors import RateLimitExceeded
 import runtime
 import database as db
 import ai_router as ai
+import asyncio
+import ai_keys
+import ai_config
 import scoring
 import exam_rules
 import exam_db
@@ -281,6 +284,42 @@ def _kick_seed(request: Request):
 
     import asyncio as _asyncio
     _SEED_TASK = _asyncio.create_task(_run())
+
+
+@app.get("/api/ai-probe")
+async def api_ai_probe(t: str = "", tts: int = 1):
+    """Texnik tekshiruv (faqat AI_PROBE_TOKEN bilan): Gemini modellari tezligi va ovoz (TTS). Kalit chiqarilmaydi."""
+    import time as _time
+    token = os.getenv("AI_PROBE_TOKEN", "")
+    if not token or not secrets.compare_digest(t, token):
+        raise HTTPException(status_code=404)
+    import ai_gemini
+    import tts as _tts
+    out = {"configured": ai_gemini.is_gemini_configured(), "key_kind": (ai_keys.get("GEMINI_API_KEY") or "")[:3],
+           "default_model": ai_config.GEMINI_MODEL, "models": {}}
+    client = ai_gemini._get_client()
+    if client:
+        async def one(m):
+            t0 = _time.time()
+            try:
+                r = await asyncio.wait_for(client.aio.models.generate_content(
+                    model=m, contents="2+2 nechiga teng? Bir so'z bilan javob ber.",
+                    config={"max_output_tokens": 300, "thinking_config": {"thinking_level": "minimal"}}), timeout=20)
+                return m, {"ok": True, "ms": int((_time.time() - t0) * 1000), "text": (r.text or "")[:40]}
+            except Exception as e:  # noqa: BLE001
+                return m, {"ok": False, "ms": int((_time.time() - t0) * 1000), "err": str(e)[:180]}
+        res = await asyncio.gather(*[one(m) for m in ai_gemini._FAILOVER_MODELS])
+        out["models"] = dict(res)
+        t0 = _time.time()
+        ans = await ai.ask_tutor("Kvadrat tenglama nima? Qisqa.", "math", "ortacha", None, "normal", source="widget")
+        out["tutor"] = {"ms": int((_time.time() - t0) * 1000), "provider": ans[1], "text": ans[0][:120]}
+        if tts:
+            for g in ("male", "female"):
+                t0 = _time.time()
+                w = await _tts.synthesize_gemini("Salom! Bugun kvadrat tenglamalarni o'rganamiz.", "uz", g)
+                out["tts_" + g] = {"ms": int((_time.time() - t0) * 1000), "bytes": len(w or b"")}
+            out["tts_bad"] = list(_tts._TTS_BAD_MODEL)
+    return JSONResponse(out)
 
 
 @app.get("/api/health")
@@ -3733,14 +3772,15 @@ async def api_tts(request: Request, body: TtsRequest):
         raise HTTPException(status_code=401, detail="Avval tizimga kiring.")
 
     clean_text = prompt_safety.sanitize_user_text(body.text, tts_module.MAX_TTS_TEXT_LENGTH)
-    audio_bytes = await tts_module.synthesize_speech(clean_text, lang=body.lang, voice_gender=body.voice, rate=body.rate)
+    got = await tts_module.synthesize_any(clean_text, lang=body.lang, voice_gender=body.voice, rate=body.rate)
+    audio_bytes, audio_mime = got if got else (None, "audio/mpeg")
     if audio_bytes is None:
         # Zaxira: server tomonida ovoz generatsiya qilinmadi (masalan internet
         # uzilishi) — frontend buni 503 sifatida ko'rib, brauzerning o'z
         # (zaxira) ovoziga avtomatik o'tadi, foydalanuvchi sezmaydi.
         raise HTTPException(status_code=503, detail="Ovoz hozircha generatsiya qilinmadi.")
 
-    return Response(content=audio_bytes, media_type="audio/mpeg")
+    return Response(content=audio_bytes, media_type=audio_mime, headers={"Cache-Control": "private, max-age=600"})
 
 
 # ---------------------------------------------------------------------------

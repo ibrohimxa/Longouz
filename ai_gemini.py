@@ -95,6 +95,15 @@ async def _call_gemini_with_retry(**kwargs):
                 code = getattr(e, "code", None)
                 if code == 404 or "not_found" in text.lower():
                     break                      # bunday model yo'q — keyingisiga
+                if code == 400 and "thinking" in text.lower() and isinstance(kw.get("config"), dict) and "thinking_config" in kw["config"]:
+                    cfg = dict(kw["config"]); cfg.pop("thinking_config", None); kw["config"] = cfg
+                    try:
+                        resp = await _get_client().aio.models.generate_content(**kw)
+                        _BUSY_UNTIL.pop(model, None)
+                        return resp
+                    except genai_errors.APIError as e2:
+                        last_error = e2
+                        break
                 busy = code in (503, 429, 500) or "UNAVAILABLE" in text or "RESOURCE_EXHAUSTED" in text
                 if not busy:
                     raise
@@ -171,13 +180,13 @@ _MATHY = __import__("re").compile(r"[0-9=+*/^<>%]|masala|hisobla|yech|formula|te
 
 def _thinking_level(question: str, effort: str, history_len: int) -> str:
     """Tezlik va to'g'rilik muvozanati: oddiy suhbat — minimal/low, hisob-kitob va chuqur savol — medium."""
+    # v235: tezlik — oddiy savollarga deyarli o'ylamasdan (minimal), hisob-kitobga qisqa o'ylab (low) javob beradi;
+    # chuqur o'ylash faqat foydalanuvchi "Yuqori/Maksimal" tanlaganda.
     if effort in ("high", "max"):
         return "medium" if effort == "high" else "high"
-    if _MATHY.search(question.lower()) or len(question) > 220:
-        return "medium"
-    if len(question) < 40 and history_len:
-        return "minimal"
-    return "low"
+    if _MATHY.search(question.lower()) or len(question) > 260:
+        return "low"
+    return "minimal"
 
 
 def _to_contents(question: str, history: list[dict] | None):

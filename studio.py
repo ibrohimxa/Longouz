@@ -107,9 +107,14 @@ async def ai_json(system: str, user: str | list, max_tokens: int = 6000, timeout
             contents = user if isinstance(user, str) else _blocks_to_gemini(user)
             resp = await asyncio.wait_for(ai_gemini._call_gemini_with_retry(
                 model=ai_keys.get("GEMINI_MODEL", "gemini-3.8-flash"), contents=contents,
-                config={"system_instruction": system, "max_output_tokens": max_tokens,
+                config={"system_instruction": system, "max_output_tokens": max(8000, max_tokens + 4000),
+                        "response_mime_type": "application/json",
+                        "thinking_config": {"thinking_level": "low"},
                         "automatic_function_calling": ai_gemini._NO_AFC_CONFIG}), timeout=timeout)
-            return _json_from_text(resp.text or "")
+            data = _json_from_text(resp.text or "")
+            if data is None:
+                logger.warning("Gemini JSON o'qilmadi: %s", (resp.text or "")[:200])
+            return data
         except Exception as exc:  # noqa: BLE001
             logger.warning("Gemini JSON so'rovi ishlamadi: %s", exc)
     return None
