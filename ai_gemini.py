@@ -61,8 +61,10 @@ def is_gemini_configured() -> bool:
 _RETRY_DELAYS_SECONDS = [0.8]
 # v229: model "band" bo'lsa (503 high demand / 429) — boshqa Gemini modeliga o'tamiz (avval faqat qayta urinib,
 # keyin taslim bo'lardi va AI repetitor/hakamlik "javob bermadi" bo'lib qolardi).
-_FAILOVER_MODELS = ("gemini-3.8-flash", "gemini-3.6-flash", "gemini-flash-latest", "gemini-3.5-flash-lite", "gemini-2.5-flash")
+_FAILOVER_MODELS = ("gemini-3.8-flash", "gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-flash-latest")
 _BUSY_UNTIL: dict = {}
+_CALL_TIMEOUT = 14
+_MIN_UNSUPPORTED: dict = {"gemini-3.8-flash": True, "gemini-flash-latest": True}
 
 
 async def _call_gemini_with_retry(**kwargs):
@@ -78,17 +80,22 @@ async def _call_gemini_with_retry(**kwargs):
     last_error = None
     for mi, model in enumerate(order):
         kw = dict(kwargs, model=model)
-        if model != first and isinstance(kw.get("config"), dict) and "thinking_config" in kw["config"]:
-            cfg = dict(kw["config"])
-            cfg.pop("thinking_config", None)   # zaxira modellar thinking_level'ni qo'llab-quvvatlamasligi mumkin
-            kw["config"] = cfg
+        # v235: thinking_config OLIB TASHLANMAYDI — usiz model standart (eng chuqur) o'ylash bilan 20+ soniya ishlaydi.
+        if isinstance(kw.get("config"), dict) and _MIN_UNSUPPORTED.get(model):
+            tc = kw["config"].get("thinking_config") or {}
+            if tc.get("thinking_level") == "minimal":
+                kw["config"] = dict(kw["config"], thinking_config={"thinking_level": "low"})
         for attempt, delay in enumerate([0.0] + _RETRY_DELAYS_SECONDS):
             if delay:
                 await asyncio.sleep(delay)
             try:
-                resp = await _get_client().aio.models.generate_content(**kw)
+                resp = await asyncio.wait_for(_get_client().aio.models.generate_content(**kw), _CALL_TIMEOUT)
                 _BUSY_UNTIL.pop(model, None)
                 return resp
+            except asyncio.TimeoutError as e:
+                last_error = e
+                logger.warning("Gemini %s %ss ichida javob bermadi — keyingi model.", model, _CALL_TIMEOUT)
+                break
             except genai_errors.APIError as e:
                 last_error = e
                 text = str(e)
@@ -96,7 +103,13 @@ async def _call_gemini_with_retry(**kwargs):
                 if code == 404 or "not_found" in text.lower():
                     break                      # bunday model yo'q — keyingisiga
                 if code == 400 and "thinking" in text.lower() and isinstance(kw.get("config"), dict) and "thinking_config" in kw["config"]:
-                    cfg = dict(kw["config"]); cfg.pop("thinking_config", None); kw["config"] = cfg
+                    cfg = dict(kw["config"])
+                    if (cfg.get("thinking_config") or {}).get("thinking_level") == "minimal":
+                        _MIN_UNSUPPORTED[model] = True
+                        cfg["thinking_config"] = {"thinking_level": "low"}   # minimal yo'q — eng tez qo'llanadigani
+                    else:
+                        cfg.pop("thinking_config", None)
+                    kw["config"] = cfg
                     try:
                         resp = await _get_client().aio.models.generate_content(**kw)
                         _BUSY_UNTIL.pop(model, None)
@@ -173,7 +186,7 @@ def _build_system_prompt(subject: str, effort: str = "normal") -> str:
     return persona + "\n\n" + BASE_PERSONA_RULES + "\n\n" + effort_note
 
 
-_FALLBACK_MODELS = ("gemini-3.6-flash", "gemini-flash-latest", "gemini-3.5-flash-lite")
+_FALLBACK_MODELS = ("gemini-3.6-flash", "gemini-3.5-flash-lite")
 _GOOD_MODEL: dict = {}
 _MATHY = __import__("re").compile(r"[0-9=+*/^<>%]|masala|hisobla|yech|formula|tenglama|isbot|nechta|necha")
 
@@ -226,7 +239,7 @@ async def ask_gemini(
     primary = ai_keys.get("GEMINI_MODEL", GEMINI_MODEL) or GEMINI_MODEL
     if _GOOD_MODEL.get("m"):
         primary = _GOOD_MODEL["m"]
-    attempts = [(primary, False)] if _GOOD_MODEL.get("think") is False else [(primary, True), (primary, False)]
+    attempts = [(primary, True)]
     for fallback in _FALLBACK_MODELS:
         if fallback != primary:
             attempts.append((fallback, False))
@@ -244,7 +257,7 @@ async def ask_gemini(
         except genai_errors.APIError as e:
             msg = str(e).lower()
             # thinking_level qo'llab-quvvatlanmasa yoki model topilmasa — keyingi variantga o'tamiz
-            if getattr(e, "code", None) in (400, 404) or "thinking" in msg or "not_found" in msg:
+            if getattr(e, "code", None) in (400, 404, 429, 503) or "thinking" in msg or "not_found" in msg:
                 logger.info("Gemini %s (thinking=%s) rad etdi: %s — boshqa variant sinab ko'riladi.", model, with_thinking, str(e)[:160])
                 ai_diagnostics.record_error("gemini", e)
                 continue

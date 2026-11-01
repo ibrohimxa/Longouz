@@ -304,7 +304,7 @@ async def api_ai_probe(t: str = "", tts: int = 1):
             try:
                 r = await asyncio.wait_for(client.aio.models.generate_content(
                     model=m, contents="2+2 nechiga teng? Bir so'z bilan javob ber.",
-                    config={"max_output_tokens": 300, "thinking_config": {"thinking_level": "minimal"}}), timeout=20)
+                    config={"max_output_tokens": 600, "thinking_config": {"thinking_level": "minimal" if not ai_gemini._MIN_UNSUPPORTED.get(m) else "low"}}), timeout=20)
                 return m, {"ok": True, "ms": int((_time.time() - t0) * 1000), "text": (r.text or "")[:40]}
             except Exception as e:  # noqa: BLE001
                 return m, {"ok": False, "ms": int((_time.time() - t0) * 1000), "err": str(e)[:180]}
@@ -2420,7 +2420,7 @@ async def dashboard(request: Request):
         "d": dash,
         "greeting": greeting,
         "quote": quotes[date.today().toordinal() % len(quotes)],
-        "subject_name": db.SUBJECT_NAMES.get(user.subject, user.subject),
+        "subject_name": (db.SUBJECT_NAMES.get(user.subject) or "Fan"),
     })
 
 
@@ -2594,7 +2594,7 @@ async def repetitor_page(request: Request):
 
     return templates.TemplateResponse(request, "repetitor.html", {
         "user": user,
-        "subject_name": db.SUBJECT_NAMES.get(user.subject, user.subject),
+        "subject_name": (db.SUBJECT_NAMES.get(user.subject) or "Fan"),
     })
 
 
@@ -2689,7 +2689,7 @@ async def profile_page(request: Request):
         "certificates": certificates,
         "usage": usage,
         "plan_limits": plan_limits,
-        "subject_name": db.SUBJECT_NAMES.get(user.subject, user.subject),
+        "subject_name": (db.SUBJECT_NAMES.get(user.subject) or "Fan"),
         "subject_names": db.SUBJECT_NAMES,
         "subjects": db.SUBJECTS,
         "levels": db.LEVELS,
