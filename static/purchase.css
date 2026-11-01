@@ -129,3 +129,10 @@ html[data-theme="light"] .pm-price{color:#3fae5f}
 .pm-submit{background:linear-gradient(180deg,#1fa850,#168a41)!important;color:#fff;box-shadow:0 6px 16px rgba(20,140,70,.28),inset 0 1px 0 rgba(255,255,255,.18)!important}
 .pm-submit:hover{filter:brightness(1.06)}
 .pm-checks i{box-shadow:0 0 0 3px rgba(40,180,90,.14)!important}
+
+/* v238: o'rtacha neon — yorqin yashil, lekin ko'zni qamashtirmaydi */
+.pm-submit{background:linear-gradient(180deg,#2bd566,#16b34f)!important;color:#04230f;box-shadow:0 6px 20px rgba(34,214,100,.38),inset 0 1px 0 rgba(255,255,255,.28)!important}
+.pm-submit:hover{filter:brightness(1.05);box-shadow:0 8px 24px rgba(34,214,100,.5)!important}
+.pm-modal{--pm-bd:rgba(60,225,115,.6);--pm-inbd:rgba(55,215,110,.5);--pm-blue:#34e070}
+.pm-checks i{background:#1fd662!important;box-shadow:0 0 0 3px rgba(34,214,100,.2),0 0 10px rgba(34,214,100,.4)!important}
+.pm-tab::after{background:linear-gradient(90deg,#34e070,#5df095)!important;box-shadow:0 0 8px rgba(52,224,112,.65)!important}

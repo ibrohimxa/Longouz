@@ -1,3 +1,6 @@
+## v238
+- Neon o'rtacha darajaga qaytarildi: yorqin yashil, lekin qamashtirmaydi.
+
 ## v237
 - Neon darajasi pasaytirildi (ayniqsa kunduzgi rejim), to'lov tugmasi yumshoq yashil.
 

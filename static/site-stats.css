@@ -50,3 +50,16 @@ html[data-theme="light"] .lz-ss-card[data-k="visitors"] .lz-ss-ico,html[data-the
 .lz-ss-card[data-k="visitors"] .lz-ss-num,.lz-ss-card[data-k="accuracy"] .lz-ss-num,.lz-ss-card[data-k="visitors"] .lz-ss-ico,.lz-ss-card[data-k="accuracy"] .lz-ss-ico{text-shadow:none;box-shadow:none}
 html[data-theme="light"] .lz-ss-card{border-color:rgba(18,165,80,.35);box-shadow:0 2px 8px rgba(10,60,30,.06)}
 html[data-theme="light"] .lz-ss-card:hover{border-color:rgba(18,165,80,.6);box-shadow:0 8px 18px rgba(10,60,30,.12)}
+
+/* v238: o'rtacha yog'du */
+.lz-ss-card{border-color:rgba(61,255,123,.5);box-shadow:0 0 12px rgba(61,255,123,.14)}
+.lz-ss-card:hover{border-color:rgba(61,255,123,.85);box-shadow:0 0 18px rgba(61,255,123,.38),0 16px 32px rgba(0,0,0,.42)}
+.lz-ss-ico{box-shadow:0 0 8px rgba(61,255,123,.22)}
+.lz-ss-num{text-shadow:0 0 8px rgba(61,255,123,.28)}
+.lz-ss-card[data-k="visitors"],.lz-ss-card[data-k="accuracy"]{border-color:rgba(46,196,255,.5);box-shadow:0 0 12px rgba(46,196,255,.14)}
+.lz-ss-card[data-k="visitors"]:hover,.lz-ss-card[data-k="accuracy"]:hover{border-color:rgba(46,196,255,.85);box-shadow:0 0 18px rgba(46,196,255,.38),0 16px 32px rgba(0,0,0,.42)}
+.lz-ss-card[data-k="visitors"] .lz-ss-ico,.lz-ss-card[data-k="accuracy"] .lz-ss-ico{box-shadow:0 0 8px rgba(46,196,255,.25)}
+.lz-ss-card[data-k="visitors"] .lz-ss-num,.lz-ss-card[data-k="accuracy"] .lz-ss-num{text-shadow:0 0 8px rgba(46,196,255,.3)}
+html[data-theme="light"] .lz-ss-card{border-color:rgba(15,184,90,.5);box-shadow:0 3px 10px rgba(0,150,70,.12)}
+html[data-theme="light"] .lz-ss-card:hover{border-color:rgba(15,184,90,.8);box-shadow:0 0 14px rgba(15,184,90,.3),0 10px 22px rgba(10,60,30,.12)}
+html[data-theme="light"] .lz-ss-num,html[data-theme="light"] .lz-ss-ico{text-shadow:none}
