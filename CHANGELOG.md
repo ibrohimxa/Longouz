@@ -1,3 +1,6 @@
+## v237
+- Neon darajasi pasaytirildi (ayniqsa kunduzgi rejim), to'lov tugmasi yumshoq yashil.
+
 ## v236
 - "Pul yechilmaydi" ogohlantirishlari (balans, tarif, tarif oynasi) olib tashlandi.
 - Tarif sotib olish oynasi ko'kdan tiniq yashilga o'tkazildi, ayrim detallar salgina ko'k.
