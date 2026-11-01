@@ -8,8 +8,8 @@
   <link rel="icon" type="image/png" href="/static/logo-owl.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css?v=235">
-  <script src="/static/theme-init.js?v=235"></script>
+  <link rel="stylesheet" href="/static/style.css?v=236">
+  <script src="/static/theme-init.js?v=236"></script>
 </head>
 <body data-logged-in="true">
 
@@ -30,11 +30,6 @@
       <div class="balance-hero">
         <div class="balance-hero-label">Joriy balans</div>
         <div class="balance-hero-amount"><span id="balance-amount">{{ "{:,}".format(user.balance_som or 0).replace(",", " ") }}</span> so'm</div>
-      </div>
-
-      <div class="balance-notice">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0;"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
-        <span>Hozircha to'lov tizimlari (Click, Paynet, SQB) sinov rejimida — kartangizdan haqiqiy pul yechilmaydi va hech qanday karta ma'lumoti serverga yuborilmaydi. Ular to'liq ulangach, bu yerda real to'lov va balansni yechib olish imkoniyati ham qo'shiladi.</span>
       </div>
 
       <div class="balance-topup-card">
@@ -85,8 +80,8 @@
   </div>
 
   {% include "_owl_widget.html" %}
-  <script src="/static/devtools-guard.js?v=235"></script>
-  <script src="/static/app.js?v=235"></script>
+  <script src="/static/devtools-guard.js?v=236"></script>
+  <script src="/static/app.js?v=236"></script>
   <script>
     (function () {
       const amountBtns = document.querySelectorAll(".balance-amount-btn");
