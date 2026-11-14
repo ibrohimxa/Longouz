@@ -123,8 +123,8 @@
   // ---- Ctrl/⌘ + K qidiruv ----
   var pal = document.getElementById("dash-palette"), inp = document.getElementById("dash-palette-input"), list = document.getElementById("dash-palette-list");
   var items = [
-    ["Bosh sahifa", "/dashboard"], ["Test boshlash", "/quiz"], ["Mavzular bo'yicha mashq", "/quiz"], ["AI repetitor", "/repetitor"],
-    ["Reyting", "#leaderboard"], ["Balans", "/balance"], ["Profil va sertifikatlar", "/profile"], ["Pro'ga o'tish", "/upgrade"], ["Yordam", "/support"],
+    ["Bosh sahifa", "/kabinet"], ["Test boshlash", "/testlar"], ["Mavzular bo'yicha mashq", "/testlar"], ["AI repetitor", "/ustoz"],
+    ["Reyting", "#leaderboard"], ["Balans", "/hisob"], ["Profil va sertifikatlar", "/profil"], ["Pro'ga o'tish", "/tariflar"], ["Yordam", "/yordam"],
   ];
   var sel = 0;
   function render() {

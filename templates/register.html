@@ -8,9 +8,9 @@
   <link rel="icon" type="image/png" href="/static/logo-owl.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css?v=241">
-  <link rel="stylesheet" href="/static/auth.css?v=241">
-  <script src="/static/theme-init.js?v=241"></script>
+  <link rel="stylesheet" href="/static/style.css?v=242">
+  <link rel="stylesheet" href="/static/auth.css?v=242">
+  <script src="/static/theme-init.js?v=242"></script>
 </head>
 <body class="auth-page auth-register">
   {% with auth_page='register' %}{% include "_auth_header.html" %}{% endwith %}
@@ -50,7 +50,7 @@
         {% if error %}<div class="au-error" role="alert">{{ error }}</div>{% endif %}
         {% include "_auth_social.html" %}
 
-        <form method="post" action="/register" id="auth-form">
+        <form method="post" action="/royxat" id="auth-form">
           <input type="hidden" name="plan" value="{{ plan or 'free' }}">
           <input type="hidden" name="subject" value="{{ subject or '' }}">
           <div class="au-field">
@@ -85,11 +85,11 @@
             <span>Ro'yxatdan o'tish</span>
           </button>
         </form>
-        <p class="au-switch">Hisobingiz bormi? <a href="/login">Kirish</a></p>
+        <p class="au-switch">Hisobingiz bormi? <a href="/kirish{% if next %}?next={{ next | urlencode }}{% endif %}">Kirish</a></p>
       </section>
 
       <section class="au-reg-right" aria-hidden="true">
-        <img src="/static/auth-art-register.webp" alt="" width="440" height="510" loading="lazy">
+        <img src="/static/auth-art-register-g.webp" alt="" width="440" height="510" loading="lazy">
       </section>
     </div>
   </main>

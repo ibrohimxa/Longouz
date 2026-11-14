@@ -12,7 +12,7 @@
   function open(plan, name, price) {
     planInput.value = plan;
     var g = $("pm-google");
-    if (g) g.setAttribute("href", "/auth/google/login?next=" + encodeURIComponent("/upgrade?plan=" + plan + "&auto=1"));
+    if (g) g.setAttribute("href", "/auth/google/login?next=" + encodeURIComponent("/tariflar?plan=" + plan + "&auto=1"));
     setText("pm-plan-name", name);
     setText("pm-plan-price", price);
     overlay.hidden = false;

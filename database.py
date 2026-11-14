@@ -136,7 +136,7 @@ LEVEL_NAMES = {l["code"]: l["name"] for l in LEVELS}
 #   - qolgan barcha fanlar uchun: DTM, Sertifikat (umumiy CEFR-uslubidagi
 #     mock imtihon, fan nomiga moslashtirilgan)
 # Har bir rejim o'z savollar soni, vaqt chegarasi va baholash tizimiga ega
-# (qarang: scoring.py). Bu ro'yxat ENDI /quiz sahifasida HAR SAFAR test
+# (qarang: scoring.py). Bu ro'yxat ENDI /testlar sahifasida HAR SAFAR test
 # boshlashda ko'rsatiladi — onboarding'dagi certificate_type endi faqat
 # "so'nggi ishlatilgan rejim" sifatida standart tanlovni belgilaydi.
 # ---------------------------------------------------------------------------
@@ -805,6 +805,22 @@ class MockTest(Base):
     time_minutes: Mapped[int] = mapped_column(Integer, default=0)  # 0 = fan standarti
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_by: Mapped[str] = mapped_column(String(60), default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class AiAuditFinding(Base):
+    """v242: AI tekshiruv natijasi — Gemini savollar bankini ko'rib chiqib topgan muammo (admin ko'rib, tuzatadi yoki yopadi)."""
+    __tablename__ = "ai_audit_findings"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    question_id: Mapped[int] = mapped_column(Integer, index=True)
+    subject: Mapped[str] = mapped_column(String(30), index=True)
+    mode: Mapped[str] = mapped_column(String(20), default="")
+    topic: Mapped[str] = mapped_column(String(150), default="")
+    kind: Mapped[str] = mapped_column(String(30), default="other")
+    severity: Mapped[int] = mapped_column(Integer, default=2)  # 1 mayda, 2 o'rta, 3 jiddiy (javob kaliti xato)
+    note: Mapped[str] = mapped_column(String(700), default="")
+    suggested_index: Mapped[int] = mapped_column(Integer, default=-1)  # AI taklif qilgan to'g'ri variant (yo'q = -1)
+    status: Mapped[str] = mapped_column(String(12), default="open", index=True)  # open | fixed | hidden | dismissed
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 
@@ -3225,13 +3241,13 @@ async def get_dashboard_data(user: "WebUser") -> dict:
     goal_q = max(1, min(200, getattr(user, "daily_goal", None) or DAILY_QUESTION_GOAL))
     weak_topic = weak[0]["topic"] if weak else None
     plan_items = [
-        {"text": "Bugun kamida 1 ta test yeching", "done": len(today_logs) >= 1, "href": "/quiz"},
+        {"text": "Bugun kamida 1 ta test yeching", "done": len(today_logs) >= 1, "href": "/testlar"},
         {"text": f"Bugun {goal_q} ta savolga javob bering", "done": today_q >= goal_q,
-         "href": "/quiz", "meta": f"{min(today_q, goal_q)}/{goal_q}"},
+         "href": "/testlar", "meta": f"{min(today_q, goal_q)}/{goal_q}"},
         {"text": f"Zaif mavzu: {weak_topic}" if weak_topic else "Xato qilingan savollarni takrorlang",
          "done": bool(weak_topic and any(l.topic == weak_topic for l in today_logs)) or (not weak_topic and missed_count == 0 and bool(logs)),
-         "href": "/quiz", "meta": (f"{missed_count} ta xato" if missed_count else "")},
-        {"text": "AI repetitorga savol bering", "done": chat_today > 0, "href": "/repetitor"},
+         "href": "/testlar", "meta": (f"{missed_count} ta xato" if missed_count else "")},
+        {"text": "AI repetitorga savol bering", "done": chat_today > 0, "href": "/ustoz"},
     ]
 
     streak = user.streak_days or 0

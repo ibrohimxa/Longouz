@@ -6,18 +6,18 @@
     <h3 id="plock-title"><span data-plock-feature>AI repetitor</span> — Pro va Ultra tariflarida</h3>
     <p class="plock-sub">Jonli AI o'qituvchi xatolaringizni tushuntiradi, savollaringizga javob beradi va mavzuni bosqichma-bosqich o'rgatadi.</p>
     <div class="plock-plans">
-      <a class="plock-plan" href="/upgrade?plan=pro&auto=1">
+      <a class="plock-plan" href="/tariflar?plan=pro&auto=1">
         <b>Pro</b><span>99 000 so'm/oy</span>
         <small>AI repetitor, barcha fanlar, batafsil statistika</small>
       </a>
-      <a class="plock-plan best" href="/upgrade?plan=ultra&auto=1">
+      <a class="plock-plan best" href="/tariflar?plan=ultra&auto=1">
         <em>Eng to'liq</em><b>Ultra</b><span>199 000 so'm/oy</span>
         <small>Pro + ustuvor AI, shaxsiy o'quv rejasi, cheksiz mock</small>
       </a>
     </div>
     <div class="plock-actions">
       <button type="button" class="plock-cancel" data-plock-close>Bekor qilish</button>
-      <a class="plock-buy" href="/upgrade?plan=pro&auto=1">Sotib olish</a>
+      <a class="plock-buy" href="/tariflar?plan=pro&auto=1">Sotib olish</a>
     </div>
   </div>
 </div>
@@ -49,7 +49,7 @@
   function open(feature){ var f=ov.querySelector('[data-plock-feature]'); if(f&&feature) f.textContent=feature; ov.hidden=false; document.body.style.overflow='hidden'; }
   function close(){ ov.hidden=true; document.body.style.overflow=''; }
   document.addEventListener('click',function(e){
-    var a=e.target.closest&&e.target.closest('a[href="/repetitor"],a[href^="/repetitor?"],a[href*="locked=repetitor"],[data-pro-lock]');
+    var a=e.target.closest&&e.target.closest('a[href="/ustoz"],a[href^="/ustoz?"],a[href*="locked=repetitor"],[data-pro-lock]');
     if(!a) return;
     e.preventDefault(); e.stopPropagation();
     open(a.getAttribute('data-pro-lock')||'AI repetitor');

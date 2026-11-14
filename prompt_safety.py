@@ -81,3 +81,11 @@ def wrap_user_content(text: str) -> str:
         f"{text}\n"
         "[[O'QUVCHI MATNI TUGADI]]"
     )
+
+
+def chat_turn(text: str) -> str:
+    """v242: jonli suhbat (AI repetitor) uchun — o'quvchi gapi model e'tiborini chalg'itadigan uzun texnik o'ramsiz,
+    o'z holicha uzatiladi (aks holda model 'salom'ga ham rasmiy, sun'iy javob berardi). Himoya: ichki chegara belgilari
+    sanitize_user_text'da olib tashlanadi, ko'rsatma-almashtirish urinishlari looks_like_injection bilan ushlanadi va
+    tizim ko'rsatmasida o'quvchi matni buyruq emasligi aytilgan."""
+    return (text or "").replace("[[", "( (").replace("]]", ") )").strip()

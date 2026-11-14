@@ -107,6 +107,29 @@ def _clean_spoken(text: str) -> str:
     return _re.sub(r"[ \t]+\n", "\n", text).strip()
 
 
+# v242: model ba'zan o'zi haqida keraksiz gap qo'shadi ("Men o'zbek tilida gapiraman", "Men sun'iy intellektman...").
+# Tizim ko'rsatmasi buni taqiqlaydi; bu yerda — qo'shimcha to'r: shunday gaplar javobdan olib tashlanadi.
+_META_SENT = _re.compile(
+    r"(?:(?<=^)|(?<=[.!?…])\s+)"
+    r"(?:[^.!?…\n]{0,60}?\b(?:men|biz)\b[^.!?…\n]{0,40}?"
+    r"(?:o['ʻ‘’`]zbek\s+tilida\s+(?:gapir|javob\s+ber|suhbatlash|so['ʻ‘’`]zlash|yoz|tushuntir)\w*"
+    r"|sun['ʻ‘’`]iy\s+intellekt\w*|til\s+modeli\w*|katta\s+til\s+model\w*)"
+    r"[^.!?…\n]{0,80}[.!?…]+"
+    r"|(?:as\s+an\s+ai|i\s+am\s+an\s+ai|i'm\s+an\s+ai)\b[^.!?\n]{0,80}[.!?]+)",
+    _re.IGNORECASE,
+)
+
+
+def _strip_meta(text: str, question: str = "") -> str:
+    """O'quvchi o'zi 'sen AI misan / qaysi tilda gapirasan' deb so'ramagan bo'lsa, model o'zi haqidagi gaplarni olib tashlaydi."""
+    ql = (question or "").lower()
+    if any(w in ql for w in ("odammisan", "odammisiz", "robot", "sun'iy", "suniy", " ai", "ai ", "kimsan", "kimsiz", "tilida", "which language", "are you")):
+        return text
+    cleaned = _META_SENT.sub(" ", text)
+    cleaned = _re.sub(r"[ \t]{2,}", " ", cleaned).strip()
+    return cleaned if len(cleaned) >= 2 else "Xo'sh, qaysi mavzuni ko'ramiz?"
+
+
 async def ask_tutor(
     question: str, subject: str, level: str, certificate_type: str | None = None,
     effort: str = "normal", source: str = "widget",
@@ -127,7 +150,7 @@ async def ask_tutor(
             gemini.ask_gemini(question, subject, effort, level, certificate_type, hist, lang),
             ASK_TIMEOUT_SECONDS, f"Gemini (ask, {label_suffix})",
         )
-        return (_clean_spoken(a), "gemini") if a else None
+        return (_strip_meta(_clean_spoken(a), question), "gemini") if a else None
 
     async def _try_claude():
         if not claude.is_claude_configured():
@@ -136,11 +159,11 @@ async def ask_tutor(
             claude.ask_claude(question, subject, level, certificate_type, effort, hist, lang),
             CLAUDE_ASK_TIMEOUT_SECONDS, f"Claude (ask, {label_suffix})",
         )
-        return (_clean_spoken(a), "claude") if a else None
+        return (_strip_meta(_clean_spoken(a), question), "claude") if a else None
 
     # To'liq AI repetitor (aniqlik muhim, ayniqsa matematika/fizika/kimyo) — avval Claude; tezkor suzuvchi chat — avval Gemini.
     # Admin paneldan "ai_primary_repetitor" = claude | gemini bilan almashtirish mumkin (db sozlamasi).
-    prefer = (await db.get_setting("ai_primary_repetitor", "claude")) if source == "repetitor" else "gemini"
+    prefer = (await db.get_setting("ai_primary_repetitor", "gemini")) if source == "repetitor" else "gemini"
     chain = (_try_claude, _try_gemini) if prefer == "claude" else (_try_gemini, _try_claude)
     for attempt in chain:
         res = await attempt()

@@ -34,7 +34,7 @@
   "use strict";
   var input = document.getElementById("email"), hint = document.getElementById("email-hint");
   if (!input || !hint) return;
-  var isLogin = (document.getElementById("auth-form") || {}).getAttribute && document.getElementById("auth-form").getAttribute("action") === "/login";
+  var isLogin = (document.getElementById("auth-form") || {}).getAttribute && document.getElementById("auth-form").getAttribute("action") === "/kirish";
   var timer = null, last = "";
   function show(html, kind) { hint.innerHTML = html; hint.className = "au-email-hint is-" + kind; hint.hidden = false; }
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
@@ -55,9 +55,9 @@
         if (d.exists === null) { hint.hidden = true; return; }
         if (isLogin) {
           if (d.exists) show("✓ Hisob topildi — parolingizni kiriting.", "ok");
-          else show('Bu email bilan hisob yo\'q. <a href="/register?email=' + encodeURIComponent(v) + '">Ro\'yxatdan o\'tish →</a>', "warn");
+          else show('Bu email bilan hisob yo\'q. <a href="/royxat?email=' + encodeURIComponent(v) + '">Ro\'yxatdan o\'tish →</a>', "warn");
         } else {
-          if (d.exists) show('Bu email bilan hisob allaqachon bor. Parolingizni kiritsangiz avtomatik kirasiz yoki <a href="/login?email=' + encodeURIComponent(v) + '">Kirish →</a>', "warn");
+          if (d.exists) show('Bu email bilan hisob allaqachon bor. Parolingizni kiritsangiz avtomatik kirasiz yoki <a href="/kirish?email=' + encodeURIComponent(v) + '">Kirish →</a>', "warn");
           else show("✓ Email bo'sh — yangi hisob ochiladi.", "ok");
         }
       }).catch(function () {});

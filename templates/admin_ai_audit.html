@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>AI tekshiruv — Admin — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css?v=242">
+  <link rel="stylesheet" href="/static/admin-dash.css?v=242">
+  <link rel="stylesheet" href="/static/admin.css?v=242">
+  <link rel="stylesheet" href="/static/admin-studio.css?v=242">
+  <script src="/static/theme-init.js?v=242"></script>
+  <style>
+    .aa-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+    .aa-kpi{padding:14px 16px;border-radius:14px;background:var(--bg-elevated);border:1px solid var(--line)}
+    .aa-kpi b{display:block;font-size:1.5rem;font-variant-numeric:tabular-nums}.aa-kpi span{font-size:.8rem;color:var(--ink-soft)}
+    .aa-kpi.warn b{color:#f0a53a}.aa-kpi.bad b{color:var(--error)}.aa-kpi.good b{color:var(--accent-green)}
+    .aa-card{padding:18px;border-radius:16px;background:var(--bg-elevated);border:1px solid var(--line);margin-bottom:16px}
+    .aa-card h3{margin:0 0 6px;font-size:1.05rem}.aa-card p.sub{margin:0 0 12px;color:var(--ink-soft);font-size:.88rem;line-height:1.5}
+    .aa-tbl{width:100%;border-collapse:collapse;font-size:.88rem}.aa-tbl th{text-align:left;font-weight:600;color:var(--ink-soft);font-size:.78rem;padding:6px 8px}
+    .aa-tbl td{padding:8px;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}.aa-tbl td.n,.aa-tbl th.n{text-align:right}
+    .aa-scroll{overflow-x:auto}
+    .aa-run{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .aa-run select{padding:9px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit}
+    .aa-btn{padding:9px 16px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:600 .88rem Inter,sans-serif;cursor:pointer}
+    .aa-btn:hover{border-color:var(--accent-green)}.aa-btn.primary{background:var(--accent-green);border-color:var(--accent-green);color:#041209}
+    .aa-btn.danger:hover{border-color:var(--error);color:var(--error)}.aa-btn:disabled{opacity:.55;cursor:default}
+    .aa-btn.small{padding:6px 11px;font-size:.8rem}
+    .aa-prog{height:12px;border-radius:999px;background:var(--bg);border:1px solid var(--line);overflow:hidden;margin:14px 0 8px}
+    .aa-prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent-green),#2bb8ff);transition:width .5s ease}
+    .aa-status{font-size:.86rem;color:var(--ink-soft);min-height:1.3em}
+    .aa-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+    .aa-item{border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:10px;background:var(--bg)}
+    .aa-item-head{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:.76rem;color:var(--ink-soft);margin-bottom:8px}
+    .aa-tag{padding:2px 9px;border-radius:999px;font-weight:700;font-size:.72rem;border:1px solid var(--line)}
+    .aa-tag.s3{background:rgba(255,90,90,.14);color:#ff7a7a;border-color:rgba(255,90,90,.4)}
+    .aa-tag.s2{background:rgba(240,165,58,.14);color:#f0a53a;border-color:rgba(240,165,58,.4)}
+    .aa-tag.s1{background:rgba(127,127,127,.12)}
+    .aa-q{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5;margin:0 0 8px}
+    .aa-opts{list-style:none;margin:0 0 8px;padding:0;display:grid;gap:5px}
+    .aa-opts li{padding:6px 10px;border-radius:9px;border:1px solid var(--line);font-size:.88rem;overflow-wrap:anywhere}
+    .aa-opts li.cur{border-color:rgba(255,90,90,.55)}.aa-opts li.sug{border-color:var(--accent-green);background:rgba(29,239,106,.08)}
+    .aa-opts li small{float:right;font-weight:700;margin-left:8px}.aa-opts li.cur small{color:#ff7a7a}.aa-opts li.sug small{color:var(--accent-green)}
+    .aa-note{margin:0 0 10px;padding:9px 12px;border-radius:10px;background:var(--bg-elevated);border-left:3px solid var(--accent-green);font-size:.9rem;line-height:1.5}
+    .aa-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .aa-empty{color:var(--ink-soft);text-align:center;padding:22px 8px;margin:0}
+    .aa-pager{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:12px;font-size:.86rem}
+  </style>
+</head>
+<body data-logged-in="true" data-admin-prefix="{{ admin_prefix }}">
+  <div class="app-shell">
+    {% include "_admin_sidebar.html" %}
+    <div class="app-content">
+      <div class="app-topbar"><div>
+        <h1>AI tekshiruv</h1>
+        <p>Gemini bazadagi barcha savollarni o'zi yechib ko'radi va faqat aniq xatolarni ko'rsatadi. Siz tasdiqlaysiz — hech narsa o'zi o'zgarmaydi.</p>
+      </div></div>
+
+      <div class="aa-kpis">
+        <div class="aa-kpi"><b id="k-unique">…</b><span>Takrorlanmas savol</span></div>
+        <div class="aa-kpi"><b id="k-rows">…</b><span>Jami qator (rejimlar bilan)</span></div>
+        <div class="aa-kpi"><b id="k-topics">…</b><span>Mavzu</span></div>
+        <div class="aa-kpi"><b id="k-mocks">…</b><span>Mock test</span></div>
+        <div class="aa-kpi warn"><b id="k-open">…</b><span>Ochiq AI topilma</span></div>
+        <div class="aa-kpi bad"><b id="k-severe">…</b><span>Shundan jiddiy (kalit xato)</span></div>
+        <div class="aa-kpi good"><b id="k-fixed">…</b><span>Tuzatilgan / yashirilgan</span></div>
+      </div>
+
+      <div class="aa-card">
+        <h3>Bazani AI bilan tekshirish</h3>
+        <p class="sub">Har qadamda {{ batch }} ta savol tekshiriladi. Bir xil savol DTM va sertifikat rejimida bo'lsa, bir marta tekshiriladi va tuzatish ikkalasiga qo'llanadi.
+          Sahifani yopsangiz ham joyi saqlanadi — keyin shu yerdan davom etadi. Gemini'ning bepul limiti tugasa, tekshiruv o'zi to'xtaydi; keyinroq «Davom ettirish»ni bosing.</p>
+        <div class="aa-run">
+          <select id="aa-subject" aria-label="Fan">
+            <option value="">Barcha fanlar</option>
+            {% for s in subjects %}<option value="{{ s.code }}">{{ s.name }}</option>{% endfor %}
+          </select>
+          <button class="aa-btn primary" id="aa-start">Tekshiruvni boshlash</button>
+          <button class="aa-btn" id="aa-stop" disabled>To'xtatish</button>
+          <button class="aa-btn danger" id="aa-restart">Boshidan boshlash</button>
+        </div>
+        <div class="aa-prog"><i id="aa-bar"></i></div>
+        <div class="aa-status" id="aa-status" aria-live="polite">Holat yuklanmoqda…</div>
+      </div>
+
+      <div class="aa-card">
+        <h3>Fanlar bo'yicha baza</h3>
+        <p class="sub">Tuzilma tekshiruvi (AI'siz): <b id="st-issues">…</b> <a href="{{ admin_prefix }}/questions/audit">batafsil ko'rish →</a></p>
+        <div class="aa-scroll"><table class="aa-tbl">
+          <thead><tr><th>Fan</th><th class="n">Takrorlanmas savol</th><th class="n">Qator</th><th class="n">Mavzu</th><th class="n">Mock</th><th class="n">Ochiq topilma</th></tr></thead>
+          <tbody id="aa-subjects"><tr><td colspan="6">Yuklanmoqda…</td></tr></tbody>
+        </table></div>
+      </div>
+
+      <div class="aa-card">
+        <h3>AI topilmalari</h3>
+        <div class="aa-filters">
+          <select id="f-status" class="aa-btn small" aria-label="Holat">
+            <option value="open">Ochiq</option><option value="fixed">Tuzatilgan</option><option value="hidden">Yashirilgan</option><option value="dismissed">Yopilgan (to'g'ri ekan)</option>
+          </select>
+          <select id="f-subject" class="aa-btn small" aria-label="Fan">
+            <option value="">Barcha fanlar</option>
+            {% for s in subjects %}<option value="{{ s.code }}">{{ s.name }}</option>{% endfor %}
+          </select>
+          <select id="f-kind" class="aa-btn small" aria-label="Muammo turi">
+            <option value="">Barcha turlar</option>
+            {% for k, label in kinds.items() %}<option value="{{ k }}">{{ label }}</option>{% endfor %}
+          </select>
+          <button class="aa-btn small" id="f-minor" title="Faqat mayda (1-daraja) topilmalar yopiladi">Mayda topilmalarni yopish</button>
+          <span id="f-count" style="margin-left:auto;font-size:.84rem;color:var(--ink-soft)"></span>
+        </div>
+        <div id="aa-list"><p class="aa-empty">Yuklanmoqda…</p></div>
+        <div class="aa-pager"><button class="aa-btn small" id="p-prev">← Oldingi</button><span id="p-info"></span><button class="aa-btn small" id="p-next">Keyingi →</button></div>
+      </div>
+    </div>
+  </div>
+  <script>
+  (function () {
+    var P = "{{ admin_prefix }}";
+    var $ = function (id) { return document.getElementById(id); };
+    var H = { "X-Requested-With": "fetch", "Content-Type": "application/json" };
+    var fmt = function (n) { return (n == null ? "—" : Number(n).toLocaleString("ru-RU").replace(/,/g, " ")); };
+    function esc(t) { return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+    async function api(path, body) {
+      var r = await fetch(P + path, body === undefined ? { headers: H } : { method: "POST", headers: H, body: JSON.stringify(body) });
+      var j = await r.json().catch(function () { return {}; });
+      if (!r.ok && j.ok === undefined) { j.ok = false; j.detail = j.detail || ("Server xatosi " + r.status); }
+      return j;
+    }
+
+    // ---------- umumiy ko'rinish ----------
+    var running = false, fails = 0, page = 1, total = 0, per = 25;
+    function showState(st, extra) {
+      st = st || {};
+      var tot = st.total || 0, done = st.checked || 0;
+      $("aa-bar").style.width = (tot ? Math.min(100, Math.round(done / tot * 100)) : 0) + "%";
+      var txt = "";
+      if (!st.started_at) txt = "Tekshiruv hali boshlanmagan.";
+      else if (st.done) txt = "Tekshiruv tugadi: " + fmt(done) + " ta savol ko'rib chiqildi, " + fmt(st.flagged || 0) + " ta topilma.";
+      else txt = fmt(done) + " / " + fmt(tot) + " savol tekshirildi · " + fmt(st.flagged || 0) + " ta topilma" + (running ? " · ishlayapti…" : " · to'xtatilgan");
+      $("aa-status").textContent = txt + (extra ? " — " + extra : "");
+      if (st.subject !== undefined && !running) $("aa-subject").value = st.subject || "";
+      $("aa-start").textContent = st.started_at && !st.done ? "Davom ettirish" : "Tekshiruvni boshlash";
+    }
+    async function loadOverview() {
+      var j = await api("/api/ai-audit/overview");
+      if (!j.ok) { $("aa-status").textContent = j.detail || "Ma'lumot yuklanmadi."; return; }
+      var o = j.overview;
+      $("k-unique").textContent = fmt(o.total_unique); $("k-rows").textContent = fmt(o.total_rows);
+      $("k-topics").textContent = fmt(o.total_topics); $("k-mocks").textContent = fmt(o.total_mocks);
+      $("k-open").textContent = fmt(o.open); $("k-severe").textContent = fmt(o.open_severe); $("k-fixed").textContent = fmt(o.fixed);
+      $("aa-subjects").innerHTML = o.subjects.map(function (s) {
+        return "<tr><td>" + esc(s.name) + "</td><td class='n'>" + fmt(s.unique) + "</td><td class='n'>" + fmt(s.rows) + "</td><td class='n'>" + fmt(s.topics) +
+          "</td><td class='n'>" + fmt(s.mocks) + "</td><td class='n'>" + (s.open ? "<b>" + fmt(s.open) + "</b>" : "0") + "</td></tr>";
+      }).join("") || "<tr><td colspan='6'>Bazada savol yo'q.</td></tr>";
+      if (!running) showState(j.state, j.ai_ready ? "" : "Gemini kaliti sozlanmagan («Kalitlar» bo'limi)");
+    }
+    api("/api/ai-audit/structure").then(function (j) {
+      $("st-issues").textContent = j.ok ? (fmt(j.checked) + " qator tekshirildi, " + fmt(j.total_issues) + " ta tuzilma muammosi.") : "yuklanmadi.";
+    });
+
+    // ---------- tekshiruv sikli ----------
+    function setRunning(on) {
+      running = on; $("aa-start").disabled = on; $("aa-stop").disabled = !on; $("aa-subject").disabled = on; $("aa-restart").disabled = on;
+    }
+    var sleep = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
+    async function loop(restart) {
+      setRunning(true); fails = 0;
+      var first = !!restart, sinceRefresh = 0;
+      while (running) {
+        var j;
+        try { j = await api("/api/ai-audit/step", { subject: $("aa-subject").value, restart: first }); }
+        catch (e) { j = { ok: false, detail: "Internet aloqasi uzildi.", retry_after: 15 }; }
+        first = false;
+        if (j.ok) {
+          fails = 0; showState(j, j.batch ? ("oxirgi bo'lak: " + j.batch + " savol, " + j.found + " topilma, " + j.took + " s") : "");
+          if (j.found) { sinceRefresh += j.found; }
+          if (j.done) { setRunning(false); showState(j); break; }
+          if (sinceRefresh >= 3) { sinceRefresh = 0; loadFindings(); }
+          await sleep(4200); // bepul tarif: daqiqasiga ~12 so'rov
+        } else {
+          fails++;
+          if (j.fatal || fails >= 4) {
+            setRunning(false);
+            showState(j, (j.detail || "AI javob bermadi") + " Tekshiruv to'xtatildi — keyinroq «Davom ettirish»ni bosing.");
+            break;
+          }
+          showState(j, (j.detail || "AI javob bermadi") + " " + (j.retry_after || 20) + " soniyadan keyin qayta uriniladi (" + fails + "/4)…");
+          await sleep((j.retry_after || 20) * 1000);
+        }
+      }
+      setRunning(false); loadOverview(); loadFindings();
+    }
+    $("aa-start").onclick = function () { loop(false); };
+    $("aa-stop").onclick = function () { running = false; $("aa-stop").disabled = true; $("aa-status").textContent = "To'xtatilmoqda — joriy bo'lak tugashini kuting…"; };
+    $("aa-restart").onclick = function () {
+      if (confirm("Tekshiruv boshidan boshlansinmi? Avval topilgan ochiq topilmalar saqlanadi, savollar qaytadan ko'rib chiqiladi.")) loop(true);
+    };
+
+    // ---------- topilmalar ----------
+    var L = "ABCDEFGH";
+    function render(items) {
+      if (!items.length) { $("aa-list").innerHTML = "<p class='aa-empty'>Bu bo'limda topilma yo'q.</p>"; return; }
+      $("aa-list").innerHTML = items.map(function (it) {
+        var opts = (it.options || []).map(function (o, i) {
+          var cls = "", mark = "";
+          if (it.qtype !== "open") {
+            if (i === it.suggested_index) { cls = "sug"; mark = "AI taklifi"; }
+            else if (i === it.correct_index) { cls = "cur"; mark = "hozirgi kalit"; }
+          }
+          return "<li class='" + cls + "'>" + (mark ? "<small>" + mark + "</small>" : "") + (it.qtype === "open" ? "" : "<b>" + L[i] + ")</b> ") + esc(o) + "</li>";
+        }).join("");
+        var act = "";
+        if (it.status === "open" && it.exists) {
+          if (it.suggested_index >= 0) act += "<button class='aa-btn small primary' data-a='apply' data-id='" + it.id + "'>AI javobini qo'llash (" + L[it.suggested_index] + ")</button>";
+          act += "<a class='aa-btn small' href='" + P + "/questions/" + it.question_id + "/edit' target='_blank' rel='noopener'>Tahrirlash</a>";
+          act += "<button class='aa-btn small danger' data-a='hide' data-id='" + it.id + "'>Savolni yashirish</button>";
+          act += "<button class='aa-btn small' data-a='dismiss' data-id='" + it.id + "'>Savol to'g'ri ekan</button>";
+        } else if (it.status === "open") {
+          act = "<button class='aa-btn small' data-a='dismiss' data-id='" + it.id + "'>Yopish</button>";
+        }
+        return "<article class='aa-item' id='f-" + it.id + "'><div class='aa-item-head'><span class='aa-tag s" + it.severity + "'>" + esc(it.kind_label) + "</span>" +
+          "<span>" + esc(it.subject) + " · " + esc(it.topic) + "</span><span>#" + it.question_id + (it.has_figure ? " · chizmali" : "") + "</span></div>" +
+          "<p class='aa-q'>" + esc(it.question) + "</p><ul class='aa-opts'>" + opts + "</ul>" +
+          "<p class='aa-note'>" + esc(it.note) + "</p><div class='aa-actions'>" + act + "</div></article>";
+      }).join("");
+    }
+    async function loadFindings() {
+      var q = "?status=" + encodeURIComponent($("f-status").value) + "&subject=" + encodeURIComponent($("f-subject").value) +
+        "&kind=" + encodeURIComponent($("f-kind").value) + "&page=" + page;
+      var j = await api("/api/ai-audit/findings" + q);
+      if (!j.ok) { $("aa-list").innerHTML = "<p class='aa-empty'>" + esc(j.detail || "Yuklanmadi.") + "</p>"; return; }
+      total = j.total; per = j.per; render(j.items);
+      var pages = Math.max(1, Math.ceil(total / per));
+      $("f-count").textContent = fmt(total) + " ta";
+      $("p-info").textContent = page + " / " + pages; $("p-prev").disabled = page <= 1; $("p-next").disabled = page >= pages;
+    }
+    ["f-status", "f-subject", "f-kind"].forEach(function (id) { $(id).onchange = function () { page = 1; loadFindings(); }; });
+    $("p-prev").onclick = function () { if (page > 1) { page--; loadFindings(); } };
+    $("p-next").onclick = function () { page++; loadFindings(); };
+    $("f-minor").onclick = async function () {
+      if (!confirm("Barcha mayda (1-daraja) ochiq topilmalar yopilsinmi?")) return;
+      var j = await api("/api/ai-audit/dismiss-minor", { subject: $("f-subject").value, max_severity: 1 });
+      if (j.ok) { loadFindings(); loadOverview(); }
+    };
+    $("aa-list").addEventListener("click", async function (e) {
+      var b = e.target.closest("button[data-a]"); if (!b) return;
+      var a = b.getAttribute("data-a"), id = b.getAttribute("data-id");
+      if (a === "hide" && !confirm("Savol o'quvchilardan yashirilsinmi? (Barcha rejimlardagi nusxasi)")) return;
+      b.disabled = true;
+      var j = await api("/api/ai-audit/finding/" + id, { action: a });
+      if (j.ok) {
+        var el = document.getElementById("f-" + id); if (el) el.remove();
+        total = Math.max(0, total - 1); $("f-count").textContent = fmt(total) + " ta";
+        if (!$("aa-list").children.length) loadFindings();
+        loadOverview();
+      } else { b.disabled = false; alert(j.detail || "Bajarilmadi."); }
+    });
+
+    loadOverview(); loadFindings();
+  })();
+  </script>
+  <script src="/static/devtools-guard.js?v=242"></script>
+  <script src="/static/app.js?v=242"></script>
+</body>
+</html>

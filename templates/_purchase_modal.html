@@ -1,5 +1,5 @@
-{# Tarif sotib olish oynasi — bosh sahifa (mehmon) va /upgrade (a'zo) uchun umumiy.
-   pm_member=True  -> faqat karta ma'lumotlari, POST /upgrade (hisob allaqachon bor)
+{# Tarif sotib olish oynasi — bosh sahifa (mehmon) va /tariflar (a'zo) uchun umumiy.
+   pm_member=True  -> faqat karta ma'lumotlari, POST /tariflar (hisob allaqachon bor)
    pm_member=False -> mehmon: hisob ma'lumotlari + karta, POST /checkout/register #}
 <div id="pm-overlay" class="pm-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="pm-title">
   <div class="pm-modal">
@@ -51,7 +51,7 @@
         </div>
       </div>
 
-      <form id="pm-form" class="pm-form" method="post" action="{% if pm_member %}/upgrade{% else %}/checkout/register{% endif %}" autocomplete="off">
+      <form id="pm-form" class="pm-form" method="post" action="{% if pm_member %}/tariflar{% else %}/checkout/register{% endif %}" autocomplete="off">
         <input type="hidden" name="plan" id="pm-plan-input" value="pro">
 
         {% if pm_member %}

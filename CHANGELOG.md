@@ -1,3 +1,12 @@
+## v242 — ekranga moslik, yangi manzillar, tabiiy AI repetitor, AI tekshiruv, yangi savollar
+- **Katta va o'rta ekranlar**: kabinet va yuqori panel noutbuklarda (1280–1680 px) juda yirik, QHD monitorlarda esa ikki marta kattalashgan edi (shrift + masshtab ustma-ust). Endi kabinet sahifalari ekran kengligi va balandligiga qarab bir tekis masshtablanadi; yon paneldagi «Chiqish» katta ekranda ham ko'rinadi. Admin panel o'zgarmagan.
+- **Bosh sahifa**: saytga qayta kirganda doim bosh sahifa ochiladi (kirgan o'quvchi uchun tepada «Kabinet» tugmasi). Chiqishdan keyin ham bosh sahifa.
+- **Sahifa manzillari yangilandi**: /kabinet, /testlar, /ustoz, /profil, /tariflar, /hisob, /yordam, /boshlash, /blok-test, /tahlil, /qollanma, /kirish, /royxat, /chiqish. Eski manzillar (/dashboard, /quiz, /login ...) yangisiga yo'naltiriladi. Kirmagan odam yopiq sahifani ochsa — ro'yxatdan o'tish sahifasiga yuboriladi (avval kirgan brauzer — kirish sahifasiga) va kirgach aynan o'sha sahifaga qaytadi. Admin panel manzili, /api va sertifikat havolalari o'zgarmagan.
+- **Kirish / ro'yxatdan o'tish**: boyqush rasmlari foni ko'k-qoradan saytning asosiy to'q yashiliga o'tkazildi, atrofidagi kuchli neon o'rniga yumshoq yashil yog'du; kirish sahifasidagi rasm paneli va sarlavha foni ham yashil.
+- **AI repetitor**: odamdek, do'stona suhbat — salomga salom, ortiqcha gapsiz darhol javob; «men o'zbek tilida gapiraman», «men sun'iy intellektman» kabi gaplar aytilmaydi (ko'rsatma + qo'shimcha filtr); o'quvchining uslubi va kayfiyatiga moslashadi, cho'zilib ketsa do'stona jamlaydi, o'ylanib qolsa shoshirmaydi. IELTS examiner rejimi tabiiyroq. Salomlashuv har safar boshqacha va kun vaqtiga mos.
+- **Admin: «AI tekshiruv»** (yangi bo'lim): Gemini bazadagi barcha savollarni bo'laklab o'zi yechib ko'radi va aniq xatolarni ko'rsatadi (kalit xato, bir nechta to'g'ri javob, tushunarsiz savol va h.k.). Har topilmada: AI javobini qo'llash, tahrirlash, yashirish yoki «to'g'ri ekan». Fanlar bo'yicha savol, mavzu va mock soni ham shu yerda.
+- **Yangi savollar (293 ta)**: rus tili — 202 ta (har mavzuga +6, 4 ta yangi mavzu: so'z tarkibi, urg'u, tire, XIX asr adabiyoti); matematika — 40 ta (eng kam savolli 10 mavzu); ona tili — 20 ta; IELTS — 31 ta (3 ta yangi Reading matni, lug'at, kollokatsiyalar).
+
 ## v241
 - Ochilish ekrani: logotip, aylanuvchi chiziq, 0-100% ko'rsatkich, 3 soniya, yashil to'lish.
 - Tugmalar atrofida suvdek aylanuvchi chegara (admin panelda yo'q).

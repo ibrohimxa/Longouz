@@ -8,10 +8,10 @@
   <link rel="icon" type="image/png" href="/static/logo-owl.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css?v=241">
-  <link rel="stylesheet" href="/static/exam.css?v=241">
-  <link rel="stylesheet" href="/static/features215.css?v=241">
-  <script src="/static/theme-init.js?v=241"></script>
+  <link rel="stylesheet" href="/static/style.css?v=242">
+  <link rel="stylesheet" href="/static/exam.css?v=242">
+  <link rel="stylesheet" href="/static/features215.css?v=242">
+  <script src="/static/theme-init.js?v=242"></script>
 </head>
 <body data-logged-in="true">
 
@@ -43,7 +43,7 @@
       <section class="qs-panel" id="qs-panel-mode">
         <p class="qs-hint">Test shu andozada tuziladi — savollar {{ default_level_name }} daraja bo'yicha tanlanadi.</p>
         <div class="mode-select-grid" id="qs-mode-grid"></div>
-        <a class="f215-banner" href="/dtm-blok">
+        <a class="f215-banner" href="/blok-test">
           <span class="f215-banner-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4"/></svg></span>
           <span><b>DTM haqiqiy format — 90 savollik blok mock</b><small>3 majburiy fan + 2 ixtisoslik fani, 180 daqiqa, maksimal 189 ball</small></span>
         </a>
@@ -90,7 +90,7 @@
           {% if full_mock_access %}
           <a href="#" id="qs-mock-start" class="btn-primary admin-btn-sm">Boshlash</a>
           {% else %}
-          <a href="/upgrade" class="qs-mock-locked">
+          <a href="/tariflar" class="qs-mock-locked">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
             Pro/Ultra
           </a>
@@ -167,7 +167,7 @@
         title.textContent = subjectLabel;
         subtitle.textContent = "Mavzuni tanlang — ketma-ket ishlang";
         const ad = document.getElementById("qs-adaptive");
-        if (ad) ad.href = `/quiz/take?subject=${state.subject}&level=${state.level}&mode=${state.mode}&adaptive=1&n=20`;
+        if (ad) ad.href = `/testlar/ishlash?subject=${state.subject}&level=${state.level}&mode=${state.mode}&adaptive=1&n=20`;
       }
     }
 
@@ -207,7 +207,7 @@
     let activeGrade = null;
     let activeVariant = "main";
 
-    function qBase() { return `/quiz/take?subject=${state.subject}&level=${state.level}&mode=${state.mode}`; }
+    function qBase() { return `/testlar/ishlash?subject=${state.subject}&level=${state.level}&mode=${state.mode}`; }
 
     function showLockModal(title, text) {
       const old = document.getElementById("lock-modal");
@@ -217,7 +217,7 @@
       el.className = "lock-modal-overlay";
       el.innerHTML = `<div class="lock-modal-card" role="dialog" aria-modal="true">
         <h3>${esc(title)}</h3><p>${esc(text)}</p>
-        <div class="lock-modal-actions"><a class="go" href="/upgrade">Tarifni yangilash</a><button type="button" class="cancel">Hozir emas</button></div></div>`;
+        <div class="lock-modal-actions"><a class="go" href="/tariflar">Tarifni yangilash</a><button type="button" class="cancel">Hozir emas</button></div></div>`;
       document.body.appendChild(el);
       const close = () => el.remove();
       el.querySelector(".cancel").addEventListener("click", close);
@@ -231,7 +231,7 @@
       const pct = Math.round(d.open_topics / Math.max(d.total_topics, 1) * 100);
       el.innerHTML = `<span><b>${esc(d.plan_name)}</b> tarifi: ${d.open_topics} / ${d.total_topics} mavzu ochiq</span>
         <span class="plan-meter"><i style="width:${pct}%"></i></span>
-        ${d.plan === "ultra" ? "" : '<a href="/upgrade">Ko\'proq mavzu va qiyin savollar →</a>'}`;
+        ${d.plan === "ultra" ? "" : '<a href="/tariflar">Ko\'proq mavzu va qiyin savollar →</a>'}`;
     }
 
     const VARIANT_SUBJECTS = ["biology", "chemistry", "physics", "native", "math", "english", "russian"];
@@ -359,7 +359,7 @@
     async function loadTopics() {
       const mockStart = document.getElementById("qs-mock-start");
       if (mockStart) {
-        mockStart.href = `/quiz/take?subject=${state.subject}&level=${state.level}&mode=${state.mode}`;
+        mockStart.href = `/testlar/ishlash?subject=${state.subject}&level=${state.level}&mode=${state.mode}`;
       }
 
       (async () => {
@@ -374,7 +374,7 @@
             j.mocks.forEach((m) => {
               const a = document.createElement("a");
               a.className = "qs-mock-card"; a.style.cssText = "display:flex;justify-content:space-between;margin-top:8px;text-decoration:none;color:inherit";
-              a.href = m.locked ? "/upgrade" : `/quiz/take?subject=${state.subject}&level=${state.level}&mode=${state.mode}&mock=${m.id}`;
+              a.href = m.locked ? "/tariflar" : `/testlar/ishlash?subject=${state.subject}&level=${state.level}&mode=${state.mode}&mock=${m.id}`;
               a.textContent = `${m.name} — ${m.variant}-variant · ${m.total} savol` + (m.locked ? ` · 🔒 ${m.plan}` : "");
               box.appendChild(a);
             });
@@ -399,7 +399,7 @@
         if (data.missed_count > 0) {
           missedBanner.classList.remove("qs-hidden");
           missedCount.textContent = data.missed_count;
-          missedStart.href = `/quiz/take?subject=${state.subject}&level=${state.level}&mode=${state.mode}&topic=__missed__`;
+          missedStart.href = `/testlar/ishlash?subject=${state.subject}&level=${state.level}&mode=${state.mode}&topic=__missed__`;
         } else {
           missedBanner.classList.add("qs-hidden");
         }
@@ -428,7 +428,7 @@
           const offset = RING_CIRCUMFERENCE * (1 - t.percent / 100);
           const lockIcon = LOCK_SVG;
           const row = t.locked ? `
-          <a class="topic-row topic-row-locked" href="/upgrade" title="Bu mavzu yuqori tarifda ochiladi">
+          <a class="topic-row topic-row-locked" href="/tariflar" title="Bu mavzu yuqori tarifda ochiladi">
             <span class="topic-row-order">${t.order}</span>
             <span class="topic-row-body">
               <span class="topic-row-title">${t.topic}</span>
@@ -437,7 +437,7 @@
             <span class="topic-row-lock-icon">${lockIcon}</span>
           </a>` : `
           <a class="topic-row ${t.completed ? 'topic-row-done' : ''}"
-             href="/quiz/take?subject=${state.subject}&level=${state.level}&mode=${state.mode}&topic=${encodeURIComponent(t.topic)}">
+             href="/testlar/ishlash?subject=${state.subject}&level=${state.level}&mode=${state.mode}&topic=${encodeURIComponent(t.topic)}">
             <span class="topic-row-order">${t.order}</span>
             <span class="topic-row-body">
               <span class="topic-chip ${t.completed ? 'topic-chip-done' : (t.solved ? 'topic-chip-progress' : '')}">${t.completed ? "Tugallangan" : (t.solved ? "Davom etmoqda" : "Yangi mavzu")}</span>
@@ -461,7 +461,7 @@
             const topicsParam = encodeURIComponent(groupTopics.join(","));
             return row + `
           <a class="topic-row topic-row-practice"
-             href="/quiz/take?subject=${state.subject}&level=${state.level}&mode=${state.mode}&topics=${topicsParam}">
+             href="/testlar/ishlash?subject=${state.subject}&level=${state.level}&mode=${state.mode}&topics=${topicsParam}">
             <span class="topic-row-order">★</span>
             <span class="topic-row-body">
               <span class="topic-row-title">${groupNum}-amaliy sinov (${rangeStart + 1}—${idx + 1}-mavzular aralash)</span>
@@ -512,8 +512,8 @@
     showStep(3);
   </script>
 
-  <script src="/static/devtools-guard.js?v=241"></script>
-  <script src="/static/app.js?v=241"></script>
-  <script src="/static/owl-chat.js?v=241"></script>
+  <script src="/static/devtools-guard.js?v=242"></script>
+  <script src="/static/app.js?v=242"></script>
+  <script src="/static/owl-chat.js?v=242"></script>
 </body>
 </html>

@@ -8,9 +8,9 @@
   <link rel="icon" type="image/png" href="/static/logo-owl.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=Caveat:wght@600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css?v=241">
-  <link rel="stylesheet" href="/static/purchase.css?v=241">
-  <script src="/static/theme-init.js?v=241"></script>
+  <link rel="stylesheet" href="/static/style.css?v=242">
+  <link rel="stylesheet" href="/static/purchase.css?v=242">
+  <script src="/static/theme-init.js?v=242"></script>
 </head>
 <body data-logged-in="true">
 
@@ -54,7 +54,7 @@
           {% if user.plan == 'free' %}
           <span class="plan-btn plan-btn-outline plan-btn-current">Joriy tarifingiz</span>
           {% else %}
-          <form method="post" action="/upgrade"><input type="hidden" name="plan" value="free">
+          <form method="post" action="/tariflar"><input type="hidden" name="plan" value="free">
             <button type="submit" class="plan-btn plan-btn-outline" style="width:100%;">Free'ga qaytish</button>
           </form>
           {% endif %}
@@ -105,11 +105,11 @@
   {% with pm_member=True %}{% include "_purchase_modal.html" %}{% endwith %}
 
   {% include "_owl_widget.html" %}
-  <script src="/static/devtools-guard.js?v=241"></script>
-  <script src="/static/app.js?v=241"></script>
-  <script src="/static/purchase.js?v=241"></script>
+  <script src="/static/devtools-guard.js?v=242"></script>
+  <script src="/static/app.js?v=242"></script>
+  <script src="/static/purchase.js?v=242"></script>
   {% if turnstile_active(request) %}
-  <script src="/static/turnstile-helper.js?v=241"></script>
+  <script src="/static/turnstile-helper.js?v=242"></script>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=lgTurnstileReady" async defer onerror="window.lgTurnstileFailed&&window.lgTurnstileFailed()"></script>
   {% endif %}
   <script>
@@ -117,7 +117,7 @@
       // --- Oylik / Yillik narx almashtirgich — hozircha faqat KO'RSATISH
       // uchun (haqiqiy to'lov davri hali serverga yozilmaydi, chunki to'lov
       // tizimi umuman ulanmagan) — real to'lov ulanganda shu tanlov
-      // /upgrade so'roviga ham qo'shiladi. ---
+      // /tariflar so'roviga ham qo'shiladi. ---
       let billingCycle = "monthly";
       const toggleBtns = document.querySelectorAll(".billing-toggle-btn");
       const priceEls = document.querySelectorAll("#plans-grid .plan-price[data-monthly-label]");

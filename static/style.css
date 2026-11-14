@@ -4201,21 +4201,42 @@ html.theme-anim *,html.theme-anim *::before,html.theme-anim *::after{transition:
 }
 @keyframes sbdrop { from { opacity: 0; transform: translateY(6px) scale(.98); } }
 
-/* Katta monitorlar (QHD/4K): matn va bloklar mayda ko'rinmasligi uchun asosiy shriftni kattalashtirish */
-@media (min-width: 1920px) { html { font-size: 17px; } }
-@media (min-width: 2300px) { html { font-size: 19px; } }
-@media (min-width: 3000px) { html { font-size: 24px; } }
-
-
-/* ===== v217: KATTA EKRANLAR (2K / 4K / televizor) — interfeys ekranga mutanosib kattalashadi ===== */
-@media (min-width: 2200px) { html { zoom: 1.3; } }
-@media (min-width: 2800px) { html { zoom: 1.7; } }
-@media (min-width: 3400px) { html { zoom: 2.05; } }
-@media (min-width: 5000px) { html { zoom: 3; } }
-@supports not (zoom: 1) {
-  @media (min-width: 2200px) { html { font-size: 20px; } }
-  @media (min-width: 3400px) { html { font-size: 28px; } }
+/* ===== v242: EKRANGA MOS ZICHLIK =====
+   Avval: 1920+ da shrift, 2200+ da butun sahifa kattalashardi (ikkisi ustma-ust — QHD monitorda matn 1,5 barobar),
+   noutbuk ekranlarida (1280–1680 px) esa kabinet va yuqori panel juda yirik edi.
+   Endi kabinet sahifalari (.app-shell) ekran kengligi va balandligiga qarab bir tekis masshtablanadi:
+   noutbukda ixchamroq, oddiy Full HD da biroz ixcham, juda katta monitorda mo'tadil kattalashadi. */
+:root { --lz-z: 1; --lz-zh: 1; }
+@media (min-width: 901px) and (max-width: 1099px)  { :root { --lz-z: .78; } }
+@media (min-width: 1100px) and (max-width: 1299px) { :root { --lz-z: .8; } }
+@media (min-width: 1300px) and (max-width: 1499px) { :root { --lz-z: .84; } }
+@media (min-width: 1500px) and (max-width: 1699px) { :root { --lz-z: .88; } }
+@media (min-width: 1700px) and (max-width: 2099px) { :root { --lz-z: .94; } }
+@media (min-width: 2100px) and (max-width: 2699px) { :root { --lz-z: 1.06; } }
+@media (min-width: 2700px) and (max-width: 3399px) { :root { --lz-z: 1.3; } }
+@media (min-width: 3400px) and (max-width: 4999px) { :root { --lz-z: 1.65; } }
+@media (min-width: 5000px) { :root { --lz-z: 2.3; } }
+/* past ekran (masalan 1366x768 yoki 125% masshtabli noutbuk): yana biroz ixcham */
+@media (min-width: 901px) and (max-height: 720px) { :root { --lz-zh: .92; } }
+/* Admin panel (.lg-admin-tag bor yon panel) bu qoidaga kirmaydi — u avvalgi holatida qoladi. */
+@media (min-width: 901px) {
+  .app-shell:not(:has(.lg-admin-tag)) { zoom: calc(var(--lz-z) * var(--lz-zh)); min-height: calc(100vh / (var(--lz-z) * var(--lz-zh))); }
+  .app-shell:not(:has(.lg-admin-tag)) > .app-sidebar { height: calc(100vh / (var(--lz-z) * var(--lz-zh))); overflow-y: auto; scrollbar-width: none; }
+  .app-shell:not(:has(.lg-admin-tag)) > .app-sidebar::-webkit-scrollbar { display: none; }
 }
+/* Admin panel: avvalgi (v217) katta ekran qoidalari o'zgarishsiz */
+@media (min-width: 1920px) { html:has(.lg-admin-tag) { font-size: 17px; } }
+@media (min-width: 2300px) { html:has(.lg-admin-tag) { font-size: 19px; } }
+@media (min-width: 3000px) { html:has(.lg-admin-tag) { font-size: 24px; } }
+@media (min-width: 2200px) { html:has(.lg-admin-tag) { zoom: 1.3; } }
+@media (min-width: 2800px) { html:has(.lg-admin-tag) { zoom: 1.7; } }
+@media (min-width: 3400px) { html:has(.lg-admin-tag) { zoom: 2.05; } }
+@media (min-width: 5000px) { html:has(.lg-admin-tag) { zoom: 3; } }
+/* Kabinetdan tashqari sahifalar (bosh sahifa, kirish, test): faqat juda katta monitorda mo'tadil kattalashadi */
+@media (min-width: 2300px) { html:not(:has(.app-shell)) { zoom: 1.12; } }
+@media (min-width: 2800px) { html:not(:has(.app-shell)) { zoom: 1.35; } }
+@media (min-width: 3400px) { html:not(:has(.app-shell)) { zoom: 1.7; } }
+@media (min-width: 5000px) { html:not(:has(.app-shell)) { zoom: 2.4; } }
 
 /* ===== v217: suzuvchi boyqush — kontentni to'smasligi uchun ===== */
 #owl-pin-button { transition: opacity .25s ease, transform .25s ease, box-shadow .2s ease; }
@@ -4273,7 +4294,7 @@ html.owl-scrolling #owl-pin-button { opacity: 1 !important; transform: none !imp
   body.home .site-header .brand .lg-owl, body.auth-page .site-header .brand .lg-owl { height: 34px !important; }
 }
 /* Kirish / ro'yxatdan o'tish: sarlavha shaffof emas — sahifa aylantirilganda matn ostidan ko'rinmaydi */
-body.auth-page .site-header { background: rgba(4, 19, 26, .97) !important; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); position: sticky; top: 0; z-index: 100; }
+body.auth-page .site-header { background: rgba(4, 17, 10, .97) !important; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); position: sticky; top: 0; z-index: 100; }
 html[data-theme="light"] body.auth-page .site-header { background: rgba(242, 251, 245, .97) !important; }
 /* logotip rasmi: brauzerning sifatli kichraytirishi (qirrali/xira ko'rinmasin) */
 .lg-owl, .living-owl-img { image-rendering: auto !important; }
@@ -4303,7 +4324,7 @@ html[data-theme="light"] body.auth-page .site-header { background: rgba(242, 251
 }
 
 /* 3) Bosh sahifa sarlavhasi shaffof emas — pastdagi matn ostidan ko'rinmaydi */
-body.home .site-header { position: sticky; top: 0; z-index: 100; background: rgba(4, 19, 26, .96) !important; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(255,255,255,.06); }
+body.home .site-header { position: sticky; top: 0; z-index: 100; background: rgba(4, 17, 10, .96) !important; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(255,255,255,.06); }
 html[data-theme="light"] body.home .site-header { background: rgba(242, 251, 245, .97) !important; border-bottom-color: rgba(5, 75, 31,.1); }
 
 /* 4) Admin: aniqlanmagan --border oq chiziq berardi; kartalar sayt uslubida */

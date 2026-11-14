@@ -44,7 +44,7 @@
   // OVOZLI KIRISH — to'g'ridan-to'g'ri (jonli) nutq tanish. Ovoz yozib
   // yuborilmaydi: brauzerning Speech Recognition xizmati gapirayotganingizni
   // real vaqtda matnga aylantiradi, jimlik boshlanganda savol avtomatik
-  // yuboriladi. /repetitor sahifasida "Jonli suhbat" rejimi: AI javobini
+  // yuboriladi. /ustoz sahifasida "Jonli suhbat" rejimi: AI javobini
   // aytib bo'lgach, mikrofon o'zi qayta tinglashni boshlaydi.
   // ==========================================================================
   const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -522,7 +522,7 @@
     showThinking();
 
     try {
-      // "source" — serverga qaysi suhbat ekanini aytadi: /repetitor sahifasidagi
+      // "source" — serverga qaysi suhbat ekanini aytadi: /ustoz sahifasidagi
       // to'liq AI repetitor ("owl-voice-orb" faqat shu sahifada bor) Claude
       // orqali ishlaydi, boshqa barcha sahifalardagi suzuvchi tezkor chat esa
       // Gemini orqali — ikkalasi ATAYLAB ALOHIDA AI provayderga bog'langan.
@@ -743,7 +743,7 @@
         <p class="owl-limit-sub">${data.message || `${data.used}/${data.limit} ta savol ishlatildi.`}</p>
         ${hasCountdown ? `<p class="owl-limit-countdown" aria-live="polite"><span class="owl-limit-countdown-num">${formatCountdown(data.retry_after_seconds)}</span><span class="owl-limit-countdown-label">dan keyin avtomatik ochiladi</span></p>` : ""}
         <div class="owl-limit-actions">
-          <a href="/upgrade?plan=pro&amp;auto=1" class="btn-primary">Pro/Ultra'ga o'tish</a>
+          <a href="/tariflar?plan=pro&amp;auto=1" class="btn-primary">Pro/Ultra'ga o'tish</a>
           <button type="button" class="btn-secondary owl-limit-dismiss">Bekor qilish</button>
         </div>
       </div>

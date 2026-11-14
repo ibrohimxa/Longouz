@@ -22,7 +22,7 @@ from google.genai import errors as genai_errors
 
 from ai_config import GEMINI_MODEL, GEMINI_MAX_TOKENS, gemini_key
 import ai_keys
-from prompt_safety import wrap_user_content
+from prompt_safety import wrap_user_content, chat_turn
 
 logger = logging.getLogger(__name__)
 
@@ -206,9 +206,9 @@ def _to_contents(question: str, history: list[dict] | None):
     contents = []
     for h in history or []:
         role = "model" if h["role"] == "assistant" else "user"
-        text = wrap_user_content(h["text"]) if role == "user" else h["text"]
+        text = chat_turn(h["text"]) if role == "user" else h["text"]
         contents.append({"role": role, "parts": [{"text": text}]})
-    contents.append({"role": "user", "parts": [{"text": wrap_user_content(question)}]})
+    contents.append({"role": "user", "parts": [{"text": chat_turn(question)}]})
     return contents
 
 

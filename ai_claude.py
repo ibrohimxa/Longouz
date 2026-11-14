@@ -24,7 +24,7 @@ from anthropic import AsyncAnthropic, APIError, APIConnectionError
 from ai_config import CLAUDE_MODEL, CLAUDE_MAX_TOKENS, ANTHROPIC_WORKSPACE_ID, anthropic_key
 from database import SUBJECT_NAMES
 import ai_keys
-from prompt_safety import wrap_user_content
+from prompt_safety import wrap_user_content, chat_turn
 
 logger = logging.getLogger(__name__)
 
@@ -201,10 +201,10 @@ async def ask_claude(
     system_prompt = build_system_prompt(subject, level, certificate_type, effort, lang, spoken=True)
     max_tokens = {"low": 500, "normal": 1200, "high": 2500, "max": 4000}.get(effort, 1200)
     msgs = [
-        {"role": h["role"], "content": wrap_user_content(h["text"]) if h["role"] == "user" else h["text"]}
+        {"role": h["role"], "content": chat_turn(h["text"]) if h["role"] == "user" else h["text"]}
         for h in normalize_history(history)
     ]
-    msgs.append({"role": "user", "content": wrap_user_content(question)})
+    msgs.append({"role": "user", "content": chat_turn(question)})
 
     try:
         # MUHIM TUZATISH: Anthropic SDK'ning yangi versiyasi katta modellar

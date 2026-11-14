@@ -8,8 +8,8 @@
   <link rel="icon" type="image/png" href="/static/logo-owl.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css?v=241">
-  <script src="/static/theme-init.js?v=241"></script>
+  <link rel="stylesheet" href="/static/style.css?v=242">
+  <script src="/static/theme-init.js?v=242"></script>
 </head>
 <body data-logged-in="false">
 
@@ -19,12 +19,12 @@
     </a>
     <nav class="site-nav">
       {% if is_owner and quiz_log_id %}
-      <a href="/quiz/{{ quiz_log_id }}/review" class="cert-back-link">
+      <a href="/testlar/{{ quiz_log_id }}/tahlil" class="cert-back-link">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         Test natijasiga qaytish
       </a>
       {% elif is_owner %}
-      <a href="/profile" class="cert-back-link">
+      <a href="/profil" class="cert-back-link">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         Kabinetga qaytish
       </a>
@@ -117,6 +117,6 @@
   <footer class="site-footer">
     <p>&copy; LongoUZ — Barcha huquqlar himoyalangan.</p>
   </footer>
-  <script src="/static/devtools-guard.js?v=241"></script>
+  <script src="/static/devtools-guard.js?v=242"></script>
 </body>
 </html>

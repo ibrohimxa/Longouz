@@ -253,7 +253,7 @@
           history: S.history.slice(-10),
         }),
       });
-      if (res.status === 401) { location.href = "/login"; return; }
+      if (res.status === 401) { location.href = "/kirish"; return; }
       var data = await res.json().catch(function () { return {}; });
       if (res.status === 402 || data.limit_reached) {
         limited = true; reply = data.message || "AI limiti tugadi.";
@@ -271,7 +271,7 @@
     if (!reply) { startListening(); return; }
     addLine("assistant", reply);
     if (limited) {
-      var a = document.createElement("a"); a.href = "/upgrade"; a.className = "rp-upgrade"; a.textContent = "Tarifni ko'rish";
+      var a = document.createElement("a"); a.href = "/tariflar"; a.className = "rp-upgrade"; a.textContent = "Tarifni ko'rish";
       el.transcript.appendChild(a);
       setState("paused", "Limit tugadi"); return;
     }
@@ -283,14 +283,36 @@
   }
 
   // ---------- qo'ng'iroq boshqaruvi ----------
+  // v242: tabiiy, har safar biroz boshqacha salomlashuv (o'zini tanishtirish va ortiqcha gaplarsiz)
+  function pick(list) { return list[Math.floor(Math.random() * list.length)]; }
   function greeting() {
-    var l = shortLang();
+    var l = shortLang(), n = userName, h = new Date().getHours();
     if (el.mode.value === "ielts") {
-      return "Hello, " + userName + ". I'm your IELTS speaking examiner today. Let's begin with Part one. Could you tell me a little about yourself? What do you do, work or study?";
+      return pick([
+        "Hello, " + n + ". Nice to meet you. Let's start with a few questions about you. Do you work, or are you a student?",
+        "Good to see you, " + n + ". Shall we begin? First, tell me a little about where you live.",
+        "Hi, " + n + ". Let's get started. To begin with, what do you do, work or study?",
+      ]);
     }
-    if (l === "ru") return "Здравствуйте, " + userName + "! Я ваш ИИ-репетитор. Какую тему сегодня разберём? Просто скажите.";
-    if (l === "en") return "Hello, " + userName + "! I'm your AI tutor. What would you like to practise today? Just say it.";
-    return "Assalomu alaykum, " + userName + "! Men sizning AI repetitoringizman. Bugun qaysi mavzuni o'rganamiz? Shunchaki ayting, men eshitaman.";
+    if (l === "ru") {
+      return pick([
+        "Здравствуйте, " + n + "! Как настроение? С какой темы начнём сегодня?",
+        "Привет, " + n + "! Рад вас слышать. Что сегодня разберём?",
+      ]);
+    }
+    if (l === "en") {
+      return pick([
+        "Hi, " + n + "! How are you doing? What shall we work on today?",
+        "Hello, " + n + "! Good to hear you. What would you like to practise?",
+      ]);
+    }
+    var hello = h >= 5 && h < 11 ? "Xayrli tong" : (h >= 18 || h < 5 ? "Xayrli kech" : "Salom");
+    return pick([
+      hello + ", " + n + "! Qalaysiz? Bugun qaysi mavzudan boshlaymiz?",
+      hello + ", " + n + "! Kayfiyat yaxshimi? Xo'sh, bugun nimani ko'rib chiqamiz?",
+      "Assalomu alaykum, " + n + "! Ko'rishganimdan xursandman. Qani, bugun nimani o'rganamiz?",
+      hello + ", " + n + "! Tayyormisiz? Qaysi mavzu qiynayapti, o'shandan boshlaylik.",
+    ]);
   }
 
   async function startCall() {

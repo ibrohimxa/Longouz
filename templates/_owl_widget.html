@@ -2,14 +2,14 @@
      PIN QILINGAN BOYQUSH — pastki o'ng burchakda, doim ko'rinadi.
      Bu blok har bir sahifaning </body>'sidan oldin qo'yiladi.
 
-     AI repetitor endi FAQAT Pro/Ultra imtiyozi (main.py: /repetitor va
+     AI repetitor endi FAQAT Pro/Ultra imtiyozi (main.py: /ustoz va
      /api/ask shu tarzda himoyalangan). Bepul foydalanuvchiga to'liq chat
      oynasini ko'rsatib, keyin har bir xabarda bloklashdan ko'ra — pin
-     tugmasi to'g'ridan-to'g'ri /upgrade'ga olib boradigan yopiq (qulf)
+     tugmasi to'g'ridan-to'g'ri /tariflar'ga olib boradigan yopiq (qulf)
      ko'rinishda ko'rsatiladi.
      ============================================================================ -->
 {% if user and user.plan == 'free' %}
-<a id="owl-pin-button" href="/upgrade?locked=repetitor" aria-label="AI repetitor — Pro/Ultra imtiyozi" title="AI repetitor — Pro/Ultra'da ochiladi" class="owl-pin-locked">
+<a id="owl-pin-button" href="/tariflar?locked=repetitor" aria-label="AI repetitor — Pro/Ultra imtiyozi" title="AI repetitor — Pro/Ultra'da ochiladi" class="owl-pin-locked">
   {% with living_owl_id="owl-pin-living", living_owl_size=48 %}
     {% include "_living_owl.html" %}
   {% endwith %}

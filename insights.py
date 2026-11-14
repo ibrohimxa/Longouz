@@ -43,7 +43,7 @@ _flushing = False
 def _norm(path: str) -> str:
     parts = [p for p in path.split("/") if p][:2]
     out = "/" + "/".join(parts)
-    # raqamli ID larni umumlashtiramiz (/quiz/123 -> /quiz/:id)
+    # raqamli ID larni umumlashtiramiz (/testlar/123 -> /testlar/:id)
     return "/".join(":id" if s.isdigit() else s for s in out.split("/"))[:120] or "/"
 
 

@@ -223,7 +223,7 @@
       }
     });
   });
-  const logout = sidebar.querySelector(".sidebar-footer a[href*='logout']");
+  const logout = sidebar.querySelector(".sidebar-footer a[href*='chiqish'], .sidebar-footer a[href*='logout']");
 
   const burger = document.createElement("button");
   burger.type = "button"; burger.className = "sidebar-burger"; burger.hidden = true;
@@ -260,7 +260,7 @@
     links.forEach((a, i) => { if (hidden.has(i)) { const c = a.cloneNode(true); c.classList.remove("sb-hidden"); drop.appendChild(c); } });
     if (logout) { const sep = document.createElement("div"); sep.className = "sb-sep"; drop.appendChild(sep); drop.appendChild(logout.cloneNode(true)); }
     const up = document.createElement("a");
-    up.className = "sidebar-link"; up.href = "/upgrade";
+    up.className = "sidebar-link"; up.href = "/tariflar";
     up.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 6 6 .9-4.5 4.4 1 6.2L12 16.6 6.5 19.5l1-6.2L3 8.9 9 8z"/></svg>Pro tarif';
     if (!document.querySelector(".lg-admin-tag")) drop.appendChild(up);
     if (!hidden.size && !logout) burger.hidden = true;
