@@ -220,10 +220,22 @@ def register(app, prefix: str, require_admin, templates) -> None:
         bugungi ro'yxatdan o'tganlar va AI yordamchi o'zgarishlari (Xotira jurnali)."""
         if not require_admin(request):
             raise HTTPException(status_code=401, detail="Admin sifatida kiring.")
+        # v243: admin panel ochiq tursa — LongoAI navbatdagi bitta ishni (shikoyat/xabar) bajarib qo'yadi
+        try:
+            import longo_agent
+            if request.query_params.get("work") != "0":
+                await longo_agent.process_pending(limit=1, budget=40)
+        except Exception:  # noqa: BLE001
+            logger.debug("LongoAI navbati", exc_info=True)
         m = await get_memory()
         ai_log = [x for x in m["log"] if x.get("who") != "admin"]
         out = {"memory_last": ai_log[-1]["t"] if ai_log else "", "memory_last_text": (ai_log[-1]["text"][:140] if ai_log else ""),
                "memory_count": len(ai_log)}
+        try:
+            import longo_agent
+            out["ai_pending"] = await longo_agent.pending_count()
+        except Exception:  # noqa: BLE001
+            out["ai_pending"] = 0
         try:
             start = datetime.combine(date.today(), datetime.min.time())
             async with db.async_session() as session:

@@ -4442,3 +4442,33 @@ html:not([data-theme="light"]) .dash-hero h1 em,html:not([data-theme="light"]) .
   .has-bottom-nav .app-sidebar .sidebar-link{font-size:.66rem!important;padding-left:2px!important;padding-right:2px!important;gap:3px!important}
   .has-bottom-nav .app-sidebar .sidebar-link svg{width:20px!important;height:20px!important}
 }
+
+/* ===== v243: chat — formulalar/chizmalar, matematik belgilar paneli ===== */
+.chat-msg-ai.lr { white-space: normal; }
+.chat-msg-ai.lr .lr-fig { background: rgba(0,0,0,.18); }
+.chat-math-btn {
+  height: 38px; min-width: 38px; padding: 0 9px; border-radius: 999px; flex-shrink: 0;
+  border: 1px solid var(--line); background: var(--bg); color: var(--ink-soft);
+  font: 600 .82rem/1 "Cambria Math", Cambria, Georgia, serif; cursor: pointer; transition: all .15s;
+}
+.chat-math-btn:hover, .chat-math-btn.on { border-color: #2ec4ff; color: #2ec4ff; box-shadow: 0 0 10px rgba(46,196,255,.3); }
+.lz-mathpad { padding: 8px 10px 2px; border-top: 1px solid var(--line); background: var(--bg); }
+.lz-mathpad-keys { display: grid; grid-template-columns: repeat(auto-fill, minmax(38px, 1fr)); gap: 4px; max-height: 70px; overflow-y: auto; scrollbar-width: thin; }
+.lz-mathpad-keys button {
+  height: 31px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg-elevated); color: var(--ink);
+  font: 500 .86rem/1 "Cambria Math", Cambria, Georgia, serif; cursor: pointer; padding: 0 4px;
+}
+.lz-mathpad-keys button:hover { border-color: #2ec4ff; color: #2ec4ff; }
+.lz-mathpad-keys button:active { transform: scale(.94); }
+#floating-chat-widget .lthink-row { margin: 2px 0; }
+.floating-chat-input-row input { min-width: 0; }
+.floating-chat-input-row { gap: 6px; }
+@media (max-width: 380px) { .chat-math-btn { min-width: 34px; height: 34px; padding: 0 6px; } }
+
+/* v243: admin yon panel — bo'limlarga ajratilgan */
+.sb-group{margin:14px 10px 4px;font-size:.66rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;opacity:.45}
+.sidebar-nav .sb-group:first-child{margin-top:4px}
+.sidebar-link.sb-longoai{background:linear-gradient(90deg,rgba(46,196,255,.12),transparent);border:1px solid rgba(46,196,255,.25)}
+.sidebar-link.sb-longoai svg{color:#2ec4ff}
+.sidebar-link.sb-longoai.active{background:linear-gradient(90deg,rgba(46,196,255,.25),rgba(61,255,123,.08))}
+@media (max-width:900px){.sb-group{display:none}}

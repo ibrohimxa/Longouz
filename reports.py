@@ -56,11 +56,14 @@ TRIAGE_SYSTEM = (
 # ------------------------------------------------------------------ sozlamalar
 async def get_cfg() -> dict:
     raw = await db.get_setting("reports_cfg", "")
-    cfg = {"auto_analyze": False, "auto_fix": False, "min_conf": 92}
+    # v243: standart — Gemini shikoyatni O'ZI tekshiradi, aniq xato bo'lsa O'ZI tuzatadi va o'quvchiga javob yozadi
+    cfg = {"auto_analyze": True, "auto_fix": True, "auto_reply": True, "web_search": True, "min_conf": 90}
     try:
-        cfg.update(json.loads(raw) if raw else {})
+        saved = json.loads(raw) if raw else {}
     except ValueError:
-        pass
+        saved = {}
+    if saved.get("_v") == 243:
+        cfg.update(saved)
     return cfg
 
 
@@ -70,6 +73,10 @@ async def set_cfg(patch: dict) -> dict:
         cfg["auto_analyze"] = bool(patch["auto_analyze"])
     if "auto_fix" in patch:
         cfg["auto_fix"] = bool(patch["auto_fix"])
+    for k in ("auto_reply", "web_search"):
+        if k in patch:
+            cfg[k] = bool(patch[k])
+    cfg["_v"] = 243
     if "min_conf" in patch:
         try:
             cfg["min_conf"] = max(70, min(100, int(patch["min_conf"])))
@@ -114,7 +121,12 @@ async def create_report(user, session_entry: dict, index: int, category: str, me
         session.add(rep)
         await session.commit()
         await session.refresh(rep)
-        return {"id": rep.id, "updated": False}
+    try:
+        import traffic as _tr
+        await _tr.bump("report")
+    except Exception:  # noqa: BLE001
+        pass
+    return {"id": rep.id, "updated": False}
 
 
 # ------------------------------------------------------------------ AI tahlil
@@ -144,7 +156,7 @@ async def _live_question(qid: int | None) -> dict | None:
         return db._question_to_dict(q) | {"subject": q.subject, "mode": q.mode, "is_active": q.is_active}
 
 
-async def analyze_report(report_id: int, apply_if_confident: bool = False, admin: str = "AI") -> dict:
+async def analyze_report(report_id: int, apply_if_confident: bool = False, admin: str = "AI", facts: str = "") -> dict:
     import studio  # kech import: studio katta modul
     async with db.async_session() as session:
         rep = await session.get(db.QuestionReport, report_id)
@@ -166,6 +178,9 @@ async def analyze_report(report_id: int, apply_if_confident: bool = False, admin
             live = {"question": rep.question_text, "options": opts, "correct_index": rep.correct_index, "explanation": rep.explanation}
         head = f"Fan: {db.SUBJECT_NAMES.get(rep.subject, rep.subject)}; rejim: {rep.mode}; mavzu: {rep.topic}\n"
         user_msg = head + _fmt_question(live) + "\n\nFoydalanuvchi shikoyatlari:\n" + "\n".join(complaints)
+        if facts:
+            user_msg += ("\n\nINTERNETDAN (Google) TOPILGAN MA'LUMOT — faktlarni tekshirish uchun, lekin o'zingiz ham mantiqan tekshiring:\n"
+                         + facts[:3500])
     data = await studio.ai_json(TRIAGE_SYSTEM, user_msg, max_tokens=2500, timeout=55)
     if not isinstance(data, dict):
         raise HTTPException(status_code=502, detail="AI javob bermadi (kalit/kredit/tarmoq). Keyinroq urinib ko'ring.")
@@ -473,15 +488,13 @@ def register(app, prefix: str, require_admin, current_admin_username, templates,
         entry["token"] = token
         res = await create_report(user, entry, index, str(body.get("category", "other")), str(body.get("message", "")), str(body.get("selected", "")))
         cfg = await get_cfg()
-        if cfg.get("auto_analyze") and not res.get("updated"):
-            import asyncio
-
-            async def _bg():
-                try:
-                    await analyze_report(res["id"], apply_if_confident=True)
-                except Exception:  # noqa: BLE001
-                    logger.info("Avto-tahlil bajarilmadi", exc_info=True)
-            asyncio.create_task(_bg())
+        if cfg.get("auto_analyze"):
+            # v243: Vercel fon vazifalarini muzlatadi — ish navbatga qo'yiladi, sahifa /api/agent/kick bilan darhol bajartiradi
+            try:
+                import longo_agent
+                res["job"] = await longo_agent.enqueue("report", res["id"], user.id)
+            except Exception:  # noqa: BLE001
+                logger.exception("Shikoyatni LongoAI navbatiga qo'yib bo'lmadi")
         return JSONResponse({"ok": True, **res})
 
     # ---------- admin tomoni ----------

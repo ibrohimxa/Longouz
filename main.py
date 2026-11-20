@@ -65,6 +65,13 @@ from auth import (
 
 logger = logging.getLogger(__name__)
 
+
+def _cookie_secure() -> bool:
+    """HTTPS'da (Vercel doim HTTPS) cookie faqat shifrlangan ulanish orqali yuboriladi."""
+    import auth as _auth
+    return bool(_auth.COOKIE_SECURE)
+
+
 _EXPOSE_DOCS = os.getenv("EXPOSE_API_DOCS", "false").strip().lower() == "true"
 app = FastAPI(
     title="LongoUZ",
@@ -106,14 +113,15 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # ---------------------------------------------------------------------------
 _CSP_POLICY = (
     "default-src 'self'; "
-    "script-src 'self' https://challenges.cloudflare.com 'unsafe-inline'; "
+    "script-src 'self' 'unsafe-inline'; "
     "style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; "
     "font-src 'self' https://fonts.gstatic.com; "
     "img-src 'self' data: https:; "
     "media-src 'self' blob:; "
-    "connect-src 'self' https://challenges.cloudflare.com; "
-    "frame-src https://challenges.cloudflare.com https://accounts.google.com; "
-    "child-src https://challenges.cloudflare.com blob:; "
+    "connect-src 'self'; "
+    "frame-src https://accounts.google.com; "
+    "child-src blob:; "
+    "form-action 'self' https://accounts.google.com; "
     "worker-src 'self' blob:; "
     "frame-ancestors 'none'; "
     "object-src 'none'; "
@@ -224,8 +232,26 @@ async def inject_fx_middleware(request: Request, call_next):
     return new
 
 
+_UNSAFE_METHODS = ("POST", "PUT", "PATCH", "DELETE")
+
+
+def _cross_site_write(request: Request) -> bool:
+    """v243 CSRF himoyasi: boshqa saytdan yuborilgan yozish so'rovlari (forma/fetch) rad etiladi."""
+    if request.method not in _UNSAFE_METHODS:
+        return False
+    from urllib.parse import urlsplit
+    host = (request.headers.get("x-forwarded-host") or request.headers.get("host") or "").split(",")[0].strip().lower()
+    src = request.headers.get("origin") or request.headers.get("referer") or ""
+    if not src or src == "null" or not host:
+        return src == "null"
+    return (urlsplit(src).netloc or "").lower() != host
+
+
 @app.middleware("http")
 async def security_headers_middleware(request: Request, call_next):
+    if _cross_site_write(request):
+        logger.warning("Begona saytdan yozish so'rovi rad etildi: %s %s", request.method, request.url.path)
+        return JSONResponse({"detail": "So'rov rad etildi."}, status_code=403)
     if runtime.IS_VERCEL:
         await _ensure_db_ready()
         await db.load_env_overrides()  # 45 soniyada bir marta: boshqa instansda saqlangan kalitlar
@@ -242,20 +268,36 @@ async def security_headers_middleware(request: Request, call_next):
     try:
         if response.status_code == 200 and "text/html" in response.headers.get("content-type", ""):
             import insights as _ins
-            _ins.record(request, ADMIN_PREFIX)
+            import traffic as _tr
+            _ins.record(request, ADMIN_PREFIX)   # sahifalar reytingi (admin)
             if runtime.IS_VERCEL:
                 await _ins.flush(force=True)  # Vercel fon vazifasini muzlatadi — darhol yozamiz
             else:
                 _ins.schedule_flush()
+            # v243: haqiqiy tashriflar — F5 (yangilash) sanalmaydi
+            _uid = decode_access_token(request.cookies.get(COOKIE_NAME, "")) if request.cookies.get(COOKIE_NAME) else None
+            await _tr.track(request, response, ADMIN_PREFIX, _uid)
     except Exception:  # noqa: BLE001
-        pass
+        logger.debug("tashrif yozilmadi", exc_info=True)
     if getattr(request.state, "drop_session", False):
         response.delete_cookie(COOKIE_NAME)
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["Permissions-Policy"] = "geolocation=(), camera=(), payment=()"
-    response.headers["Content-Security-Policy"] = _CSP_POLICY
+    csp = _CSP_POLICY
+    if os.getenv("TURNSTILE_ENABLE", "").strip().lower() == "true":
+        cf = " https://challenges.cloudflare.com"
+        csp = (csp.replace("script-src 'self'", "script-src 'self'" + cf).replace("connect-src 'self'", "connect-src 'self'" + cf)
+               .replace("frame-src", "frame-src" + cf))
+    response.headers["Content-Security-Policy"] = csp
+    response.headers["Cross-Origin-Opener-Policy"] = "same-origin-allow-popups"
+    response.headers["X-Permitted-Cross-Domain-Policies"] = "none"
+    path0 = request.url.path
+    if path0.startswith(ADMIN_PREFIX) or path0.startswith("/api/"):
+        response.headers["Cache-Control"] = "no-store"
+        if path0.startswith(ADMIN_PREFIX):
+            response.headers["X-Robots-Tag"] = "noindex, nofollow"
     # HSTS faqat HAQIQIY HTTPS ulanishida ma'noga ega (brauzer HTTP orqali
     # kelgan HSTS sarlavhasini e'tiborsiz qoldiradi, lekin lokal http://
     # rivojlantirishda chalkashtirmaslik uchun shart bo'lganda qo'shamiz).
@@ -367,8 +409,8 @@ def _kick_seed(request: Request):
 @app.get("/api/site-stats")
 async def api_site_stats():
     """Kabinetdagi sayt ko'rsatkichlari: ko'rishlar, tashrif buyuruvchilar, o'quvchilar, yechilgan testlar, o'rtacha natija."""
-    import insights as _ins
-    data = await _ins.public_stats()
+    import traffic as _tr
+    data = await _tr.public_numbers()
     data["questions"] = await _question_total()
     return JSONResponse(data, headers={"Cache-Control": "no-store"})
 
@@ -381,6 +423,17 @@ async def api_ai_probe(t: str = "", tts: int = 1):
     if not token or not secrets.compare_digest(t, token):
         raise HTTPException(status_code=404)
     return JSONResponse(await _ai_probe_data(bool(tts)))
+
+
+@app.get(f"{ADMIN_PREFIX}/api/traffic")
+async def admin_traffic(request: Request, days: int = 14):
+    """Admin: tashriflar, odamlar, test boshlandi/tugadi, AI, ro'yxatdan o'tish — kunlar kesimida."""
+    if not require_admin(request):
+        raise HTTPException(status_code=401)
+    import traffic as _tr
+    days = max(7, min(int(days or 14), 60))
+    return JSONResponse({"series": await _tr.daily_series(days), "now": await _tr.public_numbers(),
+                         "devices": await _tr.devices(), "returning": await _tr.returning_share(), "names": _tr.EVENT_NAMES})
 
 
 @app.get(f"{ADMIN_PREFIX}/api/ai-check")
@@ -424,17 +477,16 @@ async def _ai_probe_data(tts: bool) -> dict:
 
 @app.get("/api/health")
 async def api_health():
-    """Holat: baza turi va ulanish (maxfiy ma'lumot chiqarilmaydi)."""
-    info = {"db": "sqlite" if db.IS_SQLITE else "postgres", "ok": False}
+    """Holat: faqat ishlayapti/ishlamayapti (v243: foydalanuvchilar soni va xato matni oshkor qilinmaydi)."""
+    ok = False
     try:
         from sqlalchemy import text as _t
         async with db.async_session() as session:
             await session.execute(_t("select 1"))
-            info["users"] = (await session.execute(_t("select count(*) from web_users"))).scalar()
-        info["ok"] = True
-    except Exception as exc:  # noqa: BLE001
-        info["error"] = type(exc).__name__ + ": " + str(exc)[:160].replace(os.getenv("DATABASE_URL", "") or "\x00", "***")
-    return JSONResponse(info)
+        ok = True
+    except Exception:  # noqa: BLE001
+        logger.exception("health: baza ishlamayapti")
+    return JSONResponse({"ok": ok}, status_code=200 if ok else 503, headers={"Cache-Control": "no-store"})
 
 
 @app.get("/api/seed-step")
@@ -706,7 +758,7 @@ async def register_submit(
         response.set_cookie(
             "intended_plan", plan,
             httponly=True,
-            secure=os.getenv("WEB_COOKIE_SECURE", "false").strip().lower() == "true",
+            secure=_cookie_secure(),
             samesite="lax",
             max_age=60 * 30,
         )
@@ -725,6 +777,24 @@ async def register_submit(
 # uchun ESKI /royxat endpoint hech qachon to'g'ridan-to'g'ri pullik tarif
 # bermaydi — faqat shu maxsus checkout yo'li beradi.
 # ---------------------------------------------------------------------------
+
+def payments_live() -> bool:
+    """v243: haqiqiy to'lov provayderi (Click/Payme/Paynet) ULANMAGUNCHA pullik tarif HECH QACHON avtomatik berilmaydi.
+    Ilgari /tariflar va /checkout/register so'rovi bilan istalgan odam Pro/Ultra'ni tekin olardi."""
+    return os.getenv("PAYMENTS_LIVE", "false").strip().lower() == "true"
+
+
+async def _record_plan_request(user, plan: str) -> None:
+    """Pullik tarif so'rovi — admin «Xabarlar» bo'limida ko'radi va tarifni qo'lda yoqadi."""
+    try:
+        await db.create_support_message(user.id, f"[To'lov] {plan.upper()} tarif so'rovi",
+                                        f"{user.first_name or ''} ({user.email}) {plan.upper()} tarifini olmoqchi. "
+                                        "To'lov tizimi hali ulanmagan — tarifni admin panel → Foydalanuvchilar bo'limidan yoqish mumkin.")
+        await db.create_notification(user.id, "plan_request", title=f"{plan.upper()} tarif so'rovingiz qabul qilindi",
+                                     body="To'lov tizimi ulanishi bilan tarifingiz faollashadi. Hozircha barcha bepul imkoniyatlardan foydalanishingiz mumkin.")
+    except Exception:  # noqa: BLE001
+        logger.exception("Tarif so'rovini yozib bo'lmadi")
+
 
 @app.post("/checkout/register", response_class=HTMLResponse)
 @limiter.limit("10/minute")
@@ -762,7 +832,10 @@ async def checkout_register_submit(
         # Hisob oldin ro'yxatdan o'tgan bo'lsa: parol to'g'ri bo'lsa — kiritib, tanlangan tarifni faollashtiramiz
         # (ilgari "email band" xatosi chiqardi va foydalanuvchi ro'yxatdan o'tgani hisobga olinmagandek tuyulardi).
         if verify_password(password, existing.password_hash):
-            await db.admin_set_user_plan(existing.id, plan)
+            if payments_live():
+                await db.admin_set_user_plan(existing.id, plan)
+            else:
+                await _record_plan_request(existing, plan)
             await db.update_streak(existing.id)
             existing = await _auto_onboard(request, existing)
             response = RedirectResponse(_after_auth_destination(existing, "/profil?upgraded=1"), status_code=302)
@@ -779,8 +852,13 @@ async def checkout_register_submit(
     # Bu yerda — oddiy /royxat'dan farqli — hisob TO'G'RIDAN-TO'G'RI
     # tanlangan pullik tarifda yaratiladi, chunki bu yo'lga faqat haqiqiy
     # checkout (karta) darchasidan kelinadi.
-    user = await db.create_user(email=email, password_hash=password_hash, first_name=first_name.strip(), plan=plan)
-    await db.create_notification(user.id, "welcome", body=f"LongoUZ platformasiga xush kelibsiz! {plan.upper()} tarifingiz faollashtirildi.")
+    live = payments_live()
+    user = await db.create_user(email=email, password_hash=password_hash, first_name=first_name.strip(), plan=plan if live else "free")
+    if live:
+        await db.create_notification(user.id, "welcome", body=f"LongoUZ platformasiga xush kelibsiz! {plan.upper()} tarifingiz faollashtirildi.")
+    else:
+        await db.create_notification(user.id, "welcome", body="LongoUZ platformasiga xush kelibsiz!")
+        await _record_plan_request(user, plan)
 
     # Fan bosh sahifada tanlangan bo'lsa (cookie) — onboarding o'tkazib yuboriladi; aks holda faqat fan so'raladi.
     user = await _auto_onboard(request, user)
@@ -1004,28 +1082,78 @@ def current_admin_username(request: Request) -> str:
 async def admin_login_page(request: Request):
     if require_admin(request):
         return RedirectResponse(f"{ADMIN_PREFIX}", status_code=302)
-    return templates.TemplateResponse(request, "admin_login.html", {})
+    return templates.TemplateResponse(request, "admin_login.html", {"error": admin_auth.admin_password_problem() or None})
+
+
+# v243: admin parolini terib topishga qarshi — urinishlar BAZADA sanaladi (Vercel'da har instans alohida,
+# xotiradagi cheklov yetarli emas). Bir IP'dan 15 daqiqada 5 ta xato -> 30 daqiqa blok; umumiy 40 ta/soat -> 30 daqiqa.
+_ADMIN_FAIL_WINDOW, _ADMIN_LOCK_SECONDS = 900, 1800
+
+
+async def _admin_lock_state(ip: str) -> tuple[dict, dict]:
+    import json as _j
+    out = []
+    for key in (f"admin_fail:{ip}"[:120], "admin_fail:__all__"):
+        try:
+            out.append(_j.loads(await db.get_setting(key, "") or "{}"))
+        except Exception:  # noqa: BLE001
+            out.append({})
+    return out[0], out[1]
+
+
+async def _admin_register_fail(ip: str) -> None:
+    import json as _j
+    import time as _t
+    now = _t.time()
+    per_ip, glob = await _admin_lock_state(ip)
+    for key, st, limit, window in ((f"admin_fail:{ip}"[:120], per_ip, 5, _ADMIN_FAIL_WINDOW), ("admin_fail:__all__", glob, 40, 3600)):
+        if now - st.get("t0", 0) > window:
+            st = {"t0": now, "n": 0}
+        st["n"] = st.get("n", 0) + 1
+        if st["n"] >= limit:
+            st["until"] = now + _ADMIN_LOCK_SECONDS
+        try:
+            await db.set_setting(key, _j.dumps(st))
+        except Exception:  # noqa: BLE001
+            logger.exception("admin lockout yozilmadi")
 
 
 @app.post(f"{ADMIN_PREFIX}/login", response_class=HTMLResponse)
 @limiter.limit("5/minute")  # brute-force'ga qarshi — oddiy login (10/daq)dan ham qattiqroq
 async def admin_login_submit(
     request: Request,
-    username: str = Form(...),
-    password: str = Form(...),
+    username: str = Form(..., max_length=80),
+    password: str = Form(..., max_length=200),
 ):
+    import time as _t
+    ip = _client_key(request)
+    problem = admin_auth.admin_password_problem()
+    if problem:
+        return templates.TemplateResponse(request, "admin_login.html", {"error": problem})
+    per_ip, glob = await _admin_lock_state(ip)
+    if max(per_ip.get("until", 0), glob.get("until", 0)) > _t.time():
+        mins = int((max(per_ip.get("until", 0), glob.get("until", 0)) - _t.time()) // 60) + 1
+        return templates.TemplateResponse(request, "admin_login.html", {"error": f"Juda ko'p noto'g'ri urinish. {mins} daqiqadan so'ng qayta urinib ko'ring."}, status_code=429)
     if not admin_auth.verify_admin_credentials(username, password):
-        logger.warning(f"Admin panelga noto'g'ri urinish: username={username!r}, IP={get_remote_address(request)}")
+        logger.warning("Admin panelga noto'g'ri urinish: IP=%s", ip)
+        await _admin_register_fail(ip)
+        await asyncio.sleep(0.8)  # har bir xato urinish sekinlashtiriladi
         return templates.TemplateResponse(request, "admin_login.html", {"error": "Login yoki parol noto'g'ri."})
+    try:
+        await db.set_setting(f"admin_fail:{ip}"[:120], "{}")
+        await db.log_admin_action(username.strip()[:40], "admin_login", f"IP {ip[:45]}")
+    except Exception:  # noqa: BLE001
+        pass
 
     token = admin_auth.create_admin_token(username.strip())
     response = RedirectResponse(f"{ADMIN_PREFIX}", status_code=302)
     response.set_cookie(
         admin_auth.ADMIN_COOKIE_NAME, token,
         httponly=True,
-        secure=os.getenv("WEB_COOKIE_SECURE", "false").strip().lower() == "true",
-        samesite="lax",
+        secure=_cookie_secure(),
+        samesite="strict",
         max_age=60 * 60 * admin_auth.ADMIN_TOKEN_EXPIRE_HOURS,
+        path="/",
     )
     return response
 
@@ -1550,6 +1678,8 @@ import news as _news  # noqa: E402
 _news.register(app, ADMIN_PREFIX, require_admin, templates)
 import ai_audit as _ai_audit  # noqa: E402  (v242: Gemini bilan butun savollar bankini tekshirish)
 _ai_audit.register(app, ADMIN_PREFIX, require_admin, current_admin_username, templates)
+import longo_agent as _longo_agent  # noqa: E402  (v243: LongoAI — shikoyat/yordam xabarlarini o'zi hal qiladi)
+_longo_agent.register(app, ADMIN_PREFIX, require_admin, get_current_user, limiter, templates)
 
 
 @app.get(f"{ADMIN_PREFIX}/import", response_class=HTMLResponse)
@@ -2368,7 +2498,14 @@ async def support_submit(request: Request, subject: str = Form(""), body: str = 
         })
 
     kind = kind if kind in ("Savol", "Shikoyat", "Texnik xato", "To'lov", "Taklif") else "Savol"
-    await db.create_support_message(user.id, f"[{kind}] " + subject.strip()[:180], clean_body)
+    item = await db.create_support_message(user.id, f"[{kind}] " + subject.strip()[:180], clean_body)
+    try:
+        import traffic as _tr
+        await _tr.bump("support")
+        if (await db.get_setting("longoai_support_auto", "1")) != "0":
+            await _longo_agent.enqueue("support", item.id, user.id)   # LongoAI javob yozadi (sahifa /api/agent/kick chaqiradi)
+    except Exception:  # noqa: BLE001
+        logger.exception("Yordam xabarini LongoAI navbatiga qo'yib bo'lmadi")
     return RedirectResponse("/yordam?sent=1", status_code=302)
 
 
@@ -2761,8 +2898,12 @@ async def upgrade_submit(
             return RedirectResponse(f"/tariflar?plan={plan}&auto=1&error=bot", status_code=302)
     if plan not in ("free", "pro", "ultra"):
         raise HTTPException(status_code=400, detail="Noto'g'ri tarif.")
-    await db.admin_set_user_plan(user.id, plan)
-    return RedirectResponse("/profil?upgraded=1", status_code=302)
+    if plan == "free" or payments_live():
+        # TODO(to'lov): PAYMENTS_LIVE yoqilganda shu yerda provayder tasdig'i tekshiriladi
+        await db.admin_set_user_plan(user.id, plan)
+        return RedirectResponse("/profil?upgraded=1", status_code=302)
+    await _record_plan_request(user, plan)
+    return RedirectResponse(f"/tariflar?requested={plan}", status_code=302)
 
 
 @app.get("/profil", response_class=HTMLResponse)
@@ -3046,8 +3187,84 @@ async def api_ask(request: Request, body: AskRequest):
         lang=lang,
     )
     await db.log_chat(user.id, provider, question, answer)
+    try:
+        import traffic as _tr
+        await _tr.bump("ai_ask")
+    except Exception:  # noqa: BLE001
+        pass
 
     return JSONResponse({"answer": answer, "provider": provider, "usage": usage, "effort": effort})
+
+
+@app.post("/api/ask/stream")
+@limiter.limit("20/minute")
+async def api_ask_stream(request: Request, body: AskRequest):
+    """v243: tezkor chat — javob bo'laklab keladi (Server-Sent Events). Birinchi so'zlar ~1 soniyada ko'rinadi.
+    Matn chatda chiroyli ko'rsatiladi: formulalar (LaTeX), grafik (```plot) va shakllar (```svg)."""
+    import json as _json
+    from fastapi.responses import StreamingResponse
+    user = await get_current_user(request)
+    if user is None:
+        raise HTTPException(status_code=401, detail="Avval tizimga kiring.")
+    if user.plan == "free":
+        return JSONResponse({"limit_reached": True, "used": 0, "limit": 0, "plan": "free", "window_hours": 0, "retry_after_seconds": None,
+                             "message": "AI repetitor — Pro va Ultra tarif imtiyozi. Testlar va mavzular bepul qolaveradi."}, status_code=402)
+    usage = await db.check_and_use_ai_message(user.id)
+    if not usage["allowed"]:
+        return JSONResponse({"limit_reached": True, "used": usage["used"], "limit": usage["limit"], "plan": usage["plan"],
+                             "window_hours": usage["window_hours"], "retry_after_seconds": usage["retry_after_seconds"],
+                             "message": (f"So'nggi {usage['window_hours']} soat ichidagi AI suhbat limitingiz ({usage['limit']} ta savol) tugadi. "
+                                         f"{format_retry_after(usage['retry_after_seconds'])}")}, status_code=402)
+    question = prompt_safety.sanitize_user_text(body.question, prompt_safety.MAX_QUESTION_LENGTH)
+    if not question:
+        raise HTTPException(status_code=400, detail="Savol bo'sh bo'lishi mumkin emas.")
+    effort = body.effort
+    subject = body.subject if body.subject in db.SUBJECT_CODES else user.subject
+    certificate_type, lang = user.certificate_type, body.lang
+    if body.mode == "ielts":
+        subject, certificate_type, lang = "english", "ielts", "en-US"
+    history = [{"role": str(h.get("role", "user"))[:12], "text": str(h.get("text", ""))[:1200]} for h in body.history[-10:]]
+    display = body.source != "repetitor"
+
+    def ev(obj: dict) -> bytes:
+        return ("data: " + _json.dumps(obj, ensure_ascii=False) + "\n\n").encode()
+
+    async def gen():
+        import ai_gemini as _g
+        import ai_router as _r
+        yield b": ok\n\n"
+        if prompt_safety.looks_like_injection(question):
+            answer, provider = "Keling, darsimizga qaytaylik. Qaysi mavzuda yordam kerak?", "none"
+            yield ev({"t": answer})
+        else:
+            parts: list[str] = []
+            try:
+                async for chunk in _g.ask_gemini_stream(question, subject, effort, user.level, certificate_type, history, lang, display=display):
+                    parts.append(chunk)
+                    yield ev({"t": chunk})
+            except Exception:  # noqa: BLE001
+                logger.exception("stream xatosi")
+            answer, provider = "".join(parts).strip(), "gemini"
+            if not answer:
+                # stream ishlamadi — oddiy so'rov (zaxira modellar va aniq xato xabari bilan)
+                answer, provider = await ai.ask_tutor(question, subject, user.level, certificate_type, effort, source=body.source,
+                                                      history=history, lang=lang)
+                yield ev({"t": answer, "replace": True})
+            else:
+                cleaned = _r._strip_meta(answer if display else _r._clean_spoken(answer), question)
+                if cleaned != answer:
+                    answer = cleaned
+                    yield ev({"t": answer, "replace": True})
+        try:
+            await db.log_chat(user.id, provider, question, answer)
+            import traffic as _tr
+            await _tr.bump("ai_ask")
+        except Exception:  # noqa: BLE001
+            logger.debug("chat log", exc_info=True)
+        yield ev({"done": True, "answer": answer, "provider": provider, "usage": usage, "effort": effort})
+
+    return StreamingResponse(gen(), media_type="text/event-stream",
+                             headers={"Cache-Control": "no-store", "X-Accel-Buffering": "no"})
 
 
 # ---------------------------------------------------------------------------
@@ -4184,6 +4401,8 @@ async def api_balance_topup(request: Request, amount: int = Form(...), method: s
         raise HTTPException(status_code=400, detail="Noto'g'ri summa.")
     if method not in ("click", "paynet", "sqb"):
         method = "click"
+    if not payments_live():
+        raise HTTPException(status_code=403, detail="To'lov tizimi hali ulanmagan. Tez orada Click / Payme orqali to'ldirish mumkin bo'ladi.")
     # DEMO: hozircha haqiqiy to'lov provayderi ulanmagan, shuning uchun
     # kartadan real pul yechilmaydi — bu faqat ko'rgazma/vizual oqim.
     new_balance = await db.add_demo_balance(user.id, amount, method)

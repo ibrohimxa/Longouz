@@ -200,7 +200,8 @@
           case "cbrt": return Math.cbrt(A);
           case "root": return args[1] ? (A < 0 && args[1] % 2 === 1 ? -Math.pow(-A, 1 / args[1]) : Math.pow(A, 1 / args[1])) : Math.sqrt(A);
           case "sin": return sinD(A * toR); case "cos": return cosD(A * toR);
-          case "tan": return tanD(A * toR); case "cot": return 1 / tanD(A * toR);
+          case "tan": case "tg": return tanD(A * toR); case "cot": case "ctg": return 1 / tanD(A * toR);
+          case "arctg": return Math.atan(A) * fromR; case "arcctg": return (Math.PI / 2 - Math.atan(A)) * fromR;
           case "sec": return 1 / cosD(A * toR); case "csc": return 1 / sinD(A * toR);
           case "asin": case "arcsin": return Math.asin(A) * fromR;
           case "acos": case "arccos": return Math.acos(A) * fromR;
@@ -606,7 +607,33 @@
     return out;
   }
 
+  // v243: o'nli kasrni oddiy kasrga (3/4, 7/12 ...) aylantirish — maxraj ≤ 1000, aniq mos kelsa
+  function toFraction(x) {
+    if (typeof x !== "number" || !isFinite(x) || Number.isInteger(x)) return null;
+    var sgn = x < 0 ? -1 : 1, v = Math.abs(x), h1 = 1, h0 = 0, k1 = 0, k0 = 1, b = v;
+    for (var i = 0; i < 40; i++) {
+      var a = Math.floor(b), h2 = a * h1 + h0, k2 = a * k1 + k0;
+      h0 = h1; h1 = h2; k0 = k1; k1 = k2;
+      if (k1 > 1000) return null;
+      if (Math.abs(v - h1 / k1) < 1e-10 * Math.max(1, v)) return k1 === 1 ? null : { n: sgn * h1, d: k1, text: (sgn < 0 ? "−" : "") + h1 + "/" + k1 };
+      if (b - a < 1e-12) break;
+      b = 1 / (b - a);
+    }
+    return null;
+  }
+  // √ ko'rinishi: x = a·√b (masalan 2√3)
+  function toRadical(x) {
+    if (typeof x !== "number" || !isFinite(x) || Number.isInteger(x)) return null;
+    var sq = x * x, r = Math.round(sq);
+    if (Math.abs(sq - r) > 1e-9 * Math.max(1, sq) || r <= 1) return null;
+    var out = 1, inside = r;
+    for (var f = 2; f * f <= inside; f++) while (inside % (f * f) === 0) { inside /= f * f; out *= f; }
+    if (inside === 1) return null;
+    return (x < 0 ? "−" : "") + (out > 1 ? out : "") + "√" + inside;
+  }
+
   var API = {
+    toFraction: toFraction, toRadical: toRadical,
     CONSTS: CONSTS, CONST_INFO: CONST_INFO, FORMULAS: FORMULAS, ATOMS: ATOMS,
     normalize: normalize, parse: parse, evalAst: evalAst, run: run, fmt: fmt, plain: plain, findRoots: findRoots,
     parseFormula: parseFormula, molarMass: molarMass, atomMass: atomMass, solveFormula: solveFormula,

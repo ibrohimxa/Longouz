@@ -655,6 +655,15 @@ async def run_assistant(messages: list[dict]) -> dict:
     import ai_diagnostics
     client = ai_claude._get_client()
     if client is None:
+        # v243: LongoAI agent — Gemini vositalar bilan (butun baza, shikoyatlar, internet, xotira)
+        try:
+            import longo_agent
+            out = await longo_agent.admin_assistant(messages)
+            if out is not None:
+                return out
+        except Exception:  # noqa: BLE001
+            logger.exception("LongoAI agent ishlamadi — oddiy rejimga o'tildi")
+    if client is None:
         msgs0 = [{"role": "assistant" if m.get("role") == "assistant" else "user", "content": str(m.get("text", ""))[:4000]} for m in messages[-12:] if str(m.get("text", "")).strip()]
         if not msgs0 or msgs0[-1]["role"] != "user":
             return {"reply": "Savol yozing.", "actions": []}
@@ -717,6 +726,9 @@ async def run_assistant(messages: list[dict]) -> dict:
 
 async def apply_action(act: dict, admin: str) -> dict:
     t, p = act.get("type"), act.get("payload") or {}
+    if t == "support_reply":
+        import longo_agent
+        return await longo_agent.apply_support_reply(p, admin)
     if t == "update_question":
         qid = int(p.get("id"))
         f = p.get("fields") or {}

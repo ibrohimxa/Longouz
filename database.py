@@ -1658,7 +1658,12 @@ async def log_quiz_result(
         session.add(log)
         await session.commit()
         await session.refresh(log)
-        return log
+    try:
+        import traffic as _tr  # v243: «test tugadi, natija chiqdi» statistikasi
+        await _tr.bump("quiz_finish")
+    except Exception:  # noqa: BLE001
+        pass
+    return log
 
 
 async def get_user_quiz_history(user_id: int, subject: str | None = None) -> list[WebQuizLog]:
@@ -1992,6 +1997,7 @@ async def store_quiz_session(
     payload = _j.dumps(entry, ensure_ascii=False, default=str)
     async with async_session() as session:
         row = await session.get(QuizSessionRow, attempt_token)
+        _is_new_attempt = row is None
         if row is None:
             session.add(QuizSessionRow(token=attempt_token, user_id=user_id, payload=payload, ts=entry["ts"]))
         else:
@@ -2000,6 +2006,12 @@ async def store_quiz_session(
         if random.random() < 0.05:
             await session.execute(QuizSessionRow.__table__.delete().where(QuizSessionRow.ts < time.time() - QUIZ_SESSION_TTL_SECONDS))
         await session.commit()
+    if _is_new_attempt:
+        try:
+            import traffic as _tr  # v243: «test boshlandi» statistikasi
+            await _tr.bump("quiz_start")
+        except Exception:  # noqa: BLE001
+            pass
 
 
 async def get_quiz_session(attempt_token: str, user_id: int) -> dict | None:

@@ -59,7 +59,15 @@
     <div class="owl-usage-bar"><div class="owl-usage-bar-fill" id="owl-usage-bar-fill"></div></div>
     <span id="owl-usage-text"></span>
   </div>
+  <div class="lz-mathpad" id="floating-chat-mathpad" hidden role="group" aria-label="Matematik belgilar">
+    <div class="lz-mathpad-keys">
+      {% for k, lbl in [("√(", "√"), ("∛(", "∛"), ("²", "x²"), ("³", "x³"), ("^", "xⁿ"), ("/", "a/b"), ("π", "π"), ("°", "°"), ("±", "±"), ("×", "×"), ("÷", "÷"), ("≤", "≤"), ("≥", "≥"), ("≠", "≠"), ("≈", "≈"), ("∞", "∞"), ("(", "("), (")", ")"), ("|", "|x|"), ("sin(", "sin"), ("cos(", "cos"), ("tg(", "tg"), ("log(", "log"), ("ln(", "ln"), ("α", "α"), ("β", "β"), ("Δ", "Δ"), ("∠", "∠"), ("⊥", "⊥"), ("∥", "∥"), ("△", "△"), ("→", "→"), ("₂", "x₂"), ("·10^", "·10ⁿ")] %}
+      <button type="button" data-ins="{{ k }}">{{ lbl }}</button>
+      {% endfor %}
+    </div>
+  </div>
   <form class="floating-chat-input-row" id="floating-chat-form">
+    <button type="button" id="floating-chat-mathbtn" class="chat-math-btn" aria-label="Matematik belgilar (ildiz, daraja, kasr)" title="Ildiz, daraja, kasr va boshqa belgilar" aria-expanded="false">√x</button>
     <button type="button" id="floating-chat-mic" class="chat-mic-btn" aria-label="Ovozli savol" title="Mikrofondan gapiring">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
     </button>
@@ -69,6 +77,9 @@
     </button>
   </form>
 </div>
+<link rel="stylesheet" href="/static/longo-think.css?v=243" data-longo-think-css>
+<script src="/static/longo-think.js?v=243" defer></script>
+<script src="/static/longo-render.js?v=243" defer></script>
 {% endif %}
 
 <script>

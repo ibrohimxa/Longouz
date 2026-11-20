@@ -1,0 +1,78 @@
+/* v243: LongoAI «o'ylamoqda» animatsiyasi.
+   Uch ko'k nuqta yonma-yon sakraydi -> ozgina uzoqlashib aylana bo'ylab aylanadi -> markazga birikib boyqush logotipi
+   paydo bo'ladi -> logotip sekin 360° aylanadi -> yana uch nuqtaga bo'linib yaqinlashadi ... (4,2 soniyalik tsikl). */
+.lthink{--lt:44px;--dot:7px;--c:#2ec4ff;position:relative;display:inline-block;width:var(--lt);height:var(--lt);flex:0 0 auto;vertical-align:middle;perspective:240px}
+.lthink-orbit{position:absolute;inset:0;animation:ltOrbit 4.2s cubic-bezier(.55,.1,.35,1) infinite}
+.lthink-d{position:absolute;left:50%;top:50%;width:var(--dot);height:var(--dot);margin:calc(var(--dot) / -2) 0 0 calc(var(--dot) / -2);border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,#bff0ff,var(--c) 60%,#0a8fd6);box-shadow:0 0 8px rgba(46,196,255,.85),0 0 2px #fff inset}
+.lthink-d:nth-child(1){animation:ltD1 4.2s cubic-bezier(.5,.05,.3,1) infinite}
+.lthink-d:nth-child(2){animation:ltD2 4.2s cubic-bezier(.5,.05,.3,1) infinite}
+.lthink-d:nth-child(3){animation:ltD3 4.2s cubic-bezier(.5,.05,.3,1) infinite}
+.lthink-owl{position:absolute;inset:6%;background:url("/static/logo-owl3d-sm.png") center/contain no-repeat;opacity:0;transform:scale(.2);
+  filter:drop-shadow(0 0 6px rgba(46,196,255,.55));animation:ltOwl 4.2s cubic-bezier(.45,.05,.3,1) infinite;backface-visibility:visible}
+.lthink-glow{position:absolute;inset:18%;border-radius:50%;background:radial-gradient(circle,rgba(46,196,255,.55),transparent 70%);opacity:0;animation:ltGlow 4.2s ease-in-out infinite}
+
+/* nuqtalar: qator (sakrash) -> aylana -> markaz (birikish) -> ... -> qator */
+@keyframes ltD1{
+  0%{transform:translate(-11px,0) scale(1);opacity:1}
+  5%{transform:translate(-11px,-5px) scale(1)}
+  10%{transform:translate(-11px,0) scale(1)}
+  20%{transform:translate(0,-11px) scale(1)}
+  36%{transform:translate(0,-11px) scale(1);opacity:1}
+  44%{transform:translate(0,0) scale(.3);opacity:0}
+  80%{transform:translate(0,0) scale(.3);opacity:0}
+  90%{transform:translate(-11px,0) scale(1);opacity:1}
+  100%{transform:translate(-11px,0) scale(1);opacity:1}}
+@keyframes ltD2{
+  0%{transform:translate(0,0) scale(1);opacity:1}
+  6%{transform:translate(0,0)}
+  11%{transform:translate(0,-5px)}
+  16%{transform:translate(0,0)}
+  22%{transform:translate(9.5px,5.5px) scale(1)}
+  36%{transform:translate(9.5px,5.5px) scale(1);opacity:1}
+  44%{transform:translate(0,0) scale(.3);opacity:0}
+  80%{transform:translate(0,0) scale(.3);opacity:0}
+  90%{transform:translate(0,0) scale(1);opacity:1}
+  100%{transform:translate(0,0) scale(1);opacity:1}}
+@keyframes ltD3{
+  0%{transform:translate(11px,0) scale(1);opacity:1}
+  12%{transform:translate(11px,0)}
+  16%{transform:translate(11px,-5px)}
+  19%{transform:translate(11px,0)}
+  24%{transform:translate(-9.5px,5.5px) scale(1)}
+  36%{transform:translate(-9.5px,5.5px) scale(1);opacity:1}
+  44%{transform:translate(0,0) scale(.3);opacity:0}
+  80%{transform:translate(0,0) scale(.3);opacity:0}
+  90%{transform:translate(11px,0) scale(1);opacity:1}
+  100%{transform:translate(11px,0) scale(1);opacity:1}}
+/* aylana bo'ylab aylanish (faqat nuqtalar aylanada turgan paytda) */
+@keyframes ltOrbit{0%,18%{transform:rotate(0)}40%{transform:rotate(360deg)}100%{transform:rotate(360deg)}}
+/* boyqush: paydo bo'ladi -> sekin 360° aylanadi -> kichrayib yo'qoladi */
+@keyframes ltOwl{
+  0%,38%{opacity:0;transform:scale(.2) rotateY(0)}
+  46%{opacity:1;transform:scale(1.08) rotateY(0)}
+  50%{opacity:1;transform:scale(1) rotateY(0)}
+  76%{opacity:1;transform:scale(1) rotateY(360deg)}
+  86%{opacity:0;transform:scale(.25) rotateY(360deg)}
+  100%{opacity:0;transform:scale(.2) rotateY(360deg)}}
+@keyframes ltGlow{0%,38%{opacity:0;transform:scale(.4)}46%{opacity:.9;transform:scale(1.25)}60%{opacity:.35;transform:scale(1)}82%{opacity:.2}90%,100%{opacity:0;transform:scale(.5)}}
+
+.lthink-sm{--lt:30px;--dot:5px}
+.lthink-sm .lthink-d:nth-child(1){animation-name:ltD1s}
+.lthink-sm .lthink-d:nth-child(2){animation-name:ltD2s}
+.lthink-sm .lthink-d:nth-child(3){animation-name:ltD3s}
+@keyframes ltD1s{0%{transform:translate(-8px,0)}5%{transform:translate(-8px,-4px)}10%{transform:translate(-8px,0)}20%,36%{transform:translate(0,-8px);opacity:1}44%,80%{transform:translate(0,0) scale(.3);opacity:0}90%,100%{transform:translate(-8px,0) scale(1);opacity:1}}
+@keyframes ltD2s{0%,6%{transform:translate(0,0)}11%{transform:translate(0,-4px)}16%{transform:translate(0,0)}22%,36%{transform:translate(7px,4px);opacity:1}44%,80%{transform:translate(0,0) scale(.3);opacity:0}90%,100%{transform:translate(0,0) scale(1);opacity:1}}
+@keyframes ltD3s{0%,12%{transform:translate(8px,0)}16%{transform:translate(8px,-4px)}19%{transform:translate(8px,0)}24%,36%{transform:translate(-7px,4px);opacity:1}44%,80%{transform:translate(0,0) scale(.3);opacity:0}90%,100%{transform:translate(8px,0) scale(1);opacity:1}}
+.lthink-lg{--lt:64px;--dot:10px}
+
+/* bubble: animatsiya + yozuv */
+.lthink-row{display:inline-flex;align-items:center;gap:10px;padding:6px 14px 6px 8px;border-radius:16px;border-bottom-left-radius:5px;
+  background:var(--bg-elevated,rgba(255,255,255,.04));border:1px solid var(--line,rgba(46,196,255,.25));align-self:flex-start;max-width:100%}
+.lthink-text{font-size:.82rem;color:var(--ink-soft,#9fb6c2);display:inline-flex;align-items:baseline;gap:1px;white-space:nowrap}
+.lthink-text b{font-weight:700;background:linear-gradient(90deg,#2ec4ff,#3dff7b,#2ec4ff);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:ltShine 2.4s linear infinite}
+.lthink-step{display:block;font-size:.72rem;opacity:.7;margin-top:2px;white-space:normal}
+@keyframes ltShine{to{background-position:-200% 0}}
+@media (prefers-reduced-motion:reduce){
+  .lthink-orbit,.lthink-d,.lthink-owl,.lthink-glow,.lthink-text b{animation-duration:8s}
+}

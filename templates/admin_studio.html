@@ -8,11 +8,11 @@
   <link rel="icon" type="image/png" href="/static/logo-owl.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css?v=242">
-  <link rel="stylesheet" href="/static/admin-dash.css?v=242">
-  <link rel="stylesheet" href="/static/admin.css?v=242">
-  <link rel="stylesheet" href="/static/admin-studio.css?v=242">
-  <script src="/static/theme-init.js?v=242"></script>
+  <link rel="stylesheet" href="/static/style.css?v=243">
+  <link rel="stylesheet" href="/static/admin-dash.css?v=243">
+  <link rel="stylesheet" href="/static/admin.css?v=243">
+  <link rel="stylesheet" href="/static/admin-studio.css?v=243">
+  <script src="/static/theme-init.js?v=243"></script>
 </head>
 <body data-logged-in="true">
   <div class="app-shell">
@@ -20,14 +20,14 @@
     <div class="app-content">
       <div class="app-topbar"><div>
         <h1>Studio</h1>
-        <p>Hujjatdan savol olish, mock yaratish, baza holati va Claude yordamchi</p>
+        <p>Hujjatdan savol olish, mock yaratish, baza holati va LongoAI yordamchi</p>
       </div></div>
 
       <div class="st-tabs" id="st-tabs">
         <button data-t="doc" class="on">📄 Hujjat → savollar</button>
         <button data-t="mock">🧪 Mock yaratish</button>
         <button data-t="bank">📊 Baza holati</button>
-        <button data-t="ai">🤖 Claude yordamchi</button>
+        <button data-t="ai">🦉 LongoAI yordamchi</button>
         <button data-t="log">🕘 O'zgarishlar</button>
       </div>
       {% if not ai_ready %}<div class="form-error">AI kaliti sozlanmagan — hujjatni AI bilan tahlil qilish va yordamchi ishlamaydi (qoida bo'yicha o'qish ishlaydi). <a href="{{ admin_prefix }}/ai">AI sozlamalari</a></div>{% endif %}
@@ -87,19 +87,13 @@
         <div class="st-card"><div id="b-topics-h" class="st-note">Qatorni bosing — mavzular ko'rinadi</div><div style="overflow:auto"><table class="st-table" id="b-topics"></table></div></div>
       </section>
 
-      <!-- CLAUDE -->
+      <!-- LONGOAI -->
       <section class="st-pane" id="p-ai" hidden>
-        <div class="st-card">
-          {% if not claude_ready %}<div class="form-error">Claude kaliti (ANTHROPIC_API_KEY) kerak.</div>{% endif %}
-          <div id="a-chat" class="st-chat"></div>
-          <div id="a-actions"></div>
-          <div class="st-row"><input id="a-input" class="st-grow" placeholder="Masalan: Fizika DTM da kam savolli mavzularni ayt va 'Tarix' dagi noto'g'ri mavzuli savollarni top">
-            <button class="btn-primary" id="a-send">Yuborish</button></div>
-          <div class="st-row st-chips">
-            <button class="chip">Bazani tekshir: qaysi fan va mavzularda savol yetishmaydi?</button>
-            <button class="chip">Tarix DTM savollarini mavzuga mosligi bo'yicha tekshir</button>
-            <button class="chip">Matematika DTM da 10 ta savolning javobini qayta hisobla</button>
-          </div>
+        <div class="st-card" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+          <img src="/static/logo-owl3d-sm.png" alt="" width="56" height="56">
+          <div style="flex:1;min-width:220px"><b>LongoAI yordamchi alohida sahifaga ko'chdi</b>
+            <p class="st-note" style="margin:4px 0 0">Endi u butun savollar bazasini qidiradi, shikoyat va xabarlarni ko'radi, Google'da tekshiradi, xotiraga yozadi va formulalarni chiroyli ko'rsatadi.</p></div>
+          <a class="btn-primary" href="{{ admin_prefix }}/longoai">LongoAI'ni ochish</a>
         </div>
       </section>
 
@@ -110,8 +104,8 @@
     </div>
   </div>
   <script>window.STUDIO = {prefix: "{{ admin_prefix }}"};</script>
-  <script src="/static/devtools-guard.js?v=242"></script>
-  <script src="/static/app.js?v=242"></script>
-  <script src="/static/admin-studio.js?v=242"></script>
+  <script src="/static/devtools-guard.js?v=243"></script>
+  <script src="/static/app.js?v=243"></script>
+  <script src="/static/admin-studio.js?v=243"></script>
 </body>
 </html>

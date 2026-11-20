@@ -212,6 +212,60 @@ def _to_contents(question: str, history: list[dict] | None):
     return contents
 
 
+async def ask_gemini_stream(
+    question: str, subject: str, effort: str = "normal", level: str | None = None,
+    certificate_type: str | None = None, history: list[dict] | None = None, lang: str | None = None,
+    display: bool = True,
+):
+    """v243: javobni BO'LAKLAB (stream) qaytaradi — o'quvchi birinchi so'zlarni 1 soniya ichida ko'radi.
+    Model band bo'lsa (birinchi bo'lak kelmasdan oldin) keyingi modelga o'tiladi. Hech biri ishlamasa — hech narsa yield qilmaydi."""
+    import asyncio
+    import time as _time
+    if not is_gemini_configured():
+        return
+    from ai_tutor_prompt import build_system_prompt, normalize_history
+
+    hist = normalize_history(history)
+    system_prompt = build_system_prompt(subject, level, certificate_type, effort, lang, spoken=not display)
+    max_tokens = {"low": 1500, "normal": 2800, "high": 4500, "max": 6500}.get(effort, 2800)
+    level_name = _thinking_level(question, effort, len(hist))
+    contents = _to_contents(question, hist)
+    primary = _GOOD_MODEL.get("m") or ai_keys.get("GEMINI_MODEL", GEMINI_MODEL) or GEMINI_MODEL
+    order = [primary] + [m for m in _FAILOVER_MODELS if m != primary]
+    now = _time.time()
+    order.sort(key=lambda m: 1 if _BUSY_UNTIL.get(m, 0) > now else 0)
+    for model in order:
+        tl = level_name
+        if _MIN_UNSUPPORTED.get(model) and tl == "minimal":
+            tl = "low"
+        cfg = {"system_instruction": system_prompt, "max_output_tokens": max_tokens,
+               "automatic_function_calling": _NO_AFC_CONFIG, "thinking_config": {"thinking_level": tl}}
+        got_any = False
+        try:
+            stream = await asyncio.wait_for(_get_client().aio.models.generate_content_stream(model=model, contents=contents, config=cfg), _CALL_TIMEOUT)
+            it = stream.__aiter__()
+            while True:
+                try:
+                    chunk = await asyncio.wait_for(it.__anext__(), _CALL_TIMEOUT if not got_any else 30)
+                except StopAsyncIteration:
+                    break
+                text = getattr(chunk, "text", None) or ""
+                if text:
+                    got_any = True
+                    yield text
+            if got_any:
+                _GOOD_MODEL["m"] = model
+                _BUSY_UNTIL.pop(model, None)
+                ai_diagnostics.clear_error("gemini")
+                return
+        except Exception as e:  # noqa: BLE001
+            ai_diagnostics.record_error("gemini", e)
+            logger.info("Gemini stream %s: %s", model, str(e)[:200])
+            if got_any:
+                return            # yarmida uzildi — bor matn qoladi
+            _BUSY_UNTIL[model] = _time.time() + 120
+
+
 async def ask_gemini(
     question: str, subject: str, effort: str = "normal", level: str | None = None,
     certificate_type: str | None = None, history: list[dict] | None = None, lang: str | None = None,

@@ -198,7 +198,7 @@
     };
     $("a-actions").appendChild(d);
   }
-  $("a-send").onclick = function () { send($("a-input").value); };
-  $("a-input").onkeydown = function (e) { if (e.key === "Enter") send($("a-input").value); };
+  if ($("a-send")) $("a-send").onclick = function () { send($("a-input").value); };
+  if ($("a-input")) $("a-input").onkeydown = function (e) { if (e.key === "Enter") send($("a-input").value); };
   document.querySelectorAll(".chip").forEach(function (c) { if (c.parentNode.classList.contains("st-chips")) c.onclick = function () { send(c.textContent); }; });
 })();

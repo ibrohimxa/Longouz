@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>LongoAI — Admin — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css?v=243">
+  <link rel="stylesheet" href="/static/admin-dash.css?v=243">
+  <link rel="stylesheet" href="/static/admin.css?v=243">
+  <link rel="stylesheet" href="/static/longo-think.css?v=243" data-longo-think-css>
+  <link rel="stylesheet" href="/static/longo-render.css?v=243" data-lr="lr">
+  <link rel="stylesheet" href="/static/admin-longoai.css?v=243">
+  <script src="/static/theme-init.js?v=243"></script>
+</head>
+<body data-logged-in="true">
+  <div class="app-shell">
+    {% include "_admin_sidebar.html" %}
+    <div class="app-content">
+
+      <header class="la-hero">
+        <div class="la-hero-ico" data-longo-think data-size="lg"></div>
+        <div class="la-hero-txt">
+          <h1>LongoAI</h1>
+          <p>Butun savollar bazasi, shikoyatlar, yordam xabarlari, statistika va internet (Google) bilan ishlaydigan yordamchi. O'zgartirishlarni siz tasdiqlaysiz.</p>
+        </div>
+        <div class="la-hero-state">
+          <span class="la-pill {{ 'ok' if ai_ready else 'bad' }}">{{ "Gemini ulangan" if ai_ready else "Gemini kaliti yo'q" }}</span>
+          <span class="la-pill" id="la-pending-pill">Navbatda: <b id="la-pending">{{ pending }}</b></span>
+        </div>
+      </header>
+      {% if not ai_ready %}<div class="form-error">Gemini kaliti sozlanmagan. <a href="{{ admin_prefix }}/keys">Kalitlar</a> bo'limida bepul kalitni kiriting.</div>{% endif %}
+
+      <div class="la-grid">
+        <!-- SUHBAT -->
+        <section class="la-chat-card" aria-label="LongoAI bilan suhbat">
+          <div class="la-chat-head">
+            <div><b>Suhbat</b><small>Savol bering yoki vazifa topshiring — LongoAI o'zi tekshiradi</small></div>
+            <button type="button" class="la-ghost" id="la-clear" title="Suhbatni tozalash">Yangi suhbat</button>
+          </div>
+          <div class="la-chat" id="la-chat" aria-live="polite">
+            <div class="la-empty" id="la-empty">
+              <div class="la-empty-owl"></div>
+              <h3>Nima qilamiz?</h3>
+              <p>Masalan, quyidagilardan birini tanlang:</p>
+              <div class="la-sugg" id="la-sugg">
+                <button type="button">Ochiq shikoyatlarni ko'rib chiq va qaysi savollar haqiqatan xato ekanini ayt</button>
+                <button type="button">Bugungi statistika: nechta odam kirdi, nechta test boshlandi va tugadi?</button>
+                <button type="button">Matematika DTM'da eng kam savolli 5 ta mavzuni top va har biriga 3 tadan yangi savol taklif qil</button>
+                <button type="button">Tarix savollaridan 10 tasini tekshir — sanalar to'g'rimi? Kerak bo'lsa Google'da qidir</button>
+                <button type="button">Javob berilmagan yordam xabarlarini ko'rib, javob taklif qil</button>
+                <button type="button">Bazadagi faol bo'lmagan (yashirilgan) savollar nega yashirilgan?</button>
+              </div>
+            </div>
+          </div>
+          <div class="la-actions" id="la-actions" hidden>
+            <div class="la-actions-head"><b>Tasdiq kutayotgan o'zgarishlar</b><button type="button" class="btn-primary admin-btn-sm" id="la-apply-all">Hammasini qo'llash</button></div>
+            <div id="la-actions-list"></div>
+          </div>
+          <form class="la-input" id="la-form" autocomplete="off">
+            <textarea id="la-text" rows="1" placeholder="LongoAI'ga yozing… (Enter — yuborish, Shift+Enter — yangi qator)"></textarea>
+            <button type="submit" class="la-send" id="la-send" aria-label="Yuborish"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
+          </form>
+        </section>
+
+        <!-- O'NG USTUN -->
+        <aside class="la-side">
+          <section class="la-card">
+            <h3>Avtomatik ish</h3>
+            <label class="la-switch"><input type="checkbox" data-cfg="auto_analyze" {{ 'checked' if cfg.auto_analyze }}><span></span><div><b>Shikoyatlarni o'zi tekshirsin</b><small>Savolni yechib, xato bormi aniqlaydi</small></div></label>
+            <label class="la-switch"><input type="checkbox" data-cfg="auto_fix" {{ 'checked' if cfg.auto_fix }}><span></span><div><b>Aniq xatoni o'zi tuzatsin</b><small>Ishonch {{ cfg.min_conf }}%+ bo'lsa; natijalar qayta hisoblanadi</small></div></label>
+            <label class="la-switch"><input type="checkbox" data-cfg="auto_reply" {{ 'checked' if cfg.auto_reply }}><span></span><div><b>O'quvchiga o'zi javob yozsin</b><small>Savol to'g'ri bo'lsa — nega to'g'ri ekanini tushuntiradi</small></div></label>
+            <label class="la-switch"><input type="checkbox" data-cfg="support_auto" {{ 'checked' if support_auto }}><span></span><div><b>Yordam xabarlariga javob bersin</b><small>Admin qarori kerak bo'lsa sizga ham belgilaydi</small></div></label>
+            <label class="la-switch"><input type="checkbox" data-cfg="web_search" {{ 'checked' if cfg.web_search }}><span></span><div><b>Google'da tekshirsin</b><small>Tarix, biologiya, til faktlari uchun</small></div></label>
+            <p class="la-note" id="la-cfg-note"></p>
+          </section>
+          <section class="la-card">
+            <div class="la-card-head"><h3>LongoAI ishlari</h3><button type="button" class="la-ghost" id="la-run">Hozir bajarish</button></div>
+            <div class="la-jobs" id="la-jobs"><p class="la-note">Yuklanmoqda…</p></div>
+          </section>
+        </aside>
+      </div>
+    </div>
+  </div>
+  <script>window.LONGOAI = { prefix: "{{ admin_prefix }}" };</script>
+  <script src="/static/longo-think.js?v=243"></script>
+  <script src="/static/longo-render.js?v=243"></script>
+  <script src="/static/app.js?v=243"></script>
+  <script src="/static/admin-longoai.js?v=243"></script>
+</body>
+</html>

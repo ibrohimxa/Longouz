@@ -1,3 +1,17 @@
+## v243 — xavfsizlik, haqiqiy statistika, LongoAI (o'zi tekshiradi va javob beradi), formulalar va chizmalar
+- **Xavfsizlik**:
+  - To'lov teshigi yopildi: ilgari /tariflar va /checkout/register so'rovi bilan istalgan odam Pro/Ultra'ni TEKIN olardi, /api/balance/topup esa balansni bepul to'ldirardi. Endi to'lov tizimi ulanmaguncha (PAYMENTS_LIVE=true) pullik tarif faqat admin tomonidan yoqiladi; tanlangan tarif «so'rov» sifatida adminga (Xabarlar) tushadi. Karta maydonlari hech qayerga yuborilmaydi va oyna yopilganda tozalanadi.
+  - Admin panel: GitHub tarixida ochiq qolgan eski parollar (va 10 belgidan qisqa parol) endi ISHLAMAYDI; parol o'zgarsa eski admin sessiyalari avtomatik bekor bo'ladi; noto'g'ri urinishlar bazada sanaladi (bir IP'dan 5 ta xato → 30 daqiqa blok); admin cookie faqat HTTPS va SameSite=Strict.
+  - Boshqa saytdan yuborilgan yozish so'rovlari (CSRF) rad etiladi; /api/health endi foydalanuvchilar soni va xato matnini oshkor qilmaydi; admin va API javoblari keshlanmaydi, admin sahifalari qidiruv tizimidan yashirin; CSP kuchaytirildi.
+- **Statistika**: sahifani yangilash (F5) endi raqamlarni oshirmaydi. «Tashrif» — 30 daqiqalik sessiya, «kishi» — kuniga bir marta sanaladigan noyob brauzer (barcha serverlar uchun bitta bazada). Yangi: hozir saytda (onlayn), test boshlandi / test tugadi (natija chiqdi), bugungi natija, yangi o'quvchilar. Admin panelda «Tashriflar va testlar» grafigi (7/14/30 kun), voronka, qurilmalar va qaytib kelganlar ulushi.
+- **LongoAI (Gemini)**:
+  - Shikoyat kelsa LongoAI savolni o'zi yechadi, kerak bo'lsa Google'da tekshiradi; xato aniq bo'lsa O'ZI tuzatadi (natijalar qayta hisoblanadi) va o'quvchiga tushuntirib yozadi; savol to'g'ri bo'lsa — nega to'g'ri ekanini aytadi.
+  - «Yordam» xabarlariga odamdek javob beradi (hisobini, testlarini, bazani ko'rib); admin qarori kerak bo'lsa xabarni adminga ham belgilaydi.
+  - Admin panelda yangi «LongoAI yordamchi» sahifasi: butun savollar bazasi, shikoyatlar, xabarlar, statistika, internet qidiruv va xotira vositalari; takliflar chiroyli kartalarda («Qo'llash» / «Hammasini qo'llash»); avtomatik ish sozlamalari va ishlar jurnali.
+- **Chat**: javob bo'laklab (stream) keladi — birinchi so'zlar ~1 soniyada; formulalar chiroyli (KaTeX), funksiya grafiklari va geometrik shakllar chiziladi; ildiz, daraja, kasr, π, ≤ kabi belgilar paneli; yangi «o'ylamoqda» animatsiyasi (3 ko'k nuqta → aylana → boyqush logotipi 360° → yana nuqtalar).
+- **Kalkulyator**: «Grafik» bo'limi (bir nechta funksiya, nollar, Oy bilan kesishish, yaqinlashtirish), natija oddiy kasr va ildiz ko'rinishida ham (0,75 = 3/4; 3,464 = 2√3), yangi tugmalar (∛, |x|, Cₙᵏ, 1/x), tg/ctg/arctg.
+- **Admin panel**: yon menyu bo'limlarga ajratildi (Asosiy, LongoAI, Kontent, Aloqa, Tizim).
+
 ## v242 — ekranga moslik, yangi manzillar, tabiiy AI repetitor, AI tekshiruv, yangi savollar
 - **Katta va o'rta ekranlar**: kabinet va yuqori panel noutbuklarda (1280–1680 px) juda yirik, QHD monitorlarda esa ikki marta kattalashgan edi (shrift + masshtab ustma-ust). Endi kabinet sahifalari ekran kengligi va balandligiga qarab bir tekis masshtablanadi; yon paneldagi «Chiqish» katta ekranda ham ko'rinadi. Admin panel o'zgarmagan.
 - **Bosh sahifa**: saytga qayta kirganda doim bosh sahifa ochiladi (kirgan o'quvchi uchun tepada «Kabinet» tugmasi). Chiqishdan keyin ham bosh sahifa.

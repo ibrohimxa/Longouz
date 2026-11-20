@@ -235,3 +235,4 @@ h2.inline-edit:empty::before { content: "Savol matni…"; color: var(--ink-soft)
   .app-sidebar .sidebar-nav .sb-lbl { font-size: .58rem; }
   select, input[type="number"], input[type="text"], input[type="search"] { max-width: 100%; }
 }
+

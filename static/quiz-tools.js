@@ -46,7 +46,7 @@
       '<p class="lz-err" id="lzr-err" hidden></p>' +
       '<button type="button" class="lz-primary" id="lzr-send">Yuborish</button>' +
       '<p class="lz-muted">Shikoyat adminlarga yuboriladi va savol tekshirib tuzatiladi. Agar savol xato bo\'lsa — natijangiz avtomatik qayta hisoblanadi. Test vaqti to\'xtamaydi.</p></div>' +
-      '<div id="lzr-done" hidden><div class="lz-done-ico">✓</div><h4>Rahmat!</h4><p>Shikoyatingiz yuborildi. Savolni tekshirib, kerak bo\'lsa tuzatamiz.</p><button type="button" class="lz-secondary" id="lzr-close2">Testga qaytish</button></div>' +
+      '<div id="lzr-done" hidden><div class="lz-done-ico">✓</div><h4>Rahmat!</h4><p>Shikoyatingiz yuborildi. LongoAI savolni hozir o\'zi tekshiradi — xato bo\'lsa tuzatadi va javobini qo\'ng\'iroqcha (bildirishnomalar)da ko\'rasiz.</p><button type="button" class="lz-secondary" id="lzr-close2">Testga qaytish</button></div>' +
       "</div></div>";
     document.body.appendChild(reportDrawer);
     if (S) S.register("report", reportDrawer, { button: reportBtn, onOpen: fillReportCtx });
@@ -75,7 +75,10 @@
       method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ attempt_token: token, index: st.index, category: cat, message: msg, selected: sel })
     }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.detail || "Yuborib bo'lmadi"); return j; }); })
-      .then(function () { $("#lzr-form").hidden = true; $("#lzr-done").hidden = false; reportBtn.classList.add("is-sent"); setTimeout(function () { reportBtn.classList.remove("is-sent"); }, 2500); })
+      .then(function (j) {
+        // v243: LongoAI shikoyatni darhol tekshiradi (natija qo'ng'iroqcha — bildirishnomalarda)
+        if (j && j.job) { try { fetch("/api/agent/kick", { method: "POST", credentials: "same-origin", keepalive: true, headers: { "Content-Type": "application/json" }, body: "{}" }); } catch (e) {} }
+        $("#lzr-form").hidden = true; $("#lzr-done").hidden = false; reportBtn.classList.add("is-sent"); setTimeout(function () { reportBtn.classList.remove("is-sent"); }, 2500); })
       .catch(function (e) { err.textContent = e.message; err.hidden = false; btn.disabled = false; btn.textContent = "Yuborish"; });
   }
 
@@ -113,17 +116,17 @@
     wireCalcPane();
   }
   function subjectTabs() {
-    if (subject === "math") return [["formula", "Formulalar"], ["eq", "Tenglama"], ["comb", "Kombinatorika"], ["pct", "Foiz"]];
-    if (subject === "physics") return [["formula", "Formulalar"], ["const", "Doimiylar"], ["units", "Birliklar"]];
+    if (subject === "math") return [["graph", "Grafik"], ["formula", "Formulalar"], ["eq", "Tenglama"], ["comb", "Kombinatorika"], ["pct", "Foiz"]];
+    if (subject === "physics") return [["formula", "Formulalar"], ["graph", "Grafik"], ["const", "Doimiylar"], ["units", "Birliklar"]];
     if (subject === "chemistry") return [["molar", "Molyar massa"], ["balance", "Tenglashtirish"], ["formula", "Formulalar"]];
     if (subject === "biology") return [["gen", "DNK / RNK"], ["chargaff", "Chargaff"], ["hw", "Hardy–Weinberg"], ["mendel", "Mendel"]];
     return [];
   }
   var KEYS = [
-    ["sin(", "cos(", "tan(", "π", "e"], ["asin(", "acos(", "atan(", "^2", "√("], ["(", ")", "^", "!", "%"],
+    ["sin(", "cos(", "tan(", "π", "e"], ["asin(", "acos(", "atan(", "^2", "√("], ["∛(", "abs(", "log(", "ncr(", "^(-1)"], ["(", ")", "^", "!", "%"],
     ["7", "8", "9", "/", "⌫"], ["4", "5", "6", "*", "C"], ["1", "2", "3", "-", "ln("], ["0", ".", "x", "+", "log("]
   ];
-  var KEYLABEL = { "^2": "x²", "√(": "√", "^": "xʸ", "/": "÷", "*": "×", "-": "−", "!": "n!", "⌫": "⌫" };
+  var KEYLABEL = { "^2": "x²", "√(": "√", "∛(": "∛", "abs(": "|x|", "ncr(": "Cₙᵏ", "^(-1)": "1/x", "^": "xʸ", "/": "÷", "*": "×", "-": "−", "!": "n!", "⌫": "⌫" };
   function calcPaneHtml() {
     var keys = KEYS.map(function (row) { return row.map(function (k) { var cls = /^\d$|^\.$/.test(k) ? "num" : (k === "C" || k === "⌫") ? "clr" : /^[\/*\-+]$/.test(k) ? "op" : ""; return '<button type="button" class="' + cls + '" data-k="' + esc(k) + '">' + esc(KEYLABEL[k] || k) + "</button>"; }).join(""); }).join("");
     var CHEM_CONST = { NA: 1, Vm: 1, R: 1, patm: 1, kB: 1 };
@@ -151,6 +154,12 @@
     if (r.kind === "empty") { out.innerHTML = "&nbsp;"; $("#lzc-copy").hidden = true; return; }
     if (r.kind === "error" && !commit) { out.textContent = "…"; out.className = "lzc-out"; return; }
     out.textContent = r.text;
+    // v243: aniq ko'rinish — oddiy kasr (3/4) va ildiz (2√3)
+    if (r.kind === "value" && C.toFraction) {
+      var fr = C.toFraction(r.value), rd = C.toRadical(r.value), ex = [];
+      if (fr) ex.push(fr.text); if (rd) ex.push(rd);
+      if (ex.length) { var sm = document.createElement("small"); sm.className = "lzc-exact"; sm.textContent = " = " + ex.join(" = "); out.appendChild(sm); }
+    }
     lastResult = r.plain || ""; $("#lzc-copy").hidden = !lastResult || !currentOpenInput();
     if (commit && r.kind !== "error") {
       var h = $("#lzc-hist"), item = el("button", "lzc-h", "<span>" + esc(inp.value) + "</span><b>" + esc(r.text) + "</b>");
@@ -202,7 +211,45 @@
   }
   function rowsHtml(rows) { return rows.map(function (r) { return '<div class="lzc-r"><span>' + r[0] + "</span><b>" + r[1] + "</b></div>"; }).join(""); }
 
+  // v243: funksiya grafigi — y = f(x), bir nechta funksiya, nollar va kesishishlar
+  function buildGraph(pane) {
+    pane.innerHTML = '<div class="lzc-tool"><p class="lzc-help">Har qatorga bitta funksiya: <code>y = x^2 - 4</code>, <code>y = 2x + 1</code>, <code>y = sin(x)</code>. Oraliq: <code>x: -5..5</code>. Nuqta ustiga barmoq/sichqoncha — koordinata.</p>' +
+      '<textarea class="lzc-in lzc-graph-in" rows="3" spellcheck="false">y = x^2 - 4\ny = 2x + 1\nx: -6..6</textarea>' +
+      '<div class="lzc-row"><button type="button" class="lz-primary lzc-go">Chizish</button><button type="button" class="lzc-mini" data-z="0.5">Yaqinlashtirish +</button><button type="button" class="lzc-mini" data-z="2">Uzoqlashtirish −</button></div>' +
+      '<div class="lzc-graph"></div><div class="lzc-res lzc-graph-info"></div></div>';
+    var ta = $(".lzc-graph-in", pane), host = $(".lzc-graph", pane), info = $(".lzc-graph-info", pane), scale = 1;
+    function go() {
+      var load = function () {
+        if (!window.LZGraph) return;
+        var spec = window.LZGraph.parseSpec(ta.value);
+        var mid = (spec.xmin + spec.xmax) / 2, half = (spec.xmax - spec.xmin) / 2 * scale;
+        spec.xmin = mid - half; spec.xmax = mid + half;
+        window.LZGraph.draw(host, spec, { width: 340, height: 250 });
+        // nollar va kesishishlar (aniq hisob)
+        var rows = [];
+        spec.fns.forEach(function (fn) {
+          try {
+            var ast = C.parse(C.normalize(fn.expr));
+            var f = function (x) { try { return C.evalAst(ast, { vars: { x: x }, deg: false, ans: 0 }); } catch (e) { return NaN; } };
+            var roots = C.findRoots(f).filter(function (r) { return r >= spec.xmin && r <= spec.xmax; }).slice(0, 6);
+            rows.push(["<b>" + esc(fn.src) + "</b>", roots.length ? "nollari: " + roots.map(function (r) { return "x = " + C.fmt(r); }).join(", ") : "Ox bilan kesishmaydi (oraliqda)"]);
+            var y0 = f(0); if (isFinite(y0)) rows.push(["", "Oy bilan kesishish: (0; " + C.fmt(y0) + ")"]);
+          } catch (e) { rows.push([esc(fn.src), "ifoda noto'g'ri"]); }
+        });
+        info.innerHTML = rowsHtml(rows);
+      };
+      if (window.LZGraph) load();
+      else { var sc = document.createElement("script"); sc.src = "/static/lz-graph.js?v=243"; sc.onload = load; document.head.appendChild(sc); }
+    }
+    $(".lzc-go", pane).addEventListener("click", function () { scale = 1; go(); });
+    $$("[data-z]", pane).forEach(function (b) { b.addEventListener("click", function () { scale *= +b.dataset.z; go(); }); });
+    ta.addEventListener("keydown", function (e) { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); go(); } });
+    if (!document.querySelector('link[data-lr="lr"]')) { var l = document.createElement("link"); l.rel = "stylesheet"; l.href = "/static/longo-render.css?v=243"; l.setAttribute("data-lr", "lr"); document.head.appendChild(l); }
+    go();
+  }
+
   function buildTool(tab, pane) {
+    if (tab === "graph") return buildGraph(pane);
     if (tab === "formula") return buildFormulaSolver(pane);
     if (tab === "const") {
       pane.innerHTML = '<div class="lzc-tool"><p class="lzc-help">Bosing — hisoblash maydoniga qo\'shiladi.</p>' + C.CONST_INFO.map(function (c) { return '<button type="button" class="lzc-const" data-c="' + c[0] + '"><b>' + c[0] + "</b><span>" + c[1] + "</span><em>" + c[2] + "</em></button>"; }).join("") + "</div>";

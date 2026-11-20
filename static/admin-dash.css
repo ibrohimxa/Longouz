@@ -58,3 +58,28 @@
 .imp-opts { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin: 8px 0 14px; }
 .imp-sticky { position: sticky; bottom: 0; padding: 12px 0; background: var(--bg, #0d1117); border-top: 1px solid var(--border, #2a313c); z-index: 5; }
 .q-bulk { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+
+/* v243: tashriflar va testlar paneli */
+.lz-traffic{margin:0 0 18px}
+.lz-tr-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.lz-tr-head h3{margin:0 0 2px}
+.lz-tr-range{display:inline-flex;border:1px solid rgba(61,255,123,.35);border-radius:10px;overflow:hidden}
+.lz-tr-range button{background:transparent;border:0;color:inherit;padding:7px 12px;font-size:.82rem;cursor:pointer;opacity:.75}
+.lz-tr-range button.on{background:rgba(61,255,123,.16);opacity:1;font-weight:700}
+.lz-tr-funnel{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:14px 0 10px}
+.lz-tr-step{position:relative;padding:10px 12px 14px;border-radius:12px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);overflow:hidden}
+.lz-tr-step span{display:block;font-size:.74rem;opacity:.7}
+.lz-tr-step b{font-size:1.3rem;font-variant-numeric:tabular-nums}
+.lz-tr-step i{position:absolute;left:0;bottom:0;height:4px;width:var(--w);background:linear-gradient(90deg,#3dff7b,#2ec4ff);border-radius:0 4px 4px 0;transition:width .6s}
+.lz-tr-legend{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 6px}
+.lz-tr-legend button{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:transparent;color:inherit;font-size:.78rem;cursor:pointer}
+.lz-tr-legend button i{width:10px;height:10px;border-radius:50%}
+.lz-tr-legend button.off{opacity:.35;text-decoration:line-through}
+.lz-tr-chart{width:100%;min-height:240px}
+.lz-tr-chart svg{width:100%;height:240px;display:block}
+.lz-tr-chart .grid{stroke:rgba(255,255,255,.07)}
+.lz-tr-chart .tx{fill:currentColor;opacity:.55;font-size:10px}
+.lz-tr-foot{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:8px;font-size:.82rem;opacity:.85}
+html[data-theme="light"] .lz-tr-step{background:#f6faf7;border-color:#e2ece5}
+html[data-theme="light"] .lz-tr-chart .grid{stroke:rgba(0,0,0,.08)}
+@media (max-width:760px){.lz-tr-funnel{grid-template-columns:repeat(2,minmax(0,1fr))}}

@@ -27,12 +27,20 @@
         var k = c.getAttribute("data-k"), num = c.querySelector(".lz-ss-num");
         if (num && d[k] != null) animate(num, Number(d[k]) || 0, c.getAttribute("data-suffix") || "");
       });
-      var tv = root.querySelector('[data-sub="today_views"]'); if (tv) tv.textContent = "bugun " + fmt(d.today_views || 0) + " marta";
-      var q = root.querySelector('[data-sub="questions"]'); if (q) q.textContent = fmt(d.questions || 0) + "+ savol bazada";
+      var subs = {
+        today_views: "bugun " + fmt(d.today_views || 0) + " ta tashrif",
+        today_visitors: "bugun " + fmt(d.today_visitors || 0) + " kishi",
+        new_users_today: "bugun +" + fmt(d.new_users_today || 0) + " yangi",
+        tests_today: "bugun " + fmt(d.tests_today || 0) + " · boshlangan " + fmt(d.tests_started_today || 0),
+        today_accuracy: d.tests_today ? "bugun " + (d.today_accuracy || 0) + "%" : "bugun hali test yo'q",
+        questions: fmt(d.questions || 0) + "+ savol bazada"
+      };
+      root.querySelectorAll("[data-sub]").forEach(function (el) { var k = el.getAttribute("data-sub"); if (subs[k]) el.textContent = subs[k]; });
     }).catch(function () {});
   }
   load();
-  setInterval(function () { if (!document.hidden) load(); }, 30000);
+  setInterval(function () { if (!document.hidden) load(); }, 20000);
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) load(); });
 
   // 3D egilish — sichqoncha kartaning qaysi tomonida bo'lsa, o'sha tomonga og'adi
   if (!reduce && window.matchMedia("(hover: hover)").matches) {

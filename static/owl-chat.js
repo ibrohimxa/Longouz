@@ -464,10 +464,16 @@
 
   function showThinking() {
     clearEmptyState();
-    const bubble = document.createElement("div");
-    bubble.className = "owl-thinking-bubble";
+    let bubble;
+    if (window.LongoThink) {
+      // v243: uch ko'k nuqta -> aylana -> boyqush logotipi -> 360° -> yana nuqtalar
+      bubble = window.LongoThink.row("LongoAI o'ylamoqda");
+    } else {
+      bubble = document.createElement("div");
+      bubble.className = "owl-thinking-bubble";
+      bubble.innerHTML = '<img src="/static/logo-owl.png" alt=""><span>LongoAI o\'ylamoqda...</span>';
+    }
     bubble.id = "owl-thinking-indicator";
-    bubble.innerHTML = '<img src="/static/logo-owl.png" alt=""><span>LongoAI o\'ylamoqda...</span>';
     messages.appendChild(bubble);
     messages.scrollTop = messages.scrollHeight;
 
@@ -483,12 +489,29 @@
 
   // Javobni typewriter effektida (birma-bir harf) yozadi, tugagach —
   // ovoz yoqilgan bo'lsa, baland ovozda o'qib beradi.
-  function typewriteAnswer(fullText, opts) {
+  // v243: AI javobi — formulalar (LaTeX), grafik va chizmalar bilan chiroyli ko'rsatiladi
+  function newAiBubble() {
     const bubble = document.createElement("div");
     bubble.className = "chat-msg chat-msg-ai";
-    bubble.style.maxWidth = "85%";
-    bubble.style.fontSize = "0.85rem";
+    bubble.style.maxWidth = "92%";
+    bubble.style.fontSize = "0.86rem";
     messages.appendChild(bubble);
+    return bubble;
+  }
+  function renderRich(bubble, text, streaming) {
+    if (window.LongoRender) window.LongoRender.render(bubble, text, { streaming: !!streaming });
+    else bubble.textContent = text;
+  }
+  function speechText(text) { return window.LongoRender ? window.LongoRender.toSpeech(text) : text; }
+
+  function typewriteAnswer(fullText, opts) {
+    const bubble = newAiBubble();
+    if (window.LongoRender && /[$`*\\]|^\s*[-#]/m.test(fullText)) {
+      renderRich(bubble, fullText);
+      messages.scrollTop = messages.scrollHeight;
+      if (opts && opts.silent) maybeAutoListen(); else speak(speechText(fullText));
+      return;
+    }
 
     let i = 0;
     const speed = 14; // ms har harf uchun — tezroq javob berish taassuroti
@@ -502,11 +525,88 @@
       } else if (opts && opts.silent) {
         maybeAutoListen();
       } else {
-        speak(fullText);
+        speak(speechText(fullText));
       }
     }
     step();
   }
+
+  async function sendStreaming(question) {
+    const source = document.getElementById("owl-voice-orb") && document.body.classList.contains("repetitor-fullpage") ? "repetitor" : "widget";
+    let res;
+    try {
+      res = await fetch("/api/ask/stream", {
+        method: "POST", credentials: "same-origin",
+        headers: { "Content-Type": "application/json", "Accept": "text/event-stream" },
+        body: JSON.stringify({ question, effort: currentEffort, source, history: chatHistory.slice(-10), lang: (langSelect && langSelect.value) || "uz-UZ" }),
+      });
+    } catch (e) { return false; }   // tarmoq — oddiy usulga o'tamiz
+    if (res.status === 402) { removeThinking(); showLimitReachedCard(await res.json()); liveMode = false; maybeAutoListen(); return true; }
+    if (res.status === 401) { removeThinking(); typewriteAnswer("Sessiya tugagan. Iltimos, qayta kiring.", { silent: true }); return true; }
+    if (!res.ok || !res.body || (res.headers.get("content-type") || "").indexOf("text/event-stream") < 0) return false;
+    const reader = res.body.getReader(), dec = new TextDecoder();
+    let buf = "", text = "", bubble = null, final = null, last = 0, pending = false;
+    function paint(force) {
+      if (!bubble) { removeThinking(); bubble = newAiBubble(); }
+      const now = Date.now();
+      if (!force && now - last < 90) { if (!pending) { pending = true; setTimeout(function () { pending = false; paint(true); }, 95); } return; }
+      last = now;
+      const nearBottom = messages.scrollHeight - messages.scrollTop - messages.clientHeight < 80;
+      renderRich(bubble, text, !final);
+      if (nearBottom) messages.scrollTop = messages.scrollHeight;
+    }
+    try {
+      for (;;) {
+        const r = await reader.read();
+        if (r.done) break;
+        buf += dec.decode(r.value, { stream: true });
+        let i;
+        while ((i = buf.indexOf("\n\n")) >= 0) {
+          const block = buf.slice(0, i); buf = buf.slice(i + 2);
+          const line = block.split("\n").filter(function (l) { return l.indexOf("data:") === 0; }).map(function (l) { return l.slice(5).trim(); }).join("");
+          if (!line) continue;
+          let ev; try { ev = JSON.parse(line); } catch (e) { continue; }
+          if (ev.done) { final = ev; text = ev.answer || text; }
+          else if (ev.replace) text = ev.t || "";
+          else if (ev.t) text += ev.t;
+          paint(!!ev.done);
+        }
+      }
+    } catch (e) { /* uzilish — bor matn qoladi */ }
+    if (!text) { removeThinking(); typewriteAnswer("Internet aloqasida muammo bo'ldi. Qayta urinib ko'ring.", { silent: true }); return true; }
+    final = final || { answer: text, provider: "gemini" };
+    paint(true);
+    messages.scrollTop = messages.scrollHeight;
+    if (final.provider && final.provider !== "none") {
+      chatHistory.push({ role: "user", text: question }, { role: "assistant", text: text });
+      if (chatHistory.length > 20) chatHistory.splice(0, chatHistory.length - 20);
+    }
+    if (final.usage) updateUsageIndicator(final.usage);
+    speak(speechText(text));
+    return true;
+  }
+
+  // v243: matematik belgilar paneli (ildiz, daraja, kasr, π, ≤ ...)
+  (function mathPad() {
+    const btn = document.getElementById("floating-chat-mathbtn"), pad = document.getElementById("floating-chat-mathpad");
+    if (!btn || !pad) return;
+    btn.addEventListener("click", function () {
+      pad.hidden = !pad.hidden;
+      btn.setAttribute("aria-expanded", pad.hidden ? "false" : "true");
+      btn.classList.toggle("on", !pad.hidden);
+      if (!pad.hidden) input.focus();
+    });
+    pad.addEventListener("mousedown", function (e) { if (e.target.closest("button")) e.preventDefault(); });
+    pad.addEventListener("click", function (e) {
+      const b = e.target.closest("button[data-ins]"); if (!b) return;
+      const ins = b.dataset.ins, st = input.selectionStart == null ? input.value.length : input.selectionStart, en = input.selectionEnd == null ? st : input.selectionEnd;
+      let add = ins, caret = ins.length;
+      if (ins === "|") { add = "||"; caret = 1; }
+      input.setRangeText(add, st, en, "end");
+      input.setSelectionRange(st + caret, st + caret);
+      input.focus();
+    });
+  })();
 
   // Markazlashtirilgan yuborish funksiyasi — forma orqali ham, tashqaridan
   // (masalan "AI'dan so'rash" tugmasi) ham shu orqali yuboriladi.
@@ -520,6 +620,12 @@
     sendBtn.disabled = true;
     setBusy(true);
     showThinking();
+
+    // v243: OQIM (stream) — javobning birinchi so'zlari ~1 soniyada chiqadi, formulalar va chizmalar darhol chiziladi
+    if (window.ReadableStream && window.TextDecoder) {
+      const handled = await sendStreaming(question);
+      if (handled) { sendBtn.disabled = false; return; }
+    }
 
     try {
       // "source" — serverga qaysi suhbat ekanini aytadi: /ustoz sahifasidagi

@@ -8,9 +8,9 @@
   <link rel="icon" type="image/png" href="/static/logo-owl.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=Caveat:wght@600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css?v=242">
-  <link rel="stylesheet" href="/static/purchase.css?v=242">
-  <script src="/static/theme-init.js?v=242"></script>
+  <link rel="stylesheet" href="/static/style.css?v=243">
+  <link rel="stylesheet" href="/static/purchase.css?v=243">
+  <script src="/static/theme-init.js?v=243"></script>
 </head>
 <body data-logged-in="true">
 
@@ -26,6 +26,13 @@
           <p>Joriy tarifingiz: <strong>{{ user.plan|upper }}</strong>.</p>
         </div>
       </div>
+
+      {% if request.query_params.get('requested') in ('pro', 'ultra') %}
+      <div class="upgrade-locked-banner" style="margin-top:18px; padding:14px 18px; border-radius:12px; background:rgba(34,204,96,0.12); border:1px solid rgba(34,204,96,0.4); color:var(--ink); display:flex; align-items:center; gap:10px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;flex-shrink:0;color:#22cc60;"><path d="M20 6L9 17l-5-5"/></svg>
+        <span>{{ request.query_params.get('requested')|upper }} tarif so'rovingiz qabul qilindi. Click / Payme orqali to'lov ulanishi bilan tarifingiz faollashadi — sizga xabar beramiz.</span>
+      </div>
+      {% endif %}
 
       {% if locked_message %}
       <div class="upgrade-locked-banner" style="margin-top:18px; padding:14px 18px; border-radius:12px; background:rgba(230,160,40,0.12); border:1px solid rgba(230,160,40,0.35); color:var(--ink); display:flex; align-items:center; gap:10px;">
@@ -105,11 +112,11 @@
   {% with pm_member=True %}{% include "_purchase_modal.html" %}{% endwith %}
 
   {% include "_owl_widget.html" %}
-  <script src="/static/devtools-guard.js?v=242"></script>
-  <script src="/static/app.js?v=242"></script>
-  <script src="/static/purchase.js?v=242"></script>
+  <script src="/static/devtools-guard.js?v=243"></script>
+  <script src="/static/app.js?v=243"></script>
+  <script src="/static/purchase.js?v=243"></script>
   {% if turnstile_active(request) %}
-  <script src="/static/turnstile-helper.js?v=242"></script>
+  <script src="/static/turnstile-helper.js?v=243"></script>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=lgTurnstileReady" async defer onerror="window.lgTurnstileFailed&&window.lgTurnstileFailed()"></script>
   {% endif %}
   <script>

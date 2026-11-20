@@ -8,8 +8,8 @@
   <link rel="icon" type="image/png" href="/static/logo-owl.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css?v=242">
-  <script src="/static/theme-init.js?v=242"></script>
+  <link rel="stylesheet" href="/static/style.css?v=243">
+  <script src="/static/theme-init.js?v=243"></script>
 </head>
 <body data-logged-in="true">
 
@@ -27,7 +27,13 @@
         </div>
       </div>
 
-      {% if sent %}<div class="form-success">Xabaringiz yuborildi. Admin tez orada javob beradi.</div>{% endif %}
+      {% if sent %}
+      <div class="form-success">Xabaringiz yuborildi.</div>
+      <div class="dash-panel lz-support-ai" id="lz-support-ai">
+        <div data-longo-think="LongoAI javob yozmoqda"></div>
+        <p class="panel-sub" id="lz-support-ai-note" style="margin:.5rem 0 0">Odatda bir daqiqa ichida javob keladi. Admin qarori kerak bo'lsa, admin ham ko'rib chiqadi.</p>
+      </div>
+      {% endif %}
       {% if error %}<div class="form-error">{{ error }}</div>{% endif %}
 
       <div class="dash-panel">
@@ -57,7 +63,7 @@
       </div>
 
       <div class="dash-panel">
-        <h3>Oldingi xabarlaringiz</h3>
+        <h3 id="javob">Oldingi xabarlaringiz</h3>
         {% if messages %}
         <div class="balance-history-list">
           {% for m in messages %}
@@ -69,8 +75,8 @@
             <p class="panel-sub" style="margin:0;">{{ m.body }}</p>
             {% if m.admin_reply %}
             <div style="background:var(--bg-hover); border-radius:10px; padding:10px 14px;">
-              <div class="balance-history-meta" style="margin-bottom:4px;">Admin javobi:</div>
-              <p style="margin:0;">{{ m.admin_reply }}</p>
+              <div class="balance-history-meta" style="margin-bottom:4px;">LongoUZ javobi:</div>
+              <p style="margin:0;white-space:pre-wrap;">{{ m.admin_reply }}</p>
             </div>
             {% endif %}
           </div>
@@ -85,7 +91,28 @@
   </div>
 
   {% include "_owl_widget.html" %}
-  <script src="/static/devtools-guard.js?v=242"></script>
-  <script src="/static/app.js?v=242"></script>
+  <script src="/static/devtools-guard.js?v=243"></script>
+  <script src="/static/app.js?v=243"></script>
+  <link rel="stylesheet" href="/static/longo-think.css?v=243">
+  <script src="/static/longo-think.js?v=243"></script>
+  {% if sent %}
+  <script>
+  (function () {
+    var box = document.getElementById("lz-support-ai"); if (!box) return;
+    var tries = 0, done = false;
+    function check() {
+      fetch("/api/support/thread", { credentials: "same-origin" }).then(function (r) { return r.json(); }).then(function (d) {
+        var last = (d.items || [])[0];
+        if (last && last.reply) { done = true; location.replace("/yordam#javob"); return; }
+        if (!d.pending && tries > 2) { box.hidden = true; return; }
+        if (++tries < 40) setTimeout(check, 3000); else box.hidden = true;
+      }).catch(function () { if (++tries < 40) setTimeout(check, 4000); });
+    }
+    fetch("/api/agent/kick", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: "{}" })
+      .then(function () { if (!done) check(); }).catch(function () { check(); });
+    setTimeout(check, 2500);
+  })();
+  </script>
+  {% endif %}
 </body>
 </html>

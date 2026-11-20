@@ -20,7 +20,8 @@
     if (window.lgTurnstileRender) window.lgTurnstileRender();
     setTimeout(function () { var f = overlay.querySelector("input:not([type=hidden])"); if (f && window.innerWidth > 860) f.focus({ preventScroll: true }); }, 60);
   }
-  function close() { overlay.hidden = true; document.body.style.overflow = ""; document.body.classList.remove("pm-open"); }
+  function wipeCard() { [num, exp, cvv].forEach(function (el) { if (el) el.value = ""; }); }
+  function close() { wipeCard(); overlay.hidden = true; document.body.style.overflow = ""; document.body.classList.remove("pm-open"); }
 
   window.pmOpen = function (btn) {
     open(btn.dataset.plan, btn.dataset.planName, btn.dataset.activePrice || btn.dataset.monthlyPrice);
@@ -68,6 +69,8 @@
   cvv.addEventListener("input", function () { cvv.value = cvv.value.replace(/\D/g, "").slice(0, 3); });
 
   var form = $("pm-form");
+  // v243: karta ma'lumotlari serverga YUBORILMAYDI va sahifada qolmaydi (to'lov provayderi hali ulanmagan)
+  form.addEventListener("submit", function () { setTimeout(wipeCard, 0); });
   form.addEventListener("submit", function (e) {
     var p1 = $("pm-pass"), p2 = $("pm-pass2");
     if (p1 && p2 && p1.value !== p2.value) {

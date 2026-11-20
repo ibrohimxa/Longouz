@@ -57,11 +57,37 @@ if not ADMIN_URL_PREFIX.startswith("/"):
 ADMIN_URL_PREFIX = ADMIN_URL_PREFIX.rstrip("/") or "/neo"
 
 
+# v243: GitHub tarixida oshkor bo'lgan eski parollar va juda qisqa parollar QABUL QILINMAYDI —
+# aks holda repo tarixini o'qigan har kim admin panelga kira oladi.
+import hashlib as _hashlib
+
+_LEAKED_PREFIXES = ("xamroyev",)
+MIN_ADMIN_PASSWORD_LEN = 10
+
+
+def admin_password_problem() -> str:
+    """Admin paroli xavfli bo'lsa — sababi (bo'sh satr = parol yaroqli)."""
+    pw = ADMIN_PASSWORD or ""
+    if not pw:
+        return "ADMIN_PASSWORD o'rnatilmagan."
+    low = pw.strip().lower()
+    if any(low.startswith(p) for p in _LEAKED_PREFIXES):
+        return "Admin paroli ilgari ochiq GitHub repoda oshkor bo'lgan. Vercel → Settings → Environment Variables → ADMIN_PASSWORD ni yangi, uzun parolga almashtiring va Redeploy qiling."
+    if len(pw) < MIN_ADMIN_PASSWORD_LEN:
+        return f"Admin paroli juda qisqa (kamida {MIN_ADMIN_PASSWORD_LEN} belgi kerak). Vercel'da ADMIN_PASSWORD ni uzunroq parolga almashtiring."
+    return ""
+
+
+def _password_fingerprint() -> str:
+    """Parol o'zgarsa — eski admin sessiyalari avtomatik bekor bo'ladi."""
+    return _hashlib.sha256(("lz-admin|" + (ADMIN_PASSWORD or "")).encode()).hexdigest()[:16]
+
+
 def verify_admin_credentials(username: str, password: str) -> bool:
     """Vaqt hujumlariga chidamli solishtirish — parol noto'g'ri bo'lganda
     ham javob VAQTI bir xil bo'lishi kerak, aks holda parolni harf-harflab
     "sinab ko'rish" mumkin bo'lib qoladi."""
-    if not ADMIN_PASSWORD:
+    if not ADMIN_PASSWORD or admin_password_problem():
         return False
     username_ok = secrets.compare_digest(username.strip().lower(), ADMIN_USERNAME.lower())  # katta-kichik harf farqsiz
     password_ok = secrets.compare_digest(password, ADMIN_PASSWORD)
@@ -70,7 +96,7 @@ def verify_admin_credentials(username: str, password: str) -> bool:
 
 def create_admin_token(username: str) -> str:
     expire = datetime.now(timezone.utc) + timedelta(hours=ADMIN_TOKEN_EXPIRE_HOURS)
-    payload = {"admin": True, "username": username, "exp": expire}
+    payload = {"admin": True, "username": username, "exp": expire, "pv": _password_fingerprint()}
     return jwt.encode(payload, user_auth.SECRET_KEY, algorithm=user_auth.ALGORITHM)
 
 
@@ -83,7 +109,9 @@ def verify_admin_token(token: str) -> bool:
         payload = jwt.decode(token, user_auth.SECRET_KEY, algorithms=[user_auth.ALGORITHM])
     except JWTError:
         return False
-    return payload.get("admin") is True
+    if admin_password_problem():
+        return False
+    return payload.get("admin") is True and secrets.compare_digest(str(payload.get("pv", "")), _password_fingerprint())
 
 
 def get_admin_username(token: str) -> str:
