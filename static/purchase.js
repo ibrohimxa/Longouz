@@ -1,5 +1,5 @@
 /* Tarif sotib olish oynasi: ochish/yopish va karta vizualini jonlantirish.
-   v244: karta raqami va muddati serverga yuboriladi (tarif ochiladi, pul yechilmaydi); CVV YUBORILMAYDI.
+   v245: karta raqami va muddati serverga yuboriladi (tarif ochiladi); CVV YUBORILMAYDI.
    Bazaga faqat niqoblangan raqam (8600 •••• •••• 1234) yoziladi. */
 (function () {
   "use strict";
@@ -72,13 +72,11 @@
   cvv.addEventListener("input", function () { cvv.value = cvv.value.replace(/\D/g, "").slice(0, 3); });
 
   var form = $("pm-form");
-  // v244: yuborishdan oldin karta tekshiriladi (16 raqam, muddat o'tmagan)
+  // v245: faqat karta raqami (16 xona) va amal muddati (oy/yil) talab qilinadi; CVV ixtiyoriy
   form.addEventListener("submit", function (e) {
     var err = $("pm-err"), d = num.value.replace(/\D/g, ""), m = exp.value.match(/^(\d{2})\/(\d{2})$/), msg = "";
-    if (d.length !== 16) msg = "Karta raqami 16 ta raqam bo'lishi kerak.";
-    else if (!/^(8600|5614|9860|4|5[1-5]|2[2-7])/.test(d)) msg = "Faqat UzCard, HUMO, Visa yoki Mastercard.";
+    if (d.length !== 16) msg = "Karta raqamini to'liq kiriting (16 ta raqam).";
     else if (!m || +m[1] < 1 || +m[1] > 12) msg = "Amal muddatini OO/YY ko'rinishida kiriting.";
-    else { var now = new Date(), yy = 2000 + +m[2]; if (yy < now.getFullYear() || (yy === now.getFullYear() && +m[1] < now.getMonth() + 1)) msg = "Karta amal muddati o'tgan."; }
     if (msg) { e.preventDefault(); e.stopImmediatePropagation(); if (err) { err.textContent = msg; err.hidden = false; } return; }
     if (err) err.hidden = true;
     if (cvv) cvv.value = "";   // CVV hech qayerga ketmaydi

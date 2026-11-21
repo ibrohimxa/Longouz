@@ -11,7 +11,7 @@
     var s = document.querySelector('script[data-lzcalc]');
     if (!s) {
       s = document.createElement("script");
-      s.src = "/static/calc-engine.js?v=244"; s.setAttribute("data-lzcalc", "1");
+      s.src = "/static/calc-engine.js?v=245"; s.setAttribute("data-lzcalc", "1");
       document.head.appendChild(s);
     }
     s.addEventListener("load", function () { cb(); });

@@ -57,25 +57,12 @@ if not ADMIN_URL_PREFIX.startswith("/"):
 ADMIN_URL_PREFIX = ADMIN_URL_PREFIX.rstrip("/") or "/neo"
 
 
-# v243: GitHub tarixida oshkor bo'lgan eski parollar va juda qisqa parollar QABUL QILINMAYDI —
-# aks holda repo tarixini o'qigan har kim admin panelga kira oladi.
 import hashlib as _hashlib
-
-_LEAKED_PREFIXES = ("xamroyev",)
-MIN_ADMIN_PASSWORD_LEN = 10
 
 
 def admin_password_problem() -> str:
-    """Admin paroli xavfli bo'lsa — sababi (bo'sh satr = parol yaroqli)."""
-    pw = ADMIN_PASSWORD or ""
-    if not pw:
-        return "ADMIN_PASSWORD o'rnatilmagan."
-    low = pw.strip().lower()
-    if any(low.startswith(p) for p in _LEAKED_PREFIXES):
-        return "Admin paroli ilgari ochiq GitHub repoda oshkor bo'lgan. Vercel → Settings → Environment Variables → ADMIN_PASSWORD ni yangi, uzun parolga almashtiring va Redeploy qiling."
-    if len(pw) < MIN_ADMIN_PASSWORD_LEN:
-        return f"Admin paroli juda qisqa (kamida {MIN_ADMIN_PASSWORD_LEN} belgi kerak). Vercel'da ADMIN_PASSWORD ni uzunroq parolga almashtiring."
-    return ""
+    """Admin paroli o'rnatilmagan bo'lsa — sababi (bo'sh satr = hammasi joyida)."""
+    return "" if ADMIN_PASSWORD else "ADMIN_PASSWORD o'rnatilmagan."
 
 
 def _password_fingerprint() -> str:

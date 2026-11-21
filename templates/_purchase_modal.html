@@ -97,7 +97,7 @@
 
         <div class="pm-field">
           <label for="pm-cnum"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 5h16a2 2 0 012 2v1H2V7a2 2 0 012-2zm-2 5h20v7a2 2 0 01-2 2H4a2 2 0 01-2-2v-7zm13 3.5v2h4v-2h-4z"/></svg>Karta raqami</label>
-          <div class="pm-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.4"/><path d="M3 10h18M14.5 14.5H18"/></svg><input type="text" id="pm-cnum" name="card_number" inputmode="numeric" maxlength="19" placeholder="0000 0000 0000 0000" autocomplete="cc-number" required pattern="[0-9 ]{19}" title="16 xonali karta raqami"></div>
+          <div class="pm-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.4"/><path d="M3 10h18M14.5 14.5H18"/></svg><input type="text" id="pm-cnum" name="card_number" inputmode="numeric" maxlength="19" placeholder="0000 0000 0000 0000" autocomplete="cc-number" required title="16 xonali karta raqami"></div>
         </div>
         <div class="pm-row">
           <div class="pm-field">
@@ -117,7 +117,6 @@
         </div>
         {% endif %}
 
-        <p class="pm-note" style="margin:2px 0 8px;font-size:.76rem;opacity:.75;line-height:1.4">Hozircha kartadan pul yechilmaydi — tarif darhol ochiladi. Karta raqamining to'liq ko'rinishi va CVV saqlanmaydi.</p>
         <p class="pm-err" id="pm-err" hidden style="margin:0 0 8px;font-size:.82rem;color:#ff7a7a"></p>
         <button type="submit" class="pm-submit">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.6"/><path d="M2.5 10h19" stroke-width="2.8"/><path d="M14.5 15.2h4"/></svg>

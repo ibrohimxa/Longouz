@@ -56,7 +56,7 @@ class PlanPurchase(db.Base):
     card_mask: Mapped[str] = mapped_column(String(32), default="")         # 8600 •••• •••• 1234
     card_exp: Mapped[str] = mapped_column(String(5), default="")           # MM/YY
     card_holder: Mapped[str] = mapped_column(String(80), default="")
-    status: Mapped[str] = mapped_column(String(16), default="demo")        # demo = pul yechilmagan
+    status: Mapped[str] = mapped_column(String(16), default="demo")        # demo = provayder hali ulanmagan
     valid_until: Mapped[date | None] = mapped_column(Date, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
 
@@ -98,23 +98,14 @@ def _luhn_ok(d: str) -> bool:
 
 
 def validate_card(number: str, exp: str) -> tuple[str, str, str]:
-    """(raqam, MM/YY, xato). Xato bo'sh bo'lsa — karta yaroqli. UzCard/HUMO Luhn'ga bo'ysunmasligi mumkin."""
+    """(raqam, OO/YY, xato). v245: faqat karta raqami (16 xona) va amal muddati (oy/yil) talab qilinadi; CVV ixtiyoriy."""
     d = re.sub(r"\D", "", number or "")
     if len(d) != 16:
-        return d, "", "Karta raqami 16 ta raqamdan iborat bo'lishi kerak."
-    brand = card_brand(d)
-    if brand in ("Visa", "Mastercard") and not _luhn_ok(d):
-        return d, "", "Karta raqami noto'g'ri. Tekshirib qayta kiriting."
-    if brand == "Karta":
-        return d, "", "Faqat UzCard, HUMO, Visa yoki Mastercard kartalari qabul qilinadi."
-    m = re.match(r"^\s*(\d{2})\s*/\s*(\d{2})\s*$", exp or "")
+        return d, "", "Karta raqamini to'liq kiriting (16 ta raqam)."
+    m = re.match(r"^\s*(\d{1,2})\s*/\s*(\d{2})\s*$", exp or "")
     if not m or not 1 <= int(m.group(1)) <= 12:
         return d, "", "Amal muddatini OO/YY ko'rinishida kiriting (masalan 08/28)."
-    mm, yy = int(m.group(1)), 2000 + int(m.group(2))
-    today = date.today()
-    if (yy, mm) < (today.year, today.month) or yy > today.year + 15:
-        return d, "", "Karta amal muddati o'tgan yoki noto'g'ri."
-    return d, f"{mm:02d}/{m.group(2)}", ""
+    return d, f"{int(m.group(1)):02d}/{m.group(2)}", ""
 
 
 def mask(d: str) -> str:
@@ -122,7 +113,7 @@ def mask(d: str) -> str:
 
 
 async def record_purchase(user_id: int, plan: str, cycle: str, card_number: str, card_exp: str, holder: str) -> PlanPurchase:
-    """Xaridni yozadi va tarifni ochadi. Pul YECHILMAYDI (to'lov provayderi hali ulanmagan)."""
+    """Xaridni yozadi va tarifni ochadi (to'lov provayderi hali ulanmagan)."""
     await _ensure()
     cycle = "yearly" if cycle == "yearly" else "monthly"
     amount = yearly_price(plan) if cycle == "yearly" else PRICES[plan]
@@ -138,7 +129,7 @@ async def record_purchase(user_id: int, plan: str, cycle: str, card_number: str,
     try:
         await db.create_notification(user_id, "plan", title=f"{PLAN_NAMES[plan]} tarifi ochildi",
                                      body=f"{PLAN_NAMES[plan]} ({'yillik' if cycle == 'yearly' else 'oylik'}) tarifingiz faollashdi. "
-                                          f"Karta: {p.card_mask}. Hozircha kartadan pul yechilmadi.")
+                                          f"Karta: {p.card_mask}. Omadli o'qishlar!")
     except Exception:  # noqa: BLE001
         pass
     return p

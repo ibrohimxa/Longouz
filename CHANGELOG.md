@@ -1,3 +1,8 @@
+## v245 — soddaroq karta oynasi, admin paroli
+- Tarif oynasida faqat karta raqami (16 xona) va amal muddati (oy/yil) talab qilinadi; CVV ixtiyoriy va serverga yuborilmaydi. Karta kiritilgach tanlangan tarif darhol ochiladi.
+- «Pul yechilmaydi» degan yozuvlar olib tashlandi (oyna, bildirishnoma, LongoAI javoblari, admin «To'lovlar»).
+- Admin paroli egasining tanlovi bo'yicha qabul qilinadi (oshkor/qisqa parol cheklovi olib tashlandi); terib topishga qarshi himoya (5 xato → 30 daqiqa blok) saqlanadi.
+
 ## v244 — ranglar neon yashilga qaytdi, karta bilan tarif ochiladi, yangi narxlar
 - v243 da qo'shilgan ko'k/sariq urg'ular (o'ylash animatsiyasi, formulalar, grafiklar, LongoAI sahifasi, statistika kartalari, admin grafigi, belgilar paneli) yana neon yashil.
 - Tarif xaridi: karta (UzCard/HUMO/Visa/Mastercard) kiritilsa tanlangan tarif DARHOL ochiladi; hozircha pul yechilmaydi. Xarid bazaga yoziladi: tarif, oylik/yillik, summa, karta turi, niqoblangan raqam (8600 •••• •••• 1234), muddat, karta egasi. Karta to'liq raqami va CVV saqlanmaydi. Noto'g'ri yoki muddati o'tgan karta qabul qilinmaydi.
