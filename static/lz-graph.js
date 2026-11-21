@@ -3,7 +3,7 @@
    LZGraph.draw(el, spec, {interactive:true}) -> SVG grafik: o'qlar, panjara, egri chiziqlar, nollar va kesishish nuqtalari. */
 (function () {
   "use strict";
-  var COLORS = ["#2ec4ff", "#3dff7b", "#ffc43d", "#ff7ad9", "#a78bfa", "#ff8a4c"];
+  var COLORS = ["#1def6a", "#c6ff3d", "#00e0a4", "#9dffbf", "#0bd855", "#5effc0"];
   var NS = "http://www.w3.org/2000/svg";
 
   function loadCalc(cb) {
@@ -11,7 +11,7 @@
     var s = document.querySelector('script[data-lzcalc]');
     if (!s) {
       s = document.createElement("script");
-      s.src = "/static/calc-engine.js?v=243"; s.setAttribute("data-lzcalc", "1");
+      s.src = "/static/calc-engine.js?v=244"; s.setAttribute("data-lzcalc", "1");
       document.head.appendChild(s);
     }
     s.addEventListener("load", function () { cb(); });
@@ -114,7 +114,7 @@
       }
     });
     (spec.points || []).forEach(function (p) {
-      marks += '<circle class="lzg-pt" cx="' + X(p.x) + '" cy="' + Y(p.y) + '" r="4" fill="#ffc43d"/><text class="lzg-lab" x="' + (X(p.x) + 6) + '" y="' + (Y(p.y) - 6) + '">' + (p.label ? p.label.replace(/[<>&]/g, "") + " " : "") + "(" + fmtN(p.x) + "; " + fmtN(p.y) + ")</text>";
+      marks += '<circle class="lzg-pt" cx="' + X(p.x) + '" cy="' + Y(p.y) + '" r="4" fill="#c6ff3d"/><text class="lzg-lab" x="' + (X(p.x) + 6) + '" y="' + (Y(p.y) - 6) + '">' + (p.label ? p.label.replace(/[<>&]/g, "") + " " : "") + "(" + fmtN(p.x) + "; " + fmtN(p.y) + ")</text>";
     });
     svg.innerHTML = '<defs><marker id="lzgA" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L8 4L0 8z" fill="currentColor"/></marker></defs>' + out + marks +
       '<line class="lzg-cross" y1="' + pad + '" y2="' + (H - pad) + '" x1="-9" x2="-9"/><g class="lzg-tip" visibility="hidden"><rect rx="5" height="18"/><text y="13"></text></g>';

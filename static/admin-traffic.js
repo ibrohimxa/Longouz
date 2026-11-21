@@ -5,11 +5,11 @@
   if (!root) return;
   var SER = [
     { k: "visits", n: "Tashriflar", c: "#3dff7b" },
-    { k: "visitors", n: "Odamlar", c: "#2ec4ff" },
-    { k: "quiz_start", n: "Test boshlandi", c: "#ffc43d" },
-    { k: "quiz_finish", n: "Test tugadi", c: "#ff7ad9" },
-    { k: "signup", n: "Ro'yxatdan o'tdi", c: "#a78bfa" },
-    { k: "ai_ask", n: "AI savollar", c: "#ff8a4c" }
+    { k: "visitors", n: "Odamlar", c: "#0bd855" },
+    { k: "quiz_start", n: "Test boshlandi", c: "#c6ff3d" },
+    { k: "quiz_finish", n: "Test tugadi", c: "#00e0a4" },
+    { k: "signup", n: "Ro'yxatdan o'tdi", c: "#9dffbf" },
+    { k: "ai_ask", n: "AI savollar", c: "#5effc0" }
   ];
   var off = {}, data = null, days = 14;
   var fmt = function (n) { return Math.round(n || 0).toLocaleString("ru-RU").replace(/,/g, " "); };

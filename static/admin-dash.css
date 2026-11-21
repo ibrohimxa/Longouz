@@ -70,7 +70,7 @@
 .lz-tr-step{position:relative;padding:10px 12px 14px;border-radius:12px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);overflow:hidden}
 .lz-tr-step span{display:block;font-size:.74rem;opacity:.7}
 .lz-tr-step b{font-size:1.3rem;font-variant-numeric:tabular-nums}
-.lz-tr-step i{position:absolute;left:0;bottom:0;height:4px;width:var(--w);background:linear-gradient(90deg,#3dff7b,#2ec4ff);border-radius:0 4px 4px 0;transition:width .6s}
+.lz-tr-step i{position:absolute;left:0;bottom:0;height:4px;width:var(--w);background:linear-gradient(90deg,#3dff7b,#1def6a);border-radius:0 4px 4px 0;transition:width .6s}
 .lz-tr-legend{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 6px}
 .lz-tr-legend button{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:transparent;color:inherit;font-size:.78rem;cursor:pointer}
 .lz-tr-legend button i{width:10px;height:10px;border-radius:50%}

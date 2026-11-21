@@ -4,7 +4,7 @@
    LongoRender.render(el, text, {streaming}) ; LongoRender.toSpeech(text) -> ovoz uchun toza matn. */
 (function () {
   "use strict";
-  var V = "243";
+  var V = "244";
   var katexState = 0, katexWait = [];
   var texCache = {};
 

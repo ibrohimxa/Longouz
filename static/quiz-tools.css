@@ -126,8 +126,8 @@
 #lzc-kbd.on { background: var(--accent-green, #1def6a); color: #041209; }
 
 /* v243: kalkulyator — aniq qiymat (kasr/ildiz) va grafik */
-.lzc-exact{display:inline-block;margin-left:6px;font-size:.78em;font-weight:600;color:#2ec4ff;opacity:.95}
+.lzc-exact{display:inline-block;margin-left:6px;font-size:.78em;font-weight:600;color:#1def6a;opacity:.95}
 .lzc-graph-in{min-height:76px;resize:vertical;font-family:ui-monospace,Menlo,monospace;font-size:.88rem;line-height:1.5}
-.lzc-graph{margin:8px 0;padding:6px;border-radius:12px;border:1px solid rgba(46,196,255,.25);background:rgba(0,0,0,.12)}
+.lzc-graph{margin:8px 0;padding:6px;border-radius:12px;border:1px solid rgba(29,239,106,.25);background:rgba(0,0,0,.12)}
 .lzc-graph-info .lzc-r span b{font-family:ui-monospace,Menlo,monospace}
-html[data-theme="light"] .lzc-graph{background:#f7fbff}
+html[data-theme="light"] .lzc-graph{background:#f3fbf6}

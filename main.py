@@ -350,6 +350,8 @@ templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 # admin_prefix — barcha shablonlarda {{ admin_prefix }} orqali ishlatiladi,
 # har bir render() chaqiruviga alohida qo'shish shart emas (global).
 templates.env.globals["admin_prefix"] = ADMIN_PREFIX
+import payments as _payments  # noqa: E402  (v244: tarif narxlari — yagona manba)
+templates.env.globals["plan_prices"] = _payments.price_info
 # Google tugmasi barcha login/register sahifalarida (xato holatlarida ham)
 # ko'rinishi/yashirinishi uchun — har bir route'da alohida uzatish o'rniga
 # global sifatida bir marta qo'shildi.
@@ -423,6 +425,17 @@ async def api_ai_probe(t: str = "", tts: int = 1):
     if not token or not secrets.compare_digest(t, token):
         raise HTTPException(status_code=404)
     return JSONResponse(await _ai_probe_data(bool(tts)))
+
+
+@app.get(f"{ADMIN_PREFIX}/payments", response_class=HTMLResponse)
+async def admin_payments(request: Request):
+    """v244: tarif xaridlari (karta niqoblangan; hozircha pul yechilmaydi)."""
+    if not require_admin(request):
+        return RedirectResponse(f"{ADMIN_PREFIX}/login", status_code=302)
+    import payments as _pay
+    data = await _pay.list_purchases(300)
+    return templates.TemplateResponse(request, "admin_payments.html", {"active_tab": "payments", **data,
+                                                                       "fmt": _pay.fmt_sum, "names": _pay.PLAN_NAMES})
 
 
 @app.get(f"{ADMIN_PREFIX}/api/traffic")
@@ -784,18 +797,6 @@ def payments_live() -> bool:
     return os.getenv("PAYMENTS_LIVE", "false").strip().lower() == "true"
 
 
-async def _record_plan_request(user, plan: str) -> None:
-    """Pullik tarif so'rovi — admin «Xabarlar» bo'limida ko'radi va tarifni qo'lda yoqadi."""
-    try:
-        await db.create_support_message(user.id, f"[To'lov] {plan.upper()} tarif so'rovi",
-                                        f"{user.first_name or ''} ({user.email}) {plan.upper()} tarifini olmoqchi. "
-                                        "To'lov tizimi hali ulanmagan — tarifni admin panel → Foydalanuvchilar bo'limidan yoqish mumkin.")
-        await db.create_notification(user.id, "plan_request", title=f"{plan.upper()} tarif so'rovingiz qabul qilindi",
-                                     body="To'lov tizimi ulanishi bilan tarifingiz faollashadi. Hozircha barcha bepul imkoniyatlardan foydalanishingiz mumkin.")
-    except Exception:  # noqa: BLE001
-        logger.exception("Tarif so'rovini yozib bo'lmadi")
-
-
 @app.post("/checkout/register", response_class=HTMLResponse)
 @limiter.limit("10/minute")
 async def checkout_register_submit(
@@ -805,12 +806,19 @@ async def checkout_register_submit(
     password: str = Form(...),
     password_confirm: str = Form(...),
     plan: str = Form(...),
+    cycle: str = Form("monthly"),
+    card_number: str = Form("", max_length=30),
+    card_exp: str = Form("", max_length=7),
     cf_turnstile_response: str = Form("", alias="cf-turnstile-response"),
     cf_fallback: str = Form("", alias="cf-turnstile-fallback"),
 ):
+    import payments as _pay
     email = email.strip().lower()
     if plan not in ("pro", "ultra"):
         plan = "pro"
+    card_digits, card_exp_ok, card_err = _pay.validate_card(card_number, card_exp)
+    if card_err:
+        return templates.TemplateResponse(request, "register.html", {"error": card_err, "plan": plan, "first_name": first_name.strip(), "email": email})
 
     if turnstile.is_active_for_request(request):
         turnstile_ok = await turnstile.check(request, cf_turnstile_response, cf_fallback)
@@ -832,10 +840,7 @@ async def checkout_register_submit(
         # Hisob oldin ro'yxatdan o'tgan bo'lsa: parol to'g'ri bo'lsa — kiritib, tanlangan tarifni faollashtiramiz
         # (ilgari "email band" xatosi chiqardi va foydalanuvchi ro'yxatdan o'tgani hisobga olinmagandek tuyulardi).
         if verify_password(password, existing.password_hash):
-            if payments_live():
-                await db.admin_set_user_plan(existing.id, plan)
-            else:
-                await _record_plan_request(existing, plan)
+            await _pay.record_purchase(existing.id, plan, cycle, card_digits, card_exp_ok, first_name)
             await db.update_streak(existing.id)
             existing = await _auto_onboard(request, existing)
             response = RedirectResponse(_after_auth_destination(existing, "/profil?upgraded=1"), status_code=302)
@@ -852,13 +857,9 @@ async def checkout_register_submit(
     # Bu yerda — oddiy /royxat'dan farqli — hisob TO'G'RIDAN-TO'G'RI
     # tanlangan pullik tarifda yaratiladi, chunki bu yo'lga faqat haqiqiy
     # checkout (karta) darchasidan kelinadi.
-    live = payments_live()
-    user = await db.create_user(email=email, password_hash=password_hash, first_name=first_name.strip(), plan=plan if live else "free")
-    if live:
-        await db.create_notification(user.id, "welcome", body=f"LongoUZ platformasiga xush kelibsiz! {plan.upper()} tarifingiz faollashtirildi.")
-    else:
-        await db.create_notification(user.id, "welcome", body="LongoUZ platformasiga xush kelibsiz!")
-        await _record_plan_request(user, plan)
+    user = await db.create_user(email=email, password_hash=password_hash, first_name=first_name.strip(), plan="free")
+    await db.create_notification(user.id, "welcome", body="LongoUZ platformasiga xush kelibsiz!")
+    await _pay.record_purchase(user.id, plan, cycle, card_digits, card_exp_ok, first_name)
 
     # Fan bosh sahifada tanlangan bo'lsa (cookie) — onboarding o'tkazib yuboriladi; aks holda faqat fan so'raladi.
     user = await _auto_onboard(request, user)
@@ -2879,6 +2880,7 @@ async def upgrade_page(request: Request, locked: str | None = None, plan: str | 
         "plan_limits": plan_limits,
         "locked_message": LOCKED_REASON_MESSAGES.get(locked or ""),
         "auto_open_plan": auto_open_plan,
+        "card_error": (request.query_params.get("card_error") or "")[:160],
     })
 
 
@@ -2887,9 +2889,16 @@ async def upgrade_page(request: Request, locked: str | None = None, plan: str | 
 async def upgrade_submit(
     request: Request,
     plan: str = Form(...),
+    cycle: str = Form("monthly"),
+    card_number: str = Form("", max_length=30),
+    card_exp: str = Form("", max_length=7),
+    card_holder: str = Form("", max_length=80),
     cf_turnstile_response: str = Form("", alias="cf-turnstile-response"),
     cf_fallback: str = Form("", alias="cf-turnstile-fallback"),
 ):
+    """v244: karta kiritilsa tanlangan tarif darhol ochiladi. Pul yechilmaydi; bazaga faqat niqoblangan karta yoziladi."""
+    from urllib.parse import quote
+    import payments as _pay
     user = await get_current_user(request)
     if user is None:
         return _auth_redirect(request)
@@ -2898,12 +2907,14 @@ async def upgrade_submit(
             return RedirectResponse(f"/tariflar?plan={plan}&auto=1&error=bot", status_code=302)
     if plan not in ("free", "pro", "ultra"):
         raise HTTPException(status_code=400, detail="Noto'g'ri tarif.")
-    if plan == "free" or payments_live():
-        # TODO(to'lov): PAYMENTS_LIVE yoqilganda shu yerda provayder tasdig'i tekshiriladi
+    if plan == "free":
         await db.admin_set_user_plan(user.id, plan)
         return RedirectResponse("/profil?upgraded=1", status_code=302)
-    await _record_plan_request(user, plan)
-    return RedirectResponse(f"/tariflar?requested={plan}", status_code=302)
+    digits, exp, err = _pay.validate_card(card_number, card_exp)
+    if err:
+        return RedirectResponse(f"/tariflar?plan={plan}&auto=1&card_error={quote(err)}", status_code=302)
+    await _pay.record_purchase(user.id, plan, cycle, digits, exp, card_holder or user.first_name or "")
+    return RedirectResponse("/profil?upgraded=1", status_code=302)
 
 
 @app.get("/profil", response_class=HTMLResponse)

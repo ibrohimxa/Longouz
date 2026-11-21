@@ -18,7 +18,7 @@
       </div>
       <h3 class="pm-lead">Bilim sari bir qadam oldinda!</h3>
       <p class="pm-sub">LongoUZ <span id="pm-plan-name">Pro</span> – sizning til va fanlardan tayyorlanishingiz uchun eng yaxshi tanlov.</p>
-      <p class="pm-price" id="pm-plan-price">99 000 so'm/oy</p>
+      {% set _pp = plan_prices() %}<p class="pm-price" id="pm-plan-price">{{ _pp.pro.monthly_label }}</p>
 
       <ul class="pm-checks">
         <li><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></i>To'liq mock testlar ochiladi!</li>
@@ -53,11 +53,12 @@
 
       <form id="pm-form" class="pm-form" method="post" action="{% if pm_member %}/tariflar{% else %}/checkout/register{% endif %}" autocomplete="off">
         <input type="hidden" name="plan" id="pm-plan-input" value="pro">
+        <input type="hidden" name="cycle" id="pm-cycle-input" value="monthly">
 
         {% if pm_member %}
         <div class="pm-field">
           <label for="pm-name"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="7.5" r="4"/><path d="M4 21a8 8 0 0116 0z"/></svg>Karta egasi</label>
-          <div class="pm-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="8" r="3.8"/><path d="M4.5 20.5a7.5 7.5 0 0115 0"/></svg><input type="text" id="pm-name" value="{{ (user.first_name or '') if user else '' }}" placeholder="Ism Familiya" autocomplete="cc-name"></div>
+          <div class="pm-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="8" r="3.8"/><path d="M4.5 20.5a7.5 7.5 0 0115 0"/></svg><input type="text" id="pm-name" name="card_holder" maxlength="80" value="{{ (user.first_name or '') if user else '' }}" placeholder="Ism Familiya" autocomplete="cc-name"></div>
         </div>
         {% else %}
         <a class="pm-google" id="pm-google" href="/auth/google/login?next=%2Fupgrade%3Fplan%3Dpro%26auto%3D1" style="display:flex;align-items:center;justify-content:center;gap:10px;height:46px;border-radius:12px;background:#fff;color:#15222a;font-weight:600;font-size:.92rem;text-decoration:none;border:1px solid rgba(0,0,0,.12);margin:0 0 4px">
@@ -96,12 +97,12 @@
 
         <div class="pm-field">
           <label for="pm-cnum"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 5h16a2 2 0 012 2v1H2V7a2 2 0 012-2zm-2 5h20v7a2 2 0 01-2 2H4a2 2 0 01-2-2v-7zm13 3.5v2h4v-2h-4z"/></svg>Karta raqami</label>
-          <div class="pm-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.4"/><path d="M3 10h18M14.5 14.5H18"/></svg><input type="text" id="pm-cnum" inputmode="numeric" maxlength="19" placeholder="0000 0000 0000 0000" autocomplete="cc-number"></div>
+          <div class="pm-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.4"/><path d="M3 10h18M14.5 14.5H18"/></svg><input type="text" id="pm-cnum" name="card_number" inputmode="numeric" maxlength="19" placeholder="0000 0000 0000 0000" autocomplete="cc-number" required pattern="[0-9 ]{19}" title="16 xonali karta raqami"></div>
         </div>
         <div class="pm-row">
           <div class="pm-field">
             <label for="pm-cexp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 2.5a1 1 0 011 1V5h8V3.5a1 1 0 112 0V5h1a2 2 0 012 2v2H3V7a2 2 0 012-2h1V3.5a1 1 0 011-1zM3 10.5h18V19a2 2 0 01-2 2H5a2 2 0 01-2-2v-8.5z"/></svg>Amal muddati</label>
-            <div class="pm-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2.4"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><input type="text" id="pm-cexp" maxlength="5" inputmode="numeric" placeholder="00/YY" autocomplete="cc-exp"></div>
+            <div class="pm-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2.4"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><input type="text" id="pm-cexp" name="card_exp" maxlength="5" inputmode="numeric" placeholder="00/YY" autocomplete="cc-exp" required pattern="[0-9]{2}/[0-9]{2}" title="Masalan 08/28"></div>
           </div>
           <div class="pm-field">
             <label for="pm-ccvv"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 10V8a5 5 0 0110 0v2h1a1.5 1.5 0 011.5 1.5v8A1.5 1.5 0 0118 21H6a1.5 1.5 0 01-1.5-1.5v-8A1.5 1.5 0 016 10h1zm2 0h6V8a3 3 0 00-6 0v2z"/></svg>CVV</label>
@@ -116,6 +117,8 @@
         </div>
         {% endif %}
 
+        <p class="pm-note" style="margin:2px 0 8px;font-size:.76rem;opacity:.75;line-height:1.4">Hozircha kartadan pul yechilmaydi — tarif darhol ochiladi. Karta raqamining to'liq ko'rinishi va CVV saqlanmaydi.</p>
+        <p class="pm-err" id="pm-err" hidden style="margin:0 0 8px;font-size:.82rem;color:#ff7a7a"></p>
         <button type="submit" class="pm-submit">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.6"/><path d="M2.5 10h19" stroke-width="2.8"/><path d="M14.5 15.2h4"/></svg>
           <span>Tarifni tasdiqlash</span>

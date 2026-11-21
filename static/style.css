@@ -4386,8 +4386,8 @@ html.lz-typing #owl-pin-button { opacity: 0 !important; pointer-events: none; tr
 }
 
 /* ===================== v235: NEON TABIIY YASHIL / KO'K QATLAM ===================== */
-:root{--neon:#39ff78;--neon-2:#1def6a;--neon-blue:#2ec4ff;--neon-glow:0 0 14px rgba(57,255,120,.45),0 0 32px rgba(57,255,120,.18)}
-html[data-theme="light"]{--neon:#00c853;--neon-2:#00b347;--neon-blue:#0091ea;--neon-glow:0 0 12px rgba(0,200,83,.35),0 6px 18px rgba(0,160,70,.18)}
+:root{--neon:#39ff78;--neon-2:#1def6a;--neon-blue:#1def6a;--neon-glow:0 0 14px rgba(57,255,120,.45),0 0 32px rgba(57,255,120,.18)}
+html[data-theme="light"]{--neon:#00c853;--neon-2:#00b347;--neon-blue:#08d052;--neon-glow:0 0 12px rgba(0,200,83,.35),0 6px 18px rgba(0,160,70,.18)}
 /* asosiy (yashil) tugmalar — neon yog'du */
 .btn-primary,.nav-cta,.au-submit,.dash-btn-primary,.hm-pbtn.main,.f215-btn,.lz-primary,#quiz-next-btn,.quiz-next,.pm-submit,.hero-cta,.cta-primary{
   box-shadow:var(--neon-glow);transition:box-shadow .25s,transform .2s,filter .2s}
@@ -4451,14 +4451,14 @@ html:not([data-theme="light"]) .dash-hero h1 em,html:not([data-theme="light"]) .
   border: 1px solid var(--line); background: var(--bg); color: var(--ink-soft);
   font: 600 .82rem/1 "Cambria Math", Cambria, Georgia, serif; cursor: pointer; transition: all .15s;
 }
-.chat-math-btn:hover, .chat-math-btn.on { border-color: #2ec4ff; color: #2ec4ff; box-shadow: 0 0 10px rgba(46,196,255,.3); }
+.chat-math-btn:hover, .chat-math-btn.on { border-color: #1def6a; color: #1def6a; box-shadow: 0 0 10px rgba(29,239,106,.3); }
 .lz-mathpad { padding: 8px 10px 2px; border-top: 1px solid var(--line); background: var(--bg); }
 .lz-mathpad-keys { display: grid; grid-template-columns: repeat(auto-fill, minmax(38px, 1fr)); gap: 4px; max-height: 70px; overflow-y: auto; scrollbar-width: thin; }
 .lz-mathpad-keys button {
   height: 31px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg-elevated); color: var(--ink);
   font: 500 .86rem/1 "Cambria Math", Cambria, Georgia, serif; cursor: pointer; padding: 0 4px;
 }
-.lz-mathpad-keys button:hover { border-color: #2ec4ff; color: #2ec4ff; }
+.lz-mathpad-keys button:hover { border-color: #1def6a; color: #1def6a; }
 .lz-mathpad-keys button:active { transform: scale(.94); }
 #floating-chat-widget .lthink-row { margin: 2px 0; }
 .floating-chat-input-row input { min-width: 0; }
@@ -4468,7 +4468,8 @@ html:not([data-theme="light"]) .dash-hero h1 em,html:not([data-theme="light"]) .
 /* v243: admin yon panel — bo'limlarga ajratilgan */
 .sb-group{margin:14px 10px 4px;font-size:.66rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;opacity:.45}
 .sidebar-nav .sb-group:first-child{margin-top:4px}
-.sidebar-link.sb-longoai{background:linear-gradient(90deg,rgba(46,196,255,.12),transparent);border:1px solid rgba(46,196,255,.25)}
-.sidebar-link.sb-longoai svg{color:#2ec4ff}
-.sidebar-link.sb-longoai.active{background:linear-gradient(90deg,rgba(46,196,255,.25),rgba(61,255,123,.08))}
+.sidebar-link.sb-longoai{background:linear-gradient(90deg,rgba(29,239,106,.12),transparent);border:1px solid rgba(29,239,106,.25)}
+.sidebar-link.sb-longoai svg{color:#1def6a}
+.sidebar-link.sb-longoai.active{background:linear-gradient(90deg,rgba(29,239,106,.25),rgba(61,255,123,.08))}
 @media (max-width:900px){.sb-group{display:none}}
+.plan-yearly-off{font-size:.62em;font-weight:600;color:var(--accent-green);margin-left:6px;letter-spacing:0;text-transform:none;vertical-align:middle}

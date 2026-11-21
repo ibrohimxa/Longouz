@@ -237,9 +237,10 @@ SUPPORT_SYSTEM = (
 SITE_INFO = (
     "LongoUZ bo'limlari: /kabinet — shaxsiy kabinet (natijalar, maqsad, statistika); /testlar — fan bo'yicha testlar, mavzular, mock (to'liq imtihon) "
     "variantlari, DTM blok-test (/blok-test); /ustoz — AI repetitor (ovozli ham), faqat Pro va Ultra tarifda; /tahlil — natijalar tahlili; "
-    "/profil — ism, fan, maqsad, parol, sertifikatlar; /tariflar — Bepul, Pro (99 000 so'm/oy), Ultra (199 000 so'm/oy); /yordam — adminga xabar; "
+    "/profil — ism, fan, maqsad, parol, sertifikatlar; /tariflar — Bepul, Pro (25 000 so'm/oy, yillik 2% chegirma — 294 000 so'm/yil), Ultra (40 000 so'm/oy, yillik 5% chegirma — 456 000 so'm/yil); /yordam — adminga xabar; "
     "/qollanma — yo'riqnoma; /verify — sertifikatni QR/ID bilan tekshirish. Testlar va mavzular bepul. "
-    "TO'LOV: Click/Payme hali ulanmagan — Pro/Ultra tanlanganda so'rov qabul qilinadi, admin tarifni qo'lda yoqadi; karta ma'lumoti saqlanmaydi. "
+    "TO'LOV: tarif oynasida karta (UzCard/HUMO/Visa/Mastercard) kiritilsa tarif darhol ochiladi; hozircha kartadan pul yechilmaydi; "
+    "karta to'liq raqami va CVV saqlanmaydi. "
     "Test paytida savol xato bo'lsa — savol yonidagi «Shikoyat» tugmasi; LongoAI uni tekshirib javob beradi. "
     "Google bilan kirish mavjud. Parolni unutgan bo'lsa — /yordam orqali email bilan yozsin, admin yordam beradi. "
     "Natija qayta hisoblansa (savol tuzatilganda) ball faqat oshadi, kamaymaydi."

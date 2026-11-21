@@ -1,3 +1,9 @@
+## v244 — ranglar neon yashilga qaytdi, karta bilan tarif ochiladi, yangi narxlar
+- v243 da qo'shilgan ko'k/sariq urg'ular (o'ylash animatsiyasi, formulalar, grafiklar, LongoAI sahifasi, statistika kartalari, admin grafigi, belgilar paneli) yana neon yashil.
+- Tarif xaridi: karta (UzCard/HUMO/Visa/Mastercard) kiritilsa tanlangan tarif DARHOL ochiladi; hozircha pul yechilmaydi. Xarid bazaga yoziladi: tarif, oylik/yillik, summa, karta turi, niqoblangan raqam (8600 •••• •••• 1234), muddat, karta egasi. Karta to'liq raqami va CVV saqlanmaydi. Noto'g'ri yoki muddati o'tgan karta qabul qilinmaydi.
+- Yangi narxlar: Pro 25 000 so'm/oy (yillik −2% = 294 000 so'm), Ultra 40 000 so'm/oy (yillik −5% = 456 000 so'm). Barcha sahifalar narxni bitta joydan (payments.py) oladi.
+- Admin panelda «To'lovlar» bo'limi: barcha xaridlar ro'yxati.
+
 ## v243 — xavfsizlik, haqiqiy statistika, LongoAI (o'zi tekshiradi va javob beradi), formulalar va chizmalar
 - **Xavfsizlik**:
   - To'lov teshigi yopildi: ilgari /tariflar va /checkout/register so'rovi bilan istalgan odam Pro/Ultra'ni TEKIN olardi, /api/balance/topup esa balansni bepul to'ldirardi. Endi to'lov tizimi ulanmaguncha (PAYMENTS_LIVE=true) pullik tarif faqat admin tomonidan yoqiladi; tanlangan tarif «so'rov» sifatida adminga (Xabarlar) tushadi. Karta maydonlari hech qayerga yuborilmaydi va oyna yopilganda tozalanadi.

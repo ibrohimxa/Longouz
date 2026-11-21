@@ -1,5 +1,6 @@
 /* Tarif sotib olish oynasi: ochish/yopish va karta vizualini jonlantirish.
-   Ma'lumotlar hech qayerga yuborilmaydi (karta maydonlarida name yo'q). */
+   v244: karta raqami va muddati serverga yuboriladi (tarif ochiladi, pul yechilmaydi); CVV YUBORILMAYDI.
+   Bazaga faqat niqoblangan raqam (8600 •••• •••• 1234) yoziladi. */
 (function () {
   "use strict";
   var overlay = document.getElementById("pm-overlay");
@@ -9,8 +10,9 @@
 
   function setText(id, v) { var el = $(id); if (el) el.textContent = v; }
 
-  function open(plan, name, price) {
+  function open(plan, name, price, cycle) {
     planInput.value = plan;
+    var cy = $("pm-cycle-input"); if (cy) cy.value = cycle === "yearly" ? "yearly" : "monthly";
     var g = $("pm-google");
     if (g) g.setAttribute("href", "/auth/google/login?next=" + encodeURIComponent("/tariflar?plan=" + plan + "&auto=1"));
     setText("pm-plan-name", name);
@@ -24,7 +26,8 @@
   function close() { wipeCard(); overlay.hidden = true; document.body.style.overflow = ""; document.body.classList.remove("pm-open"); }
 
   window.pmOpen = function (btn) {
-    open(btn.dataset.plan, btn.dataset.planName, btn.dataset.activePrice || btn.dataset.monthlyPrice);
+    var yearly = !!btn.dataset.activePrice && btn.dataset.activePrice === btn.dataset.yearlyPrice;
+    open(btn.dataset.plan, btn.dataset.planName, btn.dataset.activePrice || btn.dataset.monthlyPrice, yearly ? "yearly" : "monthly");
   };
   document.querySelectorAll(".checkout-open-btn").forEach(function (b) {
     b.addEventListener("click", function () { window.pmOpen(b); });
@@ -69,8 +72,17 @@
   cvv.addEventListener("input", function () { cvv.value = cvv.value.replace(/\D/g, "").slice(0, 3); });
 
   var form = $("pm-form");
-  // v243: karta ma'lumotlari serverga YUBORILMAYDI va sahifada qolmaydi (to'lov provayderi hali ulanmagan)
-  form.addEventListener("submit", function () { setTimeout(wipeCard, 0); });
+  // v244: yuborishdan oldin karta tekshiriladi (16 raqam, muddat o'tmagan)
+  form.addEventListener("submit", function (e) {
+    var err = $("pm-err"), d = num.value.replace(/\D/g, ""), m = exp.value.match(/^(\d{2})\/(\d{2})$/), msg = "";
+    if (d.length !== 16) msg = "Karta raqami 16 ta raqam bo'lishi kerak.";
+    else if (!/^(8600|5614|9860|4|5[1-5]|2[2-7])/.test(d)) msg = "Faqat UzCard, HUMO, Visa yoki Mastercard.";
+    else if (!m || +m[1] < 1 || +m[1] > 12) msg = "Amal muddatini OO/YY ko'rinishida kiriting.";
+    else { var now = new Date(), yy = 2000 + +m[2]; if (yy < now.getFullYear() || (yy === now.getFullYear() && +m[1] < now.getMonth() + 1)) msg = "Karta amal muddati o'tgan."; }
+    if (msg) { e.preventDefault(); e.stopImmediatePropagation(); if (err) { err.textContent = msg; err.hidden = false; } return; }
+    if (err) err.hidden = true;
+    if (cvv) cvv.value = "";   // CVV hech qayerga ketmaydi
+  });
   form.addEventListener("submit", function (e) {
     var p1 = $("pm-pass"), p2 = $("pm-pass2");
     if (p1 && p2 && p1.value !== p2.value) {

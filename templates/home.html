@@ -8,11 +8,11 @@
   <link rel="icon" type="image/png" href="/static/logo-owl.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=Caveat:wght@600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css?v=243">
-  <link rel="stylesheet" href="/static/home.css?v=243">
-  <link rel="stylesheet" href="/static/news.css?v=243">
-  <link rel="stylesheet" href="/static/purchase.css?v=243">
-  <script src="/static/theme-init.js?v=243"></script>
+  <link rel="stylesheet" href="/static/style.css?v=244">
+  <link rel="stylesheet" href="/static/home.css?v=244">
+  <link rel="stylesheet" href="/static/news.css?v=244">
+  <link rel="stylesheet" href="/static/purchase.css?v=244">
+  <script src="/static/theme-init.js?v=244"></script>
 </head>
 <body class="home" data-logged-in="false">
   </div>
@@ -259,11 +259,12 @@
     </section>
 
     <!-- ===================== TARIFLAR ===================== -->
+    {% set _pp = plan_prices() %}
     <section class="hm-sec" id="plans">
       <div class="hm-wrap">
         <div class="hm-plans-head" data-reveal>
           <div><span class="hm-pill">Tariflar</span><h2>O'zingizga mos tarifni tanlang</h2><p>Barcha tariflar o'quvchilarning real ehtiyojlariga mos ravishda tuzilgan.</p></div>
-          <div class="hm-toggle billing-toggle" role="group" aria-label="To'lov davri"><button type="button" class="billing-toggle-btn active" data-cycle="monthly">Oylik</button><button type="button" class="billing-toggle-btn" data-cycle="yearly">Yillik <em>2 oy tejang</em></button></div>
+          <div class="hm-toggle billing-toggle" role="group" aria-label="To'lov davri"><button type="button" class="billing-toggle-btn active" data-cycle="monthly">Oylik</button><button type="button" class="billing-toggle-btn" data-cycle="yearly">Yillik <em>{{ _pp.max_discount }}% gacha chegirma</em></button></div>
         </div>
         <div class="hm-plans" id="home-plans-grid">
           <div class="hm-plan" data-reveal data-reveal-delay="1">
@@ -274,16 +275,16 @@
           </div>
           <div class="hm-plan pop" data-reveal data-reveal-delay="2">
             <span class="hm-badge">★ Mashhur</span>
-            <div class="ph"><span class="pi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l4 4 5-7 5 7 4-4-2 12H5z"/></svg></span><div><h3>Pro</h3><small>Jiddiy tayyorgarlik uchun</small></div></div>
-            <div class="hp-price" data-monthly-label="99 000 so'm / oy" data-yearly-label="990 000 so'm / yil">99 000 <span>so'm / oy</span></div>
+            <div class="ph"><span class="pi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l4 4 5-7 5 7 4-4-2 12H5z"/></svg></span><div><h3>Pro</h3><small>Jiddiy tayyorgarlik uchun · yillikda −{{ _pp.pro.discount }}%</small></div></div>
+            <div class="hp-price" data-monthly-label="{{ _pp.pro.monthly_num }} so'm / oy" data-yearly-label="{{ _pp.pro.yearly_num }} so'm / yil">{{ _pp.pro.monthly_num }} <span>so'm / oy</span></div>
             <ul><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>Barcha fanlar to'liq savollar banki</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>AI repetitor bilan jonli suhbat</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>Batafsil statistika va diagrammalar</li></ul>
-            <button type="button" class="hm-pbtn main checkout-open-btn" data-plan="pro" data-plan-name="Pro" data-monthly-price="99 000 so'm/oy" data-yearly-price="990 000 so'm/yil">Pro'ga o'tish</button>
+            <button type="button" class="hm-pbtn main checkout-open-btn" data-plan="pro" data-plan-name="Pro" data-monthly-price="{{ _pp.pro.monthly_label }}" data-yearly-price="{{ _pp.pro.yearly_label }}">Pro'ga o'tish</button>
           </div>
           <div class="hm-plan" data-reveal data-reveal-delay="3">
-            <div class="ph"><span class="pi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20M12 21L8 9l4-6 4 6z"/></svg></span><div><h3>Ultra</h3><small>Maksimal imkoniyatlar</small></div></div>
-            <div class="hp-price" data-monthly-label="199 000 so'm / oy" data-yearly-label="1 990 000 so'm / yil">199 000 <span>so'm / oy</span></div>
+            <div class="ph"><span class="pi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20M12 21L8 9l4-6 4 6z"/></svg></span><div><h3>Ultra</h3><small>Maksimal imkoniyatlar · yillikda −{{ _pp.ultra.discount }}%</small></div></div>
+            <div class="hp-price" data-monthly-label="{{ _pp.ultra.monthly_num }} so'm / oy" data-yearly-label="{{ _pp.ultra.yearly_num }} so'm / yil">{{ _pp.ultra.monthly_num }} <span>so'm / oy</span></div>
             <ul><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>Pro'dagi barcha imkoniyatlar</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>Shaxsiy o'quv rejimi</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>Ustuvor AI javoblari</li></ul>
-            <button type="button" class="hm-pbtn checkout-open-btn" data-plan="ultra" data-plan-name="Ultra" data-monthly-price="199 000 so'm/oy" data-yearly-price="1 990 000 so'm/yil">Ultra'ga o'tish</button>
+            <button type="button" class="hm-pbtn checkout-open-btn" data-plan="ultra" data-plan-name="Ultra" data-monthly-price="{{ _pp.ultra.monthly_label }}" data-yearly-price="{{ _pp.ultra.yearly_label }}">Ultra'ga o'tish</button>
           </div>
         </div>
       </div>
@@ -347,11 +348,11 @@
   </footer>
 
   {% include "_owl_widget.html" %}
-  <script src="/static/devtools-guard.js?v=243"></script>
-  <script src="/static/app.js?v=243"></script>
-  <script src="/static/owl-chat.js?v=243"></script>
-  <script src="/static/home-showcase.js?v=243"></script>
-  <script src="/static/news-strip.js?v=243" defer></script>
+  <script src="/static/devtools-guard.js?v=244"></script>
+  <script src="/static/app.js?v=244"></script>
+  <script src="/static/owl-chat.js?v=244"></script>
+  <script src="/static/home-showcase.js?v=244"></script>
+  <script src="/static/news-strip.js?v=244" defer></script>
   <script>
     (function () {
       var toggleBtns = document.querySelectorAll(".billing-toggle-btn");
@@ -397,9 +398,9 @@
       });
     })();
   </script>
-  <script src="/static/purchase.js?v=243"></script>
+  <script src="/static/purchase.js?v=244"></script>
   {% if turnstile_active(request) %}
-  <script src="/static/turnstile-helper.js?v=243"></script>
+  <script src="/static/turnstile-helper.js?v=244"></script>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=lgTurnstileReady" async defer onerror="window.lgTurnstileFailed&&window.lgTurnstileFailed()"></script>
   {% endif %}
 </body>

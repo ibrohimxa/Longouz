@@ -7,11 +7,11 @@
     <p class="plock-sub">Jonli AI o'qituvchi xatolaringizni tushuntiradi, savollaringizga javob beradi va mavzuni bosqichma-bosqich o'rgatadi.</p>
     <div class="plock-plans">
       <a class="plock-plan" href="/tariflar?plan=pro&auto=1">
-        <b>Pro</b><span>99 000 so'm/oy</span>
+        <b>Pro</b><span>{{ plan_prices().pro.monthly_label }}</span>
         <small>AI repetitor, barcha fanlar, batafsil statistika</small>
       </a>
       <a class="plock-plan best" href="/tariflar?plan=ultra&auto=1">
-        <em>Eng to'liq</em><b>Ultra</b><span>199 000 so'm/oy</span>
+        <em>Eng to'liq</em><b>Ultra</b><span>{{ plan_prices().ultra.monthly_label }}</span>
         <small>Pro + ustuvor AI, shaxsiy o'quv rejasi, cheksiz mock</small>
       </a>
     </div>
