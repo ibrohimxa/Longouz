@@ -1,0 +1,71 @@
+/* v246: Admin panel — barcha ekranlarga moslashuv (telefon, planshet, noutbuk) va tungi rejim. */
+
+/* Telefon/planshetda yuqori qatorda kunduzgi/tungi rejim tugmasi */
+.adm-theme-m { display: none !important; }
+@media (max-width: 900px) {
+  .adm-theme-m { display: block !important; margin-left: auto; flex: none; transform: scale(.86); transform-origin: right center; }
+  .app-sidebar .sidebar-brand { flex: none; }
+}
+
+/* ---------- umumiy moslashuv ---------- */
+.app-content { min-width: 0; }
+.admin-users-table-wrap, .table-wrap, .lz-traffic, .dash-panel { max-width: 100%; }
+.admin-users-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.admin-users-table { min-width: 560px; }
+img, svg, canvas { max-width: 100%; }
+
+@media (max-width: 900px) {
+  .app-content { padding: 14px 12px 24px !important; }
+  .app-topbar { flex-direction: column; align-items: stretch !important; gap: 10px; }
+  .app-topbar h1 { font-size: 1.35rem; }
+  .app-topbar p { font-size: .86rem; }
+  .app-topbar > div:last-child:not(:first-child) { display: flex; flex-wrap: wrap; gap: 8px; }
+  .stats-grid, .admin-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px !important; }
+  .dash-panel { padding: 14px !important; border-radius: 16px !important; }
+  .dash-grid, .ad-grid, .admin-two-col { grid-template-columns: 1fr !important; }
+  .admin-filters, .admin-toolbar, .q-filters { flex-wrap: wrap !important; gap: 8px !important; }
+  .admin-filters > *, .admin-toolbar > *, .q-filters > * { flex: 1 1 140px; min-width: 0; }
+  input, select, textarea { max-width: 100%; }
+  .admin-users-table th, .admin-users-table td { padding: 9px 10px; font-size: .84rem; }
+}
+@media (max-width: 420px) {
+  .stats-grid, .admin-stat-grid { grid-template-columns: 1fr 1fr !important; }
+  .stat-card .stat-value { font-size: 1.35rem; }
+}
+
+/* ---------- Tashriflar paneli ---------- */
+@media (max-width: 640px) {
+  .lz-tr-head { flex-direction: column; }
+  .lz-tr-funnel { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .lz-tr-funnel .lz-tr-step:last-child { grid-column: 1 / -1; }
+  .lz-tr-chart, .lz-tr-chart svg { min-height: 220px; height: 220px; }
+  .lz-tr-foot { flex-direction: column; gap: 4px; }
+}
+
+/* ---------- LongoAI sahifasi: telefonda sarlavha ustma-ust ---------- */
+@media (max-width: 760px) {
+  .la-hero { display: grid !important; grid-template-columns: 52px 1fr; gap: 12px !important; padding: 14px !important; align-items: center; }
+  .la-hero-ico { width: 52px !important; height: 52px !important; border-radius: 14px !important; }
+  .la-hero-txt { min-width: 0; }
+  .la-hero-txt h1 { font-size: 1.4rem !important; }
+  .la-hero-txt p { font-size: .82rem !important; grid-column: 1 / -1; }
+  .la-hero-state { grid-column: 1 / -1; flex-direction: row !important; flex-wrap: wrap; align-items: center !important; }
+  .la-chat-card { min-height: 66vh !important; max-height: none !important; border-radius: 16px !important; }
+  .la-chat { padding: 12px 10px 6px !important; max-height: 62vh; }
+  .la-a { max-width: 100% !important; }
+  .la-av { flex-basis: 26px !important; height: 26px !important; }
+  .la-body { padding: 9px 11px !important; }
+  .la-input { padding: 10px !important; gap: 8px !important; }
+  .la-chat-head { flex-wrap: wrap; }
+}
+
+/* ---------- Tungi rejim: admin elementlari ---------- */
+html[data-theme="dark"] .admin-users-table thead th { background: rgba(255,255,255,.04); }
+html[data-theme="dark"] .admin-users-table tbody tr:hover { background: rgba(29,239,106,.05); }
+html[data-theme="dark"] .stat-card { background: var(--bg-elevated); }
+
+/* ---------- Yengil animatsiya va hover ---------- */
+.stat-card, .dash-panel, .lz-ss-card { transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+@media (hover: hover) {
+  .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(0,0,0,.18), 0 0 0 1px rgba(29,239,106,.25); }
+}

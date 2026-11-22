@@ -448,7 +448,7 @@ def admin_tools(staged: list) -> list[Tool]:
     ]
 
 
-async def admin_assistant(messages: list[dict]) -> dict | None:
+async def admin_assistant(messages: list[dict], on_step=None) -> dict | None:
     """Admin suhbati. None — agent ishlamadi (chaqiruvchi eski usulga o'tadi)."""
     hist = [{"role": "assistant" if m.get("role") == "assistant" else "user", "text": str(m.get("text", ""))[:4000]}
             for m in messages[-14:] if str(m.get("text", "")).strip()]
@@ -463,7 +463,7 @@ async def admin_assistant(messages: list[dict]) -> dict | None:
         mem_txt = ""
     system = ADMIN_SYSTEM + (f"\n\nXOTIRA (avvalgi eslatmalar):\n{mem_txt}" if mem_txt else "") + \
         f"\n\nBugun: {datetime.utcnow().strftime('%Y-%m-%d')}. Fan kodlari: {', '.join(db.SUBJECT_CODES)}."
-    r = await ga.run_agent(system, hist, admin_tools(staged), deadline=55, max_steps=8, max_tokens=7000)
+    r = await ga.run_agent(system, hist, admin_tools(staged), deadline=55, max_steps=8, max_tokens=7000, on_step=on_step)
     if not r.ok and not staged:
         return None
     return {"reply": r.text or "Tayyor.", "actions": staged[:10], "steps": r.steps, "provider": "gemini", "model": r.model}
@@ -491,6 +491,7 @@ def register(app, prefix: str, require_admin, get_current_user, limiter, templat
         return templates.TemplateResponse(request, "admin_longoai.html", {
             "active_tab": "longoai", "ai_ready": ai_gemini.is_gemini_configured(), "cfg": await reports.get_cfg(),
             "support_auto": (await db.get_setting("longoai_support_auto", "1")) != "0", "pending": await pending_count(),
+            "audit_autofix": (await db.get_setting("ai_audit_autofix", "1")) != "0",
         })
 
     @app.post(f"{prefix}/api/agent/settings")
@@ -507,6 +508,8 @@ def register(app, prefix: str, require_admin, get_current_user, limiter, templat
         cfg = await reports.set_cfg(patch) if patch else await reports.get_cfg()
         if "support_auto" in body:
             await db.set_setting("longoai_support_auto", "1" if body["support_auto"] else "0")
+        if "audit_autofix" in body:
+            await db.set_setting("ai_audit_autofix", "1" if body["audit_autofix"] else "0")
         return JSONResponse({"ok": True, "cfg": cfg, "support_auto": (await db.get_setting("longoai_support_auto", "1")) != "0"})
 
     @app.post("/api/agent/kick")
@@ -530,6 +533,52 @@ def register(app, prefix: str, require_admin, get_current_user, limiter, templat
             pend = int((await s.execute(select(func.count()).select_from(AgentJob).where(
                 AgentJob.user_id == user.id, AgentJob.kind == "support", AgentJob.status.in_(("pending", "running"))))).scalar() or 0)
         return JSONResponse({"pending": pend, "items": [{"id": m.id, "reply": m.admin_reply, "replied": bool(m.replied_at)} for m in msgs]})
+
+    @app.post(f"{prefix}/api/longoai/stream")
+    async def longoai_stream(request: Request):
+        """v246: admin yordamchi — ish bosqichlari jonli (SSE), yakuniy javob keyin keladi."""
+        import asyncio
+        from fastapi.responses import StreamingResponse
+        if not require_admin(request):
+            raise HTTPException(status_code=401)
+        if request.headers.get("x-requested-with") != "fetch":
+            raise HTTPException(status_code=400)
+        body = await request.json()
+        msgs = body.get("messages") or []
+        q: asyncio.Queue = asyncio.Queue()
+
+        async def on_step(st: dict) -> None:
+            await q.put({"step": st})
+
+        async def worker():
+            t0 = time.monotonic()
+            try:
+                out = await admin_assistant(msgs, on_step=on_step)
+                if out is None:
+                    import studio
+                    out = await studio.run_assistant(msgs)
+                out["ms"] = int((time.monotonic() - t0) * 1000)
+                await q.put({"done": out})
+            except Exception as exc:  # noqa: BLE001
+                logger.exception("LongoAI stream")
+                await q.put({"error": str(exc)[:300]})
+
+        async def gen():
+            task = asyncio.create_task(worker())
+            yield b": ok\n\n"
+            while True:
+                try:
+                    item = await asyncio.wait_for(q.get(), timeout=10)
+                except asyncio.TimeoutError:
+                    yield b": ping\n\n"
+                    if task.done() and q.empty():
+                        break
+                    continue
+                yield ("data: " + json.dumps(item, ensure_ascii=False, default=str) + "\n\n").encode()
+                if "done" in item or "error" in item:
+                    break
+
+        return StreamingResponse(gen(), media_type="text/event-stream", headers={"Cache-Control": "no-store", "X-Accel-Buffering": "no"})
 
     @app.get(f"{prefix}/api/agent/jobs")
     async def agent_jobs(request: Request, limit: int = 40):

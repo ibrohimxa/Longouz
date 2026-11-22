@@ -488,6 +488,35 @@ async def _ai_probe_data(tts: bool) -> dict:
     return out
 
 
+_RECENT_CACHE: dict = {"t": 0.0, "d": None}
+
+
+@app.get("/api/public/recent-results")
+async def api_recent_results():
+    """v246: bosh sahifadagi «Jonli natijalar» lentasi — ismning faqat bosh harfi (shaxsiy ma'lumot oshkor qilinmaydi)."""
+    import time as _t
+    if _RECENT_CACHE["d"] is not None and _t.monotonic() - _RECENT_CACHE["t"] < 60:
+        return JSONResponse(_RECENT_CACHE["d"])
+    items = []
+    try:
+        from sqlalchemy import select as _sel, desc as _desc
+        async with db.async_session() as session:
+            rows = (await session.execute(_sel(db.WebQuizLog.subject, db.WebQuizLog.correct_count, db.WebQuizLog.total_count,
+                                               db.WebQuizLog.created_at, db.WebUser.first_name)
+                                          .join(db.WebUser, db.WebUser.id == db.WebQuizLog.user_id)
+                                          .where(db.WebQuizLog.total_count >= 5)
+                                          .order_by(_desc(db.WebQuizLog.id)).limit(14))).all()
+        for subj, c, tot, at, name in rows:
+            nm = (name or "O'quvchi").strip()
+            items.append({"name": (nm[:1].upper() + "***") if nm else "O'quvchi", "subject": db.SUBJECT_NAMES.get(subj, subj),
+                          "score": f"{c}/{tot}", "pct": round(100 * c / tot) if tot else 0})
+    except Exception:  # noqa: BLE001
+        logger.debug("recent results", exc_info=True)
+    data = {"items": items}
+    _RECENT_CACHE.update(t=_t.monotonic(), d=data)
+    return JSONResponse(data)
+
+
 @app.get("/api/health")
 async def api_health():
     """Holat: faqat ishlayapti/ishlamayapti (v243: foydalanuvchilar soni va xato matni oshkor qilinmaydi)."""
@@ -1540,8 +1569,59 @@ async def admin_topics_page(request: Request, subject: str = "", mode: str = "",
     })
 
 
+@app.get(f"{ADMIN_PREFIX}/moklar", response_class=HTMLResponse)
+async def admin_moklar_page(request: Request, subject: str = "", mode: str = ""):
+    """v246: Moklar — fanlar → mavzular → savollar (ochiladigan ro'yxat), «Ko'rish» va «Tahrirlash»."""
+    if not require_admin(request):
+        return RedirectResponse(f"{ADMIN_PREFIX}/login", status_code=302)
+    allt = await db.admin_topic_overview()
+    subj_counts: dict = {}
+    for t in allt:
+        c = subj_counts.setdefault(t["subject"], {"topics": 0, "questions": 0})
+        c["topics"] += 1
+        c["questions"] += t["total"]
+    subjects = [x for x in db.SUBJECTS if x["code"] in subj_counts] or db.SUBJECTS
+    subject = subject if subject in subj_counts else (subjects[0]["code"] if subjects else "")
+    modes_here = sorted({t["mode"] for t in allt if t["subject"] == subject}, key=lambda m: [x["code"] for x in db.TEST_MODES].index(m) if m in db.TEST_MODE_BY_CODE else 99)
+    mode = mode if mode in modes_here else (modes_here[0] if modes_here else "dtm")
+    topics = [t for t in allt if t["subject"] == subject and t["mode"] == mode]
+    # mavzu tartibi: rasmiy tartib (sinf/raqam) bo'lsa — shu, bo'lmasa nomi bo'yicha
+    try:
+        order = await db.get_topic_order(subject, mode)
+    except Exception:  # noqa: BLE001
+        order = {}
+    if order:
+        topics.sort(key=lambda t: (order.get(t["topic"], (99, 9999)), t["topic"].lower()))
+    return templates.TemplateResponse(request, "admin_moklar.html", {
+        "active_tab": "moklar", "subjects": subjects, "subj_counts": subj_counts, "subject": subject, "mode": mode,
+        "modes": [m for m in db.TEST_MODES if m["code"] in modes_here], "topics": topics,
+        "subject_name": db.SUBJECT_NAMES.get(subject, subject),
+        "open_topic": request.query_params.get("open", ""), "saved": request.query_params.get("saved", ""),
+        "totals": {"topics": len(topics), "questions": sum(t["total"] for t in topics), "active": sum(t["active"] for t in topics),
+                   "hidden": sum(t["hidden"] for t in topics)},
+    })
+
+
+@app.get(f"{ADMIN_PREFIX}/api/moklar/questions")
+async def admin_moklar_questions(request: Request, subject: str, mode: str, topic: str):
+    if not require_admin(request):
+        raise HTTPException(status_code=401)
+    import json as _json
+    rows = await db.admin_topic_questions(subject, mode, topic)
+    out = []
+    for i, q in enumerate(rows, 1):
+        try:
+            opts = _json.loads(q.options_json or "[]")
+        except ValueError:
+            opts = []
+        out.append({"n": i, "id": q.id, "q": q.question, "opts": opts, "ci": q.correct_index, "type": q.qtype or "closed",
+                    "diff": q.difficulty or 0, "active": bool(q.is_active), "fig": bool((q.figure_json or "").strip()),
+                    "plan": q.min_plan or 0, "expl": (q.explanation or "")[:400]})
+    return JSONResponse({"items": out})
+
+
 @app.get(f"{ADMIN_PREFIX}/topics/edit", response_class=HTMLResponse)
-async def admin_topic_editor_page(request: Request, subject: str, mode: str, topic: str, start: int = 1):
+async def admin_topic_editor_page(request: Request, subject: str, mode: str, topic: str, start: int = 1, src: str = ""):
     if not require_admin(request):
         return RedirectResponse(f"{ADMIN_PREFIX}/login", status_code=302)
     rows = await db.admin_topic_questions(subject, mode, topic)
@@ -1552,7 +1632,7 @@ async def admin_topic_editor_page(request: Request, subject: str, mode: str, top
         "subject_name": db.SUBJECT_NAMES.get(subject, subject),
         "mode_name": db.TEST_MODE_BY_CODE.get(mode, {}).get("name", mode),
         "time_limit_minutes": db.TEST_MODE_BY_CODE.get(mode, {}).get("time_limit_minutes", 30),
-        "start": max(1, start), "prefix": ADMIN_PREFIX,
+        "start": max(1, start), "prefix": ADMIN_PREFIX, "immersive": src == "moklar",
         "questions": [
             {"id": q.id, "question": q.question, "options": _json.loads(q.options_json),
              "correct_index": q.correct_index, "explanation": q.explanation or "",
@@ -1561,8 +1641,12 @@ async def admin_topic_editor_page(request: Request, subject: str, mode: str, top
             for q in rows
         ],
     }
+    from urllib.parse import urlencode as _ue
+    back = f"{ADMIN_PREFIX}/moklar?" + _ue({"subject": subject, "mode": mode, "open": topic}) if src == "moklar" else f"{ADMIN_PREFIX}/topics"
+    payload["back"] = back
     return templates.TemplateResponse(request, "admin_topic_editor.html", {
-        "payload": payload, "subject": subject, "mode": mode, "topic": topic, "active_tab": "questions",
+        "payload": payload, "subject": subject, "mode": mode, "topic": topic, "active_tab": "moklar" if src == "moklar" else "questions",
+        "immersive": src == "moklar", "back_url": back,
     })
 
 

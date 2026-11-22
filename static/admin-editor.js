@@ -3,12 +3,14 @@
   "use strict";
   var P = JSON.parse(document.getElementById("editor-data").textContent);
   var $ = function (id) { return document.getElementById(id); };
-  var STYLE_DEFAULTS = { fs: 1.25, fw: 600, lh: 1.4, mt: 0, mb: 20, pd: 30, og: 10, ox: 0, oy: 0, al: "left", col: "" };
+  var STYLE_DEFAULTS = { fs: 1.25, fw: 600, lh: 1.4, mt: 0, mb: 20, pd: 30, og: 10, ox: 0, oy: 0, al: "left", col: "", ofs: 1, op: 14, fsc: 100, fx: 0, fy: 0, fal: "left" };
   var STYLE_FIELDS = [
     ["fs", "Matn o'lchami", 0.9, 2.6, 0.05, "rem"], ["fw", "Qalinligi", 400, 800, 100, ""], ["lh", "Qator balandligi", 1.1, 2.2, 0.05, ""],
     ["mt", "Tepadan masofa", 0, 80, 2, "px"], ["mb", "Pastdan masofa (variantlargacha)", 0, 80, 2, "px"],
     ["pd", "Karta ichki masofasi", 8, 56, 2, "px"], ["og", "Variantlar orasidagi masofa", 4, 32, 1, "px"],
     ["ox", "Chapga / o'ngga surish", -120, 120, 2, "px"], ["oy", "Tepaga / pastga surish", -60, 120, 2, "px"],
+    ["ofs", "Variant matni o'lchami", 0.75, 1.8, 0.05, "rem"], ["op", "Variant balandligi", 4, 30, 1, "px"],
+    ["fsc", "Chizma o'lchami", 30, 180, 5, "%"], ["fx", "Chizmani chapga / o'ngga", -200, 200, 2, "px"], ["fy", "Chizmani tepaga / pastga", -80, 160, 2, "px"],
   ];
   var LAYOUT_DEFAULTS = { timer: "show", timerPos: "right", timerSize: 1.1, header: "show", progress: "show", cardW: 720, nav: "between" };
 
@@ -72,6 +74,37 @@
     pv.classList.toggle("is-deleted", it.deleted);
     window.LZQuizStyle.applyLayout(pv, layout);
     window.LZQuizStyle.applyQuestion(pv, it.style);
+    enableFigDrag();
+  }
+
+  // v246: tahrirlashda chizmani sichqoncha/barmoq bilan surish va burchagidan tortib kattalashtirish
+  function enableFigDrag() {
+    var fig = $("pv-qfig");
+    if (!fig) return;
+    fig.classList.toggle("fig-editable", editing && !fig.hidden);
+    var h = fig.querySelector(".fig-resize");
+    if (!editing || fig.hidden) { if (h) h.remove(); return; }
+    if (!h) { h = document.createElement("span"); h.className = "fig-resize"; h.title = "Tortib kattalashtiring"; fig.appendChild(h); }
+    if (fig._dragBound) return;
+    fig._dragBound = true;
+    var mode = null, sx = 0, sy = 0, ox = 0, oy = 0, sw = 100, baseW = 1;
+    fig.addEventListener("pointerdown", function (e) {
+      if (!editing || !items[cur]) return;
+      var st = items[cur].style;
+      mode = e.target.classList.contains("fig-resize") ? "size" : "move";
+      sx = e.clientX; sy = e.clientY; ox = +st.fx || 0; oy = +st.fy || 0; sw = +st.fsc || 100;
+      baseW = (fig.firstElementChild ? fig.firstElementChild.getBoundingClientRect().width : fig.clientWidth) || 1;
+      fig.setPointerCapture(e.pointerId); e.preventDefault();
+    });
+    fig.addEventListener("pointermove", function (e) {
+      if (!mode || !items[cur]) return;
+      var st = items[cur].style, dx = e.clientX - sx, dy = e.clientY - sy;
+      if (mode === "move") { st.fx = Math.max(-200, Math.min(200, Math.round(ox + dx))); st.fy = Math.max(-80, Math.min(160, Math.round(oy + dy))); }
+      else { st.fsc = Math.max(30, Math.min(180, Math.round(sw * (baseW + dx) / baseW / 5) * 5)); }
+      window.LZQuizStyle.applyQuestion($("epreview"), st);
+    });
+    function end() { if (!mode) return; mode = null; syncControls(); touch(true, true); }
+    fig.addEventListener("pointerup", end); fig.addEventListener("pointercancel", end);
   }
 
   // ---------- Navigator ----------
@@ -151,6 +184,9 @@
     lookCtl.push(mkSeg(host, "Matn joylashuvi", [["left", "Chap"], ["center", "Markaz"], ["right", "O'ng"]],
       function () { return (items[cur] && items[cur].style.al) || "left"; },
       function (v) { if (items[cur]) { items[cur].style.al = v; touch(true); } }));
+    lookCtl.push(mkSeg(host, "Chizma joylashuvi", [["left", "Chap"], ["center", "Markaz"], ["right", "O'ng"]],
+      function () { return (items[cur] && items[cur].style.fal) || "left"; },
+      function (v) { if (items[cur]) { items[cur].style.fal = v; touch(true); } }));
     var cw = document.createElement("label"); cw.className = "erange"; cw.innerHTML = "<span><b>Matn rangi</b></span>";
     var ci = document.createElement("input"); ci.type = "color"; ci.value = "#e6edf3";
     ci.addEventListener("input", function () { if (items[cur]) { items[cur].style.col = ci.value; touch(true); } });
@@ -222,6 +258,7 @@
 
   function setEditing(on) {
     editing = on;
+    if ($("ed-live")) $("ed-live").hidden = !on;
     $("mode-edit").classList.toggle("active", on); $("mode-view").classList.toggle("active", !on);
     $("epanel").hidden = !on;
     document.querySelector(".egrid").classList.toggle("is-editing", on);
@@ -239,6 +276,10 @@
   $("mode-view").addEventListener("click", function () { setEditing(false); });
   $("mode-edit").addEventListener("click", function () { setEditing(true); });
   $("nav-prev").addEventListener("click", function () { go(cur - 1); });
+  // v246: test oynasidagi «Oldingi / Keyingi» ham ishlaydi — tahrirlash holati saqlanib qoladi
+  var pvNav = document.querySelectorAll(".epreview .quiz-nav-row button");
+  if (pvNav[0]) pvNav[0].addEventListener("click", function () { go(cur - 1); });
+  if (pvNav[1]) pvNav[1].addEventListener("click", function () { go(cur + 1); });
   $("nav-next").addEventListener("click", function () { go(cur + 1); });
   $("nav-jump").addEventListener("change", function () { var n = parseInt(this.value, 10); if (n >= 1 && n <= items.length) go(n - 1); this.value = ""; });
   document.querySelectorAll(".etabs button").forEach(function (b) {
@@ -275,9 +316,10 @@
     location.href = location.pathname + location.search.replace(/&start=\d+/, "") + "&start=" + (cur + 1);
   });
 
-  $("btn-save").addEventListener("click", save);
+  $("btn-save").addEventListener("click", function () { save(); });
+  var savedTotal = 0;
   function save() {
-    if ($("btn-save").disabled) return;
+    if ($("btn-save").disabled) return Promise.resolve({ saved: 0, created: 0, deleted: 0, errors: [] });
     var changes = [], deletes = [];
     items.forEach(function (it, i) {
       if (it.deleted) { if (it.id != null) deletes.push(it.id); return; }
@@ -286,7 +328,7 @@
         explanation: it.explanation, is_active: it.is_active, style: it.style, figure: it.figure });
     });
     var btn = $("btn-save"); btn.disabled = true; btn.firstChild.textContent = "Saqlanmoqda… ";
-    fetch(P.prefix + "/api/topic/save", {
+    return fetch(P.prefix + "/api/topic/save", {
       method: "POST", credentials: "same-origin",
       headers: { "Content-Type": "application/json", "X-Requested-With": "fetch" },
       body: JSON.stringify({ subject: P.subject, mode: P.mode, topic: P.topic, changes: changes, deletes: deletes, layout: layout }),
@@ -306,8 +348,31 @@
         if (d.errors && d.errors.length) toast("Qisman saqlandi. Xatolar: " + d.errors.join("; "), "err");
         else { toast("Saqlandi: " + d.saved + " tahrir, " + d.created + " yangi, " + d.deleted + " o'chirildi. Sayt yangilandi.", "ok"); }
         if (!(d.errors && d.errors.length)) window.LZToast.ok("Saved ✓ — o'zgarishlar saytga qo'llandi");
+        savedTotal += (d.saved || 0) + (d.created || 0) + (d.deleted || 0);
+        return d;
       })
-      .catch(function (e) { btn.firstChild.textContent = "Saqlash "; renderCounter(); toast("Saqlab bo'lmadi: " + e.message, "err"); window.LZToast.err("Saqlab bo'lmadi: " + e.message); });
+      .catch(function (e) { btn.firstChild.textContent = "Saqlash "; renderCounter(); toast("Saqlab bo'lmadi: " + e.message, "err"); window.LZToast.err("Saqlab bo'lmadi: " + e.message); throw e; });
+  }
+
+  // v246: «Chop etish» — saqlaydi, test oynasidan chiqadi va Moklar sahifasiga shu mavzu ochilgan holda qaytadi
+  if ($("btn-publish")) $("btn-publish").addEventListener("click", function () {
+    var b = this; b.disabled = true; b.textContent = "Chop etilmoqda…";
+    save().then(function (d) {
+      if (d && d.errors && d.errors.length) { b.disabled = false; b.textContent = "Chop etish"; return; }
+      leaving = true;
+      var url = P.back + (P.back.indexOf("?") >= 0 ? "&" : "?") + "saved=" + savedTotal;
+      location.href = url;
+    }).catch(function () { b.disabled = false; b.textContent = "Chop etish"; });
+  });
+  var leaving = false;
+  if ($("btn-tools")) {
+    $("btn-tools").hidden = !P.immersive;
+    $("btn-tools").addEventListener("click", function () {
+      var open = !document.body.classList.contains("tools-closed");
+      document.body.classList.toggle("tools-closed", open);
+      this.setAttribute("aria-expanded", open ? "false" : "true");
+    });
+    if (P.immersive && window.matchMedia("(max-width: 900px)").matches) document.body.classList.add("tools-closed");
   }
 
   document.addEventListener("keydown", function (e) {
@@ -316,7 +381,7 @@
     if (tag === "input" || tag === "textarea" || tag === "select") return;
     if (e.key === "ArrowLeft") go(cur - 1); else if (e.key === "ArrowRight") go(cur + 1);
   });
-  window.addEventListener("beforeunload", function (e) { if (dirtyCount() > 0 || layoutDirty()) { e.preventDefault(); e.returnValue = ""; } });
+  window.addEventListener("beforeunload", function (e) { if (!leaving && (dirtyCount() > 0 || layoutDirty())) { e.preventDefault(); e.returnValue = ""; } });
 
-  buildFigPane(); buildLook(); buildWin(); renderAll(); setEditing(false);
+  buildFigPane(); buildLook(); buildWin(); renderAll(); setEditing(!!P.immersive);
 })();

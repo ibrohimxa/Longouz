@@ -239,12 +239,12 @@
         info.innerHTML = rowsHtml(rows);
       };
       if (window.LZGraph) load();
-      else { var sc = document.createElement("script"); sc.src = "/static/lz-graph.js?v=245"; sc.onload = load; document.head.appendChild(sc); }
+      else { var sc = document.createElement("script"); sc.src = "/static/lz-graph.js?v=246"; sc.onload = load; document.head.appendChild(sc); }
     }
     $(".lzc-go", pane).addEventListener("click", function () { scale = 1; go(); });
     $$("[data-z]", pane).forEach(function (b) { b.addEventListener("click", function () { scale *= +b.dataset.z; go(); }); });
     ta.addEventListener("keydown", function (e) { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); go(); } });
-    if (!document.querySelector('link[data-lr="lr"]')) { var l = document.createElement("link"); l.rel = "stylesheet"; l.href = "/static/longo-render.css?v=245"; l.setAttribute("data-lr", "lr"); document.head.appendChild(l); }
+    if (!document.querySelector('link[data-lr="lr"]')) { var l = document.createElement("link"); l.rel = "stylesheet"; l.href = "/static/longo-render.css?v=246"; l.setAttribute("data-lr", "lr"); document.head.appendChild(l); }
     go();
   }
 

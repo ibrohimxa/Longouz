@@ -1,3 +1,15 @@
+## v246 — Moklar bo'limi, test ko'rinishida tahrirlash, admin moslashuvi
+- Admin → «Moklar»: fan → mavzu ro'yxati (tartib/nom/ko'p/kam/yangi bo'yicha saralash, qidiruv). Mavzu bosilsa savollari pastga ochiladi; «Ko'rish» va «Tahrirlash» tugmalari.
+- Tahrirlash test yechish ko'rinishida ochiladi: savollar ketma-ket, tahrirlash rejimi yoqilgan holda qoladi, saqlash hisoblagichi 1, 2, 3… o'sadi. «Chop etish» → Moklarga shu mavzu ochiq holda qaytadi, pastki o'ngda neon yashil «O'zgarishlar saqlandi» xabari.
+- Muharrirda chizmani sichqoncha/barmoq bilan surish va burchagidan kattalashtirish, joylashuv (chap/markaz/o'ng), variant matni o'lchami va balandligi — saytda ham shunday ko'rinadi.
+- Admin panel telefon uchun to'liq moslashtirildi, tungi/kunduzgi rejim tugmasi mobil menyuda ham bor. LongoAI sarlavhasi mobilda tuzatildi. «AI holati» bloki olib tashlandi.
+- Statistika grafigi: har bir ko'rsatkich alohida rangda (yashil, ko'k, sariq, binafsha, qizil, moviy), legendada davr jami, nol qiymatlar xira, kun ustiga borganda hamma ko'rsatkich chiqadi.
+- LongoAI yordamchi: javob jonli oqimda (qaysi amalni bajarayotgani, ishlash vaqti), matn asta-sekin yoziladi; yozilayotganda yuqoriga erkin aylantirish mumkin, «pastga» tugmasi bor.
+- Kabinet chatida: «Ishlamoqda · X s» jonli soat va javob oxirida «O'yladi X s · jami Y s».
+- AI tekshiruv: xato/to'liq bo'lmagan savolni ma'nosini aniqlab o'zi tuzatadi (sozlamada o'chirish mumkin).
+- Ingliz tili: +256 savol, 8 ta yangi mavzu (used to, too/enough, causative, indirect questions, make/do, ish/iqtisod va tabiat lug'ati, although/despite/unless).
+- Bosh sahifa: jonli statistika kartalari, so'nggi natijalar lentasi, Ultra yillik chegirma banneri, yangi hover effektlar.
+
 ## v245 — soddaroq karta oynasi, admin paroli
 - Tarif oynasida faqat karta raqami (16 xona) va amal muddati (oy/yil) talab qilinadi; CVV ixtiyoriy va serverga yuborilmaydi. Karta kiritilgach tanlangan tarif darhol ochiladi.
 - «Pul yechilmaydi» degan yozuvlar olib tashlandi (oyna, bildirishnoma, LongoAI javoblari, admin «To'lovlar»).

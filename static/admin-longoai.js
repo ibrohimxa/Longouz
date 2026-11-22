@@ -19,7 +19,7 @@
       return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.detail || ("Xato " + r.status)); return j; });
     });
   }
-  function scroll() { chat.scrollTop = chat.scrollHeight; }
+  var scroll = function () { chat.scrollTop = chat.scrollHeight; };
   function hideEmpty() { var e = $("la-empty"); if (e) e.hidden = true; }
 
   function addUser(t) {
@@ -106,35 +106,103 @@
     (function next(i) { if (i >= cards.length) return; apply(cards[i]._action, cards[i]).then(function () { next(i + 1); }); })(0);
   };
 
+  // ---------------------------------------------------------------- aqlli aylantirish
+  // v246: foydalanuvchi tepaga chiqib o'qiyotgan bo'lsa — majburan pastga tushirilmaydi; «Pastga» tugmasi chiqadi
+  var stick = true;
+  var downBtn = document.createElement("button");
+  downBtn.type = "button"; downBtn.className = "la-down"; downBtn.hidden = true; downBtn.setAttribute("aria-label", "Pastga");
+  downBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>';
+  chat.parentNode.insertBefore(downBtn, chat.nextSibling);
+  downBtn.onclick = function () { stick = true; chat.scrollTop = chat.scrollHeight; downBtn.hidden = true; };
+  chat.addEventListener("scroll", function () {
+    var near = chat.scrollHeight - chat.scrollTop - chat.clientHeight < 60;
+    stick = near; if (near) downBtn.hidden = true;
+  }, { passive: true });
+  scroll = function () { if (stick) chat.scrollTop = chat.scrollHeight; else downBtn.hidden = false; };
+
+  // javob matnini bosqichma-bosqich (yozayotgandek) chiqarish
+  function typeOut(el, full, done) {
+    var words = full.split(/(\s+)/), i = 0, last = 0;
+    var per = Math.max(2, Math.round(words.length / 90));   // uzun javob ~3-5 soniyada tugaydi
+    function tick() {
+      i = Math.min(words.length, i + per);
+      var now = Date.now();
+      if (now - last > 70 || i >= words.length) {
+        last = now;
+        var part = words.slice(0, i).join("");
+        if (window.LongoRender) window.LongoRender.render(el, part, { streaming: i < words.length }); else el.textContent = part;
+        scroll();
+      }
+      if (i < words.length) setTimeout(tick, 18); else if (done) done();
+    }
+    tick();
+  }
+
   // ---------------------------------------------------------------- yuborish
   var busy = false;
+  function fmtSec(ms) { return (ms / 1000).toFixed(1).replace(".", ",") + " s"; }
   function send(t) {
     t = (t || "").trim(); if (!t || busy) return;
-    busy = true; sendBtn.disabled = true;
+    busy = true; sendBtn.disabled = true; stick = true;
     addUser(t); hist.push({ role: "user", text: t }); save();
     text.value = ""; grow();
-    var thinking = window.LongoThink ? window.LongoThink.row("LongoAI o'ylamoqda", { size: "" }) : document.createElement("div");
-    thinking.classList.add("la-thinking"); chat.appendChild(thinking); scroll();
-    var hints = ["Savollar bazasi ko'rilmoqda", "Kerakli ma'lumot yig'ilmoqda", "Tekshirilmoqda", "Javob tayyorlanmoqda"], hi = 0;
-    var ht = setInterval(function () { if (thinking.setStep) thinking.setStep(hints[hi++ % hints.length]); }, 3500);
     var t0 = Date.now();
-    api("/api/studio/assistant", { messages: hist.slice(-14) }).then(function (j) {
-      thinking.remove();
-      var sec = ((Date.now() - t0) / 1000).toFixed(1);
-      addAi(j.reply || "Tayyor.", j.steps || [], (j.model ? j.model + " · " : "") + sec + " s");
-      hist.push({ role: "assistant", text: j.reply || "" }); save();
-      (j.actions || []).forEach(function (a) { $("la-actions-list").appendChild(actionCard(a)); });
-      syncActions();
-      if ((j.actions || []).length) $("la-actions").scrollIntoView({ behavior: "smooth", block: "nearest" });
-    }).catch(function (e) {
-      thinking.remove();
-      addAi("Xatolik: " + e.message + ". Bir daqiqadan so'ng qayta urinib ko'ring.");
-    }).then(function () { clearInterval(ht); busy = false; sendBtn.disabled = false; text.focus(); });
+    var thinking = window.LongoThink ? window.LongoThink.row("LongoAI o'ylamoqda", { size: "", rotate: false }) : document.createElement("div");
+    var holder = document.createElement("div"); holder.className = "la-thinking";
+    var live = document.createElement("div"); live.className = "la-steps la-steps-live";
+    holder.appendChild(thinking); holder.appendChild(live); chat.appendChild(holder); scroll();
+    var clock = setInterval(function () { if (thinking.setStep) thinking.setStep("Ishlamoqda · " + fmtSec(Date.now() - t0)); }, 200);
+    function finish(j) {
+      clearInterval(clock); holder.remove();
+      var wrap = addAi("", j.steps || [], null);
+      var body = wrap.querySelector(".la-text");
+      typeOut(body, j.reply || "Tayyor.", function () {
+        var m = document.createElement("small"); m.className = "la-meta";
+        m.textContent = "Ishladi: " + fmtSec(j.ms || (Date.now() - t0)) + ((j.steps || []).length ? " · " + j.steps.length + " ta amal" : "") + (j.model ? " · " + j.model : "");
+        body.parentNode.appendChild(m);
+        hist.push({ role: "assistant", text: j.reply || "" }); save();
+        (j.actions || []).forEach(function (a) { $("la-actions-list").appendChild(actionCard(a)); });
+        syncActions();
+        busy = false; sendBtn.disabled = false; scroll();
+      });
+    }
+    function fail(msg) { clearInterval(clock); holder.remove(); addAi("Xatolik: " + msg + ". Bir daqiqadan so'ng qayta urinib ko'ring."); busy = false; sendBtn.disabled = false; }
+    fetch(P + "/api/longoai/stream", {
+      method: "POST", credentials: "same-origin",
+      headers: { "Content-Type": "application/json", "X-Requested-With": "fetch", "Accept": "text/event-stream" },
+      body: JSON.stringify({ messages: hist.slice(-14) })
+    }).then(function (r) {
+      if (!r.ok || !r.body) throw new Error("Xato " + r.status);
+      var reader = r.body.getReader(), dec = new TextDecoder(), buf = "", got = false;
+      function pump() {
+        return reader.read().then(function (x) {
+          if (x.done) { if (!got) fail("javob kelmadi"); return; }
+          buf += dec.decode(x.value, { stream: true });
+          var k;
+          while ((k = buf.indexOf("\n\n")) >= 0) {
+            var block = buf.slice(0, k); buf = buf.slice(k + 2);
+            var line = block.split("\n").filter(function (l) { return l.indexOf("data:") === 0; }).map(function (l) { return l.slice(5).trim(); }).join("");
+            if (!line) continue;
+            var ev; try { ev = JSON.parse(line); } catch (e) { continue; }
+            if (ev.step) {
+              var st = ev.step;
+              if (st.start) { var sp = document.createElement("span"); sp.className = "la-step run"; sp.textContent = st.label || st.tool; live.appendChild(sp); }
+              else { var lastRun = live.querySelector(".la-step.run"); if (lastRun) { lastRun.classList.remove("run"); if (st.ok === false) lastRun.classList.add("bad"); lastRun.textContent += " · " + fmtSec(st.ms || 0); } }
+              scroll();
+            } else if (ev.done) { got = true; finish(ev.done); return; }
+            else if (ev.error) { got = true; fail(ev.error); return; }
+          }
+          return pump();
+        });
+      }
+      return pump();
+    }).catch(function (e) { fail(e.message); });
   }
   function grow() { text.style.height = "auto"; text.style.height = Math.min(180, text.scrollHeight) + "px"; }
   text.addEventListener("input", grow);
   text.addEventListener("keydown", function (e) { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(text.value); } });
   $("la-form").addEventListener("submit", function (e) { e.preventDefault(); send(text.value); });
+  text.addEventListener("focus", function () { setTimeout(function () { stick = true; scroll(); }, 300); });
   $("la-sugg").addEventListener("click", function (e) { var b = e.target.closest("button"); if (b) send(b.textContent); });
   $("la-clear").onclick = function () {
     hist = []; save();

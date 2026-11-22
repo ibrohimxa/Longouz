@@ -58,8 +58,12 @@ SYSTEM = (
     "'1-A, 2-C, 3-B' ko'rinishidagi moslik; savol matnidagi juftlarga qarab tekshiring. Maktab dasturi va DTM an'anasidagi qiymatlarni "
     "to'g'ri deb oling (g = 10 m/s^2, Cl = 35,5, Cu = 64, pi = 3,14 va h.k.). Rus va ingliz tilidagi savollarni o'sha til qoidalari "
     "bo'yicha tekshiring. note — o'zbek tilida, 1-2 gap: nima xato va to'g'risi qanday.\n"
-    'NATIJA — faqat JSON: {"issues": [{"id": 123, "kind": "wrong_key", "severity": 3, "note": "...", "correct_index": 2}]}. '
-    "severity: 3 — o'quvchi noto'g'ri baholanadi (kalit/variant xato), 2 — savol chalg'itadi, 1 — mayda. Muammo bo'lmasa: {\"issues\": []}."
+    'NATIJA — faqat JSON: {"issues": [{"id": 123, "kind": "wrong_key", "severity": 3, "note": "...", "correct_index": 2, "fix": null}]}. '
+    "severity: 3 — o'quvchi noto'g'ri baholanadi (kalit/variant xato), 2 — savol chalg'itadi, 1 — mayda. Muammo bo'lmasa: {\"issues\": []}.\n"
+    "TUZATISH (fix): no_correct, multi_correct, unclear, typo, explanation turlarida savol muallifi NIMA DEMOQCHI bo'lganini aniqlang va "
+    "TO'LIQ tuzatilgan savolni bering: \"fix\": {\"question\": \"...\", \"options\": [4 ta variant], \"correct_index\": 0-3, "
+    "\"explanation\": \"qisqa to'g'ri izoh\"}. Savol mazmuni va mavzusini saqlang, faqat xatoni tuzating; aynan bitta variant to'g'ri "
+    "bo'lsin. type=open yoki match bo'lsa yoki aniq tuzata olmasangiz — \"fix\": null."
 )
 
 
@@ -220,8 +224,61 @@ def _clean_issues(data, batch: list) -> list[dict]:
             sev = 2
         if kind in ("wrong_key", "no_correct", "multi_correct"):
             sev = 3
-        out.append({"row": row, "kind": kind, "severity": sev, "note": note, "idx": idx})
+        fix = it.get("fix") if isinstance(it.get("fix"), dict) else None
+        if fix is not None:
+            try:
+                fq = " ".join(str(fix.get("question") or "").split())[:1900]
+                fo = [" ".join(str(o).split())[:600] for o in (fix.get("options") or [])]
+                fci = int(fix.get("correct_index"))
+                fe = " ".join(str(fix.get("explanation") or "").split())[:1500]
+                ok = ((row.qtype or "closed") == "closed" and fq and len(fo) == 4 and all(fo) and len(set(o.lower() for o in fo)) == 4
+                      and 0 <= fci < 4)
+                fix = {"question": fq, "options": fo, "correct_index": fci, "explanation": fe} if ok else None
+            except (TypeError, ValueError):
+                fix = None
+        out.append({"row": row, "kind": kind, "severity": sev, "note": note, "idx": idx, "fix": fix})
     return out
+
+
+async def _auto_fix(session, row, it: dict) -> str:
+    """v246: aniq xatoni AI o'zi tuzatadi (barcha rejimdagi nusxalarida). Natija: 'fixed' yoki 'open'."""
+    targets = await _twins(session, row)
+    if it["kind"] == "wrong_key" and it["idx"] >= 0:
+        try:
+            want = json.loads(row.options_json or "[]")[it["idx"]]
+        except (ValueError, IndexError):
+            return "open"
+        n = 0
+        for t in targets:
+            try:
+                opts = json.loads(t.options_json or "[]")
+            except ValueError:
+                continue
+            if want in opts:
+                t.correct_index = opts.index(want)
+                n += 1
+        if n:
+            for t in targets:
+                if t.source_file == "longouz-bank":
+                    t.source_file = "longouz-fixed"
+            return "fixed"
+        return "open"
+    fix = it.get("fix")
+    if not fix:
+        return "open"
+    # matni o'zgargan savol boshqa savolning nusxasiga aylanib qolmasin
+    dup = (await session.execute(select(db.Question.id).where(db.Question.question == fix["question"], db.Question.subject == row.subject,
+                                                              db.Question.id.notin_([t.id for t in targets])).limit(1))).scalar()
+    if dup:
+        return "open"
+    for t in targets:
+        t.question = fix["question"]
+        t.options_json = json.dumps(fix["options"], ensure_ascii=False)
+        t.correct_index = fix["correct_index"]
+        if fix.get("explanation"):
+            t.explanation = fix["explanation"]
+        t.source_file = "longouz-fixed" if t.source_file in ("longouz-bank", "") else t.source_file
+    return "fixed"
 
 
 async def step(subject: str = "", restart: bool = False) -> dict:
@@ -257,11 +314,20 @@ async def step(subject: str = "", restart: bool = False) -> dict:
         # qayta tekshirilgan savolning eski OCHIQ topilmasi yangisi bilan almashtiriladi
         await session.execute(sa_delete(db.AiAuditFinding).where(db.AiAuditFinding.question_id.in_(ids),
                                                                  db.AiAuditFinding.status == "open"))
+        auto = (await db.get_setting("ai_audit_autofix", "1")) != "0"
+        fixed_now = 0
         for it in issues:
             r = it["row"]
+            status = "open"
+            if auto:
+                status = await _auto_fix(session, r, it)
+                if status == "fixed":
+                    fixed_now += 1
             session.add(db.AiAuditFinding(question_id=r.id, subject=r.subject, mode=r.mode, topic=r.topic, kind=it["kind"],
-                                          severity=it["severity"], note=it["note"], suggested_index=it["idx"]))
+                                          severity=it["severity"], suggested_index=it["idx"], status=status,
+                                          note=(it["note"] + (" — LongoAI o'zi tuzatdi." if status == "fixed" else ""))[:700]))
         await session.commit()
+        st["autofixed"] = int(st.get("autofixed", 0)) + fixed_now
     st.update(cursor=new_cursor, checked=int(st.get("checked", 0)) + len(batch),
               flagged=int(st.get("flagged", 0)) + len(issues), done=bool(finished))
     await _save_state(st)

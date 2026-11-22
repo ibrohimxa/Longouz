@@ -73,7 +73,7 @@ def _to_contents(history: list[dict]) -> list[dict]:
 
 
 async def run_agent(system: str, history: list[dict], tools: list[Tool], *, deadline: float = 50.0, max_steps: int = 8,
-                    thinking: str = "low", max_tokens: int = 6000, json_final: bool = False) -> AgentResult:
+                    thinking: str = "low", max_tokens: int = 6000, json_final: bool = False, on_step=None) -> AgentResult:
     """Vosita chaqiruvlari bilan Gemini suhbati. history: [{"role": "user"|"assistant", "text": "..."}]."""
     res = AgentResult()
     client = ai_gemini._get_client()
@@ -122,6 +122,11 @@ async def run_agent(system: str, history: list[dict], tools: list[Tool], *, dead
                 for fc in calls[:6]:
                     tool = by_name.get(fc.name or "")
                     t0 = time.monotonic()
+                    if on_step is not None:
+                        try:
+                            await on_step({"tool": fc.name, "label": (tool.label if tool else fc.name), "start": True})
+                        except Exception:  # noqa: BLE001
+                            pass
                     args = dict(fc.args or {})
                     if tool is None:
                         out: Any = {"error": f"'{fc.name}' degan vosita yo'q"}
@@ -135,6 +140,11 @@ async def run_agent(system: str, history: list[dict], tools: list[Tool], *, dead
                             out, ok = {"error": str(exc)[:300]}, False
                     res.steps.append({"tool": fc.name, "label": (tool.label if tool else fc.name), "args": _short(args),
                                       "ok": ok, "ms": int((time.monotonic() - t0) * 1000)})
+                    if on_step is not None:
+                        try:
+                            await on_step(res.steps[-1])
+                        except Exception:  # noqa: BLE001
+                            pass
                     payload = out if isinstance(out, dict) else {"result": out}
                     blob = json.dumps(payload, ensure_ascii=False, default=str)
                     if len(blob) > 14000:

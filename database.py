@@ -3313,8 +3313,10 @@ import json as _json_style
 STYLE_LIMITS = {  # kalit: (min, max)
     "fs": (0.9, 2.6), "fw": (400, 800), "lh": (1.1, 2.2), "mt": (0, 80), "mb": (0, 80),
     "pd": (8, 56), "og": (4, 32), "ox": (-120, 120), "oy": (-60, 120),
+    # v246: variantlar va chizma
+    "ofs": (0.75, 1.8), "op": (4, 30), "fsc": (30, 180), "fx": (-200, 200), "fy": (-80, 160),
 }
-STYLE_CHOICES = {"al": {"left", "center", "right"}}
+STYLE_CHOICES = {"al": {"left", "center", "right"}, "fal": {"left", "center", "right"}}
 LAYOUT_LIMITS = {"timerSize": (0.8, 2.4), "cardW": (480, 960)}
 LAYOUT_CHOICES = {
     "timer": {"show", "hide"}, "timerPos": {"left", "center", "right"}, "header": {"show", "hide"},
@@ -3611,3 +3613,11 @@ async def admin_overview() -> dict:
         "subject_breakdown": subject_breakdown, "unread_messages": unread, "bank_target": BANK_TARGET_PER_SUBJECT,
         "db_engine": "PostgreSQL" if "postgres" in DATABASE_URL else "SQLite",
     }
+
+
+async def get_topic_order(subject: str, mode: str) -> dict:
+    """v246: mavzu -> (sinf, tartib raqami) — Moklar sahifasida rasmiy tartibda ko'rsatish uchun."""
+    async with async_session() as session:
+        rows = (await session.execute(select(TopicMeta.topic, TopicMeta.grade, TopicMeta.order_no)
+                                      .where(TopicMeta.subject == subject, TopicMeta.mode == mode))).all()
+    return {t: (g or 0, o or 0) for t, g, o in rows}

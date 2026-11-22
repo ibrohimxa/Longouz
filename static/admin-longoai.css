@@ -97,3 +97,13 @@ html[data-theme="light"] .la-step{color:#15803d}
 html[data-theme="light"] .la-act{background:#fff}
 @media (max-width:1100px){.la-grid{grid-template-columns:1fr}.la-side{position:static}.la-chat-card{min-height:70vh}}
 @media (max-width:640px){.la-sugg{grid-template-columns:1fr}.la-hero{flex-wrap:wrap}.la-hero-state{align-items:flex-start;flex-direction:row}.la-msg{max-width:100%}.la-f{grid-template-columns:1fr}}
+/* v246: jonli bosqichlar, «Pastga» tugmasi */
+.la-chat-card{position:relative}
+.la-down{position:absolute;right:18px;bottom:96px;z-index:5;width:40px;height:40px;border-radius:50%;border:1px solid rgba(29,239,106,.5);background:var(--bg-elevated,#0c1a12);color:#1def6a;display:grid;place-items:center;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.3);animation:laIn .2s ease}
+.la-down svg{width:18px;height:18px}
+.la-steps-live{margin:6px 0 0 0}
+.la-step.run{position:relative;padding-left:20px}
+.la-step.run::before{content:"";position:absolute;left:7px;top:50%;width:8px;height:8px;margin-top:-4px;border-radius:50%;border:2px solid #1def6a;border-right-color:transparent;animation:laSpin .8s linear infinite}
+@keyframes laSpin{to{transform:rotate(360deg)}}
+.la-thinking{display:flex;flex-direction:column;align-items:flex-start}
+.la-down[hidden],.mk-toast[hidden],.lz-tr-tip[hidden]{display:none}

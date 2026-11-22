@@ -78,6 +78,12 @@ def load_packs():
         import logging
         logging.getLogger(__name__).warning("gen_v242 yuklanmadi: %s", e)
     try:
+        from . import gen_v246
+        gen_v246.extend(packs)
+    except Exception as e:  # pragma: no cover
+        import logging
+        logging.getLogger(__name__).warning("gen_v246 yuklanmadi: %s", e)
+    try:
         sanitize_packs(packs)
     except Exception as e:  # pragma: no cover
         import logging

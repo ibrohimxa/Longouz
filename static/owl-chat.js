@@ -531,7 +531,16 @@
     step();
   }
 
+  // v246: Claude'dagidek — necha soniya o'ylagani va qancha vaqt ishlagani ko'rinadi
+  function secs(ms) { return (ms / 1000).toFixed(1).replace(".", ",") + " s"; }
+  let clock = 0;
   async function sendStreaming(question) {
+    const t0 = Date.now();
+    clearInterval(clock);
+    clock = setInterval(function () {
+      const row = document.getElementById("owl-thinking-indicator");
+      if (row && row.setStep) row.setStep("Ishlamoqda · " + secs(Date.now() - t0));
+    }, 200);
     const source = document.getElementById("owl-voice-orb") && document.body.classList.contains("repetitor-fullpage") ? "repetitor" : "widget";
     let res;
     try {
@@ -540,14 +549,14 @@
         headers: { "Content-Type": "application/json", "Accept": "text/event-stream" },
         body: JSON.stringify({ question, effort: currentEffort, source, history: chatHistory.slice(-10), lang: (langSelect && langSelect.value) || "uz-UZ" }),
       });
-    } catch (e) { return false; }   // tarmoq — oddiy usulga o'tamiz
-    if (res.status === 402) { removeThinking(); showLimitReachedCard(await res.json()); liveMode = false; maybeAutoListen(); return true; }
-    if (res.status === 401) { removeThinking(); typewriteAnswer("Sessiya tugagan. Iltimos, qayta kiring.", { silent: true }); return true; }
-    if (!res.ok || !res.body || (res.headers.get("content-type") || "").indexOf("text/event-stream") < 0) return false;
+    } catch (e) { clearInterval(clock); return false; }   // tarmoq — oddiy usulga o'tamiz
+    if (res.status === 402) { clearInterval(clock); removeThinking(); showLimitReachedCard(await res.json()); liveMode = false; maybeAutoListen(); return true; }
+    if (res.status === 401) { clearInterval(clock); removeThinking(); typewriteAnswer("Sessiya tugagan. Iltimos, qayta kiring.", { silent: true }); return true; }
+    if (!res.ok || !res.body || (res.headers.get("content-type") || "").indexOf("text/event-stream") < 0) { clearInterval(clock); return false; }
     const reader = res.body.getReader(), dec = new TextDecoder();
-    let buf = "", text = "", bubble = null, final = null, last = 0, pending = false;
+    let buf = "", text = "", bubble = null, final = null, last = 0, pending = false, tFirst = 0;
     function paint(force) {
-      if (!bubble) { removeThinking(); bubble = newAiBubble(); }
+      if (!bubble) { tFirst = Date.now(); clearInterval(clock); removeThinking(); bubble = newAiBubble(); }
       const now = Date.now();
       if (!force && now - last < 90) { if (!pending) { pending = true; setTimeout(function () { pending = false; paint(true); }, 95); } return; }
       last = now;
@@ -573,9 +582,16 @@
         }
       }
     } catch (e) { /* uzilish — bor matn qoladi */ }
+    clearInterval(clock);
     if (!text) { removeThinking(); typewriteAnswer("Internet aloqasida muammo bo'ldi. Qayta urinib ko'ring.", { silent: true }); return true; }
     final = final || { answer: text, provider: "gemini" };
     paint(true);
+    if (bubble) {
+      const meta = document.createElement("div");
+      meta.className = "chat-msg-meta";
+      meta.textContent = "O'yladi " + secs((tFirst || Date.now()) - t0) + " · jami " + secs(Date.now() - t0);
+      bubble.after(meta);
+    }
     messages.scrollTop = messages.scrollHeight;
     if (final.provider && final.provider !== "none") {
       chatHistory.push({ role: "user", text: question }, { role: "assistant", text: text });

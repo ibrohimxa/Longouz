@@ -83,3 +83,15 @@
 html[data-theme="light"] .lz-tr-step{background:#f6faf7;border-color:#e2ece5}
 html[data-theme="light"] .lz-tr-chart .grid{stroke:rgba(0,0,0,.08)}
 @media (max-width:760px){.lz-tr-funnel{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* v246: grafik — tushunarli ranglar, jami qiymatlar va kun bo'yicha izoh */
+.lz-tr-chart{position:relative}
+.lz-tr-legend button b{font-variant-numeric:tabular-nums;margin-left:2px}
+.lz-tr-legend button.zero{opacity:.55}
+.lz-tr-legend button i{width:11px;height:11px;box-shadow:0 0 0 2px rgba(255,255,255,.08)}
+.lz-tr-cross{stroke:currentColor;opacity:.3;stroke-dasharray:3 3}
+.lz-tr-tip{position:absolute;top:6px;z-index:3;min-width:150px;padding:8px 10px;border-radius:10px;background:rgba(6,16,11,.94);color:#eafff0;border:1px solid rgba(29,239,106,.35);font-size:.76rem;line-height:1.45;pointer-events:none;box-shadow:0 8px 22px rgba(0,0,0,.35)}
+.lz-tr-tip span{display:flex;align-items:center;gap:6px}
+.lz-tr-tip i{width:8px;height:8px;border-radius:50%;display:inline-block}
+html[data-theme="light"] .lz-tr-tip{background:#fff;color:#0b2a1a;border-color:rgba(8,160,70,.3)}
+.lz-tr-tip[hidden]{display:none}

@@ -8,13 +8,13 @@
   <link rel="icon" type="image/png" href="/static/logo-owl.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css?v=245">
-  <link rel="stylesheet" href="/static/admin-dash.css?v=245">
-  <link rel="stylesheet" href="/static/admin.css?v=245">
-  <link rel="stylesheet" href="/static/longo-think.css?v=245" data-longo-think-css>
-  <link rel="stylesheet" href="/static/longo-render.css?v=245" data-lr="lr">
-  <link rel="stylesheet" href="/static/admin-longoai.css?v=245">
-  <script src="/static/theme-init.js?v=245"></script>
+  <link rel="stylesheet" href="/static/style.css?v=246">
+  <link rel="stylesheet" href="/static/admin-dash.css?v=246">
+  <link rel="stylesheet" href="/static/admin.css?v=246">
+  <link rel="stylesheet" href="/static/longo-think.css?v=246" data-longo-think-css>
+  <link rel="stylesheet" href="/static/longo-render.css?v=246" data-lr="lr">
+  <link rel="stylesheet" href="/static/admin-longoai.css?v=246">
+  <script src="/static/theme-init.js?v=246"></script>
 </head>
 <body data-logged-in="true">
   <div class="app-shell">
@@ -74,6 +74,7 @@
             <label class="la-switch"><input type="checkbox" data-cfg="auto_fix" {{ 'checked' if cfg.auto_fix }}><span></span><div><b>Aniq xatoni o'zi tuzatsin</b><small>Ishonch {{ cfg.min_conf }}%+ bo'lsa; natijalar qayta hisoblanadi</small></div></label>
             <label class="la-switch"><input type="checkbox" data-cfg="auto_reply" {{ 'checked' if cfg.auto_reply }}><span></span><div><b>O'quvchiga o'zi javob yozsin</b><small>Savol to'g'ri bo'lsa — nega to'g'ri ekanini tushuntiradi</small></div></label>
             <label class="la-switch"><input type="checkbox" data-cfg="support_auto" {{ 'checked' if support_auto }}><span></span><div><b>Yordam xabarlariga javob bersin</b><small>Admin qarori kerak bo'lsa sizga ham belgilaydi</small></div></label>
+            <label class="la-switch"><input type="checkbox" data-cfg="audit_autofix" {{ 'checked' if audit_autofix }}><span></span><div><b>AI tekshiruvda xatoni o'zi tuzatsin</b><small>Noto'liq yoki xato savolni ma'nosini aniqlab to'g'rilaydi</small></div></label>
             <label class="la-switch"><input type="checkbox" data-cfg="web_search" {{ 'checked' if cfg.web_search }}><span></span><div><b>Google'da tekshirsin</b><small>Tarix, biologiya, til faktlari uchun</small></div></label>
             <p class="la-note" id="la-cfg-note"></p>
           </section>
@@ -86,9 +87,9 @@
     </div>
   </div>
   <script>window.LONGOAI = { prefix: "{{ admin_prefix }}" };</script>
-  <script src="/static/longo-think.js?v=245"></script>
-  <script src="/static/longo-render.js?v=245"></script>
-  <script src="/static/app.js?v=245"></script>
-  <script src="/static/admin-longoai.js?v=245"></script>
+  <script src="/static/longo-think.js?v=246"></script>
+  <script src="/static/longo-render.js?v=246"></script>
+  <script src="/static/app.js?v=246"></script>
+  <script src="/static/admin-longoai.js?v=246"></script>
 </body>
 </html>

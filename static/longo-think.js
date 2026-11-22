@@ -6,7 +6,7 @@
   function ensureCss() {
     if (document.querySelector('link[data-longo-think-css]')) return;
     var l = document.createElement("link");
-    l.rel = "stylesheet"; l.href = "/static/longo-think.css?v=245"; l.setAttribute("data-longo-think-css", "1");
+    l.rel = "stylesheet"; l.href = "/static/longo-think.css?v=246"; l.setAttribute("data-longo-think-css", "1");
     document.head.appendChild(l);
   }
   function el(size) {

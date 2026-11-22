@@ -21,7 +21,27 @@
       title.style.marginBottom = s.mb != null ? num(s.mb, 20) + "px" : "";
       title.style.color = s.col || "";
     }
-    if (opts) opts.style.gap = s.og != null ? num(s.og, 10) + "px" : "";
+    if (opts) {
+      opts.style.gap = s.og != null ? num(s.og, 10) + "px" : "";
+      Array.prototype.forEach.call(opts.querySelectorAll(".quiz-option"), function (o) {
+        o.style.fontSize = s.ofs != null ? num(s.ofs, 1) + "rem" : "";
+        o.style.paddingTop = o.style.paddingBottom = s.op != null ? num(s.op, 14) + "px" : "";
+      });
+    }
+    // v246: chizma — o'lchami, joylashuvi va surilishi
+    var fig = card.querySelector(".quiz-qfig");
+    if (fig) {
+      var inner = fig.firstElementChild;
+      fig.style.textAlign = s.fal || "";
+      fig.style.display = fig.hidden ? "none" : (s.fal ? "block" : "");
+      if (inner) {
+        inner.style.width = s.fsc != null ? Math.round(num(s.fsc, 100)) + "%" : "";
+        inner.style.maxWidth = s.fsc != null && num(s.fsc, 100) > 100 ? "none" : "";
+        inner.style.marginLeft = s.fal === "center" || s.fal === "right" ? "auto" : "";
+        inner.style.marginRight = s.fal === "center" ? "auto" : "";
+      }
+      fig.style.transform = (s.fx || s.fy) ? "translate(" + num(s.fx, 0) + "px," + num(s.fy, 0) + "px)" : "";
+    }
   }
 
   function applyLayout(scope, layout) {

@@ -8,11 +8,12 @@
   <link rel="icon" type="image/png" href="/static/logo-owl.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=Caveat:wght@600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css?v=245">
-  <link rel="stylesheet" href="/static/home.css?v=245">
-  <link rel="stylesheet" href="/static/news.css?v=245">
-  <link rel="stylesheet" href="/static/purchase.css?v=245">
-  <script src="/static/theme-init.js?v=245"></script>
+  <link rel="stylesheet" href="/static/style.css?v=246">
+  <link rel="stylesheet" href="/static/home.css?v=246">
+  <link rel="stylesheet" href="/static/home-v246.css?v=246">
+  <link rel="stylesheet" href="/static/news.css?v=246">
+  <link rel="stylesheet" href="/static/purchase.css?v=246">
+  <script src="/static/theme-init.js?v=246"></script>
 </head>
 <body class="home" data-logged-in="false">
   </div>
@@ -77,6 +78,21 @@
           </div>
           <div class="stabs" data-tabs></div>
         </div>
+      </div>
+    </section>
+
+
+    <!-- ===================== v246: JONLI RAQAMLAR VA NATIJALAR ===================== -->
+    <section class="hm-live" id="live" aria-label="LongoUZ raqamlarda">
+      <div class="hm-wrap">
+        <div class="hm-live-grid" id="hm-live-grid">
+          <div class="hm-live-card" data-k="users"><b data-v="0">0</b><span>o'quvchi</span></div>
+          <div class="hm-live-card" data-k="tests"><b data-v="0">0</b><span>yechilgan test</span></div>
+          <div class="hm-live-card" data-k="questions"><b data-v="0">0</b><span>savol bazada</span></div>
+          <div class="hm-live-card" data-k="accuracy" data-suffix="%"><b data-v="0">0%</b><span>o'rtacha natija</span></div>
+          <div class="hm-live-card live" data-k="online"><b data-v="0">0</b><span><i></i>hozir saytda</span></div>
+        </div>
+        <div class="hm-ticker" id="hm-ticker" hidden><span class="hm-ticker-lbl"><i></i>Jonli natijalar</span><div class="hm-ticker-track"><div class="hm-ticker-run" id="hm-ticker-run"></div></div></div>
       </div>
     </section>
 
@@ -260,6 +276,18 @@
 
     <!-- ===================== TARIFLAR ===================== -->
     {% set _pp = plan_prices() %}
+    <!-- ===================== v246: REKLAMA / TAKLIF ===================== -->
+    <section class="hm-promo-sec" aria-label="Maxsus taklif">
+      <div class="hm-wrap">
+        <a class="hm-promo" href="#plans" data-reveal>
+          <span class="hm-promo-glow" aria-hidden="true"></span>
+          <span class="hm-promo-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/></svg></span>
+          <span class="hm-promo-txt"><b>Ultra — yillik obunada {{ _pp.ultra.discount }}% chegirma</b><small>AI repetitor, barcha mavzular, cheksiz mock testlar · {{ _pp.ultra.yearly_label }}</small></span>
+          <span class="hm-promo-cta">Tanlash →</span>
+        </a>
+      </div>
+    </section>
+
     <section class="hm-sec" id="plans">
       <div class="hm-wrap">
         <div class="hm-plans-head" data-reveal>
@@ -348,11 +376,12 @@
   </footer>
 
   {% include "_owl_widget.html" %}
-  <script src="/static/devtools-guard.js?v=245"></script>
-  <script src="/static/app.js?v=245"></script>
-  <script src="/static/owl-chat.js?v=245"></script>
-  <script src="/static/home-showcase.js?v=245"></script>
-  <script src="/static/news-strip.js?v=245" defer></script>
+  <script src="/static/devtools-guard.js?v=246"></script>
+  <script src="/static/app.js?v=246"></script>
+  <script src="/static/owl-chat.js?v=246"></script>
+  <script src="/static/home-showcase.js?v=246"></script>
+  <script src="/static/news-strip.js?v=246" defer></script>
+  <script src="/static/home-v246.js?v=246" defer></script>
   <script>
     (function () {
       var toggleBtns = document.querySelectorAll(".billing-toggle-btn");
@@ -398,10 +427,10 @@
       });
     })();
   </script>
-  <script src="/static/purchase.js?v=245"></script>
+  <script src="/static/purchase.js?v=246"></script>
   {% if turnstile_active(request) %}
-  <script src="/static/turnstile-helper.js?v=245"></script>
-  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=lgTurnstileReady" async defer onerror="window.lgTurnstileFailed&&window.lgTurnstileFailed()"></script>
+  <script src="/static/turnstile-helper.js?v=246"></script>
+  {% if turnstile_active(request) %}<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=lgTurnstileReady" async defer onerror="window.lgTurnstileFailed&&window.lgTurnstileFailed()"></script>{% endif %}
   {% endif %}
 </body>
 </html>

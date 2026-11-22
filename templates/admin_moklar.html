@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Moklar — Admin — LongoUZ</title>
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css?v=246">
+  <link rel="stylesheet" href="/static/admin.css?v=246">
+  <link rel="stylesheet" href="/static/admin-moklar.css?v=246">
+  <script src="/static/theme-init.js?v=246"></script>
+</head>
+<body data-logged-in="true">
+  <div class="app-shell">
+    {% include "_admin_sidebar.html" %}
+    <div class="app-content">
+      <header class="mk-head">
+        <div>
+          <h1>Moklar</h1>
+          <p>Fan → mavzu → savollar. Mavzuni bosing — savollari ochiladi. «Tahrirlash» test yechish oynasida ochiladi.</p>
+        </div>
+        <label class="mk-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          <input type="search" id="mk-q" placeholder="Mavzu yoki savol matni…" autocomplete="off"></label>
+      </header>
+
+      <nav class="mk-subjects" aria-label="Fanlar">
+        {% for s in subjects %}
+        <a href="?subject={{ s.code }}" class="mk-subj{{ ' on' if s.code == subject else '' }}">
+          <b>{{ s.name }}</b><small>{{ subj_counts.get(s.code, {}).get('topics', 0) }} mavzu · {{ subj_counts.get(s.code, {}).get('questions', 0) }} savol</small>
+        </a>
+        {% endfor %}
+      </nav>
+
+      <div class="mk-bar">
+        <div class="mk-modes" role="tablist">
+          {% for m in modes %}<a href="?subject={{ subject }}&mode={{ m.code }}" class="{{ 'on' if m.code == mode else '' }}">{{ m.name.replace(' rejimi', '') }}</a>{% endfor %}
+        </div>
+        <div class="mk-stats">
+          <span><b>{{ totals.topics }}</b> mavzu</span><span><b>{{ totals.questions }}</b> savol</span>
+          <span class="ok"><b>{{ totals.active }}</b> faol</span>{% if totals.hidden %}<span class="warn"><b>{{ totals.hidden }}</b> yashirin</span>{% endif %}
+        </div>
+        <select id="mk-sort" aria-label="Saralash">
+          <option value="order">Tartib bo'yicha</option><option value="name">Nomi (A–Z)</option>
+          <option value="most">Ko'p savolli</option><option value="least">Kam savolli</option><option value="new">Yangi qo'shilgan</option>
+        </select>
+      </div>
+
+      <ol class="mk-list" id="mk-list">
+        {% for t in topics %}
+        <li class="mk-topic" data-topic="{{ t.topic }}" data-total="{{ t.total }}" data-last="{{ t.last_id }}" data-i="{{ loop.index }}">
+          <div class="mk-row">
+            <button type="button" class="mk-toggle" aria-expanded="false">
+              <span class="mk-n">{{ loop.index }}</span>
+              <span class="mk-name">{{ t.topic }}</span>
+              <span class="mk-meta"><b>{{ t.total }}</b> savol{% if t.hidden %} · <em>{{ t.hidden }} yashirin</em>{% endif %}</span>
+              <span class="mk-bar-mini"><i style="width:{{ [100, (t.total * 100 // 30)]|min }}%"></i></span>
+              <svg class="mk-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="mk-actions">
+              <button type="button" class="mk-btn view">Ko'rish</button>
+              <a class="mk-btn edit" href="{{ admin_prefix }}/topics/edit?subject={{ subject|urlencode }}&mode={{ mode|urlencode }}&topic={{ t.topic|urlencode }}&src=moklar">Tahrirlash</a>
+            </div>
+          </div>
+          <div class="mk-body" hidden></div>
+        </li>
+        {% else %}
+        <li class="mk-empty">Bu fan va rejimda hali mavzu yo'q.</li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+  <div class="mk-toast" id="mk-toast" role="status" hidden></div>
+  <script>window.MOKLAR = {{ {"prefix": admin_prefix, "subject": subject, "mode": mode, "open": open_topic, "saved": saved}|tojson }};</script>
+  <script src="/static/app.js?v=246"></script>
+  <script src="/static/admin-moklar.js?v=246"></script>
+</body>
+</html>

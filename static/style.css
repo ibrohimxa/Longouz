@@ -4473,3 +4473,6 @@ html:not([data-theme="light"]) .dash-hero h1 em,html:not([data-theme="light"]) .
 .sidebar-link.sb-longoai.active{background:linear-gradient(90deg,rgba(29,239,106,.25),rgba(61,255,123,.08))}
 @media (max-width:900px){.sb-group{display:none}}
 .plan-yearly-off{font-size:.62em;font-weight:600;color:var(--accent-green);margin-left:6px;letter-spacing:0;text-transform:none;vertical-align:middle}
+/* v246: chatda javob vaqti */
+.chat-msg-meta { align-self: flex-start; margin: -4px 0 6px 6px; font-size: .68rem; color: var(--ink-soft); opacity: .8; display: inline-flex; align-items: center; gap: 5px; }
+.chat-msg-meta::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--accent-green); box-shadow: 0 0 6px var(--accent-green); }

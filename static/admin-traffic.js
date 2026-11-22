@@ -3,13 +3,14 @@
   "use strict";
   var root = document.getElementById("lz-traffic");
   if (!root) return;
+  // v246: aniq ajraladigan ranglar (yashil, ko'k, sariq, binafsha, qizil, havorang)
   var SER = [
-    { k: "visits", n: "Tashriflar", c: "#3dff7b" },
-    { k: "visitors", n: "Odamlar", c: "#0bd855" },
-    { k: "quiz_start", n: "Test boshlandi", c: "#c6ff3d" },
-    { k: "quiz_finish", n: "Test tugadi", c: "#00e0a4" },
-    { k: "signup", n: "Ro'yxatdan o'tdi", c: "#9dffbf" },
-    { k: "ai_ask", n: "AI savollar", c: "#5effc0" }
+    { k: "visits", n: "Tashriflar", c: "#1def6a" },
+    { k: "visitors", n: "Odamlar", c: "#2f8cff" },
+    { k: "quiz_start", n: "Test boshlandi", c: "#ffb020" },
+    { k: "quiz_finish", n: "Test tugadi", c: "#a855f7" },
+    { k: "signup", n: "Ro'yxatdan o'tdi", c: "#ff4d6d" },
+    { k: "ai_ask", n: "AI savollar", c: "#14d8e8" }
   ];
   var off = {}, data = null, days = 14;
   var fmt = function (n) { return Math.round(n || 0).toLocaleString("ru-RU").replace(/,/g, " "); };
@@ -28,35 +29,51 @@
   }
 
   function legend() {
+    var S = (data && data.series) || [];
     document.getElementById("lz-tr-legend").innerHTML = SER.map(function (s) {
-      return '<button type="button" data-k="' + s.k + '" class="' + (off[s.k] ? "off" : "") + '"><i style="background:' + s.c + '"></i>' + esc(s.n) + "</button>";
+      var tot = S.reduce(function (a, d) { return a + (d[s.k] || 0); }, 0);
+      return '<button type="button" data-k="' + s.k + '" class="' + (off[s.k] ? "off" : "") + (tot ? "" : " zero") + '" title="' + esc(s.n) + ': davr bo\'yicha jami ' + tot + '"><i style="background:' + s.c + '"></i>' + esc(s.n) + ' <b>' + fmt(tot) + "</b></button>";
     }).join("");
   }
 
   function draw() {
     if (!data) return;
     var host = document.getElementById("lz-tr-chart"), S = data.series, n = S.length;
-    var W = Math.max(300, host.clientWidth || 700), H = 240, L = 34, R = 18, B = 26, T = 12, ph = H - B - T, step = (W - L - R) / Math.max(1, n - 1);
+    var W = Math.max(300, host.clientWidth || 700), H = 250, L = 34, R = 14, B = 26, T = 14, ph = H - B - T, step = (W - L - R) / Math.max(1, n - 1);
     var vis = SER.filter(function (s) { return !off[s.k]; });
     var max = 4;
     vis.forEach(function (s) { S.forEach(function (d) { max = Math.max(max, d[s.k] || 0); }); });
-    max = Math.ceil(max * 1.1);
+    max = Math.max(4, Math.ceil(max * 1.12 / 4) * 4);   // butun sonli o'q belgilari
+    var X = function (i) { return L + step * i; }, Y = function (v) { return T + ph - (v / max) * ph; };
     var svg = '<svg viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="none">';
     for (var g = 0; g <= 4; g++) {
       var y = T + ph - (ph * g) / 4;
       svg += '<line class="grid" x1="' + L + '" x2="' + (W - R) + '" y1="' + y + '" y2="' + y + '"/><text class="tx" x="' + (L - 6) + '" y="' + (y + 3) + '" text-anchor="end">' + fmt((max * g) / 4) + "</text>";
     }
-    vis.forEach(function (s) {
-      var pts = S.map(function (d, i) { return [L + step * i, T + ph - ((d[s.k] || 0) / max) * ph]; });
+    vis.forEach(function (s, si) {
+      var pts = S.map(function (d, i) { return [X(i), Y(d[s.k] || 0), d[s.k] || 0]; });
       var line = pts.map(function (p, i) { return (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1); }).join(" ");
-      svg += '<path d="' + line + " L" + pts[n - 1][0] + " " + (T + ph) + " L" + L + " " + (T + ph) + 'Z" fill="' + s.c + '" opacity=".07"/>';
-      svg += '<path d="' + line + '" fill="none" stroke="' + s.c + '" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>';
-      pts.forEach(function (p, i) { svg += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="3" fill="' + s.c + '"><title>' + esc(S[i].day + " — " + s.n + ": " + (S[i][s.k] || 0)) + "</title></circle>"; });
+      if (si === 0) svg += '<path d="' + line + " L" + pts[n - 1][0] + " " + (T + ph) + " L" + L + " " + (T + ph) + 'Z" fill="' + s.c + '" opacity=".10"/>';
+      svg += '<path d="' + line + '" fill="none" stroke="' + s.c + '" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" opacity=".95"/>';
+      pts.forEach(function (p) { if (p[2] > 0) svg += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="3.6" fill="' + s.c + '" stroke="var(--bg-elevated,#0c1a12)" stroke-width="1.5"/>'; });
     });
     S.forEach(function (d, i) {
-      if (i % Math.ceil(n / 8) === 0 || i === n - 1) svg += '<text class="tx" x="' + (L + step * i) + '" y="' + (H - 8) + '" text-anchor="middle">' + d.day + "</text>";
+      if (i % Math.ceil(n / 7) === 0 || i === n - 1) svg += '<text class="tx" x="' + X(i) + '" y="' + (H - 8) + '" text-anchor="' + (i === n - 1 ? "end" : i === 0 ? "start" : "middle") + '">' + d.day + "</text>";
     });
-    host.innerHTML = svg + "</svg>";
+    svg += '<line class="lz-tr-cross" x1="-9" x2="-9" y1="' + T + '" y2="' + (T + ph) + '"/>';
+    host.innerHTML = svg + '</svg><div class="lz-tr-tip" hidden></div>';
+    var el = host.querySelector("svg"), tip = host.querySelector(".lz-tr-tip"), cross = host.querySelector(".lz-tr-cross");
+    function move(ev) {
+      var r = el.getBoundingClientRect(), px = ((ev.touches ? ev.touches[0].clientX : ev.clientX) - r.left) / r.width * W;
+      var i = Math.max(0, Math.min(n - 1, Math.round((px - L) / step))), d = S[i];
+      cross.setAttribute("x1", X(i)); cross.setAttribute("x2", X(i));
+      tip.innerHTML = "<b>" + d.day + "</b>" + vis.map(function (s) { return '<span><i style="background:' + s.c + '"></i>' + esc(s.n) + ": <b>" + fmt(d[s.k] || 0) + "</b></span>"; }).join("");
+      tip.hidden = false;
+      var left = (X(i) / W) * r.width;
+      tip.style.left = Math.min(r.width - tip.offsetWidth - 4, Math.max(4, left + 12)) + "px";
+    }
+    el.addEventListener("mousemove", move); el.addEventListener("touchstart", move, { passive: true }); el.addEventListener("touchmove", move, { passive: true });
+    el.addEventListener("mouseleave", function () { tip.hidden = true; cross.setAttribute("x1", -9); cross.setAttribute("x2", -9); });
   }
 
   function foot() {

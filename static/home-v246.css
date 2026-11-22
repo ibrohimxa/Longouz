@@ -1,0 +1,48 @@
+/* v246: bosh sahifa — jonli raqamlar, natijalar lentasi, taklif banneri va yangi hover effektlar */
+.hm-live{padding:8px 0 18px}
+.hm-live-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.hm-live-card{position:relative;padding:16px 14px;border-radius:18px;text-align:center;border:1px solid rgba(29,239,106,.22);
+  background:linear-gradient(160deg,rgba(29,239,106,.07),rgba(255,255,255,.02));overflow:hidden;transition:transform .25s ease,box-shadow .25s ease,border-color .25s}
+.hm-live-card::after{content:"";position:absolute;inset:-40% -60%;background:linear-gradient(110deg,transparent 40%,rgba(255,255,255,.08) 50%,transparent 60%);transform:translateX(-60%);transition:transform .9s ease}
+.hm-live-card:hover{transform:translateY(-4px);border-color:rgba(29,239,106,.6);box-shadow:0 14px 34px rgba(0,0,0,.25),0 0 22px rgba(29,239,106,.22)}
+.hm-live-card:hover::after{transform:translateX(60%)}
+.hm-live-card b{display:block;font-family:Fraunces,Georgia,serif;font-size:clamp(1.4rem,2.6vw,2rem);color:#1def6a;text-shadow:0 0 18px rgba(29,239,106,.35);font-variant-numeric:tabular-nums}
+.hm-live-card span{font-size:.82rem;opacity:.8;display:inline-flex;align-items:center;gap:6px}
+.hm-live-card.live i{width:8px;height:8px;border-radius:50%;background:#1def6a;animation:hmPulse 1.6s infinite}
+@keyframes hmPulse{0%{box-shadow:0 0 0 0 rgba(29,239,106,.7)}70%{box-shadow:0 0 0 8px rgba(29,239,106,0)}100%{box-shadow:0 0 0 0 rgba(29,239,106,0)}}
+.hm-ticker{display:flex;align-items:center;gap:12px;margin-top:12px;padding:8px 12px;border-radius:14px;border:1px solid rgba(29,239,106,.18);background:rgba(29,239,106,.04);overflow:hidden}
+.hm-ticker-lbl{flex:none;display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;color:#1def6a}
+.hm-ticker-lbl i{width:7px;height:7px;border-radius:50%;background:#ff4d6d;animation:hmPulse 1.6s infinite}
+.hm-ticker-track{flex:1;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
+.hm-ticker-run{display:inline-flex;gap:26px;white-space:nowrap;animation:hmRun 48s linear infinite}
+.hm-ticker:hover .hm-ticker-run{animation-play-state:paused}
+@keyframes hmRun{to{transform:translateX(-50%)}}
+.hm-tk{font-size:.84rem;opacity:.9}
+.hm-tk em{font-style:normal;font-weight:800}
+.hm-tk.hi em{color:#1def6a}.hm-tk.mid em{color:#ffc43d}.hm-tk.lo em{color:#ff7a7a}
+/* taklif banneri */
+.hm-promo-sec{padding:6px 0 0}
+.hm-promo{position:relative;display:flex;align-items:center;gap:16px;padding:18px 22px;border-radius:20px;text-decoration:none;color:inherit;overflow:hidden;isolation:isolate;
+  border:1px solid transparent;background:linear-gradient(var(--bg-elevated,#0c1a12),var(--bg-elevated,#0c1a12)) padding-box,linear-gradient(120deg,#1def6a,#0fbf55,#c6ff3d,#1def6a) border-box;background-size:auto,300% 100%;animation:hmBorder 6s linear infinite;transition:transform .25s}
+@keyframes hmBorder{to{background-position:0 0,300% 0}}
+.hm-promo:hover{transform:translateY(-3px) scale(1.005)}
+.hm-promo-glow{position:absolute;inset:auto -10% -60% -10%;height:120%;background:radial-gradient(closest-side,rgba(29,239,106,.22),transparent);z-index:-1;pointer-events:none}
+.hm-promo-ico{flex:none;width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:rgba(29,239,106,.12);color:#1def6a}
+.hm-promo-ico svg{width:26px;height:26px}
+.hm-promo-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.hm-promo-txt b{font-size:1.05rem}
+.hm-promo-txt small{opacity:.75}
+.hm-promo-cta{flex:none;padding:10px 16px;border-radius:12px;background:linear-gradient(135deg,#1def6a,#0fbf55);color:#04140a;font-weight:800;box-shadow:0 0 18px rgba(29,239,106,.35)}
+/* mavjud kartalarga yangi hover */
+.hm-plan,.hm-feat,.hm-step,.hm-subj{transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}
+@media (hover:hover){
+  .hm-plan:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(0,0,0,.3),0 0 26px rgba(29,239,106,.18)}
+  .hm-feat:hover,.hm-step:hover,.hm-subj:hover{transform:translateY(-4px);border-color:rgba(29,239,106,.5)}
+}
+html[data-theme="light"] .hm-live-card{background:linear-gradient(160deg,rgba(8,208,82,.08),#fff);border-color:rgba(8,160,70,.2)}
+html[data-theme="light"] .hm-live-card b{color:#08a046;text-shadow:none}
+html[data-theme="light"] .hm-ticker{background:#f3fbf6}
+@media (max-width:860px){.hm-live-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.hm-live-card.live{grid-column:1/-1}}
+@media (max-width:560px){.hm-promo{flex-wrap:wrap;padding:16px}.hm-promo-cta{width:100%;text-align:center}}
+@media (prefers-reduced-motion:reduce){.hm-ticker-run,.hm-promo{animation:none}}
+.hm-ticker[hidden]{display:none}
