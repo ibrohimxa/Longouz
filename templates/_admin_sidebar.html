@@ -1,4 +1,6 @@
-    <link rel="stylesheet" href="/static/admin-v246.css?v=246">
+    <link rel="stylesheet" href="/static/admin-v246.css?v=249">
+    <link rel="stylesheet" href="/static/admin-mobile.css?v=249">
+    <script src="/static/admin-mobile.js?v=249" defer></script>
     <aside class="app-sidebar">
       <div class="sidebar-brand">
         {% include "_brandmark.html" %}
@@ -12,15 +14,15 @@
         <div class="sb-group">Asosiy</div>
         <a href="{{ admin_prefix }}" class="sidebar-link{{ ' active' if active_tab == 'dashboard' else '' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-          <span class="sb-lbl">Umumiy holat</span>
+          <span class="sb-lbl" data-short="Bosh">Umumiy holat</span>
         </a>
         <a href="{{ admin_prefix }}/insights" class="sidebar-link{{ ' active' if active_tab == 'insights' else '' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
-          <span class="sb-lbl">Sayt tahlili</span>
+          <span class="sb-lbl" data-short="Tahlil">Sayt tahlili</span>
         </a>
         <a href="{{ admin_prefix }}/users" class="sidebar-link{{ ' active' if active_tab == 'users' else '' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-          <span class="sb-lbl">Foydalanuvchilar</span>
+          <span class="sb-lbl" data-short="Odamlar">Foydalanuvchilar</span>
           <span id="admin-users-badge" hidden title="Bugun ro'yxatdan o'tganlar" style="margin-left:auto; background:#4a9eff; color:#fff; font-size:0.72rem; font-weight:800; line-height:1; border-radius:999px; padding:3px 7px;">0</span>
         </a>
         <a href="{{ admin_prefix }}/payments" class="sidebar-link{{ ' active' if active_tab == 'payments' else '' }}">
@@ -30,12 +32,12 @@
         <div class="sb-group">LongoAI</div>
         <a href="{{ admin_prefix }}/longoai" class="sidebar-link sb-longoai{{ ' active' if active_tab == 'longoai' else '' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="2.2"/><circle cx="12" cy="6" r="2.2"/><circle cx="18" cy="12" r="2.2"/><path d="M8 18c1.2 1.3 2.6 2 4 2s2.8-.7 4-2"/></svg>
-          <span class="sb-lbl">LongoAI yordamchi</span>
+          <span class="sb-lbl" data-short="LongoAI">LongoAI yordamchi</span>
           <span id="admin-ai-badge" hidden title="LongoAI navbatidagi ishlar" style="margin-left:auto; background:#2ec4ff; color:#03121a; font-size:0.72rem; font-weight:800; line-height:1; border-radius:999px; padding:3px 7px;">0</span>
         </a>
         <a href="{{ admin_prefix }}/reports" class="sidebar-link{{ ' active' if active_tab == 'reports' else '' }}" style="position:relative;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
-          <span class="sb-lbl">Shikoyatlar</span>
+          <span class="sb-lbl" data-short="Shikoyat">Shikoyatlar</span>
           <span id="admin-reports-badge" hidden style="margin-left:auto; background:var(--error); color:#fff; font-size:0.72rem; font-weight:700; line-height:1; border-radius:999px; padding:3px 7px;">0</span>
         </a>
         <a href="{{ admin_prefix }}/messages" class="sidebar-link{{ ' active' if active_tab == 'messages' else '' }}" style="position:relative;">
@@ -59,15 +61,15 @@
         </a>
         <a href="{{ admin_prefix }}/topics" class="sidebar-link{{ ' active' if active_tab == 'questions' else '' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
-          <span class="sb-lbl">Savollar banki</span>
+          <span class="sb-lbl" data-short="Bank">Savollar banki</span>
         </a>
         <a href="{{ admin_prefix }}/studio" class="sidebar-link{{ ' active' if active_tab == 'studio' else '' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 5.6L20 10l-5.6 2.4L12 18l-2.4-5.6L4 10l5.6-2.4z"/></svg>
-          <span class="sb-lbl">Studio (AI)</span>
+          <span class="sb-lbl" data-short="Studio">Studio (AI)</span>
         </a>
         <a href="{{ admin_prefix }}/import" class="sidebar-link{{ ' active' if active_tab == 'import' else '' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          <span class="sb-lbl">Import (PDF / fayl)</span>
+          <span class="sb-lbl" data-short="Import">Import (PDF / fayl)</span>
         </a>
         <a href="{{ admin_prefix }}/bank" class="sidebar-link{{ ' active' if active_tab == 'bank' else '' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.7-4 3-9 3s-9-1.3-9-3"/><path d="M3 5v14c0 1.7 4 3 9 3s9-1.3 9-3V5"/></svg>
@@ -75,16 +77,16 @@
         </a>
         <a href="{{ admin_prefix }}/certificates" class="sidebar-link{{ ' active' if active_tab == 'certificates' else '' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.5 13.5L17 22l-5-3-5 3 1.5-8.5"/></svg>
-          <span class="sb-lbl">Sertifikatlar</span>
+          <span class="sb-lbl" data-short="Sertifikat">Sertifikatlar</span>
         </a>
         <div class="sb-group">Aloqa</div>
         <a href="{{ admin_prefix }}/announcements" class="sidebar-link{{ ' active' if active_tab == 'announcements' else '' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-          <span class="sb-lbl">Bildirishnomalar</span>
+          <span class="sb-lbl" data-short="E'lonlar">Bildirishnomalar</span>
         </a>
         <a href="{{ admin_prefix }}/news" class="sidebar-link{{ ' active' if active_tab == 'news' else '' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 15l-5-5-8 8"/></svg>
-          <span class="sb-lbl">Yangiliklar / reklama</span>
+          <span class="sb-lbl" data-short="Yangilik">Yangiliklar / reklama</span>
         </a>
         <div class="sb-group">Tizim</div>
         <a href="{{ admin_prefix }}/keys" class="sidebar-link{{ ' active' if active_tab == 'keys' else '' }}">
@@ -97,15 +99,15 @@
         </a>
         <a href="{{ admin_prefix }}/settings" class="sidebar-link{{ ' active' if active_tab == 'settings' else '' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-          <span class="sb-lbl">Sozlamalar</span>
+          <span class="sb-lbl" data-short="Sozlama">Sozlamalar</span>
         </a>
         <a href="{{ admin_prefix }}/log" class="sidebar-link{{ ' active' if active_tab == 'log' else '' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          <span class="sb-lbl">Admin jurnali</span>
+          <span class="sb-lbl" data-short="Jurnal">Admin jurnali</span>
         </a>
         <a href="/" class="sidebar-link" target="_blank">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>
-          <span class="sb-lbl">Saytni ko'rish</span>
+          <span class="sb-lbl" data-short="Sayt">Saytni ko'rish</span>
         </a>
       </nav>
       <div class="sidebar-footer">
@@ -116,7 +118,7 @@
         </button>
         <a href="{{ admin_prefix }}/logout" class="sidebar-link">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          <span class="sb-lbl">Admin sessiyasidan chiqish</span>
+          <span class="sb-lbl" data-short="Chiqish">Admin sessiyasidan chiqish</span>
         </a>
       </div>
     </aside>

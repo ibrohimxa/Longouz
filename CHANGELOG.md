@@ -1,3 +1,10 @@
+## v249 — admin panel kichik telefonlarga to'liq moslashtirildi
+- Admin paneldagi barcha jadvallar (foydalanuvchilar, xabarlar, to'lovlar, savollar banki, tekshiruv, jurnal, sertifikatlar va boshqalar) telefonda kartochkaga aylanadi: har bir qiymat oldida ustun nomi yoziladi, hech bir ustun ekrandan chiqib yashirinmaydi.
+- Yorliqlar qatori, Moklar fanlari va mavzu qo'shish yorliqlari endi yon tomonga aylanmaydi — qatorga o'raladi.
+- Pastki menyuda telefon uchun qisqa nomlar (Bosh, Tahlil, Odamlar …), «Yana» menyusida uzun nomlar ikki qatorga o'raladi.
+- Formalar, tanlov maydonlari va tugmalar 320 px ekranga sig'adi (Kalitlar sahifasidagi tanlov ham).
+- 26 ta admin sahifasi 320 va 360 px kenglikda avtomatik tekshirildi: ekrandan chiqib ketgan element qolmadi.
+
 ## v248 — Google va sun'iy intellektlar saytni topadigan qilindi
 - /robots.txt: Google, Bing, Yandex hamda AI botlari (GPTBot, Google-Extended, ClaudeBot, PerplexityBot va boshqalar) ochiq sahifalarni o'qiy oladi; shaxsiy sahifalar yopiq.
 - /sitemap.xml, /llms.txt va /llms-full.txt (AI uchun sayt, fanlar va mavzular haqida aniq ma'lumot).
