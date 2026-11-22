@@ -759,6 +759,8 @@ async def apply_action(act: dict, admin: str) -> dict:
                 q.min_plan = f["min_plan"]
             if "is_active" in f:
                 q.is_active = bool(f["is_active"])
+            if q.source_file == "longouz-bank":
+                q.source_file = "longouz-fixed"  # baza yangilanishida bu tahrir qaytarib yozilmasin
             await session.commit()
         await db.log_admin_action(admin, "ai_update_question", f"#{qid}: {act.get('reason', '')[:120]}")
         # v229: to'g'ri javob yoki variantlar o'zgargan bo'lsa — shu savolni yechgan o'quvchilar qayta baholanadi

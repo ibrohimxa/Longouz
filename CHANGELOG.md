@@ -1,3 +1,9 @@
+## v247 — barcha fanlarga yangi savollar va xato savollar tuzatildi
+- 8 ta fanning 10 tadan kam savolli barcha mavzulariga (240 dan ortiq mavzu) DTM 2026 / milliy sertifikat uslubida 600 ga yaqin yangi savol qo'shildi: tarix, biologiya, kimyo, fizika, matematika, ona tili va adabiyot, rus tili, ingliz tili. Bazada jami ~9 000 savol.
+- Matematika, fizika va kimyo savollari hisob-kitob bilan tekshirildi.
+- Xato yoki chala savollar tuzatildi: oldingi savolga bog'liq kontekstsiz savollar to'liq shartli qilindi; ona tili va adabiyotda noto'g'ri javoblar («Kitobxon» o'zagi, «Shahar tinch uxladi» — metonimiya, Go'ro'g'li turkumi, «Kecha va kunduz», Said Ahmadning «Qirq besh kun» kitobi) va tarixdagi shubhali sanalar aniq faktlarga almashtirildi; imlo xatolari tuzatildi.
+- Admin yoki LongoAI tahrirlagan savollar endi baza yangilanganda qaytarib yozilmaydi va nofaol bo'lib qolmaydi.
+
 ## v246 — Moklar bo'limi, test ko'rinishida tahrirlash, admin moslashuvi
 - Admin → «Moklar»: fan → mavzu ro'yxati (tartib/nom/ko'p/kam/yangi bo'yicha saralash, qidiruv). Mavzu bosilsa savollari pastga ochiladi; «Ko'rish» va «Tahrirlash» tugmalari.
 - Tahrirlash test yechish ko'rinishida ochiladi: savollar ketma-ket, tahrirlash rejimi yoqilgan holda qoladi, saqlash hisoblagichi 1, 2, 3… o'sadi. «Chop etish» → Moklarga shu mavzu ochiq holda qaytadi, pastki o'ngda neon yashil «O'zgarishlar saqlandi» xabari.

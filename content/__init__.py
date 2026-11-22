@@ -84,10 +84,22 @@ def load_packs():
         import logging
         logging.getLogger(__name__).warning("gen_v246 yuklanmadi: %s", e)
     try:
+        from . import gen_v247
+        gen_v247.extend(packs)
+    except Exception as e:  # pragma: no cover
+        import logging
+        logging.getLogger(__name__).warning("gen_v247 yuklanmadi: %s", e)
+    try:
         sanitize_packs(packs)
     except Exception as e:  # pragma: no cover
         import logging
         logging.getLogger(__name__).warning("sanitize_packs ishlamadi: %s", e)
+    try:
+        from . import gen_v247
+        gen_v247.fix(packs)
+    except Exception as e:  # pragma: no cover
+        import logging
+        logging.getLogger(__name__).warning("gen_v247.fix ishlamadi: %s", e)
     apply_quota_tiers(packs)
     return packs
 

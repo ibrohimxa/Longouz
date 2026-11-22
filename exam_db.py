@@ -19,7 +19,7 @@ import exam_rules as ER
 logger = logging.getLogger(__name__)
 
 # Tayyor kontent versiyasi: oshirilsa yangi savollar/mavzular qo'shiladi (mavjudlari qayta yozilmaydi).
-CONTENT_VERSION = "v246a"
+CONTENT_VERSION = "v247a"
 
 _KIND_OF = {"closed": "c", "open": "o", "match": "m"}
 
@@ -387,7 +387,8 @@ async def _seed_pack(subject: str, mode: str, topics: list[dict], questions: lis
             row = existing_rows.get(text.lower())
             if row is not None:
                 # Tayyor bank qatori: mavzu / tarif / javob / chizma yangi versiyaga moslanadi (eski xato biriktirishlar tuzaladi)
-                if row.source_file == "longouz-bank":
+                # admin muharrirda saqlagan qator (style_json yozilgan) ustidan yozilmaydi
+                if row.source_file == "longouz-bank" and not (row.style_json or "").strip():
                     new_opts = json.dumps(q["options"], ensure_ascii=False)
                     new_vals = dict(topic=q["topic"], grade=q.get("grade", 0), difficulty=q.get("difficulty", 2), block=q.get("block", ""),
                                     qtype=q.get("qtype", "closed"), min_plan=q.get("min_plan", 0), options_json=new_opts,
@@ -418,7 +419,8 @@ async def _seed_pack(subject: str, mode: str, topics: list[dict], questions: lis
         keep = keep_keys if keep_keys is not None else pack_keys
         if len(keep) >= 20:
             for key, row in existing_rows.items():
-                if row.source_file == "longouz-bank" and key not in keep and row.is_active:
+                if (row.source_file == "longouz-bank" and key not in keep and row.is_active
+                        and not (row.style_json or "").strip()):
                     row.is_active = False
                     synced += 1
         await session.commit()

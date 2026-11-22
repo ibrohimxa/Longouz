@@ -2791,6 +2791,8 @@ async def admin_update_question(
             await _add_tombstone(session, old_subject, old_mode, old_text)
             await _purge_missed_for_question(session, old_text)
             await _remove_tombstone(session, subject, mode, question)
+        if q.source_file == "longouz-bank":
+            q.source_file = "longouz-edited"  # admin tahriri keyingi baza yangilanishida qaytarib yozilmasin
         q.subject = subject
         q.mode = mode
         q.topic = (topic or "Umumiy").strip()
@@ -2839,6 +2841,8 @@ async def admin_quick_set_correct(question_id: int, index: int) -> bool:
         if not 0 <= index < n:
             return False
         q.correct_index = index
+        if q.source_file == "longouz-bank":
+            q.source_file = "longouz-edited"
         await session.commit()
         return True
 
