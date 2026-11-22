@@ -1,0 +1,51 @@
+/* v248: ochiq SEO sahifalari (/fanlar, /fanlar/<fan>, /haqida) */
+.sp-page{max-width:1080px;margin:0 auto;padding:22px 20px 56px}
+.sp-crumbs{display:flex;gap:8px;flex-wrap:wrap;font-size:.86rem;color:var(--ink-soft);margin:6px 0 18px}
+.sp-crumbs a{color:var(--ink-soft);text-decoration:none}.sp-crumbs a:hover{color:var(--accent-green)}
+.sp-crumbs b{color:var(--ink);font-weight:600}
+.sp-hero{padding:26px 26px 24px;border-radius:22px;border:1px solid color-mix(in srgb,var(--accent-green) 35%,transparent);
+  background:radial-gradient(120% 140% at 0% 0%,color-mix(in srgb,var(--accent-green) 14%,transparent),transparent 60%),var(--bg-elevated)}
+.sp-pill{display:inline-block;font-size:.78rem;font-weight:700;letter-spacing:.02em;padding:6px 12px;border-radius:99px;
+  color:var(--accent-green);border:1px solid color-mix(in srgb,var(--accent-green) 45%,transparent)}
+.sp-hero h1{font-family:Fraunces,serif;font-size:clamp(1.6rem,4.4vw,2.6rem);line-height:1.15;margin:14px 0 10px}
+.sp-hero p{color:var(--ink-soft);line-height:1.7;max-width:760px;margin:0}
+.sp-cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.sp-btn,.sp-ghost{display:inline-flex;align-items:center;padding:12px 20px;border-radius:12px;font-weight:700;text-decoration:none;transition:transform .15s,box-shadow .2s}
+.sp-btn{background:var(--accent-green);color:#041209;box-shadow:0 0 0 0 color-mix(in srgb,var(--accent-green) 50%,transparent)}
+.sp-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px -6px color-mix(in srgb,var(--accent-green) 70%,transparent)}
+.sp-ghost{color:var(--ink);border:1.5px solid color-mix(in srgb,var(--ink) 20%,transparent)}
+.sp-ghost:hover{border-color:var(--accent-green);color:var(--accent-green)}
+.sp-stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.sp-stats span{font-size:.82rem;padding:5px 10px;border-radius:9px;background:color-mix(in srgb,var(--ink) 6%,transparent);color:var(--ink-soft)}
+.sp-stats b{color:var(--ink)}
+.sp-stats.big span{font-size:.92rem;padding:8px 12px}
+.sp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-top:22px}
+.sp-card{display:block;padding:18px;border-radius:16px;background:var(--bg-elevated);border:1px solid color-mix(in srgb,var(--ink) 10%,transparent);
+  color:inherit;text-decoration:none;transition:transform .18s,border-color .2s,box-shadow .2s}
+.sp-card:hover{transform:translateY(-3px);border-color:var(--accent-green);box-shadow:0 12px 30px -14px color-mix(in srgb,var(--accent-green) 60%,transparent)}
+.sp-card h2{font-size:1.12rem;margin:0 0 6px;font-family:Inter,sans-serif}
+.sp-card p{font-size:.9rem;line-height:1.55;color:var(--ink-soft);margin:0}
+.sp-topics,.sp-how,.sp-others,.sp-faq,.sp-feats{margin-top:28px}
+.sp-page h2{font-size:1.25rem;margin:0 0 12px;font-family:Inter,sans-serif}
+.sp-grade{border:1px solid color-mix(in srgb,var(--ink) 10%,transparent);border-radius:14px;margin-bottom:10px;background:var(--bg-elevated);overflow:hidden}
+.sp-grade summary{cursor:pointer;padding:13px 16px;font-weight:700;display:flex;justify-content:space-between;gap:10px;list-style:none}
+.sp-grade summary::-webkit-details-marker{display:none}
+.sp-grade summary em{font-style:normal;font-weight:500;color:var(--ink-soft);font-size:.86rem}
+.sp-grade[open] summary{border-bottom:1px solid color-mix(in srgb,var(--ink) 8%,transparent);color:var(--accent-green)}
+.sp-grade ul{list-style:none;margin:0;padding:6px 8px 10px}
+.sp-grade li{display:flex;justify-content:space-between;gap:12px;padding:8px 8px;border-radius:9px;font-size:.93rem}
+.sp-grade li:hover{background:color-mix(in srgb,var(--accent-green) 8%,transparent)}
+.sp-grade li i{font-style:normal;color:var(--ink-soft);font-size:.82rem;white-space:nowrap}
+.sp-how ol{margin:0;padding-left:20px;line-height:1.9;color:var(--ink-soft)}.sp-how b{color:var(--ink)}
+.sp-chips{display:flex;flex-wrap:wrap;gap:8px}
+.sp-chips a{padding:8px 13px;border-radius:99px;border:1px solid color-mix(in srgb,var(--ink) 14%,transparent);color:var(--ink);text-decoration:none;font-size:.9rem;transition:border-color .2s,color .2s}
+.sp-chips a:hover{border-color:var(--accent-green);color:var(--accent-green)}
+.sp-chips i{font-style:normal;color:var(--ink-soft);font-size:.78rem;margin-left:4px}
+.sp-feats{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.sp-feats div{padding:16px 18px;border-radius:16px;background:var(--bg-elevated);border:1px solid color-mix(in srgb,var(--ink) 10%,transparent)}
+.sp-feats h3{margin:0 0 6px;font-size:1.02rem}.sp-feats p{margin:0;color:var(--ink-soft);line-height:1.6;font-size:.92rem}
+.sp-faq details{border-bottom:1px solid color-mix(in srgb,var(--ink) 10%,transparent);padding:12px 2px}
+.sp-faq summary{cursor:pointer;font-weight:700}.sp-faq p{color:var(--ink-soft);line-height:1.65;margin:8px 0 0}
+.sp-foot{max-width:1080px;margin:0 auto;padding:22px 20px 40px;border-top:1px solid color-mix(in srgb,var(--ink) 10%,transparent);color:var(--ink-soft);font-size:.86rem}
+.sp-foot nav{display:flex;flex-wrap:wrap;gap:14px;margin-top:8px}.sp-foot a{color:var(--ink-soft);text-decoration:none}.sp-foot a:hover{color:var(--accent-green)}
+@media (max-width:600px){.sp-hero{padding:20px 16px}.sp-page{padding:14px 14px 40px}.sp-grade li{font-size:.88rem}}

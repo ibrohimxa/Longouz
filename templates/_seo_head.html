@@ -1,0 +1,22 @@
+{# v248: qidiruv tizimlari va AI uchun meta teglar. Kutilgan o'zgaruvchilar: page_title, page_desc, canonical #}
+{% set _m = seo_meta() %}
+  <meta name="description" content="{{ page_desc }}">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+  <link rel="canonical" href="{{ _m.site }}{{ canonical or '/' }}">
+  <meta name="application-name" content="LongoUZ">
+  <meta name="theme-color" content="#0b0f0c">
+  <meta property="og:site_name" content="LongoUZ">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="uz_UZ">
+  <meta property="og:title" content="{{ page_title }}">
+  <meta property="og:description" content="{{ page_desc }}">
+  <meta property="og:url" content="{{ _m.site }}{{ canonical or '/' }}">
+  <meta property="og:image" content="{{ _m.site }}/static/logo-owl3d.png">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="{{ page_title }}">
+  <meta name="twitter:description" content="{{ page_desc }}">
+  <meta name="twitter:image" content="{{ _m.site }}/static/logo-owl3d.png">
+  <link rel="alternate" type="text/plain" title="LLM ma'lumoti" href="/llms.txt">
+  {% if _m.google %}<meta name="google-site-verification" content="{{ _m.google }}">{% endif %}
+  {% if _m.bing %}<meta name="msvalidate.01" content="{{ _m.bing }}">{% endif %}
+  {% if _m.yandex %}<meta name="yandex-verification" content="{{ _m.yandex }}">{% endif %}

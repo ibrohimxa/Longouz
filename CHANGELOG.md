@@ -1,3 +1,11 @@
+## v248 — Google va sun'iy intellektlar saytni topadigan qilindi
+- /robots.txt: Google, Bing, Yandex hamda AI botlari (GPTBot, Google-Extended, ClaudeBot, PerplexityBot va boshqalar) ochiq sahifalarni o'qiy oladi; shaxsiy sahifalar yopiq.
+- /sitemap.xml, /llms.txt va /llms-full.txt (AI uchun sayt, fanlar va mavzular haqida aniq ma'lumot).
+- Yangi ochiq sahifalar: /fanlar, /fanlar/<fan> (8 ta fan, sinflar bo'yicha mavzular ro'yxati), /haqida (savol-javob bilan).
+- Bosh sahifa va yangi sahifalarga title, description, canonical, Open Graph va JSON-LD (EducationalOrganization, WebSite, FAQPage, Course, BreadcrumbList).
+- IndexNow: har yangi versiyada Bing, Yandex va boshqa qidiruv tizimlariga sahifalar avtomatik yuboriladi; admin paneldan qo'lda ham yuborish mumkin.
+- Admin → Sozlamalar → «Qidiruv tizimlari»: Google Search Console, Bing va Yandex tasdiqlash kodini kiritish (domen sotib olish shart emas).
+
 ## v247 — barcha fanlarga yangi savollar va xato savollar tuzatildi
 - 8 ta fanning 10 tadan kam savolli barcha mavzulariga (240 dan ortiq mavzu) DTM 2026 / milliy sertifikat uslubida 600 ga yaqin yangi savol qo'shildi: tarix, biologiya, kimyo, fizika, matematika, ona tili va adabiyot, rus tili, ingliz tili. Bazada jami ~9 000 savol.
 - Matematika, fizika va kimyo savollari hisob-kitob bilan tekshirildi.

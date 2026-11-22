@@ -442,7 +442,7 @@ body.home .site-header { background: var(--h-bg) !important; }
 .faq-list p{margin:0 0 17px;color:var(--h-mute);line-height:1.65}
 .faq-list a{color:var(--g)}
 .lz-foot{padding:48px 28px 26px !important;text-align:left}
-.lz-foot-grid{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:1.5fr repeat(4,1fr);gap:28px}
+.lz-foot-grid{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:1.4fr repeat(5,1fr);gap:28px}
 .lz-foot-brand p{color:var(--h-mute);font-size:.9rem;line-height:1.6;margin:12px 0 0;max-width:320px}
 .lz-foot nav{display:flex;flex-direction:column;gap:9px}
 .lz-foot h4{margin:0 0 6px;font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;color:var(--h-ink);font-family:Inter,sans-serif}

@@ -107,6 +107,37 @@
         </form>
       </div>
 
+      <div class="dash-panel" id="seo" style="margin-top:24px;">
+        <h3>Qidiruv tizimlari va sun'iy intellektlar (Google, Bing, Yandex, ChatGPT, Gemini)</h3>
+        <p class="panel-sub">Sayt manzili: <a href="{{ seo_site }}/" target="_blank" rel="noopener">{{ seo_site }}</a> ·
+          <a href="{{ seo_site }}/sitemap.xml" target="_blank" rel="noopener">sitemap.xml</a> ·
+          <a href="{{ seo_site }}/robots.txt" target="_blank" rel="noopener">robots.txt</a> ·
+          <a href="{{ seo_site }}/llms.txt" target="_blank" rel="noopener">llms.txt</a> ·
+          <a href="{{ seo_site }}/fanlar" target="_blank" rel="noopener">/fanlar</a></p>
+        <ol class="panel-sub" style="line-height:1.8;padding-left:18px;margin:10px 0 14px">
+          <li><a href="https://search.google.com/search-console" target="_blank" rel="noopener">Google Search Console</a> → «Mulk qo'shish» → <b>URL prefiksi</b> → <code>{{ seo_site }}/</code> → «HTML teg» usulini tanlang va berilgan teg (yoki faqat kod)ni quyidagi «Google» maydoniga qo'ying, saqlang, so'ng Google'da «Tasdiqlash»ni bosing.</li>
+          <li>Tasdiqlangach: «Sitemaplar» → <code>sitemap.xml</code> yuboring. «URL tekshiruvi» → bosh sahifa va /fanlar uchun «Indekslashni so'rash».</li>
+          <li><a href="https://www.bing.com/webmasters" target="_blank" rel="noopener">Bing Webmaster</a> (ChatGPT va Copilot qidiruvi Bing'dan foydalanadi) → «Import from Google Search Console» yoki kodni pastga qo'ying.</li>
+          <li><a href="https://webmaster.yandex.com" target="_blank" rel="noopener">Yandex Webmaster</a> — ixtiyoriy, kodni pastga qo'ying.</li>
+        </ol>
+        <form method="post" action="{{ admin_prefix }}/settings/seo" class="admin-question-form">
+          <div class="admin-form-row">
+            <label style="flex:1 1 260px">Google tasdiqlash kodi<input name="google" value="{{ seo_v.google }}" placeholder='<meta name="google-site-verification" content="...">' autocomplete="off"></label>
+            <label style="flex:1 1 200px">Bing (msvalidate.01)<input name="bing" value="{{ seo_v.bing }}" placeholder="kod" autocomplete="off"></label>
+            <label style="flex:1 1 200px">Yandex<input name="yandex" value="{{ seo_v.yandex }}" placeholder="kod" autocomplete="off"></label>
+          </div>
+          <div class="admin-form-row" style="align-items:flex-end;"><button type="submit" class="btn-primary">Kodlarni saqlash</button></div>
+        </form>
+        <form method="post" action="{{ admin_prefix }}/settings/seo/ping" style="margin-top:14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+          <button type="submit" class="btn-secondary">Sahifalarni hozir yuborish (IndexNow)</button>
+          <span class="panel-sub" style="margin:0">
+            {% if seo_ping.when %}Oxirgi yuborish: {{ seo_ping.when }} · {{ seo_ping.urls }} ta sahifa ·
+              {% for k, v in (seo_ping.result or {}).items() %}{{ k }}: <b>{{ v }}</b>{% if not loop.last %}, {% endif %}{% endfor %}
+            {% else %}Har yangi versiyada avtomatik yuboriladi (Bing, Yandex va boshqalar).{% endif %}
+          </span>
+        </form>
+      </div>
+
       <div class="dash-panel" style="margin-top:24px;">
         <h3>Admin xavfsizligi</h3>
         <p class="panel-sub">

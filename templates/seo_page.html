@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ page_title }}</title>
+  {% include "_seo_head.html" %}
+  <link rel="icon" type="image/png" href="/static/logo-owl.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css?v=248">
+  <link rel="stylesheet" href="/static/auth.css?v=248">
+  <link rel="stylesheet" href="/static/seo-pages.css?v=248">
+  <script src="/static/theme-init.js?v=248"></script>
+  {{ ld | safe }}
+</head>
+<body class="auth-page sp-body">
+  {% include "_auth_header.html" %}
+  <main class="sp-page">
+    <nav class="sp-crumbs" aria-label="Yo'l">
+      <a href="/">Bosh sahifa</a><span>›</span>
+      {% if kind == 'fan' %}<a href="/fanlar">Fanlar</a><span>›</span><b>{{ s.name }}</b>
+      {% elif kind == 'fanlar' %}<b>Fanlar</b>
+      {% else %}<b>Platforma haqida</b>{% endif %}
+    </nav>
+
+    {% if kind == 'fanlar' %}
+      <header class="sp-hero">
+        <span class="sp-pill">DTM 2026 · Milliy sertifikat · IELTS</span>
+        <h1>Barcha fanlar bo'yicha bepul onlayn testlar</h1>
+        <p>LongoUZ'da 8 ta fan bo'yicha <b>{{ "{:,}".format(q_total).replace(",", " ") }}</b> dan ortiq test savoli va <b>{{ t_total }}</b> ta mavzu bor. Savollar 5–11-sinf darsliklari va DTM, milliy sertifikat dasturi asosida tuzilgan, har birida izoh bor. Xatolaringizni sun'iy intellekt repetitor tushuntirib beradi.</p>
+        <div class="sp-cta"><a class="sp-btn" href="/royxat">Bepul boshlash</a><a class="sp-ghost" href="/haqida">Platforma haqida</a></div>
+      </header>
+      <section class="sp-grid">
+        {% for s in subjects %}
+        <a class="sp-card" href="/fanlar/{{ s.slug }}">
+          <h2>{{ s.name }}</h2>
+          <p>{{ s.desc }}</p>
+          <div class="sp-stats"><span><b>{{ s.q }}</b> savol</span><span><b>{{ s.t }}</b> mavzu</span>{% if s.ielts %}<span>IELTS</span>{% endif %}</div>
+        </a>
+        {% endfor %}
+      </section>
+
+    {% elif kind == 'fan' %}
+      <header class="sp-hero">
+        <span class="sp-pill">DTM 2026 · Milliy sertifikat{% if s.ielts %} · IELTS{% endif %}</span>
+        <h1>{{ s.name }} testlari — DTM va milliy sertifikatga tayyorgarlik</h1>
+        <p>{{ s.desc }}</p>
+        <div class="sp-stats big"><span><b>{{ s.q }}</b> ta savol</span><span><b>{{ s.t }}</b> ta mavzu</span><span><b>Izohli</b> javoblar</span><span><b>AI</b> repetitor</span></div>
+        <div class="sp-cta"><a class="sp-btn" href="/royxat?subject={{ s.code }}">{{ s.name }}dan bepul test yechish</a><a class="sp-ghost" href="/fanlar">Boshqa fanlar</a></div>
+      </header>
+      <section class="sp-topics">
+        <h2>{{ s.name }}: mavzular ro'yxati</h2>
+        {% for g, items in s.by_grade %}
+        <details class="sp-grade" {% if loop.first %}open{% endif %}>
+          <summary>{% if g %}{{ g }}-sinf{% else %}Umumiy va imtihon formatidagi mavzular{% endif %} <em>{{ items|length }} mavzu</em></summary>
+          <ul>{% for t in items %}<li><span>{{ t.name }}</span><i>{{ t.count }} savol</i></li>{% endfor %}</ul>
+        </details>
+        {% endfor %}
+      </section>
+      <section class="sp-how">
+        <h2>Qanday tayyorlanasiz?</h2>
+        <ol>
+          <li><b>Mavzu tanlang</b> — sinf va mavzu bo'yicha tartiblangan testlar.</li>
+          <li><b>Test yeching</b> — har bir savoldan so'ng to'g'ri javob va izoh.</li>
+          <li><b>Xatolarni AI bilan tahlil qiling</b> — LongoAI bosqichma-bosqich tushuntiradi.</li>
+          <li><b>DTM blok mock</b> — 90 savol, 189 ballik tizimda haqiqiy imtihon sinovi.</li>
+        </ol>
+      </section>
+      <section class="sp-others">
+        <h2>Boshqa fanlar</h2>
+        <div class="sp-chips">{% for o in others %}<a href="/fanlar/{{ o.slug }}">{{ o.name }} <i>{{ o.q }}</i></a>{% endfor %}</div>
+      </section>
+
+    {% else %}
+      <header class="sp-hero">
+        <span class="sp-pill">LongoUZ haqida</span>
+        <h1>LongoUZ — DTM, milliy sertifikat va IELTS'ga sun'iy intellekt bilan tayyorgarlik</h1>
+        <p>LongoUZ — O'zbekistondagi o'quvchilar va abituriyentlar uchun onlayn ta'lim platformasi. Bu yerda 8 ta fan bo'yicha <b>{{ "{:,}".format(q_total).replace(",", " ") }}</b> dan ortiq test savoli, {{ t_total }} ta mavzu, DTM blok mock va AI repetitor bor. Ro'yxatdan o'tish va asosiy testlar bepul.</p>
+        <div class="sp-cta"><a class="sp-btn" href="/royxat">Bepul ro'yxatdan o'tish</a><a class="sp-ghost" href="/fanlar">Fanlarni ko'rish</a></div>
+      </header>
+      <section class="sp-feats">
+        <div><h3>Mavzuli testlar</h3><p>Har bir fan sinflar va mavzular bo'yicha tartiblangan, har bir savolda izoh bor. Chizmali va formulali masalalar ham mavjud.</p></div>
+        <div><h3>DTM blok mock</h3><p>90 ta savol: majburiy fanlar 3×10 (×1,1), 1-ixtisoslik 30 (×3,1), 2-ixtisoslik 30 (×2,1). Maksimal ball — 189.</p></div>
+        <div><h3>AI repetitor — LongoAI</h3><p>Xatoni bosqichma-bosqich tushuntiradi, formulalar va chizmalar bilan javob beradi, qo'shimcha mashq tavsiya qiladi.</p></div>
+        <div><h3>IELTS</h3><p>Reading, Writing va Speaking mashqlari, sun'iy intellekt baholashi bilan.</p></div>
+        <div><h3>Tahlil va sertifikat</h3><p>Natijalar statistikasi, zaif mavzular va QR kod bilan tekshiriladigan sertifikatlar.</p></div>
+        <div><h3>Tariflar</h3><p>Bepul tarif bor. Pro — 25 000 so'm/oy, Ultra — 40 000 so'm/oy; yillik to'lovda chegirma.</p></div>
+      </section>
+      <section class="sp-faq">
+        <h2>Savol-javob</h2>
+        {% for a, b in faq %}<details><summary>{{ a }}</summary><p>{{ b }}</p></details>{% endfor %}
+      </section>
+      <section class="sp-others">
+        <h2>Fanlar</h2>
+        <div class="sp-chips">{% for o in subjects %}<a href="/fanlar/{{ o.slug }}">{{ o.name }} <i>{{ o.q }}</i></a>{% endfor %}</div>
+      </section>
+    {% endif %}
+  </main>
+  <footer class="sp-foot">
+    <p>&copy; 2026 LongoUZ — DTM 2026, milliy sertifikat va IELTS'ga onlayn tayyorgarlik platformasi.</p>
+    <nav><a href="/">Bosh sahifa</a><a href="/fanlar">Fanlar</a><a href="/haqida">Haqida</a><a href="/verify">Sertifikatni tekshirish</a><a href="/terms">Shartlar</a><a href="/privacy">Maxfiylik</a></nav>
+  </footer>
+  <script src="/static/app.js?v=248"></script>
+</body>
+</html>

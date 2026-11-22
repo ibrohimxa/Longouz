@@ -358,6 +358,9 @@ templates.env.globals["plan_prices"] = _payments.price_info
 templates.env.globals["google_enabled"] = oauth_google.is_enabled
 templates.env.globals["turnstile_active"] = turnstile.is_active_for_request
 templates.env.globals["turnstile_site_key"] = turnstile.site_key
+import seo as _seo  # noqa: E402  (v248: Google, Bing, Yandex va AI qidiruvlari uchun)
+templates.env.globals["seo_meta"] = _seo.meta
+app.include_router(_seo.router)
 @app.get("/static/qfig/{name}")
 async def serve_qfig(name: str):
     """Admin yuklagan chizmalar: avval baza, keyin (lokal) disk."""
@@ -645,7 +648,15 @@ def _question_total_label(n: int) -> str:
 async def home(request: Request):
     # v242: saytga qayta kirilganda ham doim BOSH SAHIFA ochiladi (kirgan o'quvchi uchun tepada «Kabinet» tugmasi turadi).
     qn = await _question_total()
-    return templates.TemplateResponse(request, "home.html", {"q_total_label": _question_total_label(qn)})
+    await _seo.refresh_verify()
+    await _seo.auto_ping_once(VERSION_STR)
+    return templates.TemplateResponse(request, "home.html", {
+        "q_total_label": _question_total_label(qn), "seo_ld": _seo.home_ld(),
+        "page_title": "LongoUZ — DTM 2026, milliy sertifikat va IELTS'ga bepul onlayn tayyorgarlik",
+        "page_desc": ("LongoUZ — DTM 2026, milliy sertifikat va IELTS'ga sun'iy intellekt bilan bepul tayyorlanish platformasi: "
+                      "8 fan, minglab izohli test savollari, DTM blok mock (189 ball), AI repetitor."),
+        "canonical": "/",
+    })
 
 
 
@@ -2318,7 +2329,17 @@ async def admin_settings_page(request: Request):
         return RedirectResponse(f"{ADMIN_PREFIX}/login", status_code=302)
     plan_limits = {p: db.get_plan_limits(p) for p in ("free", "pro", "ultra")}
     subject_breakdown = await db.admin_subject_breakdown()
+    import json as _json
+    seo_v = await _seo.refresh_verify(force=True)
+    try:
+        seo_ping = _json.loads(await db.get_setting("seo_last_ping", "") or "{}")
+    except ValueError:
+        seo_ping = {}
+    if seo_ping.get("at"):
+        import datetime as _dt
+        seo_ping["when"] = _dt.datetime.fromtimestamp(seo_ping["at"], _dt.timezone(_dt.timedelta(hours=5))).strftime("%d.%m.%Y %H:%M")
     return templates.TemplateResponse(request, "admin_settings.html", {
+        "seo_v": seo_v, "seo_ping": seo_ping, "seo_site": _seo.site(), "seo_key": _seo.INDEXNOW_KEY,
         "plan_limits": plan_limits,
         "plan_names": db.PLAN_NAMES,
         "subject_breakdown": subject_breakdown,
@@ -2327,6 +2348,36 @@ async def admin_settings_page(request: Request):
         "message": request.query_params.get("message", ""),
         "active_tab": "settings",
     })
+
+
+@app.post(f"{ADMIN_PREFIX}/settings/seo")
+async def admin_settings_seo_submit(request: Request, google: str = Form(""), bing: str = Form(""), yandex: str = Form("")):
+    """v248: Google Search Console, Bing Webmaster va Yandex Webmaster tasdiqlash kodlari."""
+    if not require_admin(request):
+        return RedirectResponse(f"{ADMIN_PREFIX}/login", status_code=302)
+    vals = {"google": _seo.clean_code(google), "bing": _seo.clean_code(bing), "yandex": _seo.clean_code(yandex)}
+    for k, v in vals.items():
+        await db.set_setting("seo_verify_" + k, v)
+    await _seo.refresh_verify(force=True)
+    await db.log_admin_action(current_admin_username(request), "seo_verify_update", ", ".join(k for k, v in vals.items() if v) or "tozalandi")
+    return RedirectResponse(f"{ADMIN_PREFIX}/settings?message=Qidiruv+tizimi+kodlari+saqlandi.#seo", status_code=302)
+
+
+@app.post(f"{ADMIN_PREFIX}/settings/seo/ping")
+async def admin_settings_seo_ping(request: Request):
+    """v248: IndexNow orqali Bing, Yandex va boshqalarga barcha ochiq sahifalarni hozir yuborish."""
+    if not require_admin(request):
+        return RedirectResponse(f"{ADMIN_PREFIX}/login", status_code=302)
+    import json as _json
+    import time as _time
+    try:
+        r = await asyncio.wait_for(_seo.ping_indexnow(), timeout=12)
+    except Exception as e:  # noqa: BLE001
+        r = {"urls": 0, "result": {"xato": type(e).__name__}}
+    await db.set_setting("seo_last_ping", _json.dumps({"at": int(_time.time()), **r}, ensure_ascii=False))
+    ok = any(isinstance(v, int) and v in (200, 202) for v in r.get("result", {}).values())
+    msg = "Sahifalar+qidiruv+tizimlariga+yuborildi." if ok else "Yuborishda+xatolik+bo%27ldi%2C+keyinroq+qayta+urinib+ko%27ring."
+    return RedirectResponse(f"{ADMIN_PREFIX}/settings?message={msg}#seo", status_code=302)
 
 
 @app.post(f"{ADMIN_PREFIX}/settings/plans")

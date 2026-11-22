@@ -3,20 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="LongoUZ — ingliz tili, DTM va boshqa fanlar bo'yicha AI yordamida o'rganish platformasi.">
-  <title>LongoUZ — o'rganish yo'lingiz</title>
+  <title>{{ page_title }}</title>
+  {% include "_seo_head.html" %}
+  {{ seo_ld | safe }}
   <link rel="icon" type="image/png" href="/static/logo-owl.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=Caveat:wght@600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css?v=246">
-  <link rel="stylesheet" href="/static/home.css?v=246">
+  <link rel="stylesheet" href="/static/home.css?v=248">
   <link rel="stylesheet" href="/static/home-v246.css?v=246">
   <link rel="stylesheet" href="/static/news.css?v=246">
   <link rel="stylesheet" href="/static/purchase.css?v=246">
   <script src="/static/theme-init.js?v=247"></script>
 </head>
 <body class="home" data-logged-in="false">
-  </div>
 
   <header class="site-header">
     <a href="/" class="brand">
@@ -192,7 +192,7 @@
       <div class="hm-wrap">
         <div class="hm-sub-head" data-reveal>
           <div><span class="hm-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/></svg>Barcha yo'nalishlar</span><h2>Fanlar <small>Qiziqishga qarab va imtihon talablari asosida o'zingizga mos fanni tanlang.</small></h2></div>
-          <a class="hm-ghost" href="/royxat">Barcha fanlarni ko'rish <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a class="hm-ghost" href="/fanlar">Barcha fanlarni ko'rish <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
         </div>
         <div class="hm-subjects"><a class="hm-subj" href="/royxat?subject=english" data-reveal data-reveal-delay="1"><span class="si c1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></svg></span><span><b>Ingliz tili</b></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a><a class="hm-subj" href="/royxat?subject=russian" data-reveal data-reveal-delay="2"><span class="si c2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20L12 4l8 16M7.5 14h9"/></svg></span><span><b>Rus tili</b></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a><a class="hm-subj" href="/royxat?subject=math" data-reveal data-reveal-delay="3"><span class="si c3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 12h2M14 12h2M8 16h2M14 16h2"/></svg></span><span><b>Matematika</b></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a><a class="hm-subj" href="/royxat?subject=history" data-reveal data-reveal-delay="4"><span class="si c4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V10M19 21V10M9 21V10M15 21V10M2 10l10-6 10 6z"/></svg></span><span><b>Tarix</b></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a><a class="hm-subj" href="/royxat?subject=native" data-reveal data-reveal-delay="1"><span class="si c5"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4C10 4 6 10 6 18l-2 2M6 18c8 0 14-4 14-14M9 15h6"/></svg></span><span><b>Ona tili va adabiyot</b></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a><a class="hm-subj" href="/royxat?subject=chemistry" data-reveal data-reveal-delay="2"><span class="si c6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6L5 19a2 2 0 002 3h10a2 2 0 002-3l-5-10V3M7.5 15h9"/></svg></span><span><b>Kimyo</b></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a><a class="hm-subj" href="/royxat?subject=biology" data-reveal data-reveal-delay="3"><span class="si c7"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 019.8 6.1C15.5 5 17 4.5 19 2c1 2 2 4.2 2 8 0 5.5-4.8 10-10 10zM2 21c0-3 1.9-5.3 5-7"/></svg></span><span><b>Biologiya</b></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a><a class="hm-subj" href="/royxat?subject=physics" data-reveal data-reveal-delay="4"><span class="si c8"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1.6"/><ellipse cx="12" cy="12" rx="10" ry="4.2"/><ellipse cx="12" cy="12" rx="10" ry="4.2" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4.2" transform="rotate(120 12 12)"/></svg></span><span><b>Fizika</b></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a></div>
       </div>
@@ -365,7 +365,8 @@
         <p>DTM, milliy sertifikat va IELTS'ga sun'iy intellekt yordamida tayyorlanish platformasi. Har bir o'quvchi uchun sifatli va zamonaviy ta'lim.</p>
       </div>
       <nav aria-label="Platforma"><h4>Platforma</h4><a href="/#how">Qanday ishlaydi</a><a href="/#features">Imkoniyatlar</a><a href="/#ai">AI repetitor</a><a href="/#plans">Tariflar</a></nav>
-      <nav aria-label="Imtihonlar"><h4>Imtihonlar</h4><a href="/blok-test">DTM blok mock</a><a href="/testlar">Mavzuli testlar</a><a href="/#subjects">Fanlar</a><a href="/qollanma">Imtihon yo'riqnomasi</a></nav>
+      <nav aria-label="Imtihonlar"><h4>Imtihonlar</h4><a href="/blok-test">DTM blok mock</a><a href="/testlar">Mavzuli testlar</a><a href="/fanlar">Barcha fanlar</a><a href="/qollanma">Imtihon yo'riqnomasi</a><a href="/haqida">LongoUZ haqida</a></nav>
+      <nav aria-label="Fanlar"><h4>Fanlar</h4><a href="/fanlar/matematika">Matematika</a><a href="/fanlar/ona-tili">Ona tili va adabiyot</a><a href="/fanlar/tarix">Tarix</a><a href="/fanlar/ingliz-tili">Ingliz tili</a><a href="/fanlar/rus-tili">Rus tili</a><a href="/fanlar/kimyo">Kimyo</a><a href="/fanlar/biologiya">Biologiya</a><a href="/fanlar/fizika">Fizika</a></nav>
       <nav aria-label="Yordam"><h4>Yordam</h4><a href="/#faq">Savol-javob</a><a href="/yordam">Bog'lanish</a><a href="/verify">Sertifikatni tekshirish</a><a href="/kirish">Kirish</a></nav>
       <nav aria-label="Huquqiy"><h4>Huquqiy</h4><a href="/terms">Foydalanish shartlari</a><a href="/privacy">Maxfiylik siyosati</a></nav>
     </div>
