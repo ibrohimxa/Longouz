@@ -150,7 +150,7 @@ def totals() -> tuple[int, int]:
 @router.get("/robots.txt", include_in_schema=False)
 async def robots_txt():
     pub = ["Allow: /api/news", "Allow: /api/public/", "Allow: /api/site-stats"]   # bosh sahifa shularni yuklaydi — Google to'liq ko'rsin
-    lines = ["# LongoUZ — DTM 2026, milliy sertifikat va IELTS'ga onlayn tayyorgarlik platformasi", ""]
+    lines = ["# LongoUz — DTM 2026, milliy sertifikat va IELTS'ga onlayn tayyorgarlik platformasi", ""]
     for bot in AI_BOTS:
         lines += [f"User-agent: {bot}", "Allow: /"] + pub + [f"Disallow: {p}" for p in PRIVATE] + [""]
     lines += ["User-agent: *", "Allow: /"] + pub + [f"Disallow: {p}" for p in PRIVATE] + [
@@ -183,9 +183,9 @@ def _llms(full: bool) -> str:
     q, t = totals()
     c = catalog()
     out = [
-        "# LongoUZ",
+        "# LongoUz",
         "",
-        "> LongoUZ (longouz) — O'zbekistondagi o'quvchi va abituriyentlar uchun DTM 2026 test sinovlari, milliy sertifikat "
+        "> LongoUz (longouz) — O'zbekistondagi o'quvchi va abituriyentlar uchun DTM 2026 test sinovlari, milliy sertifikat "
         "va IELTS imtihonlariga onlayn, bepul tayyorlanish platformasi. Sun'iy intellekt (AI) repetitor, 8 ta fan bo'yicha "
         f"{q:,} dan ortiq test savoli va {t} ta mavzu, DTM blok mock (189 ball tizimi), xatolar tahlili va sertifikatlar.".replace(f"{q:,}", f"{q:,}".replace(",", " ")),
         "",
@@ -290,8 +290,8 @@ async def auto_ping_once(version: str) -> None:
 # JSON-LD (Google va AI uchun tuzilgan ma'lumot)
 # ---------------------------------------------------------------------------
 HOME_FAQ = [
-    ("LongoUZ nima?", "LongoUZ — DTM 2026 test sinovlari, milliy sertifikat va IELTS imtihonlariga onlayn tayyorlanish platformasi. 8 ta fan bo'yicha minglab test savollari, AI repetitor va DTM blok mock bor."),
-    ("LongoUZ bepulmi?", "Ha. Ro'yxatdan o'tib, har bir mavzu bo'yicha bepul testlarni yechish mumkin. Pro (25 000 so'm/oy) va Ultra (40 000 so'm/oy) tariflarida savollar soni ko'payadi, AI repetitor va to'liq blok mock ochiladi."),
+    ("LongoUz nima?", "LongoUz — DTM 2026 test sinovlari, milliy sertifikat va IELTS imtihonlariga onlayn tayyorlanish platformasi. 8 ta fan bo'yicha minglab test savollari, AI repetitor va DTM blok mock bor."),
+    ("LongoUz bepulmi?", "Ha. Ro'yxatdan o'tib, har bir mavzu bo'yicha bepul testlarni yechish mumkin. Pro (25 000 so'm/oy) va Ultra (40 000 so'm/oy) tariflarida savollar soni ko'payadi, AI repetitor va to'liq blok mock ochiladi."),
     ("Qaysi fanlar bor?", "Ona tili va adabiyot, matematika, tarix, ingliz tili, rus tili, kimyo, biologiya va fizika. Ingliz tilida IELTS Reading, Writing va Speaking ham bor."),
     ("Savollar haqiqiy imtihonga mosmi?", "Savollar DTM test sinovlari va milliy sertifikat dasturi (5–11-sinf darsliklari) asosida tuzilgan, har bir savolda izoh bor. Fizika, matematika va kimyoda chizmali masalalar ham mavjud."),
     ("DTM blok mock qanday hisoblanadi?", "90 ta savol: majburiy fanlar (ona tili, matematika, O'zbekiston tarixi) — har biri 10 tadan, ball ×1,1; 1-ixtisoslik fani 30 ta (×3,1); 2-ixtisoslik fani 30 ta (×2,1). Maksimal ball — 189."),
@@ -308,7 +308,7 @@ def home_ld() -> str:
     q, t = totals()
     org = {
         "@context": "https://schema.org", "@type": "EducationalOrganization", "@id": base + "/#org",
-        "name": "LongoUz", "alternateName": ["LongoUZ", "Longo UZ", "longouz", "Longo"], "url": base + "/",
+        "name": "LongoUz", "alternateName": ["LongoUz", "Longo UZ", "longouz", "Longo"], "url": base + "/",
         "logo": base + "/static/logo-owl.png", "image": base + "/static/logo-owl3d.png",
         "description": f"DTM 2026, milliy sertifikat va IELTS'ga AI yordamida bepul onlayn tayyorgarlik: 8 fan, {q} dan ortiq test savoli, {t} mavzu.",
         "areaServed": {"@type": "Country", "name": "Uzbekistan"}, "inLanguage": "uz",
@@ -316,7 +316,7 @@ def home_ld() -> str:
     }
     web = {"@context": "https://schema.org", "@type": "WebSite", "@id": base + "/#site", "name": "LongoUz",
            "alternateName": ["Longo UZ", "longouz"], "url": base + "/", "inLanguage": "uz", "publisher": {"@id": base + "/#org"}}
-    app = {"@context": "https://schema.org", "@type": "WebApplication", "name": "LongoUZ", "url": base + "/",
+    app = {"@context": "https://schema.org", "@type": "WebApplication", "name": "LongoUz", "url": base + "/",
            "applicationCategory": "EducationalApplication", "operatingSystem": "Web",
            "offers": [{"@type": "Offer", "price": "0", "priceCurrency": "UZS", "name": "Bepul"},
                       {"@type": "Offer", "price": "25000", "priceCurrency": "UZS", "name": "Pro (oylik)"},
@@ -348,7 +348,7 @@ async def fanlar_page(request: Request):
     order = ("native", "math", "history", "english", "russian", "chemistry", "biology", "physics")
     subjects = [c[k] for k in order if k in c]
     ld = ld_json(_crumbs([("Bosh sahifa", "/"), ("Fanlar", "/subjects")])) + ld_json({
-        "@context": "https://schema.org", "@type": "ItemList", "name": "LongoUZ fanlari",
+        "@context": "https://schema.org", "@type": "ItemList", "name": "LongoUz fanlari",
         "itemListElement": [{"@type": "ListItem", "position": i + 1, "url": f"{site()}/subjects/{s['slug']}", "name": s["name"]} for i, s in enumerate(subjects)]})
     return _templates().TemplateResponse(request, "seo_page.html", {
         "kind": "fanlar", "subjects": subjects, "q_total": q, "t_total": t, "ld": ld,
@@ -372,7 +372,7 @@ async def fan_page(request: Request, slug: str):
     others = [v for k, v in catalog().items() if k != code]
     course = {"@context": "https://schema.org", "@type": "Course", "name": f"{s['name']} — DTM 2026 va milliy sertifikatga tayyorgarlik",
               "description": s["desc"], "inLanguage": "uz", "isAccessibleForFree": True,
-              "provider": {"@type": "EducationalOrganization", "name": "LongoUZ", "url": site() + "/"},
+              "provider": {"@type": "EducationalOrganization", "name": "LongoUz", "url": site() + "/"},
               "numberOfCredits": s["t"], "educationalLevel": "5–11-sinf, abituriyent",
               "teaches": [t["name"] for _, items in s["by_grade"] for t in items][:40]}
     ld = ld_json(_crumbs([("Bosh sahifa", "/"), ("Fanlar", "/subjects"), (s["name"], f"/subjects/{s['slug']}")])) + ld_json(course)
@@ -394,7 +394,7 @@ async def haqida_page(request: Request):
     return _templates().TemplateResponse(request, "seo_page.html", {
         "kind": "haqida", "faq": HOME_FAQ, "q_total": q, "t_total": t, "subjects": list(catalog().values()), "ld": ld,
         "page_title": "Haqida | LongoUz",
-        "page_desc": "LongoUZ nima, kimlar uchun, qanday ishlaydi: mavzuli testlar, DTM blok mock (189 ball), AI repetitor, IELTS, tariflar va savol-javoblar.",
+        "page_desc": "LongoUz nima, kimlar uchun, qanday ishlaydi: mavzuli testlar, DTM blok mock (189 ball), AI repetitor, IELTS, tariflar va savol-javoblar.",
         "canonical": "/about",
     })
 

@@ -683,7 +683,7 @@ async def home(request: Request):
     return templates.TemplateResponse(request, "home.html", {
         "q_total_label": _question_total_label(qn), "seo_ld": _seo.home_ld(),
         "page_title": "LongoUz",
-        "page_desc": ("LongoUZ — DTM 2026, milliy sertifikat va IELTS'ga sun'iy intellekt bilan bepul tayyorlanish platformasi: "
+        "page_desc": ("LongoUz — DTM 2026, milliy sertifikat va IELTS'ga sun'iy intellekt bilan bepul tayyorlanish platformasi: "
                       "8 fan, minglab izohli test savollari, DTM blok mock (189 ball), AI repetitor."),
         "canonical": "/",
     })
