@@ -27,7 +27,7 @@
             <tr><td><b>Jami</b></td><td><b>90</b></td><td></td><td><b>{{ max_ball|int }}</b></td></tr>
           </table>
           <p class="f215-muted" style="margin-top:10px">Umumiy vaqt — 180 daqiqa (3 soat; javoblar varag'ini to'ldirish ham shu vaqtga kiradi). Majburiy fanlarga 60 daqiqa, ikki ixtisoslik fani uchun 120 daqiqa mo'ljallanadi. Milliy sertifikati bor abituriyentlar sertifikat berilgan fandan imtiyoz oladi. Kasbiy yoki ijodiy imtihonli yo'nalishlarda faqat majburiy fanlar (60 daqiqa) topshiriladi. Rasmiy ma'lumotlar o'zgarishi mumkin — <a href="https://oliygoh.uz/post/test-savollarini-ishlash-uchun-qancha-vaqt-beriladi-2026-yil-qabul-tartibi" target="_blank" rel="noopener">oliygoh.uz</a> va <a href="https://uzbmb.uz" target="_blank" rel="noopener">uzbmb.uz</a> saytlarida tekshiring.</p>
-          <a class="f215-btn" href="/blok-test" style="margin-top:8px">DTM blok mock yechish</a>
+          <a class="f215-btn" href="/block-test" style="margin-top:8px">DTM blok mock yechish</a>
         </div>
         <div class="f215-card">
           <h2>Milliy sertifikat</h2>
@@ -49,7 +49,7 @@
               {% endfor %}
               {% if not loop.last %}<hr style="border:0;border-top:1px solid var(--line);margin:14px 0">{% endif %}
             {% endfor %}
-            <a class="f215-btn ghost" href="/testlar?subject={{ s.code }}" style="margin-top:12px">{{ s.name }} testlari</a>
+            <a class="f215-btn ghost" href="/tests?subject={{ s.code }}" style="margin-top:12px">{{ s.name }} testlari</a>
           </div>
         </details>
         {% endfor %}

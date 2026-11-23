@@ -1,4 +1,4 @@
-/* v248: ochiq SEO sahifalari (/fanlar, /fanlar/<fan>, /haqida) */
+/* v248: ochiq SEO sahifalari (/subjects, /subjects/<fan>, /about) */
 .sp-page{max-width:1080px;margin:0 auto;padding:22px 20px 56px}
 .sp-crumbs{display:flex;gap:8px;flex-wrap:wrap;font-size:.86rem;color:var(--ink-soft);margin:6px 0 18px}
 .sp-crumbs a{color:var(--ink-soft);text-decoration:none}.sp-crumbs a:hover{color:var(--accent-green)}

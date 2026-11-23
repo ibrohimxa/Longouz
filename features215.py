@@ -343,11 +343,11 @@ def register(app, get_current_user, templates, limiter, shuffle_question_options
     def _login_redirect(request: Request):
         from urllib.parse import quote
         q = f"?{request.url.query}" if request.url.query else ""
-        page = "/kirish" if request.cookies.get("lz_known") else "/royxat"  # v242: yangi mehmon — ro'yxatdan o'tishga
+        page = "/login" if request.cookies.get("lz_known") else "/register"  # v242: yangi mehmon — ro'yxatdan o'tishga
         return RedirectResponse(f"{page}?next={quote(request.url.path + q, safe='/')}", status_code=302)
 
     # ---------- sahifalar
-    @app.get("/blok-test", response_class=HTMLResponse)
+    @app.get("/block-test", response_class=HTMLResponse)
     async def block_page(request: Request):
         user = await get_current_user(request)
         if user is None:
@@ -357,14 +357,14 @@ def register(app, get_current_user, templates, limiter, shuffle_question_options
             "full_access": db.get_plan_limits(user.plan)["full_mock_access"], "max_ball": MAX_BALL,
         })
 
-    @app.get("/tahlil", response_class=HTMLResponse)
+    @app.get("/analytics", response_class=HTMLResponse)
     async def analytics_page(request: Request):
         user = await get_current_user(request)
         if user is None:
             return _login_redirect(request)
         return templates.TemplateResponse(request, "analytics.html", {"user": user})
 
-    @app.get("/qollanma", response_class=HTMLResponse)
+    @app.get("/guide", response_class=HTMLResponse)
     async def guide_page(request: Request):
         user = await get_current_user(request)
         if user is None:

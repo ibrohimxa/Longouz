@@ -3,8 +3,8 @@
 Domen sotib olish shart emas: sayt `https://<loyiha>.vercel.app` manzilida ishlaydi.
 
 ## 1. Baza (Neon, bepul)
-1. https://neon.tech → Google bilan kiring (iborgimxa6@gmail.com) → **Create project** → nom: `longouz`.
-2. **Connection string** ni nusxalang (`postgresql://...neon.tech/neondb?sslmode=require`). Bu — `DATABASE_URL`.
+1. https:/<ADMIN_MANZIL>n.tech → Google bilan kiring (iborgimxa6@gmail.com) → **Create project** → nom: `longouz`.
+2. **Connection string** ni nusxalang (`postgresql://...neon.tech<ADMIN_MANZIL>ndb?sslmode=require`). Bu — `DATABASE_URL`.
 3. Kompyuteringizda (loyiha papkasida, bir marta):
    ```
    pip install -r requirements.txt
@@ -21,7 +21,7 @@ Domen sotib olish shart emas: sayt `https://<loyiha>.vercel.app` manzilida ishla
 ## 3. Vercel
 1. https://vercel.com → **Continue with GitHub** → **Add New → Project** → `Longouz` repo → **Import**.
 2. Framework: *Other*. Build Command / Output Directory maydonlarini **bo'sh** qoldiring — `vercel.json` (v221) `@vercel/python` orqali `main.py` ni to'g'ridan-to'g'ri ishga tushiradi, barcha manzillar (`/static` ham) shu yerga yo'naltiriladi.
-   Kalitlar: kompyuterda — `.env` (GitHub'ga ham, Vercel'ga ham yuklanmaydi: `.gitignore` + `.vercelignore`). Vercel'da — Settings → Environment Variables (ro'yxat: `vercel_env_namuna.txt`; `.env` matnini u yerga import qilish mumkin) yoki admin panel → **Kalitlar** (`/neo/keys`).
+   Kalitlar: kompyuterda — `.env` (GitHub'ga ham, Vercel'ga ham yuklanmaydi: `.gitignore` + `.vercelignore`). Vercel'da — Settings → Environment Variables (ro'yxat: `vercel_env_namuna.txt`; `.env` matnini u yerga import qilish mumkin) yoki admin panel → **Kalitlar** (`<ADMIN_MANZIL>/keys`).
 3. **Environment Variables** (Settings → Environment Variables) ga quyidagilarni kiriting:
 
 | Nom | Qiymat |
@@ -38,8 +38,8 @@ Domen sotib olish shart emas: sayt `https://<loyiha>.vercel.app` manzilida ishla
    Keyin **Deployments → Redeploy**. Sayt manzili Vercel panelida ko'rinadi.
 4. Bundan keyin: yangi zipni `deploy_longouz.bat` ga tashlasangiz — GitHub yangilanadi, Vercel 1–3 daqiqada o'zi qayta joylaydi.
 
-> **Kalitlarni kod yoki GitHub'ga YOZMANG.** Eng oson yo'l: `/neo` → **Kalitlar** (Claude, Gemini, Cloudflare Turnstile, Google). Kalit saqlashdan oldin tekshiriladi, bazada SHIFRLANGAN saqlanadi va sahifada to'liq ko'rinmaydi. `.env` fayli `.gitignore` da; `deploy_longouz.bat` esa o'zgarishlar ichida kalit topsa GitHub'ga yubormay to'xtaydi.
-> Cloudflare Turnstile ishlamasa: `/neo/keys` da rejimni "o'chirilgan" qiling yoki Hostname ro'yxatiga domenni qo'shing. Vidjet 9 soniyada javob bermasa foydalanuvchi baribir davom eta oladi (IP bo'yicha qattiq limit bilan).
+> **Kalitlarni kod yoki GitHub'ga YOZMANG.** Eng oson yo'l: `<ADMIN_MANZIL>` → **Kalitlar** (Claude, Gemini, Cloudflare Turnstile, Google). Kalit saqlashdan oldin tekshiriladi, bazada SHIFRLANGAN saqlanadi va sahifada to'liq ko'rinmaydi. `.env` fayli `.gitignore` da; `deploy_longouz.bat` esa o'zgarishlar ichida kalit topsa GitHub'ga yubormay to'xtaydi.
+> Cloudflare Turnstile ishlamasa: `<ADMIN_MANZIL>/keys` da rejimni "o'chirilgan" qiling yoki Hostname ro'yxatiga domenni qo'shing. Vidjet 9 soniyada javob bermasa foydalanuvchi baribir davom eta oladi (IP bo'yicha qattiq limit bilan).
 
 ## 4. Google bilan kirish
 1. https://console.cloud.google.com → loyiha yarating → **APIs & Services → OAuth consent screen**: *External*, ilova nomi `LongoUZ`, email. *Testing* holatida bo'lsa — **Test users** ga o'z Gmail manzillaringizni qo'shing (yoki **Publish app**).
@@ -56,7 +56,7 @@ Domen sotib olish shart emas: sayt `https://<loyiha>.vercel.app` manzilida ishla
 4. Kirish, ro'yxatdan o'tish va parolni tiklash formalari tekshiruvsiz yuborilmaydi.
 
 ## 6. Admin Studio
-`https://<sayt>/neo` → **Studio (AI)**:
+`https://<sayt><ADMIN_MANZIL>` → **Studio (AI)**:
 - **Hujjat → savollar**: PDF/Word/Excel/JSON/CSV/rasm/ZIP yuklang → "O'qish" → kerak bo'lsa "AI bilan aniqlashtirish" (skaner/rasm uchun "AI ko'rish") → savollarni tahrirlang (variant, javob, mavzu, tarif, chizma kengligi) → "Bazaga qo'shish". Vercelda bitta so'rov 4,5 MB dan oshmasligi kerak (katta PDF ni bo'lib yuklang yoki lokal ishga tushiring).
 - **Mock yaratish**: fan + rejim + 1–3 variant; foydalanuvchilar test tanlashda "Mock testlar" ni ko'radi.
 - **Baza holati**: fan/mavzu kesimida savol soni; "AI: +8 savol" tugmasi mavzuga yangi savol yaratadi (siz tekshirib qo'shasiz).

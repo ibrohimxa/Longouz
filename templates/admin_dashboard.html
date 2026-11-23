@@ -74,7 +74,7 @@
           document.getElementById("diag-auth").addEventListener("click", async function () {
             var out = document.getElementById("diag-out"); out.textContent = "Tekshirilmoqda…";
             try {
-              var r = await fetch("{{ admin_prefix|default('/neo') }}/api/diagnose-auth", {method: "POST", credentials: "same-origin"});
+              var r = await fetch("{{ admin_prefix }}/api/diagnose-auth", {method: "POST", credentials: "same-origin"});
               var j = await r.json();
               out.innerHTML = ["turnstile", "google"].map(function (k) { var x = j[k] || {}; return (x.ok ? "✅ " : "❌ ") + "<b>" + (k === "google" ? "Google" : "Turnstile") + ":</b> " + (x.msg || ""); }).join("<br>");
             } catch (e) { out.textContent = "Xato: " + e; }

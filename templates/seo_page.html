@@ -19,7 +19,7 @@
   <main class="sp-page">
     <nav class="sp-crumbs" aria-label="Yo'l">
       <a href="/">Bosh sahifa</a><span>›</span>
-      {% if kind == 'fan' %}<a href="/fanlar">Fanlar</a><span>›</span><b>{{ s.name }}</b>
+      {% if kind == 'fan' %}<a href="/subjects">Fanlar</a><span>›</span><b>{{ s.name }}</b>
       {% elif kind == 'fanlar' %}<b>Fanlar</b>
       {% else %}<b>Platforma haqida</b>{% endif %}
     </nav>
@@ -29,11 +29,11 @@
         <span class="sp-pill">DTM 2026 · Milliy sertifikat · IELTS</span>
         <h1>Barcha fanlar bo'yicha bepul onlayn testlar</h1>
         <p>LongoUZ'da 8 ta fan bo'yicha <b>{{ "{:,}".format(q_total).replace(",", " ") }}</b> dan ortiq test savoli va <b>{{ t_total }}</b> ta mavzu bor. Savollar 5–11-sinf darsliklari va DTM, milliy sertifikat dasturi asosida tuzilgan, har birida izoh bor. Xatolaringizni sun'iy intellekt repetitor tushuntirib beradi.</p>
-        <div class="sp-cta"><a class="sp-btn" href="/royxat">Bepul boshlash</a><a class="sp-ghost" href="/haqida">Platforma haqida</a></div>
+        <div class="sp-cta"><a class="sp-btn" href="/register">Bepul boshlash</a><a class="sp-ghost" href="/about">Platforma haqida</a></div>
       </header>
       <section class="sp-grid">
         {% for s in subjects %}
-        <a class="sp-card" href="/fanlar/{{ s.slug }}">
+        <a class="sp-card" href="/subjects/{{ s.slug }}">
           <h2>{{ s.name }}</h2>
           <p>{{ s.desc }}</p>
           <div class="sp-stats"><span><b>{{ s.q }}</b> savol</span><span><b>{{ s.t }}</b> mavzu</span>{% if s.ielts %}<span>IELTS</span>{% endif %}</div>
@@ -47,7 +47,7 @@
         <h1>{{ s.name }} testlari — DTM va milliy sertifikatga tayyorgarlik</h1>
         <p>{{ s.desc }}</p>
         <div class="sp-stats big"><span><b>{{ s.q }}</b> ta savol</span><span><b>{{ s.t }}</b> ta mavzu</span><span><b>Izohli</b> javoblar</span><span><b>AI</b> repetitor</span></div>
-        <div class="sp-cta"><a class="sp-btn" href="/royxat?subject={{ s.code }}">{{ s.name }}dan bepul test yechish</a><a class="sp-ghost" href="/fanlar">Boshqa fanlar</a></div>
+        <div class="sp-cta"><a class="sp-btn" href="/register?subject={{ s.code }}">{{ s.name }}dan bepul test yechish</a><a class="sp-ghost" href="/subjects">Boshqa fanlar</a></div>
       </header>
       <section class="sp-topics">
         <h2>{{ s.name }}: mavzular ro'yxati</h2>
@@ -69,7 +69,7 @@
       </section>
       <section class="sp-others">
         <h2>Boshqa fanlar</h2>
-        <div class="sp-chips">{% for o in others %}<a href="/fanlar/{{ o.slug }}">{{ o.name }} <i>{{ o.q }}</i></a>{% endfor %}</div>
+        <div class="sp-chips">{% for o in others %}<a href="/subjects/{{ o.slug }}">{{ o.name }} <i>{{ o.q }}</i></a>{% endfor %}</div>
       </section>
 
     {% else %}
@@ -77,7 +77,7 @@
         <span class="sp-pill">LongoUZ haqida</span>
         <h1>LongoUZ — DTM, milliy sertifikat va IELTS'ga sun'iy intellekt bilan tayyorgarlik</h1>
         <p>LongoUZ — O'zbekistondagi o'quvchilar va abituriyentlar uchun onlayn ta'lim platformasi. Bu yerda 8 ta fan bo'yicha <b>{{ "{:,}".format(q_total).replace(",", " ") }}</b> dan ortiq test savoli, {{ t_total }} ta mavzu, DTM blok mock va AI repetitor bor. Ro'yxatdan o'tish va asosiy testlar bepul.</p>
-        <div class="sp-cta"><a class="sp-btn" href="/royxat">Bepul ro'yxatdan o'tish</a><a class="sp-ghost" href="/fanlar">Fanlarni ko'rish</a></div>
+        <div class="sp-cta"><a class="sp-btn" href="/register">Bepul ro'yxatdan o'tish</a><a class="sp-ghost" href="/subjects">Fanlarni ko'rish</a></div>
       </header>
       <section class="sp-feats">
         <div><h3>Mavzuli testlar</h3><p>Har bir fan sinflar va mavzular bo'yicha tartiblangan, har bir savolda izoh bor. Chizmali va formulali masalalar ham mavjud.</p></div>
@@ -93,13 +93,13 @@
       </section>
       <section class="sp-others">
         <h2>Fanlar</h2>
-        <div class="sp-chips">{% for o in subjects %}<a href="/fanlar/{{ o.slug }}">{{ o.name }} <i>{{ o.q }}</i></a>{% endfor %}</div>
+        <div class="sp-chips">{% for o in subjects %}<a href="/subjects/{{ o.slug }}">{{ o.name }} <i>{{ o.q }}</i></a>{% endfor %}</div>
       </section>
     {% endif %}
   </main>
   <footer class="sp-foot">
     <p>&copy; 2026 LongoUZ — DTM 2026, milliy sertifikat va IELTS'ga onlayn tayyorgarlik platformasi.</p>
-    <nav><a href="/">Bosh sahifa</a><a href="/fanlar">Fanlar</a><a href="/haqida">Haqida</a><a href="/verify">Sertifikatni tekshirish</a><a href="/terms">Shartlar</a><a href="/privacy">Maxfiylik</a></nav>
+    <nav><a href="/">Bosh sahifa</a><a href="/subjects">Fanlar</a><a href="/about">Haqida</a><a href="/verify">Sertifikatni tekshirish</a><a href="/terms">Shartlar</a><a href="/privacy">Maxfiylik</a></nav>
   </footer>
   <script src="/static/app.js?v=248"></script>
 </body>

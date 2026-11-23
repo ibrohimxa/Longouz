@@ -7,7 +7,7 @@
 - /llms-full.txt    — fanlar va mavzular bilan to'liq ma'lumot.
 - /<KEY>.txt        — IndexNow kaliti: Bing, Yandex (va ular orqali ChatGPT/Copilot qidiruvi) yangi sahifani
                       darhol biladi. Domen sotib olish shart emas.
-- /fanlar, /fanlar/<fan>, /haqida — qidiruvda chiqadigan ochiq sahifalar (mavzular ro'yxati bilan).
+- /subjects, /subjects/<fan>, /about — qidiruvda chiqadigan ochiq sahifalar (mavzular ro'yxati bilan).
 - Google / Bing / Yandex tasdiqlash kodi admin paneldan kiritiladi (Sozlamalar → Qidiruv tizimlari).
 """
 from __future__ import annotations
@@ -23,7 +23,7 @@ from datetime import date
 from functools import lru_cache
 
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse, PlainTextResponse, Response
+from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse, Response
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -33,7 +33,12 @@ INDEXNOW_KEY = "lz8c41f7e29b3d4a6e9f05c2b71d8e3a46"
 LASTMOD = "2026-11-22"
 
 SLUGS = {
-    "matematika": "math", "ona-tili": "native", "ingliz-tili": "english", "rus-tili": "russian",
+    "mathematics": "math", "uzbek-language": "native", "english": "english", "russian": "russian",
+    "history": "history", "chemistry": "chemistry", "biology": "biology", "physics": "physics",
+}
+# v250: eski o'zbekcha manzillar yangisiga doimiy yo'naltiriladi
+OLD_SLUGS = {
+    "matematika": "mathematics", "ona-tili": "uzbek-language", "ingliz-tili": "english", "rus-tili": "russian",
     "tarix": "history", "kimyo": "chemistry", "biologiya": "biology", "fizika": "physics",
 }
 CODE2SLUG = {v: k for k, v in SLUGS.items()}
@@ -54,8 +59,8 @@ AI_BOTS = [
     "GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot", "Claude-SearchBot", "Claude-User", "anthropic-ai",
     "PerplexityBot", "Perplexity-User", "CCBot", "cohere-ai", "Meta-ExternalAgent", "Amazonbot", "YouBot",
 ]
-PRIVATE = ["/api/", "/kabinet", "/profil", "/hisob", "/testlar", "/ustoz", "/boshlash", "/tahlil",
-           "/chiqish", "/auth/", "/certificate/", "/ielts/", "/blok-test", "/qollanma", "/yordam/"]
+PRIVATE = ["/api/", "/dashboard", "/profile", "/billing", "/tests", "/tutor", "/onboarding", "/analytics",
+           "/logout", "/auth/", "/certificate/", "/ielts/", "/block-test", "/guide", "/support/"]
 
 
 def site() -> str:
@@ -154,9 +159,9 @@ async def robots_txt():
 
 def public_urls() -> list[tuple[str, str, str]]:
     """(yo'l, changefreq, priority)"""
-    urls = [("/", "daily", "1.0"), ("/fanlar", "weekly", "0.9"), ("/haqida", "monthly", "0.8")]
-    urls += [(f"/fanlar/{s}", "weekly", "0.8") for s in SLUGS]
-    urls += [("/royxat", "monthly", "0.6"), ("/kirish", "monthly", "0.4"),
+    urls = [("/", "daily", "1.0"), ("/subjects", "weekly", "0.9"), ("/about", "monthly", "0.8")]
+    urls += [(f"/subjects/{s}", "weekly", "0.8") for s in SLUGS]
+    urls += [("/register", "monthly", "0.6"), ("/login", "monthly", "0.4"),
              ("/verify", "monthly", "0.4"), ("/terms", "yearly", "0.2"), ("/privacy", "yearly", "0.2"),
              ("/llms.txt", "weekly", "0.3")]
     return urls
@@ -201,10 +206,10 @@ def _llms(full: bool) -> str:
         s = c.get(code)
         if not s:
             continue
-        out.append(f"- [{s['name']}]({base}/fanlar/{s['slug']}): {s['q']} savol, {s['t']} mavzu. {s['desc']}")
+        out.append(f"- [{s['name']}]({base}/subjects/{s['slug']}): {s['q']} savol, {s['t']} mavzu. {s['desc']}")
     out += ["", "## Sahifalar",
-            f"- [Bosh sahifa]({base}/)", f"- [Barcha fanlar]({base}/fanlar)", f"- [Platforma haqida]({base}/haqida)",
-            f"- [Ro'yxatdan o'tish (bepul)]({base}/royxat)",
+            f"- [Bosh sahifa]({base}/)", f"- [Barcha fanlar]({base}/subjects)", f"- [Platforma haqida]({base}/about)",
+            f"- [Ro'yxatdan o'tish (bepul)]({base}/register)",
             f"- [Sertifikatni tekshirish]({base}/verify)", ""]
     if full:
         out += ["## Mavzular (fan va sinf bo'yicha)", ""]
@@ -327,36 +332,38 @@ def _crumbs(items: list[tuple[str, str]]) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Ochiq sahifalar: /fanlar, /fanlar/<fan>, /haqida
+# Ochiq sahifalar: /subjects, /subjects/<fan>, /about
 # ---------------------------------------------------------------------------
 def _templates():
     import main
     return main.templates
 
 
-@router.get("/fanlar", response_class=HTMLResponse)
+@router.get("/subjects", response_class=HTMLResponse)
 async def fanlar_page(request: Request):
     await refresh_verify()
     c = catalog()
     q, t = totals()
     order = ("native", "math", "history", "english", "russian", "chemistry", "biology", "physics")
     subjects = [c[k] for k in order if k in c]
-    ld = ld_json(_crumbs([("Bosh sahifa", "/"), ("Fanlar", "/fanlar")])) + ld_json({
+    ld = ld_json(_crumbs([("Bosh sahifa", "/"), ("Fanlar", "/subjects")])) + ld_json({
         "@context": "https://schema.org", "@type": "ItemList", "name": "LongoUZ fanlari",
-        "itemListElement": [{"@type": "ListItem", "position": i + 1, "url": f"{site()}/fanlar/{s['slug']}", "name": s["name"]} for i, s in enumerate(subjects)]})
+        "itemListElement": [{"@type": "ListItem", "position": i + 1, "url": f"{site()}/subjects/{s['slug']}", "name": s["name"]} for i, s in enumerate(subjects)]})
     return _templates().TemplateResponse(request, "seo_page.html", {
         "kind": "fanlar", "subjects": subjects, "q_total": q, "t_total": t, "ld": ld,
         "page_title": "Barcha fanlar — DTM 2026 va milliy sertifikat testlari | LongoUZ",
         "page_desc": f"8 ta fan bo'yicha {q} dan ortiq bepul test savoli: ona tili, matematika, tarix, ingliz tili, rus tili, kimyo, biologiya, fizika. DTM 2026 va milliy sertifikatga onlayn tayyorgarlik.",
-        "canonical": "/fanlar",
+        "canonical": "/subjects",
     })
 
 
-@router.get("/fanlar/{slug}", response_class=HTMLResponse)
+@router.get("/subjects/{slug}", response_class=HTMLResponse)
 async def fan_page(request: Request, slug: str):
-    code = SLUGS.get(slug) or (slug if slug in SUBJECT_INFO else "")
+    if slug in OLD_SLUGS:
+        return RedirectResponse(f"/subjects/{OLD_SLUGS[slug]}", status_code=301)
+    code = SLUGS.get(slug) or ""
     if not code:
-        return HTMLResponse("<h1>Sahifa topilmadi</h1><p><a href='/fanlar'>Barcha fanlar</a></p>", status_code=404)
+        return HTMLResponse("<h1>Sahifa topilmadi</h1><p><a href='/subjects'>Barcha fanlar</a></p>", status_code=404)
     await refresh_verify()
     s = catalog().get(code)
     if not s:
@@ -367,27 +374,27 @@ async def fan_page(request: Request, slug: str):
               "provider": {"@type": "EducationalOrganization", "name": "LongoUZ", "url": site() + "/"},
               "numberOfCredits": s["t"], "educationalLevel": "5–11-sinf, abituriyent",
               "teaches": [t["name"] for _, items in s["by_grade"] for t in items][:40]}
-    ld = ld_json(_crumbs([("Bosh sahifa", "/"), ("Fanlar", "/fanlar"), (s["name"], f"/fanlar/{s['slug']}")])) + ld_json(course)
+    ld = ld_json(_crumbs([("Bosh sahifa", "/"), ("Fanlar", "/subjects"), (s["name"], f"/subjects/{s['slug']}")])) + ld_json(course)
     return _templates().TemplateResponse(request, "seo_page.html", {
         "kind": "fan", "s": s, "others": others, "ld": ld,
         "page_title": f"{s['name']} testlari — DTM 2026 va milliy sertifikat | LongoUZ",
         "page_desc": f"{s['name']}: {s['q']} ta test savoli, {s['t']} ta mavzu, har bir savolda izoh. {s['desc'][:150]}",
-        "canonical": f"/fanlar/{s['slug']}",
+        "canonical": f"/subjects/{s['slug']}",
     })
 
 
-@router.get("/haqida", response_class=HTMLResponse)
+@router.get("/about", response_class=HTMLResponse)
 async def haqida_page(request: Request):
     await refresh_verify()
     q, t = totals()
     faq = {"@context": "https://schema.org", "@type": "FAQPage",
            "mainEntity": [{"@type": "Question", "name": a, "acceptedAnswer": {"@type": "Answer", "text": b}} for a, b in HOME_FAQ]}
-    ld = ld_json(_crumbs([("Bosh sahifa", "/"), ("Platforma haqida", "/haqida")])) + ld_json(faq)
+    ld = ld_json(_crumbs([("Bosh sahifa", "/"), ("Platforma haqida", "/about")])) + ld_json(faq)
     return _templates().TemplateResponse(request, "seo_page.html", {
         "kind": "haqida", "faq": HOME_FAQ, "q_total": q, "t_total": t, "subjects": list(catalog().values()), "ld": ld,
         "page_title": "LongoUZ haqida — DTM, milliy sertifikat va IELTS'ga AI bilan tayyorgarlik",
         "page_desc": "LongoUZ nima, kimlar uchun, qanday ishlaydi: mavzuli testlar, DTM blok mock (189 ball), AI repetitor, IELTS, tariflar va savol-javoblar.",
-        "canonical": "/haqida",
+        "canonical": "/about",
     })
 
 

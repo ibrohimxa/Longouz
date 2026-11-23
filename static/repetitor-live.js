@@ -253,7 +253,7 @@
           history: S.history.slice(-10),
         }),
       });
-      if (res.status === 401) { location.href = "/kirish"; return; }
+      if (res.status === 401) { location.href = "/login"; return; }
       var data = await res.json().catch(function () { return {}; });
       if (res.status === 402 || data.limit_reached) {
         limited = true; reply = data.message || "AI limiti tugadi.";
@@ -271,7 +271,7 @@
     if (!reply) { startListening(); return; }
     addLine("assistant", reply);
     if (limited) {
-      var a = document.createElement("a"); a.href = "/tariflar"; a.className = "rp-upgrade"; a.textContent = "Tarifni ko'rish";
+      var a = document.createElement("a"); a.href = "/plans"; a.className = "rp-upgrade"; a.textContent = "Tarifni ko'rish";
       el.transcript.appendChild(a);
       setState("paused", "Limit tugadi"); return;
     }

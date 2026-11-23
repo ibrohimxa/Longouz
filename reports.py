@@ -1,7 +1,7 @@
 """LongoUZ — SAVOL BO'YICHA SHIKOYATLAR.
 
 Foydalanuvchi test paytida "Shikoyat" tugmasini bosadi, o'ng tomondagi oynada savol bo'yicha nima xato ekanini yozadi.
-Shikoyat admin panelga (/neo/reports) tushadi. U yerda:
+Shikoyat admin panelga (<ADMIN_MANZIL>/reports) tushadi. U yerda:
   * Claude shikoyatni TAHLIL qiladi: savolni o'zi yechadi, haqiqatan xato bormi-yo'qmi aytadi va tuzatilgan variantni taklif qiladi;
   * admin "Tuzatishni qo'llash" tugmasi bilan savolni yangilaydi (yoki avto-rejimda yuqori ishonchli tuzatishlar o'zi qo'llanadi);
   * foydalanuvchiga bildirishnoma boradi.

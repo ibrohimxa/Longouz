@@ -1,7 +1,7 @@
 /* v243: Admin — LongoAI sahifasi: suhbat (formulalar/chizmalar bilan), vosita bosqichlari, tasdiq kartalari, avtomatik ish sozlamalari, ishlar jurnali. */
 (function () {
   "use strict";
-  var P = (window.LONGOAI || {}).prefix || "/neo";
+  var P = (window.LONGOAI || {}).prefix ||"" ;
   var $ = function (id) { return document.getElementById(id); };
   var chat = $("la-chat"), text = $("la-text"), sendBtn = $("la-send");
   var STORE = "lz_longoai_chat_v1";

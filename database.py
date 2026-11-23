@@ -136,7 +136,7 @@ LEVEL_NAMES = {l["code"]: l["name"] for l in LEVELS}
 #   - qolgan barcha fanlar uchun: DTM, Sertifikat (umumiy CEFR-uslubidagi
 #     mock imtihon, fan nomiga moslashtirilgan)
 # Har bir rejim o'z savollar soni, vaqt chegarasi va baholash tizimiga ega
-# (qarang: scoring.py). Bu ro'yxat ENDI /testlar sahifasida HAR SAFAR test
+# (qarang: scoring.py). Bu ro'yxat ENDI /tests sahifasida HAR SAFAR test
 # boshlashda ko'rsatiladi — onboarding'dagi certificate_type endi faqat
 # "so'nggi ishlatilgan rejim" sifatida standart tanlovni belgilaydi.
 # ---------------------------------------------------------------------------
@@ -3257,13 +3257,13 @@ async def get_dashboard_data(user: "WebUser") -> dict:
     goal_q = max(1, min(200, getattr(user, "daily_goal", None) or DAILY_QUESTION_GOAL))
     weak_topic = weak[0]["topic"] if weak else None
     plan_items = [
-        {"text": "Bugun kamida 1 ta test yeching", "done": len(today_logs) >= 1, "href": "/testlar"},
+        {"text": "Bugun kamida 1 ta test yeching", "done": len(today_logs) >= 1, "href": "/tests"},
         {"text": f"Bugun {goal_q} ta savolga javob bering", "done": today_q >= goal_q,
-         "href": "/testlar", "meta": f"{min(today_q, goal_q)}/{goal_q}"},
+         "href": "/tests", "meta": f"{min(today_q, goal_q)}/{goal_q}"},
         {"text": f"Zaif mavzu: {weak_topic}" if weak_topic else "Xato qilingan savollarni takrorlang",
          "done": bool(weak_topic and any(l.topic == weak_topic for l in today_logs)) or (not weak_topic and missed_count == 0 and bool(logs)),
-         "href": "/testlar", "meta": (f"{missed_count} ta xato" if missed_count else "")},
-        {"text": "AI repetitorga savol bering", "done": chat_today > 0, "href": "/ustoz"},
+         "href": "/tests", "meta": (f"{missed_count} ta xato" if missed_count else "")},
+        {"text": "AI repetitorga savol bering", "done": chat_today > 0, "href": "/tutor"},
     ]
 
     streak = user.streak_days or 0

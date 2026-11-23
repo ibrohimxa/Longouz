@@ -14,7 +14,7 @@
     planInput.value = plan;
     var cy = $("pm-cycle-input"); if (cy) cy.value = cycle === "yearly" ? "yearly" : "monthly";
     var g = $("pm-google");
-    if (g) g.setAttribute("href", "/auth/google/login?next=" + encodeURIComponent("/tariflar?plan=" + plan + "&auto=1"));
+    if (g) g.setAttribute("href", "/auth/google/login?next=" + encodeURIComponent("/plans?plan=" + plan + "&auto=1"));
     setText("pm-plan-name", name);
     setText("pm-plan-price", price);
     overlay.hidden = false;

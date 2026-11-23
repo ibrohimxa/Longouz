@@ -4,7 +4,7 @@ Ishga tushirish:  python main.py   (yoki start_server.bat)
 Server 0.0.0.0:6060 (HTTP) va :6600 (HTTPS) da ishlaydi — shu kompyuterda http://localhost:6060,
 boshqa qurilmalarda http://<kompyuter-IP>:6060 orqali ochiladi.
 
-Hozircha mavjud: /royxat, /kirish, /chiqish, /kabinet
+Hozircha mavjud: /register, /login, /logout, /dashboard
 Keyingi qadamlarda qo'shiladi: Gemini/Claude AI, testlar, baholash.
 """
 
@@ -53,7 +53,7 @@ import tts as tts_module
 import admin_auth
 
 # Admin panel manzili — "/admin" o'rniga taxmin qilish qiyinroq bo'lgan yo'l
-# (standart: /neo, .env'dagi ADMIN_URL_PREFIX orqali o'zgartiriladi).
+# (manzil ADMIN_URL_PREFIX muhit o'zgaruvchisida — kodda yozilmagan).
 ADMIN_PREFIX = admin_auth.ADMIN_URL_PREFIX
 import oauth_google
 import turnstile
@@ -145,10 +145,12 @@ def _canonical_host() -> str:
 # eski havola yoki qo'lda yozilgan manzil yangi manzilga yo'naltiriladi, yangi manzil esa kirmagan odamni
 # ro'yxatdan o'tishga yuboradi. Admin panel (ADMIN_PREFIX) va /api/* manzillari o'zgarmagan.
 LEGACY_PATHS = {
-    "/dashboard": "/kabinet", "/quiz": "/testlar", "/repetitor": "/ustoz", "/profile": "/profil",
-    "/upgrade": "/tariflar", "/balance": "/hisob", "/support": "/yordam", "/onboarding": "/boshlash",
-    "/dtm-blok": "/blok-test", "/analytics": "/tahlil", "/guide": "/qollanma",
-    "/login": "/kirish", "/register": "/royxat", "/logout": "/chiqish",
+    # v250: manzillar inglizchaga o'tkazildi — eski o'zbekcha va undan oldingi manzillar yangisiga yo'naltiriladi
+    "/kabinet": "/dashboard", "/testlar": "/tests", "/ustoz": "/tutor", "/profil": "/profile",
+    "/tariflar": "/plans", "/hisob": "/billing", "/yordam": "/support", "/boshlash": "/onboarding",
+    "/blok-test": "/block-test", "/tahlil": "/analytics", "/qollanma": "/guide", "/kirish": "/login",
+    "/royxat": "/register", "/chiqish": "/logout", "/fanlar": "/subjects", "/haqida": "/about",
+    "/quiz": "/tests", "/repetitor": "/tutor", "/upgrade": "/plans", "/balance": "/billing", "/dtm-blok": "/block-test",
 }
 
 
@@ -160,13 +162,13 @@ def _legacy_target(path: str) -> str:
     if not new_root:
         return ""
     rest = clean[len(seg):]
-    if seg == "/quiz":
-        if rest == "/take":
-            rest = "/ishlash"
-        elif rest.endswith("/review"):
-            rest = rest[:-len("/review")] + "/tahlil"
-    elif seg == "/profile" and rest == "/subject":
-        rest = "/fan"
+    if seg in ("/testlar", "/quiz"):
+        if rest in ("/ishlash", "/take"):
+            rest = "/take"
+        elif rest.endswith(("/tahlil", "/review")):
+            rest = rest.rsplit("/", 1)[0] + "/review"
+    elif seg == "/profil" and rest == "/fan":
+        rest = "/subject"
     return new_root + rest
 
 
@@ -177,7 +179,7 @@ async def legacy_paths_middleware(request: Request, call_next):
         if request.url.query:
             target += "?" + request.url.query
         # GET — oddiy yo'naltirish; boshqa usullar (eski keshlangan sahifadagi forma) — usul saqlanadi (307)
-        return RedirectResponse(target, status_code=302 if request.method in ("GET", "HEAD") else 307)
+        return RedirectResponse(target, status_code=301 if request.method in ("GET", "HEAD") else 307)
     return await call_next(request)
 
 
@@ -247,6 +249,25 @@ def _cross_site_write(request: Request) -> bool:
     return (urlsplit(src).netloc or "").lower() != host
 
 
+_FRESH_SKIP = ("/static/", "/api/", "/auth/", "/checkout", "/certificate", "/robots.txt", "/sitemap.xml", "/llms")
+
+
+def _fresh_visit(request: Request) -> bool:
+    """Sessiya cookie'si bor, lekin bu — sayt ichidan emas, tashqaridan (qo'lda yozilgan manzil, xatcho'p,
+    boshqa sayt) ochilgan oddiy sahifa so'rovi bo'lsa True. Yangilash (F5) bunga kirmaydi."""
+    if request.method != "GET" or COOKIE_NAME not in request.cookies:
+        return False
+    h = request.headers
+    if h.get("sec-fetch-dest", "document") != "document" or h.get("sec-fetch-mode", "navigate") != "navigate":
+        return False
+    if h.get("sec-fetch-site", "") not in ("none", "cross-site"):
+        return False
+    if "max-age=0" in h.get("cache-control", "") or "no-cache" in h.get("pragma", ""):
+        return False  # sahifani yangilash
+    p = request.url.path
+    return not (p.startswith(_FRESH_SKIP) or p.startswith(ADMIN_PREFIX) or p.endswith(".txt"))
+
+
 @app.middleware("http")
 async def security_headers_middleware(request: Request, call_next):
     if _cross_site_write(request):
@@ -256,6 +277,15 @@ async def security_headers_middleware(request: Request, call_next):
         await _ensure_db_ready()
         await db.load_env_overrides()  # 45 soniyada bir marta: boshqa instansda saqlangan kalitlar
         _kick_seed(request)
+    # v250: saytga YANGIDAN kirilganda (manzil qo'lda yozildi, xatcho'p yoki boshqa saytdan o'tildi) avvalgi sessiya
+    # e'tiborsiz qoldiriladi — akkaunt o'zi ochilib ketmaydi, har safar kirish so'raladi. Sayt ichidagi o'tishlar
+    # va sahifani yangilash (F5) sessiyani saqlaydi.
+    _sp = request.url.path
+    if _sp.startswith("/static/") and (_sp.rsplit("/", 1)[-1].startswith("admin") or _sp.endswith("/figure-builder.js")) \
+            and not require_admin(request):
+        return Response(status_code=404)   # admin fayllari faqat kirgan adminga beriladi
+    if _fresh_visit(request):
+        request.state.force_logout = True
     response = await call_next(request)
     try:
         import question_figures as _qf
@@ -279,7 +309,7 @@ async def security_headers_middleware(request: Request, call_next):
             await _tr.track(request, response, ADMIN_PREFIX, _uid)
     except Exception:  # noqa: BLE001
         logger.debug("tashrif yozilmadi", exc_info=True)
-    if getattr(request.state, "drop_session", False):
+    if getattr(request.state, "drop_session", False) or getattr(request.state, "force_logout", False):
         response.delete_cookie(COOKIE_NAME)
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
@@ -576,7 +606,7 @@ async def _ensure_db_ready():
 
 async def get_current_user(request: Request) -> db.WebUser | None:
     token = request.cookies.get(COOKIE_NAME)
-    if not token:
+    if not token or getattr(request.state, "force_logout", False):
         return None
     user_id = decode_access_token(token)
     if user_id is None:
@@ -597,7 +627,7 @@ def _auth_redirect(request: Request, target: str = ""):
     from urllib.parse import quote
     if not target:
         target = request.url.path + (f"?{request.url.query}" if request.url.query else "")
-    page = "/kirish" if request.cookies.get(KNOWN_COOKIE) else "/royxat"
+    page = "/login" if request.cookies.get(KNOWN_COOKIE) else "/register"
     return RedirectResponse(f"{page}?next={quote(target, safe='/')}", status_code=302)
 
 
@@ -702,25 +732,25 @@ def _remember_after_onboard(response, user, next_url: str = ""):
     """Yangi o'quvchi fan tanlash (onboarding) sahifasiga yuborilsa, tanlab bo'lgach asl maqsadiga
     (masalan, tarif sotib olish oynasi) qaytishi uchun eslab qolamiz."""
     nxt = _safe_next(next_url)
-    if nxt and not user.onboarding_done and not nxt.startswith("/boshlash"):
+    if nxt and not user.onboarding_done and not nxt.startswith("/onboarding"):
         response.set_cookie(AFTER_ONBOARD_COOKIE, nxt[:200], max_age=60 * 60, httponly=True, samesite="lax")
     return response
 
 
 def _after_auth_destination(user, next_url: str = "") -> str:
     if next_url and next_url.startswith("/") and not next_url.startswith("//"):
-        return next_url if user.onboarding_done or next_url.startswith("/boshlash") else "/boshlash"
-    return "/kabinet" if user.onboarding_done else "/boshlash"
+        return next_url if user.onboarding_done or next_url.startswith("/onboarding") else "/onboarding"
+    return "/dashboard" if user.onboarding_done else "/onboarding"
 
 # ---------------------------------------------------------------------------
 # Ro'yxatdan o'tish
 # ---------------------------------------------------------------------------
 
-@app.get("/royxat", response_class=HTMLResponse)
+@app.get("/register", response_class=HTMLResponse)
 async def register_page(request: Request):
     user = await get_current_user(request)
     if user:
-        return RedirectResponse("/kabinet" if user.onboarding_done else "/boshlash", status_code=302)
+        return RedirectResponse("/dashboard" if user.onboarding_done else "/onboarding", status_code=302)
     plan = request.query_params.get("plan", "free")
     if plan not in ("free", "pro", "ultra"):
         plan = "free"
@@ -737,7 +767,7 @@ async def register_page(request: Request):
     return resp
 
 
-@app.post("/royxat", response_class=HTMLResponse)
+@app.post("/register", response_class=HTMLResponse)
 @limiter.limit("10/minute")
 async def register_submit(
     request: Request,
@@ -788,7 +818,7 @@ async def register_submit(
     password_hash = hash_password(password)
     # MUHIM: hisob HAR DOIM "free" tarifda yaratiladi — pulli (pro/ultra)
     # tarif faqat to'lov (checkout) bosqichidan o'tgandan keyin beriladi.
-    # Aks holda foydalanuvchi "/royxat?plan=pro" havolasi orqali hech
+    # Aks holda foydalanuvchi "/register?plan=pro" havolasi orqali hech
     # qanday to'lovsiz Pro/Ultra tarifni bepul olib qo'yishi mumkin edi.
     user = await db.create_user(email=email, password_hash=password_hash, first_name=first_name.strip(), plan="free")
     await db.create_notification(user.id, "welcome", body="LongoUZ platformasiga xush kelibsiz! O'rganishni hoziroq boshlang.")
@@ -796,7 +826,7 @@ async def register_submit(
     user = await _auto_onboard(request, user, subject)
     token = create_access_token(user.id)
     if plan in ("pro", "ultra"):
-        response = RedirectResponse(f"/tariflar?plan={plan}&auto=1", status_code=302) if user.onboarding_done else RedirectResponse("/boshlash", status_code=302)
+        response = RedirectResponse(f"/plans?plan={plan}&auto=1", status_code=302) if user.onboarding_done else RedirectResponse("/onboarding", status_code=302)
     else:
         nxt = _safe_next(request.cookies.get("lz_oauth_next", ""))
         response = RedirectResponse(_after_auth_destination(user, nxt), status_code=302)
@@ -822,18 +852,18 @@ async def register_submit(
 # BOSH SAHIFADAGI "DARHOL KARTA OYNASI" OQIMI — foydalanuvchi qat'iy talabi:
 # bosh sahifada pullik (Pro/Ultra) tarifni bosganda avval ro'yxatdan o'tish
 # sahifasiga EMAS, darhol karta kiritish oynasiga o'tsin. Bu ALOHIDA endpoint
-# (yuqoridagi oddiy /royxat'dan farqli) — chunki bu yerga faqat home.html'dagi
+# (yuqoridagi oddiy /register'dan farqli) — chunki bu yerga faqat home.html'dagi
 # haqiqiy checkout darchasidan kelinadi, shuning uchun bu yerda hisob
 # YARATILISHI BILAN BIRGA tarif ham DARHOL faollashtiriladi (haqiqiy to'lov
 # ulanganda, aynan shu joy kartadan pul yechish logikasi bilan almashtiriladi).
-# Oddiy "/royxat?plan=pro" havolasi orqali BEPUL "loophole" ochilmasligi
-# uchun ESKI /royxat endpoint hech qachon to'g'ridan-to'g'ri pullik tarif
+# Oddiy "/register?plan=pro" havolasi orqali BEPUL "loophole" ochilmasligi
+# uchun ESKI /register endpoint hech qachon to'g'ridan-to'g'ri pullik tarif
 # bermaydi — faqat shu maxsus checkout yo'li beradi.
 # ---------------------------------------------------------------------------
 
 def payments_live() -> bool:
     """v243: haqiqiy to'lov provayderi (Click/Payme/Paynet) ULANMAGUNCHA pullik tarif HECH QACHON avtomatik berilmaydi.
-    Ilgari /tariflar va /checkout/register so'rovi bilan istalgan odam Pro/Ultra'ni tekin olardi."""
+    Ilgari /plans va /checkout/register so'rovi bilan istalgan odam Pro/Ultra'ni tekin olardi."""
     return os.getenv("PAYMENTS_LIVE", "false").strip().lower() == "true"
 
 
@@ -883,18 +913,18 @@ async def checkout_register_submit(
             await _pay.record_purchase(existing.id, plan, cycle, card_digits, card_exp_ok, first_name)
             await db.update_streak(existing.id)
             existing = await _auto_onboard(request, existing)
-            response = RedirectResponse(_after_auth_destination(existing, "/profil?upgraded=1"), status_code=302)
-            _remember_after_onboard(response, existing, "/profil?upgraded=1")
+            response = RedirectResponse(_after_auth_destination(existing, "/profile?upgraded=1"), status_code=302)
+            _remember_after_onboard(response, existing, "/profile?upgraded=1")
             set_session_cookie(response, create_access_token(existing.id))
             response.delete_cookie(SUBJECT_COOKIE)
             return response
         return templates.TemplateResponse(request, "login.html", {
             "error": "Bu email bilan hisob allaqachon bor, lekin parol mos kelmadi. Shu hisobga kiring — tarif oynasi o'zi ochiladi.",
-            "next": f"/tariflar?plan={plan}&auto=1", "email": email,
+            "next": f"/plans?plan={plan}&auto=1", "email": email,
         })
 
     password_hash = hash_password(password)
-    # Bu yerda — oddiy /royxat'dan farqli — hisob TO'G'RIDAN-TO'G'RI
+    # Bu yerda — oddiy /register'dan farqli — hisob TO'G'RIDAN-TO'G'RI
     # tanlangan pullik tarifda yaratiladi, chunki bu yo'lga faqat haqiqiy
     # checkout (karta) darchasidan kelinadi.
     user = await db.create_user(email=email, password_hash=password_hash, first_name=first_name.strip(), plan="free")
@@ -938,11 +968,11 @@ async def auth_email_check(request: Request, email: str = ""):
 # Login
 # ---------------------------------------------------------------------------
 
-@app.get("/kirish", response_class=HTMLResponse)
+@app.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
     user = await get_current_user(request)
     if user:
-        return RedirectResponse("/kabinet" if user.onboarding_done else "/boshlash", status_code=302)
+        return RedirectResponse("/dashboard" if user.onboarding_done else "/onboarding", status_code=302)
     next_url = request.query_params.get("next", "")
     resp = templates.TemplateResponse(request, "login.html", {
         "error": GOOGLE_ERROR_TEXT.get(request.query_params.get("error", "")),
@@ -954,7 +984,7 @@ async def login_page(request: Request):
     return resp
 
 
-@app.post("/kirish", response_class=HTMLResponse)
+@app.post("/login", response_class=HTMLResponse)
 @limiter.limit("10/minute")
 async def login_submit(
     request: Request,
@@ -1001,7 +1031,7 @@ async def login_submit(
     return response
 
 
-@app.get("/chiqish")
+@app.get("/logout")
 async def logout():
     response = RedirectResponse("/", status_code=302)  # v242: chiqqach bosh sahifa
     response.delete_cookie(COOKIE_NAME)
@@ -1010,7 +1040,7 @@ async def logout():
 
 # ---------------------------------------------------------------------------
 # Google bilan kirish (OAuth 2.0) — GOOGLE_CLIENT_ID/SECRET sozlanmagan
-# bo'lsa, bu routelar chaqirilganda ham xushmuomalalik bilan /kirish'ga
+# bo'lsa, bu routelar chaqirilganda ham xushmuomalalik bilan /login'ga
 # qaytaradi (sayt buzilmaydi, faqat tugma ishlamaydi).
 # ---------------------------------------------------------------------------
 
@@ -1019,7 +1049,7 @@ GOOGLE_ERROR_TEXT = {
     "google_cancelled": "Google bilan kirish bekor qilindi yoki Google xato qaytardi. Qayta urinib ko'ring.",
     "google_state_mismatch": "Xavfsizlik tekshiruvi (state) muddati tugagan. Qaytadan \"Google bilan kirish\" ni bosing.",
     "google_failed": "Google bilan kirib bo'lmadi. Qayta urinib ko'ring.",
-    "google_redirect_uri_mismatch": "Google Cloud Console'dagi 'Authorized redirect URI' ro'yxatida bu sayt manzili yo'q. Admin panelda (/neo → Tizim holati) aynan qo'shilishi kerak bo'lgan manzil ko'rsatilgan.",
+    "google_redirect_uri_mismatch": "Google Cloud Console'dagi 'Authorized redirect URI' ro'yxatida bu sayt manzili yo'q. Admin panelda (Tizim holati) aynan qo'shilishi kerak bo'lgan manzil ko'rsatilgan.",
     "google_invalid_client": "Google Client ID yoki Client Secret noto'g'ri (.env ni tekshiring).",
     "google_invalid_grant": "Google kodi eskirgan yoki bir marta ishlatilgan. Qaytadan urinib ko'ring.",
     "google_network": "Server Google bilan bog'lana olmadi (tarmoq). Birozdan so'ng urinib ko'ring.",
@@ -1031,7 +1061,7 @@ GOOGLE_ERROR_TEXT = {
 @app.get("/auth/google/login")
 async def google_login(request: Request):
     if not oauth_google.is_enabled():
-        return RedirectResponse("/kirish?error=google_not_configured", status_code=302)
+        return RedirectResponse("/login?error=google_not_configured", status_code=302)
     state = oauth_google.make_state(SECRET_KEY)
     # next= parametrini cookie ga yozamiz — callback da shu yerga qaytamiz
     next_url = request.query_params.get("next", "")
@@ -1047,18 +1077,18 @@ async def google_login(request: Request):
 @app.get("/auth/google/callback")
 async def google_callback(request: Request, code: str = "", state: str = "", error: str = ""):
     if not oauth_google.is_enabled():
-        return RedirectResponse("/kirish?error=google_not_configured", status_code=302)
+        return RedirectResponse("/login?error=google_not_configured", status_code=302)
 
     if error or not code:
-        return RedirectResponse("/kirish?error=google_cancelled", status_code=302)
+        return RedirectResponse("/login?error=google_cancelled", status_code=302)
 
     if not oauth_google.verify_state(state, SECRET_KEY):
         logger.warning("Google OAuth: state noto'g'ri yoki eskirgan.")
-        return RedirectResponse("/kirish?error=google_state_mismatch", status_code=302)
+        return RedirectResponse("/login?error=google_state_mismatch", status_code=302)
 
     userinfo, g_err = await oauth_google.exchange_code_for_userinfo(code, oauth_google.redirect_uri_for(request))
     if userinfo is None:
-        return RedirectResponse(f"/kirish?error=google_{g_err or 'failed'}", status_code=302)
+        return RedirectResponse(f"/login?error=google_{g_err or 'failed'}", status_code=302)
 
     email = userinfo["email"]
     user = await db.get_user_by_email(email)
@@ -2607,7 +2637,7 @@ async def api_notifications(request: Request):
 # "Xabarlar" bo'limida bildirishnoma (o'qilmaganlar soni) bilan ko'rinadi.
 # ---------------------------------------------------------------------------
 
-@app.get("/yordam", response_class=HTMLResponse)
+@app.get("/support", response_class=HTMLResponse)
 async def support_page(request: Request):
     user = await get_current_user(request)
     if user is None:
@@ -2619,7 +2649,7 @@ async def support_page(request: Request):
     })
 
 
-@app.post("/yordam", response_class=HTMLResponse)
+@app.post("/support", response_class=HTMLResponse)
 @limiter.limit("10/minute")
 async def support_submit(request: Request, subject: str = Form(""), body: str = Form(...), kind: str = Form("Savol")):
     user = await get_current_user(request)
@@ -2642,7 +2672,7 @@ async def support_submit(request: Request, subject: str = Form(""), body: str = 
             await _longo_agent.enqueue("support", item.id, user.id)   # LongoAI javob yozadi (sahifa /api/agent/kick chaqiradi)
     except Exception:  # noqa: BLE001
         logger.exception("Yordam xabarini LongoAI navbatiga qo'yib bo'lmadi")
-    return RedirectResponse("/yordam?sent=1", status_code=302)
+    return RedirectResponse("/support?sent=1", status_code=302)
 
 
 # ---------------------------------------------------------------------------
@@ -2711,17 +2741,17 @@ async def admin_api_messages_unread_count(request: Request):
 # Onboarding — fan, daraja, sertifikat turini majburiy tanlash
 # ---------------------------------------------------------------------------
 
-@app.get("/boshlash", response_class=HTMLResponse)
+@app.get("/onboarding", response_class=HTMLResponse)
 async def onboarding_page(request: Request):
     user = await get_current_user(request)
     if user is None:
         return _auth_redirect(request)
     if user.onboarding_done:
-        return RedirectResponse("/kabinet", status_code=302)
+        return RedirectResponse("/dashboard", status_code=302)
     # Fan bosh sahifada allaqachon tanlangan bo'lsa — qayta so'ramaymiz
     user = await _auto_onboard(request, user, request.query_params.get("subject", ""))
     if user.onboarding_done:
-        resp = RedirectResponse("/kabinet", status_code=302)
+        resp = RedirectResponse("/dashboard", status_code=302)
         resp.delete_cookie(SUBJECT_COOKIE)
         return resp
 
@@ -2734,7 +2764,7 @@ async def onboarding_page(request: Request):
     })
 
 
-@app.post("/boshlash", response_class=HTMLResponse)
+@app.post("/onboarding", response_class=HTMLResponse)
 async def onboarding_submit(
     request: Request,
     subject: str = Form(...),
@@ -2763,24 +2793,24 @@ async def onboarding_submit(
         return response
     intended_plan = request.cookies.get("intended_plan")
     if intended_plan in ("pro", "ultra"):
-        response = RedirectResponse(f"/tariflar?plan={intended_plan}&auto=1", status_code=302)
+        response = RedirectResponse(f"/plans?plan={intended_plan}&auto=1", status_code=302)
         response.delete_cookie("intended_plan")
         return response
 
-    return RedirectResponse("/kabinet", status_code=302)
+    return RedirectResponse("/dashboard", status_code=302)
 
 
 # ---------------------------------------------------------------------------
 # Dashboard (login + onboarding talab qilinadi)
 # ---------------------------------------------------------------------------
 
-@app.get("/kabinet", response_class=HTMLResponse)
+@app.get("/dashboard", response_class=HTMLResponse)
 async def dashboard(request: Request):
     user = await get_current_user(request)
     if user is None:
         return _auth_redirect(request)
     if not user.onboarding_done:
-        return RedirectResponse("/boshlash", status_code=302)
+        return RedirectResponse("/onboarding", status_code=302)
 
     stats = await db.get_user_stats(user.id)
     try:
@@ -2813,7 +2843,7 @@ async def dashboard(request: Request):
 # TEST BOSHLASH — rejim tanlash (DTM / Sertifikat) va test yechish sahifasi
 # ---------------------------------------------------------------------------
 
-@app.get("/testlar", response_class=HTMLResponse)
+@app.get("/tests", response_class=HTMLResponse)
 async def quiz_select_page(request: Request):
     """
     TEST BOSHLASH — endi har safar TO'LIQ tanlov: Fan -> Daraja -> Rejim
@@ -2827,7 +2857,7 @@ async def quiz_select_page(request: Request):
     if user is None:
         return _auth_redirect(request)
     if not user.onboarding_done:
-        return RedirectResponse("/boshlash", status_code=302)
+        return RedirectResponse("/onboarding", status_code=302)
 
     # Har bir fan uchun mos rejimlar ro'yxatini oldindan hisoblab beramiz —
     # frontend JS shu jadvaldan foydalanib, fan almashganda rejimlar
@@ -2858,12 +2888,12 @@ async def quiz_select_page(request: Request):
     })
 
 
-@app.get("/testlar/ishlash", response_class=HTMLResponse)
+@app.get("/tests/take", response_class=HTMLResponse)
 async def quiz_take_page(request: Request):
     """
     Testning o'zi shu yerda o'tkaziladi — savollar JS orqali
     /api/quiz/generate'dan yuklanadi. Fan/daraja/rejim endi HAR BIR TEST
-    uchun query-parametr orqali keladi (/testlar sahifasidagi tanlovdan) —
+    uchun query-parametr orqali keladi (/tests sahifasidagi tanlovdan) —
     foydalanuvchining doimiy profiliga yozilmaydi, faqat shu bitta
     urinishga tegishli bo'ladi.
     """
@@ -2871,7 +2901,7 @@ async def quiz_take_page(request: Request):
     if user is None:
         return _auth_redirect(request)
     if not user.onboarding_done:
-        return RedirectResponse("/boshlash", status_code=302)
+        return RedirectResponse("/onboarding", status_code=302)
 
     subject = request.query_params.get("subject", user.subject or "english")
     if subject not in db.SUBJECT_CODES:
@@ -2947,7 +2977,7 @@ async def quiz_take_page(request: Request):
 # Profil — statistika, diagrammalar, testlarni qayta ko'rish
 # ---------------------------------------------------------------------------
 
-@app.get("/ustoz", response_class=HTMLResponse)
+@app.get("/tutor", response_class=HTMLResponse)
 async def repetitor_page(request: Request):
     """
     AI repetitor uchun ALOHIDA, TO'LIQ sahifa (kichik suzuvchi chat oynasi
@@ -2957,16 +2987,16 @@ async def repetitor_page(request: Request):
     FAQAT Pro/Ultra — AI repetitor endi Bepul tarifda mavjud emas (avval
     Bepulda ham cheklangan miqdorda ishlar edi; endi butunlay Pro/Ultra
     imtiyozi). Bepul foydalanuvchi shu sahifaga kirsa, to'g'ridan-to'g'ri
-    /tariflar'ga yo'naltiriladi — bo'sh chatni ko'rsatib, keyin har bir
+    /plans'ga yo'naltiriladi — bo'sh chatni ko'rsatib, keyin har bir
     xabarda bloklashdan ko'ra yaxshiroq tajriba.
     """
     user = await get_current_user(request)
     if user is None:
         return _auth_redirect(request)
     if not user.onboarding_done:
-        return RedirectResponse("/boshlash", status_code=302)
+        return RedirectResponse("/onboarding", status_code=302)
     if user.plan == "free":
-        return RedirectResponse("/tariflar?locked=repetitor", status_code=302)
+        return RedirectResponse("/plans?locked=repetitor", status_code=302)
 
     return templates.TemplateResponse(request, "repetitor.html", {
         "user": user,
@@ -2980,9 +3010,9 @@ async def repetitor_page(request: Request):
 # MUHIM: hozircha to'lov tizimi ulanmagan ("pul so'rash yo'q" — aniq talab
 # qilingan), shuning uchun "Pro/Ultra'ga o'tish" tugmasi bosilganda darhol
 # tarif faollashadi (kelajakda bu yerga to'lov tekshiruvi qo'shilishi mumkin).
-# Buning zarurati: ilgari "Pro'ga o'tish" havolalari doim /royxat?plan=...
+# Buning zarurati: ilgari "Pro'ga o'tish" havolalari doim /register?plan=...
 # ga olib borar, allaqachon ro'yxatdan o'tgan (tizimga kirgan) foydalanuvchi
-# uchun bu HECH NARSA qilmasdi (register sahifasi darhol /kabinet'ga
+# uchun bu HECH NARSA qilmasdi (register sahifasi darhol /dashboard'ga
 # qaytarib yuborar edi) — ya'ni "reklama" tugmasi bosilganda hech qanday
 # ta'sir qilmasdi. Endi tizimga kirgan foydalanuvchi shu route orqali
 # haqiqatda Pro/Ultra'ga o'tadi.
@@ -3001,11 +3031,11 @@ LOCKED_REASON_MESSAGES = {
 }
 
 
-@app.get("/tariflar", response_class=HTMLResponse)
+@app.get("/plans", response_class=HTMLResponse)
 async def upgrade_page(request: Request, locked: str | None = None, plan: str | None = None, auto: str | None = None):
     user = await get_current_user(request)
     if user is None:
-        return RedirectResponse("/royxat?plan=pro", status_code=302)
+        return RedirectResponse("/register?plan=pro", status_code=302)
     plan_limits = {p: db.get_plan_limits(p) for p in ("free", "pro", "ultra")}
     # Ro'yxatdan o'tishda Pro/Ultra tanlangan bo'lsa, onboarding tugagach shu
     # yerga "auto=1" bilan tushadi — karta kiritish oynasi darhol ochiladi.
@@ -3019,7 +3049,7 @@ async def upgrade_page(request: Request, locked: str | None = None, plan: str | 
     })
 
 
-@app.post("/tariflar", response_class=HTMLResponse)
+@app.post("/plans", response_class=HTMLResponse)
 @limiter.limit("10/minute")
 async def upgrade_submit(
     request: Request,
@@ -3039,26 +3069,26 @@ async def upgrade_submit(
         return _auth_redirect(request)
     if turnstile.is_active_for_request(request):
         if not await turnstile.check(request, cf_turnstile_response, cf_fallback):
-            return RedirectResponse(f"/tariflar?plan={plan}&auto=1&error=bot", status_code=302)
+            return RedirectResponse(f"/plans?plan={plan}&auto=1&error=bot", status_code=302)
     if plan not in ("free", "pro", "ultra"):
         raise HTTPException(status_code=400, detail="Noto'g'ri tarif.")
     if plan == "free":
         await db.admin_set_user_plan(user.id, plan)
-        return RedirectResponse("/profil?upgraded=1", status_code=302)
+        return RedirectResponse("/profile?upgraded=1", status_code=302)
     digits, exp, err = _pay.validate_card(card_number, card_exp)
     if err:
-        return RedirectResponse(f"/tariflar?plan={plan}&auto=1&card_error={quote(err)}", status_code=302)
+        return RedirectResponse(f"/plans?plan={plan}&auto=1&card_error={quote(err)}", status_code=302)
     await _pay.record_purchase(user.id, plan, cycle, digits, exp, card_holder or user.first_name or "")
-    return RedirectResponse("/profil?upgraded=1", status_code=302)
+    return RedirectResponse("/profile?upgraded=1", status_code=302)
 
 
-@app.get("/profil", response_class=HTMLResponse)
+@app.get("/profile", response_class=HTMLResponse)
 async def profile_page(request: Request):
     user = await get_current_user(request)
     if user is None:
         return _auth_redirect(request)
     if not user.onboarding_done:
-        return RedirectResponse("/boshlash", status_code=302)
+        return RedirectResponse("/onboarding", status_code=302)
 
     stats = await db.get_user_stats(user.id)
     history = await db.get_user_quiz_history(user.id)
@@ -3159,7 +3189,7 @@ async def api_profile_delete(request: Request, body: AccountDeleteRequest):
     return response
 
 
-@app.post("/profil/fan", response_class=HTMLResponse)
+@app.post("/profile/subject", response_class=HTMLResponse)
 async def profile_change_subject(
     request: Request,
     subject: str = Form(""),
@@ -3171,10 +3201,10 @@ async def profile_change_subject(
         return _auth_redirect(request)
 
     await db.update_user_subject_level(user.id, subject=subject or None, level=level or None)
-    return RedirectResponse("/profil", status_code=302)
+    return RedirectResponse("/profile", status_code=302)
 
 
-@app.get("/testlar/{quiz_id}/tahlil", response_class=HTMLResponse)
+@app.get("/tests/{quiz_id}/review", response_class=HTMLResponse)
 async def quiz_review_page(request: Request, quiz_id: int):
     user = await get_current_user(request)
     if user is None:
@@ -3182,7 +3212,7 @@ async def quiz_review_page(request: Request, quiz_id: int):
 
     quiz = await db.get_quiz_by_id(quiz_id, user.id)
     if quiz is None:
-        return RedirectResponse("/profil", status_code=302)
+        return RedirectResponse("/profile", status_code=302)
 
     import json as _json
     try:
@@ -3243,7 +3273,7 @@ class AskRequest(BaseModel):
     # qaytarilmaydi, shunchaki jimgina cheklanadi).
     effort: str = Field("normal", pattern="^(low|normal|high|max)$")
     # "source" — bitta /api/ask endpoint IKKI TURLI suhbat sirtini
-    # xizmat qiladi: "repetitor" (/ustoz sahifasidagi to'liq AI
+    # xizmat qiladi: "repetitor" (/tutor sahifasidagi to'liq AI
     # repetitor, ovoz bilan) va "widget" (boshqa sahifalardagi suzuvchi
     # tezkor chat). Foydalanuvchi qat'iy talabi: ikkalasi ALOHIDA AI
     # provayderga bog'lanishi kerak — Claude FAQAT repetitorda ishlaydi,
@@ -3265,8 +3295,8 @@ async def api_ask(request: Request, body: AskRequest):
     if user is None:
         raise HTTPException(status_code=401, detail="Avval tizimga kiring.")
 
-    # AI REPETITOR — FAQAT Pro/Ultra. Sahifa darajasida (/ustoz) allaqachon
-    # Bepul foydalanuvchini /tariflar'ga yo'naltiramiz, lekin API endpointni
+    # AI REPETITOR — FAQAT Pro/Ultra. Sahifa darajasida (/tutor) allaqachon
+    # Bepul foydalanuvchini /plans'ga yo'naltiramiz, lekin API endpointni
     # ham alohida himoyalaymiz — to'g'ridan-to'g'ri so'rov yuborilsa ham
     # (masalan brauzer konsolidan) ishlamasligi kerak.
     if user.plan == "free":
@@ -3414,7 +3444,7 @@ async def api_ask_stream(request: Request, body: AskRequest):
 
 
 # ---------------------------------------------------------------------------
-# AI test — /testlar (Claude orqali generatsiya qilinadi)
+# AI test — /tests (Claude orqali generatsiya qilinadi)
 # ---------------------------------------------------------------------------
 
 class QuizRequest(BaseModel):
@@ -3440,7 +3470,7 @@ async def api_topics(request: Request, subject: str, mode: str = "dtm"):
     """
     MAVZULASHTIRILGAN TEST RO'YXATI (SAT Question Bank uslubida): shu
     fan+rejim uchun barcha mavzularni, har birining progress holati bilan
-    birga qaytaradi. Frontend (/testlar sahifasi) shu ro'yxatni progress-bar
+    birga qaytaradi. Frontend (/tests sahifasi) shu ro'yxatni progress-bar
     bilan ko'rsatadi va foydalanuvchi kunlik reja tartibida (1, 2, 3...)
     mavzularni tanlab boradi.
     """
@@ -3465,7 +3495,7 @@ async def api_topics(request: Request, subject: str, mode: str = "dtm"):
 
     # Tarifga qarab NECHTA (birinchi) mavzu OCHIQ — qolgani "qulflangan"
     # ko'rinishda qaytariladi (frontend qulf belgisi bilan ko'rsatadi,
-    # bosilsa /tariflar'ga yo'naltiradi). None = cheksiz (Ultra).
+    # bosilsa /plans'ga yo'naltiradi). None = cheksiz (Ultra).
     unlock_count = db.get_topic_unlock_count(user.plan)
 
     topic_list = []
@@ -4526,7 +4556,7 @@ async def certificate_download_pdf(request: Request, verification_id: str):
 # bosilganda hech qanday real pul o'tkazilmaydi, faqat ko'rgazma uchun.
 # ---------------------------------------------------------------------------
 
-@app.get("/hisob", response_class=HTMLResponse)
+@app.get("/billing", response_class=HTMLResponse)
 async def balance_page(request: Request):
     user = await get_current_user(request)
     if user is None:

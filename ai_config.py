@@ -7,7 +7,7 @@ Kalitlarni muhit o'zgaruvchisi orqali bering:
     $env:GEMINI_API_KEY="AIza..."
     uvicorn web.main:app --reload
 
-Kalit qo'yilmagunicha /ask va /testlar komandalari "AI hali sozlanmagan" deb
+Kalit qo'yilmagunicha /ask va /tests komandalari "AI hali sozlanmagan" deb
 xushmuomalalik bilan javob beradi - sayt buzilmaydi.
 """
 

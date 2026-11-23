@@ -191,6 +191,20 @@ _GOOD_MODEL: dict = {}
 _MATHY = __import__("re").compile(r"[0-9=+*/^<>%]|masala|hisobla|yech|formula|tenglama|isbot|nechta|necha")
 
 
+def _thinking_level_display(question: str, effort: str) -> str:
+    """v250: yozma chat — LongoAI ishlab, o'ylab javob beradi. Faqat salom/juda qisqa gaplarga yengil, qolganiga chuqur o'ylash."""
+    q = question.strip()
+    if effort == "low":
+        return "low"
+    if effort in ("high", "max"):
+        return "high"
+    if len(q) < 22 and "?" not in q and not _MATHY.search(q.lower()):
+        return "low"
+    if len(q) > 160 or _MATHY.search(q.lower()):
+        return "high"
+    return "medium"
+
+
 def _thinking_level(question: str, effort: str, history_len: int) -> str:
     """Tezlik va to'g'rilik muvozanati: oddiy suhbat — minimal/low, hisob-kitob va chuqur savol — medium."""
     # v235: tezlik — oddiy savollarga deyarli o'ylamasdan (minimal), hisob-kitobga qisqa o'ylab (low) javob beradi;
@@ -227,8 +241,12 @@ async def ask_gemini_stream(
 
     hist = normalize_history(history)
     system_prompt = build_system_prompt(subject, level, certificate_type, effort, lang, spoken=not display)
-    max_tokens = {"low": 1500, "normal": 2800, "high": 4500, "max": 6500}.get(effort, 2800)
-    level_name = _thinking_level(question, effort, len(hist))
+    if display:
+        max_tokens = {"low": 3000, "normal": 8000, "high": 12000, "max": 16000}.get(effort, 8000)
+        level_name = _thinking_level_display(question, effort)
+    else:
+        max_tokens = {"low": 1500, "normal": 2800, "high": 4500, "max": 6500}.get(effort, 2800)
+        level_name = _thinking_level(question, effort, len(hist))
     contents = _to_contents(question, hist)
     primary = _GOOD_MODEL.get("m") or ai_keys.get("GEMINI_MODEL", GEMINI_MODEL) or GEMINI_MODEL
     order = [primary] + [m for m in _FAILOVER_MODELS if m != primary]
@@ -242,11 +260,11 @@ async def ask_gemini_stream(
                "automatic_function_calling": _NO_AFC_CONFIG, "thinking_config": {"thinking_level": tl}}
         got_any = False
         try:
-            stream = await asyncio.wait_for(_get_client().aio.models.generate_content_stream(model=model, contents=contents, config=cfg), _CALL_TIMEOUT)
+            stream = await asyncio.wait_for(_get_client().aio.models.generate_content_stream(model=model, contents=contents, config=cfg), _CALL_TIMEOUT if not display else 45)
             it = stream.__aiter__()
             while True:
                 try:
-                    chunk = await asyncio.wait_for(it.__anext__(), _CALL_TIMEOUT if not got_any else 30)
+                    chunk = await asyncio.wait_for(it.__anext__(), (_CALL_TIMEOUT if not display else 60) if not got_any else 30)
                 except StopAsyncIteration:
                     break
                 text = getattr(chunk, "text", None) or ""

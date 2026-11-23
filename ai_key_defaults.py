@@ -6,7 +6,7 @@ Shu fayl ichiga yozsangiz, qiymatni ALBATTA qo'sh tirnoq ichida yozing (tirnoqsi
 dastur chalg'ib qolishi mumkin). Tirnoq, bo'sh joy va ortiqcha belgilar avtomatik tozalanadi.
 
 DIQQAT: bu faylni GitHub'ga yuklashdan oldin kalitni olib tashlang — ochiq repoda kalit o'g'irlanadi.
-Eng xavfsiz yo'l: kalitlarni Vercel → Settings → Environment Variables ga yoki admin panelga (/neo → AI) kiriting.
+Eng xavfsiz yo'l: kalitlarni Vercel → Settings → Environment Variables ga yoki admin panelga (<ADMIN_MANZIL> → AI) kiriting.
 """
 
 DEFAULT_KEYS = {

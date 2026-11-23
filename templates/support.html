@@ -38,7 +38,7 @@
 
       <div class="dash-panel">
         <h3>Yangi xabar yozish</h3>
-        <form method="post" action="/yordam" class="admin-question-form">
+        <form method="post" action="/support" class="admin-question-form">
           <div class="field">
             <label for="support_kind">Turi</label>
             <select name="kind" id="support_kind">
@@ -103,7 +103,7 @@
     function check() {
       fetch("/api/support/thread", { credentials: "same-origin" }).then(function (r) { return r.json(); }).then(function (d) {
         var last = (d.items || [])[0];
-        if (last && last.reply) { done = true; location.replace("/yordam#javob"); return; }
+        if (last && last.reply) { done = true; location.replace("/support#javob"); return; }
         if (!d.pending && tries > 2) { box.hidden = true; return; }
         if (++tries < 40) setTimeout(check, 3000); else box.hidden = true;
       }).catch(function () { if (++tries < 40) setTimeout(check, 4000); });

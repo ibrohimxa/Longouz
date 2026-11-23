@@ -44,7 +44,7 @@
   // OVOZLI KIRISH — to'g'ridan-to'g'ri (jonli) nutq tanish. Ovoz yozib
   // yuborilmaydi: brauzerning Speech Recognition xizmati gapirayotganingizni
   // real vaqtda matnga aylantiradi, jimlik boshlanganda savol avtomatik
-  // yuboriladi. /ustoz sahifasida "Jonli suhbat" rejimi: AI javobini
+  // yuboriladi. /tutor sahifasida "Jonli suhbat" rejimi: AI javobini
   // aytib bo'lgach, mikrofon o'zi qayta tinglashni boshlaydi.
   // ==========================================================================
   const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -554,15 +554,26 @@
     if (res.status === 401) { clearInterval(clock); removeThinking(); typewriteAnswer("Sessiya tugagan. Iltimos, qayta kiring.", { silent: true }); return true; }
     if (!res.ok || !res.body || (res.headers.get("content-type") || "").indexOf("text/event-stream") < 0) { clearInterval(clock); return false; }
     const reader = res.body.getReader(), dec = new TextDecoder();
-    let buf = "", text = "", bubble = null, final = null, last = 0, pending = false, tFirst = 0;
-    function paint(force) {
+    let buf = "", text = "", bubble = null, final = null, tFirst = 0, shown = 0, timer = 0;
+    // v250: matn tez yugurib ketmasin — o'qish tezligida (taxminan 50 belgi/soniya) chiqadi; javob juda uzun bo'lib
+    // ketsa, kutdirmaslik uchun tezlik o'zi oshadi.
+    function draw() {
       if (!bubble) { tFirst = Date.now(); clearInterval(clock); removeThinking(); bubble = newAiBubble(); }
-      const now = Date.now();
-      if (!force && now - last < 90) { if (!pending) { pending = true; setTimeout(function () { pending = false; paint(true); }, 95); } return; }
-      last = now;
       const nearBottom = messages.scrollHeight - messages.scrollTop - messages.clientHeight < 80;
-      renderRich(bubble, text, !final);
+      renderRich(bubble, text.slice(0, shown), shown < text.length || !final);
       if (nearBottom) messages.scrollTop = messages.scrollHeight;
+    }
+    function tick() {
+      const back = text.length - shown;
+      if (back <= 0) return;
+      const cps = Math.max(50, back / 5);
+      shown = Math.min(text.length, shown + Math.max(1, Math.round(cps * 0.045)));
+      draw();
+    }
+    function paint(force) {
+      if (shown > text.length) shown = text.length;
+      if (!timer) timer = setInterval(tick, 45);
+      if (force && !text) draw();
     }
     try {
       for (;;) {
@@ -583,9 +594,12 @@
       }
     } catch (e) { /* uzilish — bor matn qoladi */ }
     clearInterval(clock);
-    if (!text) { removeThinking(); typewriteAnswer("Internet aloqasida muammo bo'ldi. Qayta urinib ko'ring.", { silent: true }); return true; }
+    if (!text) { clearInterval(timer); removeThinking(); typewriteAnswer("Internet aloqasida muammo bo'ldi. Qayta urinib ko'ring.", { silent: true }); return true; }
     final = final || { answer: text, provider: "gemini" };
-    paint(true);
+    while (shown < text.length) await new Promise(function (r) { setTimeout(r, 60); });   // matn to'liq chiqquncha kutamiz
+    clearInterval(timer);
+    shown = text.length;
+    draw();
     if (bubble) {
       const meta = document.createElement("div");
       meta.className = "chat-msg-meta";
@@ -644,7 +658,7 @@
     }
 
     try {
-      // "source" — serverga qaysi suhbat ekanini aytadi: /ustoz sahifasidagi
+      // "source" — serverga qaysi suhbat ekanini aytadi: /tutor sahifasidagi
       // to'liq AI repetitor ("owl-voice-orb" faqat shu sahifada bor) Claude
       // orqali ishlaydi, boshqa barcha sahifalardagi suzuvchi tezkor chat esa
       // Gemini orqali — ikkalasi ATAYLAB ALOHIDA AI provayderga bog'langan.
@@ -865,7 +879,7 @@
         <p class="owl-limit-sub">${data.message || `${data.used}/${data.limit} ta savol ishlatildi.`}</p>
         ${hasCountdown ? `<p class="owl-limit-countdown" aria-live="polite"><span class="owl-limit-countdown-num">${formatCountdown(data.retry_after_seconds)}</span><span class="owl-limit-countdown-label">dan keyin avtomatik ochiladi</span></p>` : ""}
         <div class="owl-limit-actions">
-          <a href="/tariflar?plan=pro&amp;auto=1" class="btn-primary">Pro/Ultra'ga o'tish</a>
+          <a href="/plans?plan=pro&amp;auto=1" class="btn-primary">Pro/Ultra'ga o'tish</a>
           <button type="button" class="btn-secondary owl-limit-dismiss">Bekor qilish</button>
         </div>
       </div>

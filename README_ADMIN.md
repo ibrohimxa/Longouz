@@ -9,10 +9,10 @@ U `.venv` yaratadi, kutubxonalarni birma-bir o'rnatadi, tekshiradi va serverni i
     pip install -r requirements.txt     # pypdf (PDF import) ham shu yerda
     python main.py                      # HTTP 6060 + HTTPS 6600
 
-`.env` da `ADMIN_PASSWORD=` ni **albatta** to'ldiring. Admin manzili: `/neo` (foydalanuvchi: NEO).
+`.env` da `ADMIN_PASSWORD=` ni **albatta** to'ldiring. Admin manzili: `<ADMIN_MANZIL>` (foydalanuvchi: NEO).
 
 ## 2. Yangi savollarni qo'shish (ikki yo'l)
-### a) Admin panel → "Import" (`/neo/import`)
+### a) Admin panel → "Import" (`<ADMIN_MANZIL>/import`)
 PDF / JSON / CSV / TXT faylni tashlang. Dastur:
 1. savollarni ajratadi (A-D variantlar, "Javoblar: 1-B ..." kalitlari);
 2. fan va mavzuni o'zi aniqlaydi (TF-IDF o'xshashlik + **savoli kam mavzularga ustuvorlik**);
@@ -51,8 +51,8 @@ Claude, Gemini va ovoz (edge-tts) sozlanganmi va ishlayaptimi — "Hozir tekshir
 AI repetitor faqat Pro/Ultra tarifda: sinash uchun admin → Foydalanuvchilar → tarifni "Pro/Ultra" qiling.
 
 ## 7. Mavzular markazi va savol tahrirlagich
-`/neo/topics` — mavzular ro'yxati (fan/rejim chiplari, qidiruv, har mavzu bitta qatorda; ochilganda statistika).
-"Tahrirlash" → `/neo/topics/edit?...` 1-savoldan boshlanadi:
+`<ADMIN_MANZIL>/topics` — mavzular ro'yxati (fan/rejim chiplari, qidiruv, har mavzu bitta qatorda; ochilganda statistika).
+"Tahrirlash" → `<ADMIN_MANZIL>/topics/edit?...` 1-savoldan boshlanadi:
 - **Ko'rish / Tahrirlash** — Tahrirlashda o'ng panel: *Matn* (savol, variantlar, to'g'ri javob, izoh, faol/yashirin, qo'shish/o'chirish),
   *Ko'rinish* (shu savolning matn o'lchami, qalinligi, joylashuvi, masofalari, surilishi, rangi), *Test oynasi* (butun mavzu uchun: soat ko'rinishi/joyi/o'lchami,
   sarlavha, progress, kenglik, tugmalar joyi).

@@ -138,5 +138,5 @@ def set_session_cookie(response, token: str):
         httponly=True,
         secure=COOKIE_SECURE,
         samesite=COOKIE_SAMESITE,
-        max_age=60 * 60 * 24 * TOKEN_EXPIRE_DAYS,
+        # v250: max_age yo'q — brauzer yopilganda sessiya tugaydi (doim qayta kirish so'raladi)
     )

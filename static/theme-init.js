@@ -16,7 +16,7 @@
   try {
     if (localStorage.getItem("lz_seed_v247") === "1") return;
   } catch (e) {}
-  if (!window.fetch || /^\/(neo|static)/.test(location.pathname)) return;
+  if (!window.fetch || /^\/static/.test(location.pathname)) return;
   var tries = 0;
   function step() {
     tries++;

@@ -78,7 +78,7 @@
           <p class="dash-quote">“{{ quote }}”</p>
           <p class="dash-sub">Bugun ham o'zingizning eng yaxshi versiyangiz sari bir qadam tashlang.</p>
           <div class="dash-hero-cta">
-            <a href="/testlar" class="dash-btn dash-btn-primary"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Testni boshlash →</a>
+            <a href="/tests" class="dash-btn dash-btn-primary"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Testni boshlash →</a>
             <a href="#today-plan" class="dash-btn dash-btn-ghost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> Bugungi rejani ochish</a>
           </div>
         </div>
@@ -175,7 +175,7 @@
             <li class="{{ 'is-done' if it.done else '' }}"><a href="{{ it.href }}"><span class="dash-check">{% if it.done %}✓{% endif %}</span><span>{{ it.text }}</span>{% if it.meta %}<small>{{ it.meta }}</small>{% endif %}</a></li>
             {% endfor %}
           </ul>
-          <a href="/testlar" class="dash-btn dash-btn-outline small">Rejani davom ettirish →</a>
+          <a href="/tests" class="dash-btn dash-btn-outline small">Rejani davom ettirish →</a>
         </section>
 
         <!-- Promo -->
@@ -183,7 +183,7 @@
           <div class="dash-promo-text">
             <h2><span class="dash-h-ico">▤</span> Mock testlar</h2>
             <p>Real imtihon sharoitida o'zingizni sinab ko'ring: vaqt chegarasi, savollar tartibi va natija tahlili bilan.</p>
-            <a href="/testlar" class="dash-btn dash-btn-hot">Testni boshlash →</a>
+            <a href="/tests" class="dash-btn dash-btn-hot">Testni boshlash →</a>
           </div>
           <svg class="dash-promo-art" viewBox="0 0 120 120" aria-hidden="true"><rect x="28" y="14" width="64" height="86" rx="8" fill="#1d2b66" stroke="#4a6bff" stroke-width="2" transform="rotate(8 60 57)"/><g transform="rotate(8 60 57)"><rect x="40" y="30" width="40" height="5" rx="2" fill="#7e95ff"/><rect x="40" y="43" width="32" height="4" rx="2" fill="#4a5aa8"/><rect x="40" y="53" width="36" height="4" rx="2" fill="#4a5aa8"/><rect x="40" y="63" width="28" height="4" rx="2" fill="#4a5aa8"/></g><path d="M86 70 L104 52 L110 58 L92 76 L84 78Z" fill="#ffb347"/></svg>
         </section>
@@ -200,10 +200,10 @@
 
         <!-- Mavzu o'zlashtirish -->
         <section class="dash-card lz-rise">
-          <header><h2><span class="dash-h-ico">◉</span> Mavzular bo'yicha o'zlashtirish</h2><a href="/testlar" class="dash-link">Barchasini ko'rish →</a></header>
+          <header><h2><span class="dash-h-ico">◉</span> Mavzular bo'yicha o'zlashtirish</h2><a href="/tests" class="dash-link">Barchasini ko'rish →</a></header>
           <div class="dash-rings">
             {% for m in d.mastery %}
-            <a class="dash-ring-item" href="/testlar" title="{{ m.attempts }} ta urinish, {{ m.questions }} ta savol">
+            <a class="dash-ring-item" href="/tests" title="{{ m.attempts }} ta urinish, {{ m.questions }} ta savol">
               <div class="dash-ring" data-ring="{{ m.percent }}"><b>{{ m.percent }}%</b></div>
               <span>{{ m.topic }}</span><small>{{ m.questions }} savol</small>
             </a>
@@ -213,7 +213,7 @@
 
         <!-- Zaif mavzular -->
         <section class="dash-card lz-rise">
-          <header><h2><span class="dash-h-ico">▂▅▇</span> Zaif sohalar</h2><a href="/testlar" class="dash-link warn">Takomillashtirish kerak</a></header>
+          <header><h2><span class="dash-h-ico">▂▅▇</span> Zaif sohalar</h2><a href="/tests" class="dash-link warn">Takomillashtirish kerak</a></header>
           {% if d.weak %}
           <ul class="dash-weak">
             {% for w in d.weak %}<li><div><span>{{ w.topic }}</span><b>{{ w.percent }}%</b></div><div class="dash-goal-bar thin"><i style="--w:{{ w.percent }}%"></i></div></li>{% endfor %}
@@ -253,7 +253,7 @@
         </section>
       </div>
 {% else %}
-      <section class="dash-card"><p>Ma'lumotlarni yuklab bo'lmadi. Sahifani yangilang.</p><a href="/testlar" class="dash-btn dash-btn-primary">Test boshlash</a></section>
+      <section class="dash-card"><p>Ma'lumotlarni yuklab bo'lmadi. Sahifani yangilang.</p><a href="/tests" class="dash-btn dash-btn-primary">Test boshlash</a></section>
 {% endif %}
     </div>
   </div>

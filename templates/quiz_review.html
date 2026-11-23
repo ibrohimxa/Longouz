@@ -25,7 +25,7 @@
           <h1>{{ quiz.topic or "Test natijasi" }}</h1>
           <p>{{ subject_name }} · {{ quiz.correct_count }}/{{ quiz.total_count }} to'g'ri · {{ quiz.created_at.strftime("%d.%m.%Y %H:%M") }}</p>
         </div>
-        <a href="/profil" class="plan-badge" style="color: var(--accent-green);">Profilga qaytish</a>
+        <a href="/profile" class="plan-badge" style="color: var(--accent-green);">Profilga qaytish</a>
       </div>
 
       {% if certificate %}

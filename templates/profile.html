@@ -165,7 +165,7 @@
             </div>
           </div>
           {% if user.plan != "ultra" %}
-          <a href="/tariflar" class="btn-primary" style="margin-top:14px; display:inline-block;">Tarifni yangilash</a>
+          <a href="/plans" class="btn-primary" style="margin-top:14px; display:inline-block;">Tarifni yangilash</a>
           {% endif %}
         </div>
       </details>
@@ -225,13 +225,13 @@
                   {{ h.correct_count }}/{{ h.total_count }}
                 </div>
                 {% if h.questions_json %}
-                <a href="/testlar/{{ h.id }}/tahlil" class="review-btn">Qayta ko'rish</a>
+                <a href="/tests/{{ h.id }}/analytics" class="review-btn">Qayta ko'rish</a>
                 {% endif %}
               </div>
             </div>
             {% endfor %}
           {% else %}
-            <p style="color: var(--ink-soft);">Hali test yechilmagan. <a href="/kabinet" style="color: var(--accent-green);">Kabinetga qaytib</a> birinchi testni boshlang.</p>
+            <p style="color: var(--ink-soft);">Hali test yechilmagan. <a href="/dashboard" style="color: var(--accent-green);">Kabinetga qaytib</a> birinchi testni boshlang.</p>
           {% endif %}
         </div>
       </details>
@@ -271,7 +271,7 @@
           <svg class="dash-accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
         </summary>
         <div class="dash-accordion-body">
-          <form method="post" action="/profil/fan" style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
+          <form method="post" action="/profile/subject" style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
             <div class="field" style="margin-bottom:0; min-width:200px;">
               <label for="profile-subject">Fan</label>
               <select id="profile-subject" name="subject" style="width:100%; padding:12px 14px; border-radius:10px; border:1px solid var(--line); background:var(--bg); color:var(--ink); font-size:0.92rem;">
@@ -332,7 +332,7 @@
                 <li>Profilda va sertifikatlarda PRO belgisi</li>
                 <li>Ketma-ket 3 oy obuna uzaytirilsa — keyingi oyga chegirma</li>
               </ul>
-              {% if user.plan == 'free' %}<a href="/tariflar" class="btn-primary plan-compare-cta">Pro'ga o'tish</a>{% endif %}
+              {% if user.plan == 'free' %}<a href="/plans" class="btn-primary plan-compare-cta">Pro'ga o'tish</a>{% endif %}
             </div>
 
             <div class="plan-compare-card {% if user.plan == 'ultra' %}is-current{% endif %}">
@@ -349,7 +349,7 @@
                 <li>Profilda va sertifikatlarda ULTRA (oltin) belgisi</li>
                 <li>Yangi funksiyalarga birinchilardan bo'lib kirish</li>
               </ul>
-              {% if user.plan != 'ultra' %}<a href="/tariflar" class="btn-primary plan-compare-cta">Ultra'ga o'tish</a>{% endif %}
+              {% if user.plan != 'ultra' %}<a href="/plans" class="btn-primary plan-compare-cta">Ultra'ga o'tish</a>{% endif %}
             </div>
 
           </div>

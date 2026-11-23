@@ -59,7 +59,7 @@
           {% if user.plan == 'free' %}
           <span class="plan-btn plan-btn-outline plan-btn-current">Joriy tarifingiz</span>
           {% else %}
-          <form method="post" action="/tariflar"><input type="hidden" name="plan" value="free">
+          <form method="post" action="/plans"><input type="hidden" name="plan" value="free">
             <button type="submit" class="plan-btn plan-btn-outline" style="width:100%;">Free'ga qaytish</button>
           </form>
           {% endif %}
@@ -122,7 +122,7 @@
       // --- Oylik / Yillik narx almashtirgich — hozircha faqat KO'RSATISH
       // uchun (haqiqiy to'lov davri hali serverga yozilmaydi, chunki to'lov
       // tizimi umuman ulanmagan) — real to'lov ulanganda shu tanlov
-      // /tariflar so'roviga ham qo'shiladi. ---
+      // /plans so'roviga ham qo'shiladi. ---
       let billingCycle = "monthly";
       const toggleBtns = document.querySelectorAll(".billing-toggle-btn");
       const priceEls = document.querySelectorAll("#plans-grid .plan-price[data-monthly-label]");

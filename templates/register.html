@@ -50,7 +50,7 @@
         {% if error %}<div class="au-error" role="alert">{{ error }}</div>{% endif %}
         {% include "_auth_social.html" %}
 
-        <form method="post" action="/royxat" id="auth-form">
+        <form method="post" action="/register" id="auth-form">
           <input type="hidden" name="plan" value="{{ plan or 'free' }}">
           <input type="hidden" name="subject" value="{{ subject or '' }}">
           <div class="au-field">
@@ -85,7 +85,7 @@
             <span>Ro'yxatdan o'tish</span>
           </button>
         </form>
-        <p class="au-switch">Hisobingiz bormi? <a href="/kirish{% if next %}?next={{ next | urlencode }}{% endif %}">Kirish</a></p>
+        <p class="au-switch">Hisobingiz bormi? <a href="/login{% if next %}?next={{ next | urlencode }}{% endif %}">Kirish</a></p>
       </section>
 
       <section class="au-reg-right" aria-hidden="true">

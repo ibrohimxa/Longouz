@@ -6,10 +6,10 @@
 # MAJBURIY (Vercel uchun):
 DATABASE_URL=            # Neon Postgres (Vercel → Storage → Neon ulasangiz o'zi qo'shiladi)
 WEB_SECRET_KEY=          # uzun tasodifiy satr (64+ belgi); o'zgartirmang, aks holda hamma chiqib ketadi
-ADMIN_PASSWORD=          # admin panel paroli (/neo/login)
+ADMIN_PASSWORD=          # admin panel paroli (<admin-manzil>/login)
 WEB_COOKIE_SECURE=true
 #
-# IXTIYORIY (admin panel → Kalitlar /neo/keys dan ham kiritish mumkin):
+# IXTIYORIY (admin panel → Kalitlar <admin-manzil>/keys dan ham kiritish mumkin):
 GEMINI_API_KEY=
 ANTHROPIC_API_KEY=
 TURNSTILE_SITE_KEY=

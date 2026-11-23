@@ -32,8 +32,8 @@
           <div class="f215-total"><span class="f215-pill">Jami 90 savol</span><span class="f215-pill">180 daqiqa</span><span class="f215-pill">Maksimal {{ max_ball|int }} ball</span></div>
           <p class="f215-muted" id="bm-err" style="color:#ff7b72;margin-top:10px" hidden>Ikki xil ixtisoslik fanini tanlang.</p>
           <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
-            {% if full_access %}<button class="f215-btn" id="bm-go">Blok mockni boshlash</button>{% else %}<a class="f215-btn" href="/tariflar">Pro/Ultra'ni yoqish</a>{% endif %}
-            <a class="f215-btn ghost" href="/qollanma">Imtihon yo'riqnomasi</a>
+            {% if full_access %}<button class="f215-btn" id="bm-go">Blok mockni boshlash</button>{% else %}<a class="f215-btn" href="/plans">Pro/Ultra'ni yoqish</a>{% endif %}
+            <a class="f215-btn ghost" href="/guide">Imtihon yo'riqnomasi</a>
           </div>
           {% if not full_access %}<p class="f215-muted" style="margin-top:10px">Blok mock Pro va Ultra tariflarda ochiladi. Mavzu bo'yicha mashqlar bepul davom etadi.</p>{% endif %}
         </div>
@@ -52,7 +52,7 @@
       const same = s1.value === s2.value; err.hidden = !same; if (go) go.disabled = same;
     }
     s1.addEventListener("change", sync); s2.addEventListener("change", sync); sync();
-    if (go) go.addEventListener("click", () => { location.href = "/testlar/ishlash?block=" + s1.value + "," + s2.value; });
+    if (go) go.addEventListener("click", () => { location.href = "/tests/take?block=" + s1.value + "," + s2.value; });
   })();
   </script>
 </body>

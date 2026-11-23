@@ -51,10 +51,17 @@ ADMIN_TOKEN_EXPIRE_HOURS = 12  # foydalanuvchi sessiyasidan (30 kun) ANCHA qisqa
 # "/boshqaruv-7x9") .env fayldagi ADMIN_URL_PREFIX orqali o'zgartirishingiz
 # mumkin — kodga qaytib kirish shart emas. Qiymat "/" bilan boshlanishi va
 # oxirida "/" bo'lmasligi kerak.
-ADMIN_URL_PREFIX = os.getenv("ADMIN_URL_PREFIX", "/neo").strip()
+# v250: standart yo'l KODDA YOZILMAGAN — repo ochiq bo'lgani uchun. Aniq manzil Vercel/.env dagi
+# ADMIN_URL_PREFIX da turadi; u yo'q bo'lsa, maxfiy kalitdan hosil bo'ladigan taxmin qilib bo'lmaydigan yo'l olinadi.
+def _default_prefix() -> str:
+    import hashlib
+    return "/ctl-" + hashlib.sha256(("lz-admin-path|" + str(user_auth.SECRET_KEY)).encode()).hexdigest()[:10]
+
+
+ADMIN_URL_PREFIX = (os.getenv("ADMIN_URL_PREFIX") or "").strip() or _default_prefix()
 if not ADMIN_URL_PREFIX.startswith("/"):
     ADMIN_URL_PREFIX = "/" + ADMIN_URL_PREFIX
-ADMIN_URL_PREFIX = ADMIN_URL_PREFIX.rstrip("/") or "/neo"
+ADMIN_URL_PREFIX = ADMIN_URL_PREFIX.rstrip("/") or _default_prefix()
 
 
 import hashlib as _hashlib

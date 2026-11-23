@@ -444,7 +444,7 @@
     } else if (retry) {
       retry.style.display = "none";
     }
-    review.href = "/kabinet";
+    review.href = "/dashboard";
     review.textContent = "Kabinetga qaytish";
     review.style.display = canRetry ? "none" : "";
   }
@@ -519,7 +519,7 @@
 
     const resultsBtn = document.getElementById("quiz-celebrate-results-btn");
     if (data.quiz_id) {
-      resultsBtn.href = `/testlar/${data.quiz_id}/tahlil`;
+      resultsBtn.href = `/tests/${data.quiz_id}/review`;
     } else {
       resultsBtn.style.display = "none";
     }

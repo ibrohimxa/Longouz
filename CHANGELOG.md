@@ -1,3 +1,9 @@
+## v250
+- **Manzillar inglizchaga**: /dashboard, /tests, /tutor, /profile, /plans, /billing, /support, /subjects, /about, /register, /login va h.k. Eski o'zbekcha manzillar avtomatik (301) yangisiga yo'naltiriladi; fan sahifalari /subjects/mathematics, /subjects/uzbek-language …
+- **Admin manzili yashirildi**: yo'l kodda yozilmagan (muhit o'zgaruvchisi), ommaviy HTML/JS da izi yo'q, admin fayllari kirmagan odamga 404.
+- **Doim kirish so'raladi**: sessiya brauzer yopilganda tugaydi; manzil qo'lda yozilsa yoki xatcho'pdan ochilsa avtomatik kirib ketmaydi.
+- **LongoAI**: istalgan mavzuda chuqur o'ylab javob beradi (yuqori fikrlash darajasi), matn o'qish tezligida chiqadi.
+
 ## v249 — admin panel kichik telefonlarga to'liq moslashtirildi
 - Admin paneldagi barcha jadvallar (foydalanuvchilar, xabarlar, to'lovlar, savollar banki, tekshiruv, jurnal, sertifikatlar va boshqalar) telefonda kartochkaga aylanadi: har bir qiymat oldida ustun nomi yoziladi, hech bir ustun ekrandan chiqib yashirinmaydi.
 - Yorliqlar qatori, Moklar fanlari va mavzu qo'shish yorliqlari endi yon tomonga aylanmaydi — qatorga o'raladi.

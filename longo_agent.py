@@ -235,13 +235,13 @@ SUPPORT_SYSTEM = (
 )
 
 SITE_INFO = (
-    "LongoUZ bo'limlari: /kabinet — shaxsiy kabinet (natijalar, maqsad, statistika); /testlar — fan bo'yicha testlar, mavzular, mock (to'liq imtihon) "
-    "variantlari, DTM blok-test (/blok-test); /ustoz — AI repetitor (ovozli ham), faqat Pro va Ultra tarifda; /tahlil — natijalar tahlili; "
-    "/profil — ism, fan, maqsad, parol, sertifikatlar; /tariflar — Bepul, Pro (25 000 so'm/oy, yillik 2% chegirma — 294 000 so'm/yil), Ultra (40 000 so'm/oy, yillik 5% chegirma — 456 000 so'm/yil); /yordam — adminga xabar; "
-    "/qollanma — yo'riqnoma; /verify — sertifikatni QR/ID bilan tekshirish. Testlar va mavzular bepul. "
+    "LongoUZ bo'limlari: /dashboard — shaxsiy kabinet (natijalar, maqsad, statistika); /tests — fan bo'yicha testlar, mavzular, mock (to'liq imtihon) "
+    "variantlari, DTM blok-test (/block-test); /tutor — AI repetitor (ovozli ham), faqat Pro va Ultra tarifda; /analytics — natijalar tahlili; "
+    "/profile — ism, fan, maqsad, parol, sertifikatlar; /plans — Bepul, Pro (25 000 so'm/oy, yillik 2% chegirma — 294 000 so'm/yil), Ultra (40 000 so'm/oy, yillik 5% chegirma — 456 000 so'm/yil); /support — adminga xabar; "
+    "/guide — yo'riqnoma; /verify — sertifikatni QR/ID bilan tekshirish. Testlar va mavzular bepul. "
     "TO'LOV: tarif oynasida karta raqami va amal muddati kiritilsa tarif darhol ochiladi. "
     "Test paytida savol xato bo'lsa — savol yonidagi «Shikoyat» tugmasi; LongoAI uni tekshirib javob beradi. "
-    "Google bilan kirish mavjud. Parolni unutgan bo'lsa — /yordam orqali email bilan yozsin, admin yordam beradi. "
+    "Google bilan kirish mavjud. Parolni unutgan bo'lsa — /support orqali email bilan yozsin, admin yordam beradi. "
     "Natija qayta hisoblansa (savol tuzatilganda) ball faqat oshadi, kamaymaydi."
 )
 

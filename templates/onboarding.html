@@ -17,7 +17,7 @@
       {% include "_brandmark.html" %}
     </a>
     <nav class="site-nav">
-      <a href="/chiqish">Chiqish</a>
+      <a href="/logout">Chiqish</a>
     </nav>
   </header>
 
@@ -30,7 +30,7 @@
 
       {% if error %}<div class="form-error">{{ error }}</div>{% endif %}
 
-      <form method="post" action="/boshlash" id="onboarding-form">
+      <form method="post" action="/onboarding" id="onboarding-form">
         <input type="hidden" name="subject" id="selected-subject" required>
         <input type="hidden" name="certificate_type" value="dtm">
         <input type="hidden" name="level" value="ortacha">
