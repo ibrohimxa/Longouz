@@ -1,3 +1,6 @@
+## v254
+- Bosh sahifa: «9 000+ savol» tepasidagi odam rasmlari olib tashlandi.
+
 ## v252
 - robots.txt: bosh sahifa yuklaydigan ochiq /api manzillari (yangiliklar, statistika) Googlebot uchun ochildi.
 - Sayt nomi qidiruvda «LongoUz» ko'rinishida (WebSite, og:site_name).
