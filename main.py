@@ -682,7 +682,7 @@ async def home(request: Request):
     await _seo.auto_ping_once(VERSION_STR)
     return templates.TemplateResponse(request, "home.html", {
         "q_total_label": _question_total_label(qn), "seo_ld": _seo.home_ld(),
-        "page_title": "LongoUZ — DTM 2026, milliy sertifikat va IELTS'ga bepul onlayn tayyorgarlik",
+        "page_title": "LongoUz",
         "page_desc": ("LongoUZ — DTM 2026, milliy sertifikat va IELTS'ga sun'iy intellekt bilan bepul tayyorlanish platformasi: "
                       "8 fan, minglab izohli test savollari, DTM blok mock (189 ball), AI repetitor."),
         "canonical": "/",

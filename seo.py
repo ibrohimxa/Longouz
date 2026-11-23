@@ -351,7 +351,7 @@ async def fanlar_page(request: Request):
         "itemListElement": [{"@type": "ListItem", "position": i + 1, "url": f"{site()}/subjects/{s['slug']}", "name": s["name"]} for i, s in enumerate(subjects)]})
     return _templates().TemplateResponse(request, "seo_page.html", {
         "kind": "fanlar", "subjects": subjects, "q_total": q, "t_total": t, "ld": ld,
-        "page_title": "Barcha fanlar — DTM 2026 va milliy sertifikat testlari | LongoUZ",
+        "page_title": "Fanlar | LongoUz",
         "page_desc": f"8 ta fan bo'yicha {q} dan ortiq bepul test savoli: ona tili, matematika, tarix, ingliz tili, rus tili, kimyo, biologiya, fizika. DTM 2026 va milliy sertifikatga onlayn tayyorgarlik.",
         "canonical": "/subjects",
     })
@@ -377,7 +377,7 @@ async def fan_page(request: Request, slug: str):
     ld = ld_json(_crumbs([("Bosh sahifa", "/"), ("Fanlar", "/subjects"), (s["name"], f"/subjects/{s['slug']}")])) + ld_json(course)
     return _templates().TemplateResponse(request, "seo_page.html", {
         "kind": "fan", "s": s, "others": others, "ld": ld,
-        "page_title": f"{s['name']} testlari — DTM 2026 va milliy sertifikat | LongoUZ",
+        "page_title": f"{s['name']} | LongoUz",
         "page_desc": f"{s['name']}: {s['q']} ta test savoli, {s['t']} ta mavzu, har bir savolda izoh. {s['desc'][:150]}",
         "canonical": f"/subjects/{s['slug']}",
     })
@@ -392,7 +392,7 @@ async def haqida_page(request: Request):
     ld = ld_json(_crumbs([("Bosh sahifa", "/"), ("Platforma haqida", "/about")])) + ld_json(faq)
     return _templates().TemplateResponse(request, "seo_page.html", {
         "kind": "haqida", "faq": HOME_FAQ, "q_total": q, "t_total": t, "subjects": list(catalog().values()), "ld": ld,
-        "page_title": "LongoUZ haqida — DTM, milliy sertifikat va IELTS'ga AI bilan tayyorgarlik",
+        "page_title": "Haqida | LongoUz",
         "page_desc": "LongoUZ nima, kimlar uchun, qanday ishlaydi: mavzuli testlar, DTM blok mock (189 ball), AI repetitor, IELTS, tariflar va savol-javoblar.",
         "canonical": "/about",
     })

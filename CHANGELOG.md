@@ -1,3 +1,6 @@
+## v251
+- Qidiruvdagi sarlavhalar qisqartirildi: bosh sahifa «LongoUz», boshqalari «Fanlar | LongoUz» ko'rinishida.
+
 ## v250
 - **Manzillar inglizchaga**: /dashboard, /tests, /tutor, /profile, /plans, /billing, /support, /subjects, /about, /register, /login va h.k. Eski o'zbekcha manzillar avtomatik (301) yangisiga yo'naltiriladi; fan sahifalari /subjects/mathematics, /subjects/uzbek-language …
 - **Admin manzili yashirildi**: yo'l kodda yozilmagan (muhit o'zgaruvchisi), ommaviy HTML/JS da izi yo'q, admin fayllari kirmagan odamga 404.
