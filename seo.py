@@ -309,7 +309,7 @@ def home_ld() -> str:
     org = {
         "@context": "https://schema.org", "@type": "EducationalOrganization", "@id": base + "/#org",
         "name": "LongoUz", "alternateName": ["LongoUz", "Longo UZ", "longouz", "Longo"], "url": base + "/",
-        "logo": base + "/static/logo-owl.png", "image": base + "/static/logo-owl3d.png",
+        "logo": base + "/static/favicon-512.png", "image": base + "/static/logo-owl3d.png",
         "description": f"DTM 2026, milliy sertifikat va IELTS'ga AI yordamida bepul onlayn tayyorgarlik: 8 fan, {q} dan ortiq test savoli, {t} mavzu.",
         "areaServed": {"@type": "Country", "name": "Uzbekistan"}, "inLanguage": "uz",
         "knowsAbout": [v[0] for v in SUBJECT_INFO.values()] + ["DTM", "Milliy sertifikat", "IELTS", "Abituriyent"],

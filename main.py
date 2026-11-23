@@ -408,6 +408,15 @@ async def serve_qfig(name: str):
     return Response(data, media_type="image/png", headers={"Cache-Control": "public, max-age=31536000, immutable"})
 
 
+from fastapi.responses import FileResponse as _FR
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def _favicon_ico():
+    return _FR(os.path.join(BASE_DIR, "static", "favicon.ico"), media_type="image/x-icon",
+               headers={"Cache-Control": "public, max-age=86400"})
+
+
 app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
 
 
