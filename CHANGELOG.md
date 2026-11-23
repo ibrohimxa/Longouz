@@ -1,3 +1,8 @@
+## v256 — hamkorlar qatori "Qanday ishlaydi" ustiga ko'chirildi; telefon/planshet/kompyuter uchun moslashtirildi
+
+## v255
+- Bosh sahifa: «Bizning hamkorlarimiz» sekin aylanuvchi qator (LongoUz, SAT by Usmon, Saidxonov Academy, GitHub, Vercel). Sichqoncha ustiga kelsa to'xtaydi va kartochka oqdan yashilga o'tadi.
+
 ## v254
 - Bosh sahifa: «9 000+ savol» tepasidagi odam rasmlari olib tashlandi.
 
