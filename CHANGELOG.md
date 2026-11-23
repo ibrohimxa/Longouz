@@ -1,3 +1,7 @@
+## v252
+- robots.txt: bosh sahifa yuklaydigan ochiq /api manzillari (yangiliklar, statistika) Googlebot uchun ochildi.
+- Sayt nomi qidiruvda «LongoUz» ko'rinishida (WebSite, og:site_name).
+
 ## v251
 - Qidiruvdagi sarlavhalar qisqartirildi: bosh sahifa «LongoUz», boshqalari «Fanlar | LongoUz» ko'rinishida.
 

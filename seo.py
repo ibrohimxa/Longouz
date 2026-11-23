@@ -149,10 +149,11 @@ def totals() -> tuple[int, int]:
 # ---------------------------------------------------------------------------
 @router.get("/robots.txt", include_in_schema=False)
 async def robots_txt():
+    pub = ["Allow: /api/news", "Allow: /api/public/", "Allow: /api/site-stats"]   # bosh sahifa shularni yuklaydi — Google to'liq ko'rsin
     lines = ["# LongoUZ — DTM 2026, milliy sertifikat va IELTS'ga onlayn tayyorgarlik platformasi", ""]
     for bot in AI_BOTS:
-        lines += [f"User-agent: {bot}", "Allow: /"] + [f"Disallow: {p}" for p in PRIVATE] + [""]
-    lines += ["User-agent: *", "Allow: /"] + [f"Disallow: {p}" for p in PRIVATE] + [
+        lines += [f"User-agent: {bot}", "Allow: /"] + pub + [f"Disallow: {p}" for p in PRIVATE] + [""]
+    lines += ["User-agent: *", "Allow: /"] + pub + [f"Disallow: {p}" for p in PRIVATE] + [
         "", f"Sitemap: {site()}/sitemap.xml", f"# AI uchun qisqa ma'lumot: {site()}/llms.txt", ""]
     return PlainTextResponse("\n".join(lines), headers={"Cache-Control": "public, max-age=3600"})
 
@@ -307,13 +308,13 @@ def home_ld() -> str:
     q, t = totals()
     org = {
         "@context": "https://schema.org", "@type": "EducationalOrganization", "@id": base + "/#org",
-        "name": "LongoUZ", "alternateName": ["Longo UZ", "LongoUz", "longouz", "Longo"], "url": base + "/",
+        "name": "LongoUz", "alternateName": ["LongoUZ", "Longo UZ", "longouz", "Longo"], "url": base + "/",
         "logo": base + "/static/logo-owl.png", "image": base + "/static/logo-owl3d.png",
         "description": f"DTM 2026, milliy sertifikat va IELTS'ga AI yordamida bepul onlayn tayyorgarlik: 8 fan, {q} dan ortiq test savoli, {t} mavzu.",
         "areaServed": {"@type": "Country", "name": "Uzbekistan"}, "inLanguage": "uz",
         "knowsAbout": [v[0] for v in SUBJECT_INFO.values()] + ["DTM", "Milliy sertifikat", "IELTS", "Abituriyent"],
     }
-    web = {"@context": "https://schema.org", "@type": "WebSite", "@id": base + "/#site", "name": "LongoUZ",
+    web = {"@context": "https://schema.org", "@type": "WebSite", "@id": base + "/#site", "name": "LongoUz",
            "alternateName": ["Longo UZ", "longouz"], "url": base + "/", "inLanguage": "uz", "publisher": {"@id": base + "/#org"}}
     app = {"@context": "https://schema.org", "@type": "WebApplication", "name": "LongoUZ", "url": base + "/",
            "applicationCategory": "EducationalApplication", "operatingSystem": "Web",
