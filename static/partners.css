@@ -15,3 +15,5 @@
 @media (min-width: 1600px) { .pt-item { padding: 14px 26px 14px 16px; font-size: 1.1rem; } .pt-track { gap: 22px; } }
 @media (max-width: 560px) { .pt-track { animation-duration: 22s; gap: 12px; } .pt-item { padding: 9px 16px 9px 10px; font-size: .92rem; } .pt-ic { width: 32px; height: 32px; } }
 @media (prefers-reduced-motion: reduce) { .pt-track { animation: none; } .pt-marquee { overflow-x: auto; } }
+.pt-ic:has(img[src*="favicon-96"]) { background: transparent; box-shadow: none; border-radius: 50%; overflow: visible; }
+.pt-ic img[src*="favicon-96"] { width: 38px; height: 38px; }
