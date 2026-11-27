@@ -1,3 +1,8 @@
+## v268 — aniq baholash va ~820 ta yangi savol
+- Baholash: qisqa (to'liq bo'lmagan) testlarda ball endi bilim darajasi (Rash/IRT uslubi) va savollar qiyinligi bo'yicha haqiqiy imtihon tarkibida hisoblanadi — oson savollarni topish A/A+ bermaydi; 15 tadan kam savolda daraja berilmaydi ("taxminiy" deb ko'rsatiladi). To'liq mock rasmiy formula bo'yicha qoladi.
+- IELTS (Academic Reading jadvaliga yaqin) va CEFR chegaralari qattiqlashtirildi; tahlil sahifasidagi ball prognozi savol kam bo'lsa o'rtachaga yaqinlashtiriladi.
+- Eng kam savolli mavzularga ~820 ta yangi o'ylantiruvchi savol: matematika, fizika, kimyo, biologiya, ona tili va adabiyot, ingliz tili, tarix (hisob-kitoblar kod bilan tekshirilgan).
+
 ## v267 — 5 til, Google orqali kirish, profil rasmi, Pro/Ultra ko'rinish, neon to'lqinlar
 - Google orqali kirgandan keyin qayta parol so'ralmaydi (tashqi qaytish redirect'i "yangi tashrif" deb sessiyani o'chirardi); ma'lumotlar email orqali bitta akkauntda saqlanadi.
 - Sayt tillari: O'zbekcha (lotin), Ўзбекча (кирилл), English, Русский, Türkçe — yuqorida til tanlagich; ~2000 ta matn lug'ati, lug'atda yo'q matnlar (yangi savollar, xabarlar) Gemini bilan tarjima qilinib bazada keshlanadi. Admin panel tarjima qilinmaydi. LongoAI javoblari tanlangan tilda.

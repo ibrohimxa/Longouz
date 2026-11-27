@@ -34,12 +34,12 @@ NATIONAL_CERT_LEVELS = [
 ]
 NATIONAL_CERT_MIN = 46.0
 
-CEFR_BANDS = [
-    (90, "C2"),
-    (75, "C1"),
-    (60, "B2"),
-    (40, "B1"),
-    (20, "A2"),
+CEFR_BANDS = [            # v268: qattiqroq (avval 20% -> A2, 40% -> B1 berilardi)
+    (92, "C2"),
+    (80, "C1"),
+    (66, "B2"),
+    (50, "B1"),
+    (32, "A2"),
     (0, "A1"),
 ]
 
@@ -49,9 +49,9 @@ CEFR_BANDS = [
 # LongoUZ ichidagi mashq-testlari uchun mo'ljallangan, foydalanuvchiga
 # taxminiy yo'nalish beruvchi shkala. Sertifikatda ham shu narsa aniq
 # ko'rsatiladi ("taxminiy Band", rasmiy IELTS sertifikati emas).
-IELTS_BANDS = [
-    (95, 9.0), (90, 8.5), (85, 8.0), (80, 7.5), (70, 7.0),
-    (60, 6.5), (50, 6.0), (40, 5.5), (30, 5.0), (20, 4.5), (0, 4.0),
+IELTS_BANDS = [           # v268: IELTS Academic Reading rasmiy jadvaliga yaqin (40 savoldan: 39->9, 30->7, 23->6, 15->5)
+    (97.5, 9.0), (92.5, 8.5), (87.5, 8.0), (82.5, 7.5), (75, 7.0),
+    (67.5, 6.5), (57.5, 6.0), (47.5, 5.5), (37.5, 5.0), (32.5, 4.5), (25, 4.0), (15, 3.5), (0, 3.0),
 ]
 
 
@@ -121,17 +121,17 @@ def score_cefr(correct: int, total: int) -> dict:
 
 
 def score_ielts(correct: int, total: int) -> dict:
-    percent = _percent(correct, total)
-    band_score = 4.0
+    percent = (correct / total * 100) if total else 0
+    band_score = 3.0
     for threshold, score in IELTS_BANDS:
-        if percent >= threshold:
+        if percent + 1e-6 >= threshold:
             band_score = score
             break
     return {
         "mode": "ielts",
         "correct": correct,
         "total": total,
-        "percent": percent,
+        "percent": round(percent),
         "band_score": band_score,
         "label": f"IELTS Band {band_score}",
     }
@@ -199,6 +199,59 @@ def _diff(q: dict) -> int:
     return d if d in (1, 2, 3) else 2
 
 
+# ---------------------------------------------------------------------------
+# v268: QISQA (to'liq bo'lmagan) TESTLAR UCHUN ANIQ BAHOLASH.
+# Muammo: 5-10 ta (ko'pincha oson) savolli mashqda 8/10 to'g'ri javob to'g'ridan-to'g'ri 80 ball -> "A+" bo'lib
+# chiqardi. Haqiqiy imtihon (UzBMB) natijani Rash (IRT) modeli bilan hisoblaydi, shuning uchun bu yerda ham
+# o'quvchining bilim darajasi (theta) savollar qiyinligi va turi bo'yicha baholanadi, so'ng HAQIQIY imtihon
+# tarkibida (cells) kutiladigan ball hisoblanadi. Savol kam bo'lsa — baho ehtiyotkor (o'rtacha darajaga yaqin),
+# savol ko'p va qiyin bo'lsa — aniq. Oson savollarning hammasini topish A+ bermaydi.
+# ---------------------------------------------------------------------------
+import math as _m
+
+_B_DIFF = {1: -1.0, 2: 0.0, 3: 1.0}
+_TYPE_PARAM = {"c": (0.0, 0.20), "m": (0.3, 0.04), "o": (0.5, 0.0)}   # (qo'shimcha qiyinlik, taxmin ehtimoli)
+_PRIOR_MU, _PRIOR_SD = -0.35, 1.05
+MIN_GRADE_QUESTIONS = 15        # bundan kam savolda daraja (A+, A, B...) berilmaydi
+
+
+def _tkind(q: dict) -> str:
+    return {"closed": "c", "match": "m", "open": "o"}.get(q.get("qtype") or "closed", "c")
+
+
+def _p_item(theta: float, d: int, k: str) -> float:
+    extra, c = _TYPE_PARAM.get(k, (0.0, 0.2))
+    b = _B_DIFF.get(d, 0.0) + extra
+    return c + (1 - c) / (1 + _m.exp(-(theta - b)))
+
+
+def estimate_theta(items: list[dict]) -> float:
+    """MAP baho: theta ∈ [-4, 4], oldingi taqsimot N(-0.35, 1). Savol kam bo'lsa — o'rtachaga yaqin."""
+    best, best_v = _PRIOR_MU, -1e18
+    for i in range(-400, 401):
+        th = i / 100.0
+        v = -((th - _PRIOR_MU) ** 2) / (2 * _PRIOR_SD ** 2)
+        for q in items:
+            p = min(0.999, max(0.001, _p_item(th, _diff(q), _tkind(q))))
+            v += _m.log(p) if q.get("is_correct") else _m.log(1 - p)
+        if v > best_v:
+            best, best_v = th, v
+    return best
+
+
+def expected_exam_percent(theta: float, cells: list | None, points: dict | None = None, ball_by_diff: dict | None = None) -> float:
+    """Shu bilim darajasidagi o'quvchi haqiqiy imtihon tarkibida (cells) to'playdigan kutilgan foiz (0..100)."""
+    cells = cells or [("", 1, "c", 3), ("", 2, "c", 4), ("", 3, "c", 3)]
+    got = mx = 0.0
+    for _blk, d, k, n in cells:
+        w = (points or {}).get(k) if points else None
+        if w is None:
+            w = (ball_by_diff or {}).get(d, 1.0)
+        got += n * w * _p_item(theta, d, k)
+        mx += n * w
+    return round(got / mx * 100, 1) if mx else 0.0
+
+
 def _blocks_summary(items: list[dict], ball_of) -> list[dict]:
     order: list[str] = []
     agg: dict[str, dict] = {}
@@ -256,13 +309,18 @@ def score_session(subject: str, mode: str, items: list[dict], meta: dict | None 
         if full:
             ball = round(earned / cfg["max_raw"] * 100, 1)
         else:
-            ball = round(earned / possible * 100, 1) if possible else 0.0
+            # v268: qisqa test — bilim darajasi bo'yicha haqiqiy imtihondagi taxminiy ball (oson savollar A+ bermaydi)
+            ball = expected_exam_percent(estimate_theta(items), cfg.get("cells"), points=pts)
         level = ""
-        for thr, name in cfg["levels"]:
-            if ball >= thr:
-                level = name
-                break
+        if full or total >= MIN_GRADE_QUESTIONS:
+            for thr, name in cfg["levels"]:
+                if ball >= thr:
+                    level = name
+                    break
         label = f"{level} daraja · {ball} / 100 ball" if level else f"{ball} / 100 ball · daraja yo'q"
+        if not full:
+            label = (f"Taxminiy: {label}" if total >= MIN_GRADE_QUESTIONS
+                     else f"Taxminiy: {ball} / 100 ball · daraja uchun kamida {MIN_GRADE_QUESTIONS} ta savol kerak")
         benefit = next((r["specialty"] for r in cfg["benefits"] if r["level"] == (level or "—")), "")
         names = {"c": "Yopiq testlar (+1)", "m": "Moslashtirish (+2)", "o": "Ochiq format (+3)"}
         blocks = []
@@ -282,9 +340,12 @@ def score_session(subject: str, mode: str, items: list[dict], meta: dict | None 
         per = ER.HISTORY_CERT["ball_by_difficulty"]
         earned = sum(per[_diff(q)] for q in items if q["is_correct"])
         possible = sum(per[_diff(q)] for q in items)
-        ball = round(earned, 1) if full else (round(earned / possible * 100, 1) if possible else 0.0)
-        level = ER.national_level(ball)
+        ball = round(earned, 1) if full else expected_exam_percent(estimate_theta(items), cfg.get("cells"), ball_by_diff=per)
+        level = ER.national_level(ball) if (full or total >= MIN_GRADE_QUESTIONS) else ""
         label = (f"{level} daraja · {ball} / 100 ball" if level else f"{ball} / 100 ball · daraja yo'q")
+        if not full:
+            label = (f"Taxminiy: {label}" if total >= MIN_GRADE_QUESTIONS
+                     else f"Taxminiy: {ball} / 100 ball · daraja uchun kamida {MIN_GRADE_QUESTIONS} ta savol kerak")
         base.update({
             "mode": "certificate", "ball": ball, "max_ball": 100,
             "raw_ball": round(earned, 1), "raw_max": round(possible, 1),
@@ -306,19 +367,20 @@ def score_session(subject: str, mode: str, items: list[dict], meta: dict | None 
                 "blocks": _blocks_summary([{**q, "block": sect(q)} for q in items], lambda q: per_q.get(q["block"], 3.1)),
             })
             return base
-        ball = round(correct / total * ER.HISTORY_DTM["blocks"][1]["max"], 1)
-        base.update({"mode": "dtm", "ball": ball, "max_ball": 93.0, "label": f"{ball} / 93.0 ball"})
+        # v268: qisqa mashq — bilim darajasidan DTM'dagi taxminiy ball (oson savollar ballni sun'iy oshirmaydi)
+        ball = round(expected_exam_percent(estimate_theta(items), None) / 100 * ER.HISTORY_DTM["blocks"][1]["max"], 1)
+        base.update({"mode": "dtm", "ball": ball, "max_ball": 93.0, "label": f"Taxminiy: {ball} / 93.0 ball"})
         return base
 
     if subject in ER.VARIANT_SUBJECTS and mode == "dtm":
         variant = meta.get("variant") if meta.get("variant") in ("main", "second") else "main"
         per_q = cfg["per_question"][variant]
         mx_full = cfg["max_ball"][variant]
-        ball = round(correct * per_q, 1) if full else round(correct / total * mx_full, 1)
+        ball = round(correct * per_q, 1) if full else round(expected_exam_percent(estimate_theta(items), None) / 100 * mx_full, 1)
         mx = round(total * per_q, 1) if full else mx_full
         base.update({
             "mode": "dtm", "ball": ball, "max_ball": mx, "variant": variant,
-            "label": f"{ball} / {mx} ball",
+            "label": f"{ball} / {mx} ball" if full else f"Taxminiy: {ball} / {mx} ball",
             "blocks": [{"block": "", "name": "1-mutaxassislik fani (3.1 ball)" if variant == "main" else "2-mutaxassislik fani (2.1 ball)",
                         "correct": correct, "total": total, "ball": ball, "max": mx}],
         })

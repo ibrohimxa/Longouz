@@ -19,7 +19,7 @@ import exam_rules as ER
 logger = logging.getLogger(__name__)
 
 # Tayyor kontent versiyasi: oshirilsa yangi savollar/mavzular qo'shiladi (mavjudlari qayta yozilmaydi).
-CONTENT_VERSION = "v247a"
+CONTENT_VERSION = "v268a"
 
 _KIND_OF = {"closed": "c", "open": "o", "match": "m"}
 

@@ -184,6 +184,7 @@ async def user_analytics(user_id: int) -> dict:
             s["total"] += t
             s["seconds"] += secs
             s["recent"].append(_pct(c, t))
+            s.setdefault("recent_n", []).append(t)
     subjects = []
     for code in SUBJECT_ORDER:
         s = by_subject.get(code)
@@ -194,6 +195,10 @@ async def user_analytics(user_id: int) -> dict:
         rec = s["recent"][-5:]
         weights = list(range(1, len(rec) + 1))
         forecast = round(sum(r * w for r, w in zip(rec, weights)) / sum(weights), 1) if rec else None
+        if forecast is not None:
+            # v268: savol kam bo'lsa prognoz o'rtacha darajaga (35%) yaqinlashtiriladi — 5 ta savolda 100% "A+" bo'lib chiqmaydi
+            n_seen = sum((s.get("recent_n") or [])[-5:])
+            forecast = round((forecast * n_seen + 35.0 * 20) / (n_seen + 20), 1)
         older = s["recent"][-10:-5]
         trend = round((sum(rec) / len(rec)) - (sum(older) / len(older)), 1) if rec and older else 0.0
         subjects.append({"code": code, "name": _name(code), "attempts": s["attempts"], "total": s["total"], "correct": s["correct"],

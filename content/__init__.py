@@ -90,6 +90,14 @@ def load_packs():
         import logging
         logging.getLogger(__name__).warning("gen_v247 yuklanmadi: %s", e)
     try:
+        from . import gen_v268a, gen_v268b, gen_v268c   # v268: kam savolli mavzularga yangi savollar
+        gen_v268a.extend(packs)
+        gen_v268b.extend(packs)
+        gen_v268c.extend(packs)
+    except Exception as e:  # pragma: no cover
+        import logging
+        logging.getLogger(__name__).warning("gen_v268 yuklanmadi: %s", e)
+    try:
         sanitize_packs(packs)
     except Exception as e:  # pragma: no cover
         import logging
