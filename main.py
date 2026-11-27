@@ -56,6 +56,7 @@ import admin_auth
 # (manzil ADMIN_URL_PREFIX muhit o'zgaruvchisida — kodda yozilmagan).
 ADMIN_PREFIX = admin_auth.ADMIN_URL_PREFIX
 import oauth_google
+import i18n_service  # v267: sayt tillari (jadval create_all'dan oldin ro'yxatga olinadi)
 import turnstile
 import ielts_topics
 from auth import (
@@ -223,7 +224,7 @@ async def inject_fx_middleware(request: Request, call_next):
         j = body.find(b">", i) + 1 if i >= 0 else -1
         k = body.rfind(b"</head>")
         if j > 0 and k > j:
-            pre = f'<script src="/static/splash.js?v={v}"></script>'.encode()
+            pre = i18n_service.head_tags(v) + f'<script src="/static/splash.js?v={v}"></script>'.encode()
             post = (f'<link rel="stylesheet" href="/static/fx.css?v={v}">'
                     f'<script src="/static/fx.js?v={v}" defer></script>').encode()
             body = body[:j] + pre + body[j:k] + post + body[k:]
@@ -257,6 +258,10 @@ def _fresh_visit(request: Request) -> bool:
     boshqa sayt) ochilgan oddiy sahifa so'rovi bo'lsa True. Yangilash (F5) bunga kirmaydi."""
     if request.method != "GET" or COOKIE_NAME not in request.cookies:
         return False
+    # v267: Google (yoki boshqa tashqi) kirishdan qaytilgan zahoti — redirect zanjiri "cross-site" bo'lib qoladi,
+    # lekin bu yangi tashrif emas: foydalanuvchi hozirgina kirdi. 2 daqiqalik belgi bor bo'lsa chiqarib yubormaymiz.
+    if request.cookies.get("lz_just_in"):
+        return False
     h = request.headers
     if h.get("sec-fetch-dest", "document") != "document" or h.get("sec-fetch-mode", "navigate") != "navigate":
         return False
@@ -286,6 +291,11 @@ async def security_headers_middleware(request: Request, call_next):
         return Response(status_code=404)   # admin fayllari faqat kirgan adminga beriladi
     if _fresh_visit(request):
         request.state.force_logout = True
+    try:
+        import ai_tutor_prompt as _atp
+        _atp.SITE_LANG.set(i18n_service.lang_of(request))
+    except Exception:  # noqa: BLE001
+        pass
     response = await call_next(request)
     try:
         import question_figures as _qf
@@ -390,6 +400,10 @@ templates.env.globals["turnstile_active"] = turnstile.is_active_for_request
 templates.env.globals["turnstile_site_key"] = turnstile.site_key
 import seo as _seo  # noqa: E402  (v248: Google, Bing, Yandex va AI qidiruvlari uchun)
 templates.env.globals["seo_meta"] = _seo.meta
+import profile_style as _profile_style  # noqa: E402  (v267)
+templates.env.globals["user_prefs"] = _profile_style.load
+templates.env.globals["user_prefs_css"] = lambda u: _profile_style.css(_profile_style.load(u)) if u else ""
+templates.env.globals["banner_bg"] = lambda code: _profile_style.BANNERS.get(code, ("", "", ""))[2]
 app.include_router(_seo.router)
 @app.get("/static/qfig/{name}")
 async def serve_qfig(name: str):
@@ -448,6 +462,21 @@ def _kick_seed(request: Request):
 
     import asyncio as _asyncio
     _SEED_TASK = _asyncio.create_task(_run())
+
+
+class _I18nReq(BaseModel):
+    lang: str = Field("en", max_length=5)
+    items: list[str] = Field(default_factory=list, max_length=60)
+
+
+@app.post("/api/i18n/translate")
+@limiter.limit("40/minute")
+async def api_i18n_translate(request: Request, body: _I18nReq):
+    """v267: lug'atda yo'q matnlarni tarjima qiladi (keshlangan). Sayt tillari: en, ru, tr."""
+    if request.headers.get("x-requested-with") != "fetch":
+        raise HTTPException(status_code=400, detail="Noto'g'ri so'rov.")
+    items = [x for x in body.items if isinstance(x, str)][:60]
+    return {"items": await i18n_service.translate(body.lang, items)}
 
 
 @app.get("/api/site-stats")
@@ -3105,8 +3134,11 @@ async def profile_page(request: Request):
     usage = await db.get_ai_usage_status(user.id)
     plan_limits = {p: db.get_plan_limits(p) for p in ("free", "pro", "ultra")}
 
+    import profile_style as _ps
     return templates.TemplateResponse(request, "profile.html", {
         "user": user,
+        "prefs": _ps.load(user),
+        "popts": _ps.options(user.plan or "free"),
         "stats": stats,
         "history": history,
         "certificates": certificates,
@@ -3155,6 +3187,49 @@ async def api_profile_update(request: Request, body: ProfileUpdateRequest):
     await db.update_user_profile(user.id, first_name=name, daily_goal=body.daily_goal,
                                  target_percent=body.target_percent, avatar_color=body.avatar_color)
     return {"ok": True}
+
+
+class _AvatarReq(BaseModel):
+    image: str = Field("", max_length=200_000)
+
+
+@app.post("/api/profile/avatar")
+@limiter.limit("20/minute")
+async def api_profile_avatar(request: Request, body: _AvatarReq):
+    """v267: profil rasmini yuklash (brauzerda 256×256 ga kichraytiriladi) yoki o'chirish (bo'sh satr)."""
+    import profile_style as _ps
+    user = await require_user(request)
+    _require_fetch_header(request)
+    img = (body.image or "").strip()
+    if img and (len(img) > _ps.AVATAR_MAX or not _ps.AVATAR_RE.match(img)):
+        raise HTTPException(status_code=400, detail="Rasm formati JPG, PNG, WebP yoki GIF bo'lsin.")
+    await db.update_user_avatar(user.id, img)
+    return {"ok": True}
+
+
+@app.post("/api/profile/prefs")
+@limiter.limit("40/minute")
+async def api_profile_prefs(request: Request):
+    """v267: shaxsiy ko'rinish (rang, ramka, muqova, bio...) — tarifga qarab tekshiriladi."""
+    import json as _j
+    import profile_style as _ps
+    user = await require_user(request)
+    _require_fetch_header(request)
+    try:
+        data = await request.json()
+    except Exception:  # noqa: BLE001
+        raise HTTPException(status_code=400, detail="Noto'g'ri so'rov.")
+    if not isinstance(data, dict):
+        raise HTTPException(status_code=400, detail="Noto'g'ri so'rov.")
+    if "bio" in data and data["bio"]:
+        data["bio"] = prompt_safety.sanitize_user_text(str(data["bio"]), 80)
+    upd, err = _ps.validate(data, user.plan or "free")
+    if upd is None:
+        raise HTTPException(status_code=403, detail=err)
+    cur = _ps.load(user)
+    cur.update(upd)
+    await db.update_user_prefs(user.id, _j.dumps(cur, ensure_ascii=False))
+    return {"ok": True, "prefs": cur, "css": _ps.css(cur)}
 
 
 @app.post("/api/profile/password")

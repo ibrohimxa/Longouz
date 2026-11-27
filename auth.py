@@ -140,3 +140,5 @@ def set_session_cookie(response, token: str):
         samesite=COOKIE_SAMESITE,
         # v250: max_age yo'q — brauzer yopilganda sessiya tugaydi (doim qayta kirish so'raladi)
     )
+    # v267: hozirgina kirildi — Google'dan qaytish redirect'i "tashqi tashrif" deb sessiyani o'chirmasin
+    response.set_cookie("lz_just_in", "1", max_age=120, httponly=True, secure=COOKIE_SECURE, samesite="lax")

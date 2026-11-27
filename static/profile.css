@@ -30,3 +30,60 @@
 .btn-secondary { display: inline-block; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 10px 16px; font-weight: 600; cursor: pointer; text-decoration: none; }
 .btn-secondary:hover { border-color: var(--accent-green); }
 @media (max-width: 760px) { .pf-grid { grid-template-columns: 1fr; } }
+
+/* ============ v267: profil muqovasi, rasm, shaxsiy ko'rinish ============ */
+.pf-hero { position: relative; display: flex; align-items: center; gap: 20px; padding: 22px 24px; margin: 4px 0 18px; border-radius: 20px;
+  background: linear-gradient(135deg, rgba(29,239,106,.10), rgba(29,239,106,.02)); border: 1px solid var(--line); overflow: hidden; }
+.pf-hero.has-banner { background: var(--pf-banner); border-color: transparent; color: #fff; min-height: 150px; }
+.pf-hero.has-banner::after { content: ""; position: absolute; inset: auto 0 0 0; height: 60%; background: linear-gradient(transparent, rgba(0,0,0,.35)); pointer-events: none; }
+.pf-hero > * { position: relative; z-index: 1; }
+.pf-hero h1 { margin: 0; font-size: 1.6rem; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.pf-hero .pf-sub { margin: 6px 0 0; color: var(--ink-soft); }
+.pf-hero.has-banner .pf-sub, .pf-hero.has-banner .pf-bio { color: rgba(255,255,255,.85); }
+.pf-bio { margin: 6px 0 0; font-weight: 600; color: var(--accent-green); }
+.pf-hero-avatar { width: 96px; height: 96px; flex: none; border-radius: 50%; display: grid; place-items: center; font: 700 2.4rem var(--font-display); color: #07130b; }
+.pf-hero-avatar img, .pf-avatar img, .app-header-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
+.pf-avatar.has-img, .pf-hero-avatar.has-img, .app-header-avatar.has-img { background: #0b1a11; overflow: visible; }
+.pf-photo { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 12px; }
+.pf-photo-btn { cursor: pointer; }
+.pf-note-inline { color: var(--ink-soft); font-size: .78rem; }
+
+/* shaxsiy ko'rinish kartasi */
+.pf-tag { display: inline-block; padding: 2px 7px; border-radius: 6px; font-size: .66rem; font-weight: 800; letter-spacing: .06em; vertical-align: middle; }
+.pf-tag-pro { background: rgba(61,169,255,.16); color: #5cb8ff; border: 1px solid rgba(61,169,255,.35); }
+.pf-tag-ultra { background: linear-gradient(135deg, rgba(250,204,21,.22), rgba(245,158,11,.12)); color: #fbbf24; border: 1px solid rgba(250,204,21,.4); }
+.pf-opt { padding: 14px 0; border-top: 1px dashed var(--line); }
+.pf-opt-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-weight: 700; font-size: .92rem; }
+.pf-swatches, .pf-chips, .pf-banners, .pf-emojis { display: flex; flex-wrap: wrap; gap: 10px; }
+.pf-swatch { position: relative; width: 38px; height: 38px; border-radius: 50%; border: 2px solid transparent; background: none; padding: 3px; cursor: pointer; transition: transform .2s; }
+.pf-swatch i { display: block; width: 100%; height: 100%; border-radius: 50%; background: var(--sw); box-shadow: 0 0 12px color-mix(in srgb, var(--sw) 55%, transparent); }
+.pf-swatch:hover { transform: scale(1.1); }
+.pf-swatch.is-on { border-color: var(--sw); }
+.pf-chip { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px 8px 8px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font-weight: 600; cursor: pointer; font: 600 .86rem var(--font-body); }
+.pf-chip.is-on { border-color: var(--accent-green); background: color-mix(in srgb, var(--accent-green) 12%, var(--bg)); }
+.pf-chip-av { width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, #2b5f3c, #0e2a18); flex: none; }
+.pf-chip-av.lz-frame-aurora::before, .pf-chip-av.lz-frame-gold::before { inset: -3px; }
+.pf-chip-av.lz-frame-gold::after { top: -10px; font-size: 10px; }
+.pf-chip-av.lz-frame-neon { box-shadow: 0 0 0 2px var(--accent-green), 0 0 8px var(--accent-green); }
+.pf-chip-av.lz-frame-double { box-shadow: 0 0 0 1px var(--bg), 0 0 0 2px var(--accent-green), 0 0 0 3px var(--bg), 0 0 0 4px var(--accent-green); }
+.pf-banner { position: relative; width: 128px; height: 64px; border-radius: 12px; border: 2px solid var(--line); background: var(--bg); color: #fff; cursor: pointer; display: flex; align-items: flex-end; padding: 6px 8px; font: 700 .78rem var(--font-body); text-shadow: 0 1px 4px rgba(0,0,0,.6); }
+.pf-banner:first-child { color: var(--ink); text-shadow: none; }
+.pf-banner.is-on { border-color: var(--accent-green); box-shadow: 0 0 14px color-mix(in srgb, var(--accent-green) 45%, transparent); }
+.pf-emoji { width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); font-size: 1.2rem; cursor: pointer; color: var(--ink-soft); }
+.pf-emoji.is-on { border-color: var(--accent-green); background: color-mix(in srgb, var(--accent-green) 14%, var(--bg)); }
+.is-locked { opacity: .55; }
+.pf-lock { position: absolute; right: -4px; top: -4px; width: 16px; height: 16px; border-radius: 50%; background: #0b1a11 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23fbbf24'%3E%3Cpath d='M7 10V7a5 5 0 0110 0v3h1a1 1 0 011 1v9a1 1 0 01-1 1H6a1 1 0 01-1-1v-9a1 1 0 011-1h1zm2 0h6V7a3 3 0 00-6 0v3z'/%3E%3C/svg%3E") center/10px no-repeat; border: 1px solid rgba(250,204,21,.5); }
+.pf-chip .pf-lock { position: static; display: inline-block; }
+.pf-bio-form { display: flex; gap: 10px; flex-wrap: wrap; }
+.pf-bio-form input { flex: 1 1 240px; font: 500 .95rem var(--font-body); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.pf-opt-row { display: flex; flex-wrap: wrap; gap: 12px 22px; }
+.pf-switch { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 600; font-size: .9rem; }
+.pf-switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.pf-switch i { width: 42px; height: 24px; border-radius: 99px; background: var(--line); position: relative; transition: background .2s; flex: none; }
+.pf-switch i::after { content: ""; position: absolute; left: 3px; top: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .2s; }
+.pf-switch input:checked + i { background: var(--accent-green); box-shadow: 0 0 12px color-mix(in srgb, var(--accent-green) 50%, transparent); }
+.pf-switch input:checked + i::after { transform: translateX(18px); }
+.pf-switch input:focus-visible + i { outline: 2px solid var(--accent-green); outline-offset: 2px; }
+.pf-unlock { display: inline-block; margin-top: 12px; font-weight: 700; color: #fbbf24; text-decoration: none; }
+.pf-unlock:hover { text-decoration: underline; }
+@media (max-width: 560px) { .pf-hero { flex-direction: column; align-items: flex-start; padding: 18px; } .pf-hero-avatar { width: 80px; height: 80px; } .pf-banner { width: calc(50% - 5px); } }

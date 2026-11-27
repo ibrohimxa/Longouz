@@ -93,6 +93,22 @@ DISPLAY_RULES = (
 )
 
 
+import contextvars as _cv
+
+# v267: saytda tanlangan til (cookie lz_lang) — LongoAI javoblarini shu tilda yozadi
+SITE_LANG: _cv.ContextVar[str] = _cv.ContextVar("lz_site_lang", default="uz")
+_SITE_LANG_RULE = {
+    "en": "SAYT TILI — INGLIZ: foydalanuvchi saytni ingliz tilida ishlatmoqda. Barcha javoblarni sof, tabiiy INGLIZ tilida yozing "
+          "(fan atamalari, formulalar o'zgarmaydi). O'quvchi boshqa tilda yozsa ham inglizcha javob bering, faqat u aniq boshqa tilni so'rasa — o'shanda.",
+    "ru": "SAYT TILI — RUS: foydalanuvchi saytni rus tilida ishlatmoqda. Barcha javoblarni sof, tabiiy RUS tilida yozing "
+          "(formulalar o'zgarmaydi). Faqat o'quvchi aniq boshqa tilni so'rasa — o'sha tilda.",
+    "tr": "SAYT TILI — TURK: foydalanuvchi saytni turk tilida ishlatmoqda. Barcha javoblarni sof, tabiiy TURK tilida (Türkçe) yozing "
+          "(formulalar o'zgarmaydi). Faqat o'quvchi aniq boshqa tilni so'rasa — o'sha tilda.",
+    "uzc": "SAYT TILI — O'ZBEK (KIRILL): barcha javoblarni o'zbek tilida, KIRILL yozuvida yozing (масалан: «Тўғри жавоб — B»). "
+           "Formulalar va lotin harfli belgilar (x, y, sin) o'zgarmaydi.",
+}
+
+
 def build_system_prompt(subject: str, level: str | None, certificate_type: str | None,
                         effort: str = "normal", lang: str | None = None, spoken: bool = True) -> str:
     subj = SUBJECT_NAMES_UZ.get(subject, "fan")
@@ -187,6 +203,9 @@ def build_system_prompt(subject: str, level: str | None, certificate_type: str |
             "Suhbat o'zbek tilida boradi, sof va tabiiy o'zbekcha gapiring (chet tili darsida misollar o'sha tilda). "
             "Buni o'quvchiga e'lon qilmang, tilingiz haqida izoh bermang."
         )
+    _site = SITE_LANG.get()
+    if _site in _SITE_LANG_RULE and not (lang_code == "en" and certificate_type == "ielts"):
+        parts.append(_SITE_LANG_RULE[_site])
     if SUBJECT_GUIDE.get(subject):
         parts.append(SUBJECT_GUIDE[subject])
     parts.append(EXAM_FORMATS)

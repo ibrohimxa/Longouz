@@ -80,7 +80,13 @@ html[data-theme="light"] .au-card{background:#fff;box-shadow:0 24px 60px rgba(4,
 .au-reg-right img{position:relative}
 .au-reg-right img{display:block;width:min(100%,440px);height:auto;border-radius:24px;
   -webkit-mask-image:radial-gradient(ellipse 70% 68% at 50% 50%,#000 46%,transparent 96%);mask-image:radial-gradient(ellipse 70% 68% at 50% 50%,#000 46%,transparent 96%)}
-html[data-theme="light"] .au-reg-right img{border-radius:28px;-webkit-mask-image:none;mask-image:none;box-shadow:0 20px 50px rgba(5,40,40,.3)}
+html[data-theme="light"] .au-reg-right img{border-radius:32px;-webkit-mask-image:radial-gradient(ellipse 60% 58% at 50% 50%,#000 38%,transparent 88%);mask-image:radial-gradient(ellipse 60% 58% at 50% 50%,#000 38%,transparent 88%);box-shadow:none}
+/* v267: katta ekranda boyqush atrofidagi chegara — keskin och yashil emas, yumshoq to'q yashil nur; ramka chizig'i yo'q */
+.au-reg-right img{border:0;outline:0;-webkit-mask-image:radial-gradient(ellipse 66% 64% at 50% 50%,#000 40%,transparent 92%);mask-image:radial-gradient(ellipse 66% 64% at 50% 50%,#000 40%,transparent 92%)}
+.au-reg-right::before{background:radial-gradient(closest-side,rgba(10,90,46,.26),rgba(6,50,26,.12) 55%,transparent 80%)}
+html[data-theme="light"] .au-reg-right::before{background:radial-gradient(closest-side,rgba(12,110,56,.16),rgba(12,110,56,.05) 60%,transparent 82%)}
+.au-card{border-color:rgba(61,255,126,.14)}
+html[data-theme="light"] .au-card{border-color:rgba(14,120,60,.16)}
 
 /* KIRISH: katta bo'lingan karta */
 .au-log{position:relative;z-index:1;width:min(1142px,100%);display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--a-line);border-radius:20px;overflow:hidden;

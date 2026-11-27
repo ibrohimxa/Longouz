@@ -402,6 +402,9 @@ class WebUser(Base):
     avatar_color: Mapped[str] = mapped_column(String(12), default="")
     daily_goal: Mapped[int] = mapped_column(Integer, default=10)        # kuniga nechta savol
     target_percent: Mapped[int] = mapped_column(Integer, default=90)    # maqsadli o'rtacha natija, %
+    # v267: profil rasmi (kichik JPEG/WEBP data-URL) va shaxsiy ko'rinish sozlamalari (JSON; Pro/Ultra imkoniyatlari)
+    avatar_img: Mapped[str] = mapped_column(Text, default="")
+    prefs: Mapped[str] = mapped_column(Text, default="")
 
     # --- Balans (hamyon) — hozircha faqat demo/vizual to'ldirish, haqiqiy
     # to'lov provayderi (Click/Paynet/SQB) ulangandan keyin real bo'ladi ---
@@ -1457,7 +1460,8 @@ async def _migrate_missing_columns():
             await conn.execute(text("ALTER TABLE web_users ADD COLUMN ai_messages_today INTEGER DEFAULT 0"))
             logger.info("Migratsiya: web_users.ai_messages_today ustuni qo'shildi.")
         for col_name, ddl in (("avatar_color", "VARCHAR(12) DEFAULT ''"), ("daily_goal", "INTEGER DEFAULT 10"),
-                              ("target_percent", "INTEGER DEFAULT 90")):
+                              ("target_percent", "INTEGER DEFAULT 90"), ("avatar_img", "TEXT DEFAULT ''"),
+                              ("prefs", "TEXT DEFAULT ''")):
             if col_name not in existing_columns:
                 await conn.execute(text(f"ALTER TABLE web_users ADD COLUMN {col_name} {ddl}"))
                 logger.info("Migratsiya: web_users.%s ustuni qo'shildi.", col_name)
@@ -3500,6 +3504,28 @@ async def update_user_profile(user_id: int, first_name: str | None = None, daily
             user.target_percent = max(10, min(100, int(target_percent)))
         if avatar_color is not None and (avatar_color in AVATAR_COLORS or avatar_color == ""):
             user.avatar_color = avatar_color
+        await session.commit()
+    _cache_invalidate(user_id)
+
+
+async def update_user_avatar(user_id: int, data_url: str) -> None:
+    """v267: profil rasmi ('' — o'chirish)."""
+    async with async_session() as session:
+        user = (await session.execute(select(WebUser).where(WebUser.id == user_id))).scalar_one_or_none()
+        if user is None:
+            return
+        user.avatar_img = data_url or ""
+        await session.commit()
+    _cache_invalidate(user_id)
+
+
+async def update_user_prefs(user_id: int, prefs_json: str) -> None:
+    """v267: shaxsiy ko'rinish sozlamalari (JSON matn)."""
+    async with async_session() as session:
+        user = (await session.execute(select(WebUser).where(WebUser.id == user_id))).scalar_one_or_none()
+        if user is None:
+            return
+        user.prefs = prefs_json[:2000]
         await session.commit()
     _cache_invalidate(user_id)
 

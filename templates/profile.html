@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css?v=246">
-  <link rel="stylesheet" href="/static/profile.css?v=246">
+  <link rel="stylesheet" href="/static/profile.css?v=267">
   <script src="/static/theme-init.js?v=247"></script>
 </head>
 <body data-logged-in="true">
@@ -21,19 +21,23 @@
     <div class="app-content">
 
       {% include "_announcement_banner.html" %}
-      <div class="app-topbar">
-        <div>
-          <h1>{{ user.first_name or "Foydalanuvchi" }}
+      <section class="pf-hero{% if prefs.banner != 'none' %} has-banner{% endif %}"{% if prefs.banner != 'none' %} style="--pf-banner: {{ banner_bg(prefs.banner) }}"{% endif %}>
+        <div class="pf-hero-avatar lz-frame-{{ prefs.frame }}{% if user.avatar_img %} has-img{% endif %}" id="pf-hero-avatar"{% if not user.avatar_img %} style="background: {{ user.avatar_color or 'var(--accent-green)' }};"{% endif %}>
+          {% if user.avatar_img %}<img src="{{ user.avatar_img }}" alt="" width="96" height="96">{% else %}<span>{{ ((user.first_name or "?")[0])|upper }}</span>{% endif %}
+        </div>
+        <div class="pf-hero-text">
+          <h1><span translate="no" class="{% if prefs.glow %}lz-name-glow{% endif %}">{{ user.first_name or "Foydalanuvchi" }}</span>{% if prefs.badge %} <span class="lz-badge">{{ prefs.badge }}</span>{% endif %}
             <span class="plan-badge plan-badge-{{ user.plan }}">{{ user.plan|upper }}</span>
           </h1>
+          {% if prefs.bio %}<p class="pf-bio" translate="no">{{ prefs.bio }}</p>{% endif %}
           {% set _lv = {"boshlangich": "Boshlang'ich", "ortacha": "O'rtacha", "yuqori": "Yuqori"} %}
           {% set _parts = [] %}
           {% if subject_name and subject_name|string not in ("None", "") %}{% set _ = _parts.append(subject_name) %}{% endif %}
           {% if stats.level %}{% set _ = _parts.append((_lv.get(stats.level) or stats.level|capitalize) ~ " daraja") %}{% endif %}
           {% if stats.certificate_type and stats.certificate_type != 'none' %}{% set _ = _parts.append(stats.certificate_type|upper ~ " tayyorgarligi") %}{% endif %}
-          <p>{{ _parts|join(" · ") if _parts else "Fan va darajani pastdagi bo'limda tanlang" }}</p>
+          <p class="pf-sub">{{ _parts|join(" · ") if _parts else "Fan va darajani pastdagi bo'limda tanlang" }}</p>
         </div>
-      </div>
+      </section>
 
       <div class="stat-grid">
         <div class="stat-card">
@@ -61,12 +65,17 @@
         <article class="pf-card pf-card-wide">
           <header class="pf-card-head"><h3>Profil ma'lumotlari</h3><span class="pf-msg" id="pf-msg-profile" role="status"></span></header>
           <div class="pf-me">
-            <div class="pf-avatar" id="pf-avatar" style="background: {{ user.avatar_color or 'var(--accent-green)' }};">{{ ((user.first_name or "?")[0])|upper }}</div>
+            <div class="pf-avatar lz-frame-{{ prefs.frame }}{% if user.avatar_img %} has-img{% endif %}" id="pf-avatar"{% if not user.avatar_img %} style="background: {{ user.avatar_color or 'var(--accent-green)' }};"{% endif %}>{% if user.avatar_img %}<img src="{{ user.avatar_img }}" alt="" width="64" height="64">{% else %}{{ ((user.first_name or "?")[0])|upper }}{% endif %}</div>
             <div class="pf-me-info">
-              <strong>{{ user.first_name or "Foydalanuvchi" }}</strong>
+              <strong translate="no">{{ user.first_name or "Foydalanuvchi" }}</strong>
               <span>{{ user.email }}</span>
               <small>A'zo bo'lgan sana: {{ user.joined_at.strftime("%d.%m.%Y") }} · <span class="plan-badge plan-badge-{{ user.plan }}">{{ user.plan|upper }}</span></small>
             </div>
+          </div>
+          <div class="pf-photo">
+            <label class="btn-secondary pf-photo-btn"><input type="file" id="pf-photo-input" accept="image/png,image/jpeg,image/webp,image/gif" hidden>Rasm yuklash</label>
+            <button type="button" class="btn-secondary pf-photo-del" id="pf-photo-del"{% if not user.avatar_img %} hidden{% endif %}>Rasmni o'chirish</button>
+            <small class="pf-note-inline">Rasm avtomatik kesilib, kichraytiriladi (JPG, PNG, WebP).</small>
           </div>
           <div class="pf-colors" role="radiogroup" aria-label="Avatar rangi">
             {% for c in avatar_colors %}
@@ -78,6 +87,65 @@
             <label class="pf-field"><span>Email (o'zgartirib bo'lmaydi)</span><input type="email" value="{{ user.email }}" disabled></label>
             <button type="submit" class="btn-primary">Saqlash</button>
           </form>
+        </article>
+
+        <article class="pf-card pf-card-wide pf-style" id="pf-style">
+          <header class="pf-card-head"><h3>Shaxsiy ko'rinish</h3><span class="pf-msg" id="pf-msg-style" role="status"></span></header>
+          <p class="pf-note">Saytni o'zingizga moslang. <b class="pf-tag pf-tag-pro">PRO</b> va <b class="pf-tag pf-tag-ultra">ULTRA</b> belgili imkoniyatlar shu tariflarda ochiladi.</p>
+
+          <div class="pf-opt">
+            <div class="pf-opt-head"><span>Sayt rangi</span><b class="pf-tag pf-tag-pro">PRO</b></div>
+            <div class="pf-swatches" role="radiogroup" aria-label="Sayt rangi">
+              {% for a in popts.accents %}
+              <button type="button" class="pf-swatch{% if prefs.accent == a.code %} is-on{% endif %}{% if not a.ok %} is-locked{% endif %}" data-pref="accent" data-val="{{ a.code }}" data-need="{{ a.need }}" style="--sw: {{ a.color }}" title="{{ a.name }}{% if not a.ok %} — {{ a.need|upper }}{% endif %}" aria-label="{{ a.name }}"><i></i>{% if not a.ok %}<em class="pf-lock" aria-hidden="true"></em>{% endif %}</button>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="pf-opt">
+            <div class="pf-opt-head"><span>Avatar ramkasi</span><b class="pf-tag pf-tag-pro">PRO</b></div>
+            <div class="pf-chips">
+              {% for f in popts.frames %}
+              <button type="button" class="pf-chip{% if prefs.frame == f.code %} is-on{% endif %}{% if not f.ok %} is-locked{% endif %}" data-pref="frame" data-val="{{ f.code }}" data-need="{{ f.need }}"><span class="pf-chip-av lz-frame-{{ f.code }}"></span>{{ f.name }}{% if not f.ok %} <em class="pf-lock" aria-hidden="true"></em>{% endif %}</button>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="pf-opt">
+            <div class="pf-opt-head"><span>Holat satri (bio)</span><b class="pf-tag pf-tag-pro">PRO</b></div>
+            <form class="pf-bio-form" id="pf-bio-form">
+              <input type="text" name="bio" maxlength="80" value="{{ prefs.bio }}" placeholder="Masalan: DTM 2027 — 189 ball sari!"{% if not popts.pro %} disabled{% endif %}>
+              <button type="submit" class="btn-secondary"{% if not popts.pro %} disabled{% endif %}>Saqlash</button>
+            </form>
+          </div>
+
+          <div class="pf-opt pf-opt-row">
+            <label class="pf-switch{% if not popts.pro %} is-locked{% endif %}"><input type="checkbox" data-pref="font" data-on="large" data-off="normal"{% if prefs.font == 'large' %} checked{% endif %}{% if not popts.pro %} disabled{% endif %}><i></i>Katta shrift <b class="pf-tag pf-tag-pro">PRO</b></label>
+            <label class="pf-switch{% if not popts.pro %} is-locked{% endif %}"><input type="checkbox" data-pref="fx"{% if prefs.fx %} checked{% endif %}{% if not popts.pro %} disabled{% endif %}><i></i>Neon to'lqin effektlari <b class="pf-tag pf-tag-pro">PRO</b></label>
+            <label class="pf-switch{% if not popts.ultra %} is-locked{% endif %}"><input type="checkbox" data-pref="glow"{% if prefs.glow %} checked{% endif %}{% if not popts.ultra %} disabled{% endif %}><i></i>Ism ustida neon nur <b class="pf-tag pf-tag-ultra">ULTRA</b></label>
+          </div>
+
+          <div class="pf-opt">
+            <div class="pf-opt-head"><span>Profil muqovasi</span><b class="pf-tag pf-tag-ultra">ULTRA</b></div>
+            <div class="pf-banners">
+              {% for b in popts.banners %}
+              <button type="button" class="pf-banner{% if prefs.banner == b.code %} is-on{% endif %}{% if not b.ok %} is-locked{% endif %}" data-pref="banner" data-val="{{ b.code }}" data-need="{{ b.need }}"{% if b.bg %} style="background: {{ b.bg }}"{% endif %}><span>{{ b.name }}</span>{% if not b.ok %}<em class="pf-lock" aria-hidden="true"></em>{% endif %}</button>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="pf-opt">
+            <div class="pf-opt-head"><span>Profil belgisi</span><b class="pf-tag pf-tag-ultra">ULTRA</b></div>
+            <div class="pf-emojis">
+              <button type="button" class="pf-emoji{% if not prefs.badge %} is-on{% endif %}{% if not popts.ultra %} is-locked{% endif %}" data-pref="badge" data-val="" data-need="ultra">∅</button>
+              {% for e in popts.badges %}
+              <button type="button" class="pf-emoji{% if prefs.badge == e %} is-on{% endif %}{% if not popts.ultra %} is-locked{% endif %}" data-pref="badge" data-val="{{ e }}" data-need="ultra" translate="no">{{ e }}</button>
+              {% endfor %}
+            </div>
+          </div>
+          {% if not popts.ultra %}
+          <a class="pf-unlock" href="/plans?plan={{ 'ultra' if popts.pro else 'pro' }}">{{ "Ultra'ga o'ting — barcha imkoniyatlar ochiladi" if popts.pro else "Pro'ga o'ting — rang, ramka va boshqa imkoniyatlar ochiladi" }} →</a>
+          {% endif %}
         </article>
 
         <article class="pf-card">
@@ -364,6 +432,6 @@
   <script src="/static/devtools-guard.js?v=246"></script>
   <script src="/static/app.js?v=246"></script>
   <script src="/static/owl-chat.js?v=246"></script>
-  <script src="/static/profile.js?v=246"></script>
+  <script src="/static/profile.js?v=267"></script>
 </body>
 </html>

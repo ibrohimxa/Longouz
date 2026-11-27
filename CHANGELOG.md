@@ -1,3 +1,10 @@
+## v267 — 5 til, Google orqali kirish, profil rasmi, Pro/Ultra ko'rinish, neon to'lqinlar
+- Google orqali kirgandan keyin qayta parol so'ralmaydi (tashqi qaytish redirect'i "yangi tashrif" deb sessiyani o'chirardi); ma'lumotlar email orqali bitta akkauntda saqlanadi.
+- Sayt tillari: O'zbekcha (lotin), Ўзбекча (кирилл), English, Русский, Türkçe — yuqorida til tanlagich; ~2000 ta matn lug'ati, lug'atda yo'q matnlar (yangi savollar, xabarlar) Gemini bilan tarjima qilinib bazada keshlanadi. Admin panel tarjima qilinmaydi. LongoAI javoblari tanlangan tilda.
+- Profil: rasm yuklash/o'chirish (256×256), ism tahriri; Pro — sayt rangi, avatar ramkasi, bio, katta shrift, effektlar; Ultra — eksklyuziv ranglar, jonli aurora/oltin ramka, profil muqovasi, ism nuri, belgi.
+- Neon suv to'lqini butun saytda: sahifa pastida, progress chiziqlarida, tugmalar ustiga kelganda; ochilish ekrani yorqinroq.
+- Ro'yxatdan o'tish: katta ekranda boyqush rasmi atrofidagi chegara yumshoq.
+
 ## v256 — hamkorlar qatori "Qanday ishlaydi" ustiga ko'chirildi; telefon/planshet/kompyuter uchun moslashtirildi
 
 ## v255

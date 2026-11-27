@@ -6,11 +6,13 @@
    qoldi, chunki barcha bildirishnomalar ENDI FAQAT shu menyu orqali
    ko'rsatiladi (aniq so'ralganidek).
    ========================================================================== #}
+{% if user %}{% set _pcss = user_prefs_css(user) %}{% if _pcss %}<style id="lz-user-style">{{ _pcss|safe }}</style>{% endif %}{% endif %}
 <div class="app-header">
   <a class="app-header-account" href="/profile" title="Profil va sozlamalar" style="text-decoration:none;color:inherit;cursor:pointer">
-    <div class="app-header-avatar"{% if user and user.avatar_color %} style="background: {{ user.avatar_color }}; color: #07130b;"{% endif %}>{{ ((user.first_name or "?")[0] if user else "?")|upper }}</div>
+    {% set _pp = user_prefs(user) if user else {} %}
+    <div class="app-header-avatar lz-frame-{{ _pp.frame or 'none' }}{% if user and user.avatar_img %} has-img{% endif %}"{% if user and user.avatar_color and not user.avatar_img %} style="background: {{ user.avatar_color }}; color: #07130b;"{% endif %}>{% if user and user.avatar_img %}<img src="{{ user.avatar_img }}" alt="" width="40" height="40">{% else %}{{ ((user.first_name or "?")[0] if user else "?")|upper }}{% endif %}</div>
     <div class="app-header-user-info">
-      <span class="app-header-name">{{ user.first_name or "Foydalanuvchi" if user else "" }}</span>
+      <span class="app-header-name{% if _pp.glow %} lz-name-glow{% endif %}" translate="no">{{ user.first_name or "Foydalanuvchi" if user else "" }}{% if _pp.badge %} <span class="lz-badge">{{ _pp.badge }}</span>{% endif %}</span>
       {% if user %}<span class="app-header-plan plan-badge-{{ user.plan }}">{{ user.plan|upper }}</span>{% endif %}
     </div>
   </a>

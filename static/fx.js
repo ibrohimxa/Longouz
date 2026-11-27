@@ -12,3 +12,13 @@
   function init() { scan(); new MutationObserver(function (m) { m.forEach(function (x) { x.addedNodes.forEach(function (n) { if (n.nodeType === 1) { if (n.matches && n.matches(SEL)) add(n); scan(n); } }); }); }).observe(document.body, { childList: true, subtree: true }); }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 })();
+
+/* v267: sahifa pastidagi neon suv to'lqini (admin panelda ulanmaydi; Pro sozlamasidan o'chirish mumkin) */
+(function () {
+  function add() {
+    if (document.querySelector(".lz-wave-bg") || document.body.classList.contains("quiz-page")) return;
+    var w = document.createElement("div"); w.className = "lz-wave-bg"; w.setAttribute("aria-hidden", "true");
+    w.innerHTML = "<i></i><i></i><i></i>"; document.body.appendChild(w);
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", add); else add();
+})();

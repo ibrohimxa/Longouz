@@ -58,7 +58,7 @@
             {% if is_open %}<span>Ochiq savol</span>{% endif %}
           </div>
           {% endif %}
-          <h3 class="rv-qtext">{{ loop.index }}. {{ q.question }}</h3>
+          <h3 class="rv-qtext"{% if quiz.subject in ('native', 'english', 'russian') %} translate="no"{% endif %}>{{ loop.index }}. {{ q.question }}</h3>
           {% if q.figure and q.figure.q %}<div class="quiz-qfig" data-fig='{{ q.figure.q|tojson|forceescape }}'></div>{% endif %}
           {% if is_open %}
           <div style="margin-top:14px;">

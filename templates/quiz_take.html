@@ -99,7 +99,7 @@
         <div id="quiz-progress-fill" class="quiz-progress-fill"></div>
       </div>
 
-      <div class="quiz-question-card">
+      <div class="quiz-question-card"{% if subject in ('native', 'english', 'russian') %} translate="no"{% endif %}>
         <span id="quiz-section-label" class="quiz-section-label" hidden></span>
         <h2 id="quiz-question-text"></h2>
         <div id="quiz-qfig" class="quiz-qfig" hidden></div>
