@@ -1,3 +1,7 @@
+## v270 — 2026-11-28
+- Ochilish ekrani (87% da qotib qolish) tuzatildi: animatsiya to'liq CSS'da ishlaydi, og'ir filtr/soyalar olib tashlandi; telefon sekin bo'lsa ham, JS band bo'lsa ham 3 soniyadan so'ng albatta yopiladi, bosilganda ham yopiladi.
+- Header: 860–1180px kengliklarda menyu logotip ustiga chiqib, rejim tugmasi ekrandan chiqib ketardi — tuzatildi.
+
 ## v269 — 2026-11-28
 - Barcha to'lqin (suv) effektlari olib tashlandi: fon to'lqini, progress va tugmalardagi suyuqlik. Faqat sayt ochilishidagi (splash) to'lqin qoldi.
 - Profil sozlamalaridan "Neon to'lqin effektlari" tugmasi olib tashlandi.

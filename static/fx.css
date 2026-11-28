@@ -64,3 +64,9 @@ html[data-theme="light"] .lz-lang-list li.is-on .lz-lang-code{background:#0b8a3c
 .lz-name-glow { color: var(--accent-green); text-shadow: 0 0 8px var(--accent-green), 0 0 22px color-mix(in srgb, var(--accent-green) 60%, transparent); animation: lz-glow-pulse 2.6s ease-in-out infinite; }
 @keyframes lz-glow-pulse { 50% { text-shadow: 0 0 4px var(--accent-green), 0 0 12px color-mix(in srgb, var(--accent-green) 40%, transparent); } }
 .lz-badge { font-size: .9em; filter: drop-shadow(0 0 6px rgba(255,255,255,.25)); }
+
+/* v270: header hech qachon ustma-ust tushmasin (planshet/kichik noutbuk) */
+.site-header .brand{flex-shrink:0}
+.site-nav a,.site-nav-section-link{white-space:nowrap}
+.lz-lang,.lz-lang-btn,.lz-lang-btn svg,.site-header .theme-toggle{flex-shrink:0}
+@media (max-width:1180px){.site-nav-section-link{display:none!important}}
