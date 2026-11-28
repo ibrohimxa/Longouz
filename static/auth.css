@@ -1,5 +1,5 @@
 /* Kirish va ro'yxatdan o'tish sahifalari (.au-*) — referens dizayn */
-body.auth-page{--a-bg:#03110a;--a-card:#08190f;--a-line:rgba(99, 241, 151,.16);--a-ink:#f0fbf4;--a-mute:#8fb1ab;--a-in:#05120a;--a-inbd:rgba(255,255,255,.13);--a-g:#15ff6b;--a-g2:#00ea55;--a-gtxt:#042610;--lg-uz:#15ff6b;
+body.auth-page{--a-bg:#03110a;--a-card:#08190f;--a-line:rgba(61,255,126,.16);--a-ink:#f0fbf4;--a-mute:#8fb1ab;--a-in:#05120a;--a-inbd:rgba(255,255,255,.13);--a-g:#15ff6b;--a-g2:#00ea55;--a-gtxt:#042610;--lg-uz:#15ff6b;
   background:radial-gradient(70% 50% at 50% 0%,rgba(0, 201, 74,.12),transparent 70%),linear-gradient(180deg,#05190d,#03120a 60%,#020d07);color:var(--a-ink);min-height:100vh;display:flex;flex-direction:column;font-family:Inter,system-ui,sans-serif}
 body.auth-login{--lg-uz:#15ff6b}
 html[data-theme="light"] body.auth-page{--a-bg:#f0f9f3;--a-card:#fff;--a-line:rgba(1, 129, 48,.2);--a-ink:#0b2a26;--a-mute:#4b6c66;--a-in:#fff;--a-inbd:rgba(5, 75, 31,.22);--a-g:#00d74f;--a-g2:#009537;--a-gtxt:#fff;--lg-uz:#00cd4c;

@@ -42,7 +42,8 @@ html[data-theme="light"] .lz-lang-list{background:#fff;border-color:rgba(14,140,
 html[data-theme="light"] .lz-lang-list li{color:#0d2230}
 html[data-theme="light"] .lz-lang-list li.is-on{color:#0b8a3c;background:rgba(14,140,62,.1)}
 html[data-theme="light"] .lz-lang-list li.is-on .lz-lang-code{background:#0b8a3c;color:#fff}
-@media (max-width:560px){.lz-lang-btn{height:32px;padding:0 7px;gap:4px}.lz-lang-btn i{display:none}.lz-lang-list{right:-40px}}
+@media (max-width:560px){.lz-lang-btn{height:32px;width:32px;padding:0;justify-content:center;gap:0}.lz-lang-btn b,.lz-lang-btn i{display:none}.lz-lang-list{right:-40px}}
+@media (max-width:430px){.site-header .brand-name{font-size:1.05rem}.site-header .brand img,.site-header .brand svg{width:34px;height:34px}}
 
 /* v267: avatar ramkalari, ism nuri (barcha sahifalar) */
 /* avatar ramkalari (sayt bo'ylab) */
@@ -50,7 +51,7 @@ html[data-theme="light"] .lz-lang-list li.is-on .lz-lang-code{background:#0b8a3c
 .lz-frame-neon { box-shadow: 0 0 0 3px var(--accent-green), 0 0 18px var(--accent-green); }
 .lz-frame-double { box-shadow: 0 0 0 2px var(--bg-elevated, #0b1a11), 0 0 0 4px var(--accent-green), 0 0 0 6px var(--bg-elevated, #0b1a11), 0 0 0 8px var(--accent-green); }
 .lz-frame-aurora::before, .lz-frame-gold::before { content: ""; position: absolute; inset: -5px; border-radius: 50%; z-index: -1;
-  background: conic-gradient(from var(--lz-fa, 0deg), #22c55e, #22d3ee, #a855f7, #f43f5e, #facc15, #22c55e); animation: lz-frame-spin 3.2s linear infinite; filter: drop-shadow(0 0 8px rgba(34,197,94,.6));
+  background: conic-gradient(from var(--lz-fa, 0deg), #1def6a, #22d3ee, #a855f7, #f43f5e, #facc15, #1def6a); animation: lz-frame-spin 3.2s linear infinite; filter: drop-shadow(0 0 8px rgba(29,239,106,.6));
   -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3.5px)); mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3.5px)); pointer-events: none; }
 .lz-frame-gold::before { background: conic-gradient(from var(--lz-fa, 0deg), #fde68a, #f59e0b, #fff7d6, #b45309, #fde68a); filter: drop-shadow(0 0 10px rgba(245,158,11,.7)); }
 .lz-frame-gold::after { content: "👑"; position: absolute; top: -14px; left: 50%; transform: translateX(-50%) rotate(-8deg); font-size: 18px; line-height: 1; z-index: 2; }
@@ -63,38 +64,3 @@ html[data-theme="light"] .lz-lang-list li.is-on .lz-lang-code{background:#0b8a3c
 .lz-name-glow { color: var(--accent-green); text-shadow: 0 0 8px var(--accent-green), 0 0 22px color-mix(in srgb, var(--accent-green) 60%, transparent); animation: lz-glow-pulse 2.6s ease-in-out infinite; }
 @keyframes lz-glow-pulse { 50% { text-shadow: 0 0 4px var(--accent-green), 0 0 12px color-mix(in srgb, var(--accent-green) 40%, transparent); } }
 .lz-badge { font-size: .9em; filter: drop-shadow(0 0 6px rgba(255,255,255,.25)); }
-
-
-/* ===== v267: NEON SUV TO'LQINI — ochilish ekranidagi to'lqin endi butun saytda ===== */
-/* 1) sahifa pastida yumshoq, harakatlanuvchi neon to'lqin (bosilmaydi, matnni yopmaydi) */
-.lz-wave-bg{position:fixed;left:0;right:0;bottom:0;height:86px;pointer-events:none;z-index:2;overflow:hidden;opacity:.55;mix-blend-mode:screen}
-.lz-wave-bg i{position:absolute;left:0;bottom:0;width:200%;height:100%;background-repeat:repeat-x;background-position:0 100%;will-change:transform}
-.lz-wave-bg i:nth-child(1){background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 90' preserveAspectRatio='none'%3E%3Cpath fill='%231DEF6A' fill-opacity='.22' d='M0 46C100 18 200 18 300 46S500 74 600 46 700 18 800 46V90H0z'/%3E%3C/svg%3E");background-size:50% 100%;animation:lz-wave-x 11s linear infinite;filter:drop-shadow(0 -2px 8px rgba(61,255,126,.55))}
-.lz-wave-bg i:nth-child(2){height:78%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 90' preserveAspectRatio='none'%3E%3Cpath fill='%2314C8A0' fill-opacity='.18' d='M0 52C120 30 220 70 400 50S640 26 800 52V90H0z'/%3E%3C/svg%3E");background-size:50% 100%;animation:lz-wave-x 17s linear infinite reverse}
-.lz-wave-bg i:nth-child(3){height:6px;bottom:0;background:linear-gradient(90deg,transparent,#3dff7e,transparent);background-size:50% 100%;animation:lz-wave-x 6s linear infinite;opacity:.7;filter:blur(2px)}
-@keyframes lz-wave-x{to{transform:translateX(-50%)}}
-html[data-theme="light"] .lz-wave-bg{mix-blend-mode:multiply;opacity:.35}
-@media (prefers-reduced-motion:reduce){.lz-wave-bg i{animation:none}}
-@media (max-width:640px){.lz-wave-bg{height:56px;opacity:.45}}
-
-/* 2) progress chiziqlari — ichida suvdek oqadigan neon to'lqin */
-.quiz-progress-fill,.dash-goal-bar>i,.dash-goal-bar span,.dash-mini-bar>i,.settings-usage-bar-fill,.owl-usage-bar-fill,.topic-row-bar-fill,.subject-chart-bar-value,.dash-achbar>i,.lz-liquid{position:relative;overflow:hidden}
-.quiz-progress-fill::after,.dash-goal-bar>i::after,.dash-goal-bar span::after,.dash-mini-bar>i::after,.settings-usage-bar-fill::after,.owl-usage-bar-fill::after,.topic-row-bar-fill::after,.dash-achbar>i::after,.lz-liquid::after{
-  content:"";position:absolute;inset:-40% 0 0 0;pointer-events:none;
-  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 20' preserveAspectRatio='none'%3E%3Cpath fill='%23ffffff' fill-opacity='.35' d='M0 10Q15 0 30 10T60 10V20H0z'/%3E%3C/svg%3E") 0 0/30px 100% repeat-x;
-  animation:lz-liquid 1.6s linear infinite;mix-blend-mode:overlay}
-@keyframes lz-liquid{to{background-position:30px 0}}
-.quiz-progress-fill,.settings-usage-bar-fill,.owl-usage-bar-fill,.topic-row-bar-fill{box-shadow:0 0 12px rgba(61,255,126,.55),0 0 2px rgba(61,255,126,.9)}
-
-/* 3) asosiy tugmalar — sichqoncha kelganda ichi neon suv bilan to'ladi */
-.btn-primary,.nav-cta,.au-submit,.dash-btn,.hm-pbtn,.cta-primary,.hero-cta,.plan-btn,.pm-submit{isolation:isolate}
-.btn-primary::before,.nav-cta::before,.au-submit::before,.hm-pbtn::before,.cta-primary::before,.hero-cta::before,.pm-submit::before{
-  content:"";position:absolute;left:-5%;right:-5%;bottom:-115%;height:115%;z-index:-1;pointer-events:none;border-radius:inherit;
-  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 24' preserveAspectRatio='none'%3E%3Cpath fill='%23b6ffcc' fill-opacity='.55' d='M0 12Q30 0 60 12T120 12V24H0z'/%3E%3C/svg%3E") 0 0/60px 14px repeat-x,
-             linear-gradient(180deg,transparent 12px,rgba(182,255,204,.38) 12px);
-  transition:bottom .55s cubic-bezier(.2,.8,.2,1);animation:lz-liquid-btn 1.2s linear infinite}
-.btn-primary:hover::before,.nav-cta:hover::before,.au-submit:hover::before,.hm-pbtn:hover::before,.cta-primary:hover::before,.hero-cta:hover::before,.pm-submit:hover::before{bottom:-35%}
-@keyframes lz-liquid-btn{to{background-position:60px 0,0 0}}
-.btn-primary,.nav-cta,.au-submit,.hm-pbtn,.cta-primary,.hero-cta,.pm-submit{overflow:hidden}
-.btn-primary:hover,.nav-cta:hover,.au-submit:hover,.hm-pbtn:hover,.cta-primary:hover,.hero-cta:hover,.pm-submit:hover{box-shadow:0 0 0 1px rgba(61,255,126,.5),0 0 22px rgba(61,255,126,.45),0 8px 24px rgba(0,0,0,.25)}
-@media (prefers-reduced-motion:reduce){.btn-primary::before,.nav-cta::before,.au-submit::before,.hm-pbtn::before{animation:none}}

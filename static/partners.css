@@ -6,11 +6,11 @@
 .pt-marquee:hover .pt-track, .pt-marquee:focus-within .pt-track, .pt-marquee:active .pt-track { animation-play-state: paused; }
 @keyframes pt-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 .pt-item { display: inline-flex; align-items: center; gap: 12px; padding: 12px 22px 12px 14px; border-radius: 16px; background: transparent; color: inherit; border: 0; text-decoration: none; font-weight: 700; font-size: 1.02rem; white-space: nowrap; box-shadow: none; opacity: .92; transition: background .35s ease, color .35s ease, transform .35s ease, box-shadow .35s ease, opacity .35s ease; }
-.pt-item:hover, .pt-item:focus-visible { background: linear-gradient(135deg, #12d65a, #0a9a3f); color: #fff; opacity: 1; transform: translateY(-3px) scale(1.04); box-shadow: 0 12px 28px rgba(10,154,63,.4); outline: none; }
+.pt-item:hover, .pt-item:focus-visible { background: linear-gradient(135deg, #1def6a, #0a9a3f); color: #fff; opacity: 1; transform: translateY(-3px) scale(1.04); box-shadow: 0 12px 28px rgba(10,154,63,.4); outline: none; }
 .pt-ic { width: 38px; height: 38px; border-radius: 11px; background: #fff; display: grid; place-items: center; overflow: hidden; flex: none; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
 .pt-ic img { width: 28px; height: 28px; object-fit: contain; display: block; }
 .pt-ic b { font-size: 1.1rem; color: #0a9a3f; }
-@media (hover: none) { .pt-item:hover { background: transparent; color: inherit; transform: none; box-shadow: none; } .pt-item:active { background: linear-gradient(135deg, #12d65a, #0a9a3f); color: #fff; } }
+@media (hover: none) { .pt-item:hover { background: transparent; color: inherit; transform: none; box-shadow: none; } .pt-item:active { background: linear-gradient(135deg, #1def6a, #0a9a3f); color: #fff; } }
 @media (min-width: 561px) and (max-width: 1024px) { .pt-track { animation-duration: 24s; } .pt-item { font-size: .98rem; } }
 @media (min-width: 1600px) { .pt-item { padding: 14px 26px 14px 16px; font-size: 1.1rem; } .pt-track { gap: 22px; } }
 @media (max-width: 560px) { .pt-track { animation-duration: 22s; gap: 12px; } .pt-item { padding: 9px 16px 9px 10px; font-size: .92rem; } .pt-ic { width: 32px; height: 32px; } }

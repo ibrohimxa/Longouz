@@ -146,8 +146,6 @@ def css(p: dict) -> str:
         rules.append(f":root:root{{--accent-green:{c};--accent-green-dark:{d};--success:{c};--lz-green:{c};--lz-accent:{c}}}")
     if p.get("font") == "large":
         rules.append("html{font-size:17.5px}")
-    if p.get("fx") is False:
-        rules.append(".lz-wave-bg,.lz-ring{display:none!important}")
     return "".join(rules)
 
 

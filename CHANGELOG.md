@@ -1,3 +1,9 @@
+## v269 — 2026-11-28
+- Barcha to'lqin (suv) effektlari olib tashlandi: fon to'lqini, progress va tugmalardagi suyuqlik. Faqat sayt ochilishidagi (splash) to'lqin qoldi.
+- Profil sozlamalaridan "Neon to'lqin effektlari" tugmasi olib tashlandi.
+- Och/xira yashil ranglar (tariflar oynasi, dashboard, hamkorlar, belgilar) qora fon bilan uyg'un neon yashil (#1DEF6A / #3DFF7E) ga almashtirildi. Yorug' rejim o'zgarmadi.
+- Telefonda header siqilib qolmasligi uchun til tugmasi faqat globus belgisi bo'ldi, brend biroz ixchamlashtirildi.
+
 ## v268 — aniq baholash va ~820 ta yangi savol
 - Baholash: qisqa (to'liq bo'lmagan) testlarda ball endi bilim darajasi (Rash/IRT uslubi) va savollar qiyinligi bo'yicha haqiqiy imtihon tarkibida hisoblanadi — oson savollarni topish A/A+ bermaydi; 15 tadan kam savolda daraja berilmaydi ("taxminiy" deb ko'rsatiladi). To'liq mock rasmiy formula bo'yicha qoladi.
 - IELTS (Academic Reading jadvaliga yaqin) va CEFR chegaralari qattiqlashtirildi; tahlil sahifasidagi ball prognozi savol kam bo'lsa o'rtachaga yaqinlashtiriladi.
